@@ -65,6 +65,10 @@ dependencies:
   pdf: ^3.11.1
   printing: ^5.13.4
 
+  # Billing / ads
+  purchases_flutter: ^8.4.5
+  google_mobile_ads: ^5.2.1
+
   # Notifications
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
