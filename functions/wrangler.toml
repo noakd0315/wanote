@@ -1,0 +1,9 @@
+name = "wanote-functions"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+# Set with: wrangler secret put ANTHROPIC_API_KEY
+# Set with: wrangler secret put FIREBASE_PROJECT_ID
+[vars]
+# Non-secret config only. Secrets (ANTHROPIC_API_KEY, FIREBASE_PROJECT_ID)
+# must be set via `wrangler secret put` — never committed here.
