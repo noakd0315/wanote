@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// =============================================================================
+// LOCAL EMULATOR USE ONLY -- DO NOT DEPLOY THIS FILE TO A REAL FIREBASE PROJECT.
+//
+// This ruleset intentionally allows any authenticated-or-not read/write so the
+// app's Firestore-backed features (daily records, medical records, pets, AI
+// usage counters, etc.) can be smoke-tested end-to-end against the Firebase
+// Local Emulator Suite (see docker-compose.yml / firebase.json) without first
+// wiring up per-collection rules. All data in the emulator is throwaway (reset
+// whenever the emulator container restarts unless you export it), so open
+// rules here carry no real-world risk.
+//
+// Writing real production rules -- restricting every pet's daily/medical
+// records so only that pet's owner can read/write them, per CLAUDE.md's
+// "アクセス制御を必ず実装する" requirement -- is a SEPARATE, NOT-YET-DONE task.
+// Whoever picks that up should replace the blanket `allow read, write: if
+// true;` below with per-collection rules keyed off `request.auth.uid`
+// matching an `ownerId`/`uid` field (or a subcollection path) on each
+// document. Do not copy this file as-is into anything that gets deployed.
+// =============================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
