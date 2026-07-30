@@ -1,0 +1,29 @@
+# Copy this file to functions/.dev.vars (gitignored -- never commit it) and
+# fill in real values if/when you want genuine Claude responses and a real
+# Firebase project. `wrangler dev` (and the functions-dev docker-compose
+# service, which runs it) loads functions/.dev.vars automatically.
+#
+# You do NOT need to fill anything in just to smoke-test the app: leaving
+# ANTHROPIC_API_KEY blank makes functions/src/lib/anthropicClient.ts fall back
+# to a clearly-labeled mock response (prefixed "[MOCK RESPONSE ...]") instead
+# of calling the real Anthropic API, so OCR / AI-consultation / AI-report
+# flows all still work end-to-end with zero API cost.
+
+# Get a real key from https://console.anthropic.com/ if you want genuine AI
+# responses instead of mock ones. Leave blank to use mock responses.
+ANTHROPIC_API_KEY=
+
+# Matches .firebaserc / firebase.json's fake "demo-wanote" project id used by
+# the Firebase Local Emulator Suite (docker-compose.yml's firebase-emulators
+# service). No real Firebase/GCP project is needed for local dev -- only
+# change this if you point the app at a real Firebase project instead.
+FIREBASE_PROJECT_ID=demo-wanote
+
+# Presence (any non-empty value) tells functions/src/lib/verifyFirebaseToken.ts
+# to accept the Firebase Auth Emulator's unsigned ID tokens instead of
+# verifying a real signature against Google's JWKS -- without this, every
+# authenticated request (AI consultation/report, OCR) would 401 when the
+# Flutter app is running against the emulator, since emulator-issued tokens
+# are never signed. Leave this UNSET when pointing the backend at a real
+# Firebase project (production, or a real project during manual testing).
+FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
