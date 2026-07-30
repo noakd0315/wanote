@@ -1,4 +1,5 @@
 import type { Env } from './lib/env';
+import type { RateLimitEnv } from './lib/rateLimiter';
 
 /**
  * Route registry. Each feature agent owns one file under src/routes/ and
@@ -10,6 +11,15 @@ import type { Env } from './lib/env';
  * Keep this switch flat and route-file logic self-contained; this file is a
  * likely merge-conflict point between the medical and ai worktrees, so the
  * less logic that lives here, the easier that merge is.
+ *
+ * NOTE (Agent C / medical): the Worker's `Env` type (lib/env.ts) doesn't
+ * declare the `RATE_LIMIT_KV` binding that routes/ocr.ts needs via
+ * checkRateLimit(); rather than edit the shared lib/env.ts (out of scope
+ * for this file's "keep it minimal" goal, and a likely second conflict
+ * point with Agent D who needs the same binding for /ai/consultation), we
+ * widen the type at the call site instead. Whoever wires up wrangler.toml's
+ * `[[kv_namespaces]]` binding should also fold `RateLimitEnv` into `Env`
+ * directly at that point.
  */
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -20,10 +30,10 @@ export default {
     }
 
     switch (url.pathname) {
-      // case '/ocr/certificate': {
-      //   const { handleOcrCertificate } = await import('./routes/ocr');
-      //   return handleOcrCertificate(request, env);
-      // }
+      case '/ocr/certificate': {
+        const { handleOcrCertificate } = await import('./routes/ocr');
+        return handleOcrCertificate(request, env as unknown as Env & RateLimitEnv);
+      }
       // case '/ai/consultation': {
       //   const { handleConsultation } = await import('./routes/consultation');
       //   return handleConsultation(request, env);
