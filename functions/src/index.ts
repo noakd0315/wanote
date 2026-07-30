@@ -1,4 +1,5 @@
 import type { Env } from './lib/env';
+import type { RateLimitEnv } from './lib/rateLimiter';
 
 /**
  * Route registry. Each feature agent owns one file under src/routes/ and
@@ -12,7 +13,7 @@ import type { Env } from './lib/env';
  * less logic that lives here, the easier that merge is.
  */
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env & RateLimitEnv): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method !== 'POST') {
@@ -24,14 +25,14 @@ export default {
       //   const { handleOcrCertificate } = await import('./routes/ocr');
       //   return handleOcrCertificate(request, env);
       // }
-      // case '/ai/consultation': {
-      //   const { handleConsultation } = await import('./routes/consultation');
-      //   return handleConsultation(request, env);
-      // }
-      // case '/ai/report': {
-      //   const { handleReport } = await import('./routes/report');
-      //   return handleReport(request, env);
-      // }
+      case '/ai/consultation': {
+        const { handleConsultation } = await import('./routes/consultation');
+        return handleConsultation(request, env);
+      }
+      case '/ai/report': {
+        const { handleReport } = await import('./routes/report');
+        return handleReport(request, env);
+      }
       default:
         return new Response('Not found', { status: 404 });
     }
