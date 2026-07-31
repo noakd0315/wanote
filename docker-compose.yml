@@ -21,7 +21,12 @@ services:
       dockerfile: docker/firebase-emulators.Dockerfile
     ports:
       - "9099:9099" # Auth emulator
-      - "8080:8080" # Firestore emulator
+      # Host 8081 -> container 8080: host 8080 is already bound by an
+      # unrelated pre-existing container on this machine. The emulator
+      # itself still listens on 8080 *inside* the container (per
+      # firebase.json); only the host-side mapping changes. Flutter's
+      # lib/shared/config/emulator_config.dart points at 8081 to match.
+      - "8081:8080" # Firestore emulator
       - "9199:9199" # Storage emulator
       - "4000:4000" # Emulator UI
     volumes:

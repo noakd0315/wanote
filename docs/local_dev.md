@@ -16,7 +16,9 @@ docker compose up
 This builds and starts two containers:
 
 - **`firebase-emulators`** — the Firebase Local Emulator Suite (Auth on
-  `9099`, Firestore on `8080`, Storage on `9199`, Emulator UI on `4000`),
+  `9099`, Firestore on host `8081` [container-internal `8080`; remapped
+  because host `8080` was already taken by an unrelated container on the
+  dev machine], Storage on `9199`, Emulator UI on `4000`),
   running against the fake project id `demo-wanote` (see `firebase.json` /
   `.firebaserc`). Firebase treats any `demo-*` project id as a local-only
   fake project — no real GCP project, billing, or `firebase login` needed.
@@ -61,7 +63,7 @@ flutter run -d chrome \
 
 `USE_FIREBASE_EMULATOR=true` makes `lib/shared/config/emulator_config.dart`
 point the Firebase Auth/Firestore/Storage SDKs at `localhost:9099` /
-`localhost:8080` / `localhost:9199` (the same ports docker-compose publishes),
+`localhost:8081` / `localhost:9199` (the same ports docker-compose publishes),
 using the placeholder `demoFirebaseOptions` in
 `lib/shared/config/firebase_options_demo.dart` (`projectId: 'demo-wanote'`,
 matching `.firebaserc`).

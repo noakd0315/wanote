@@ -23,6 +23,9 @@ const String emulatorHost = String.fromEnvironment(
 Future<void> connectToFirebaseEmulatorsIfEnabled() async {
   if (!useFirebaseEmulator) return;
   await FirebaseAuth.instance.useAuthEmulator(emulatorHost, 9099);
-  FirebaseFirestore.instance.useFirestoreEmulator(emulatorHost, 8080);
+  // 8081, not the emulator's usual 8080: docker-compose.yml maps host 8081
+  // -> container 8080 because 8080 is already taken by an unrelated
+  // container on the dev machine. See the comment there for details.
+  FirebaseFirestore.instance.useFirestoreEmulator(emulatorHost, 8081);
   await FirebaseStorage.instance.useStorageEmulator(emulatorHost, 9199);
 }
