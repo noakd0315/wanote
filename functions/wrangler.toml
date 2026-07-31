@@ -9,12 +9,16 @@ compatibility_date = "2026-01-01"
 # must be set via `wrangler secret put` — never committed here.
 
 # Used by src/lib/rateLimiter.ts (Agent D's /ai/consultation and /ai/report
-# routes; Agent C's /ocr/certificate route may bind the same namespace).
-# Create the real namespace with:
-#   wrangler kv namespace create RATE_LIMIT_KV
-# then replace the placeholder id below with the id it prints. Left
-# uncreated for now since this worktree cannot deploy/provision Cloudflare
-# resources — see this feature's agent report.
-# [[kv_namespaces]]
-# binding = "RATE_LIMIT_KV"
-# id = "REPLACE_WITH_KV_NAMESPACE_ID"
+# routes; Agent C's /ocr/certificate route binds the same namespace).
+#
+# Local dev (this is what `wrangler dev` / functions-dev in docker-compose.yml
+# runs by default -- no `--remote` flag) never talks to real Cloudflare KV at
+# all: wrangler simulates the binding entirely in-process under
+# functions/.wrangler/ (gitignored), so the id below does not need to
+# correspond to a real, provisioned namespace for local dev/smoke-testing to
+# work. It only needs to be a real id -- from
+# `wrangler kv namespace create RATE_LIMIT_KV` -- before running
+# `wrangler dev --remote` or `wrangler deploy` against real Cloudflare.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "local-dev-rate-limit-kv"

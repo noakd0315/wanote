@@ -1,0 +1,66 @@
+# Fully local dev stack for wanote -- no real Firebase/RevenueCat/Anthropic
+# cloud accounts required. See docs/local_dev.md for the full walkthrough.
+#
+#   docker compose up
+#
+# brings up:
+#   - firebase-emulators: Auth (9099) / Firestore (8080) / Storage (9199) /
+#     Emulator UI (4000), running against the fake "demo-wanote" project id.
+#   - functions-dev: the Cloudflare Workers backend (functions/) via
+#     `wrangler dev`, on 8787. Calls to the Anthropic API fall back to a
+#     clearly-labeled mock response when functions/.dev.vars has no
+#     ANTHROPIC_API_KEY set (see functions/src/lib/anthropicClient.ts).
+#
+# Then point the Flutter app at both, e.g.:
+#   flutter run -d chrome --dart-define=USE_FIREBASE_EMULATOR=true --dart-define=AI_BACKEND_BASE_URL=http://localhost:8787
+
+services:
+  firebase-emulators:
+    build:
+      context: .
+      dockerfile: docker/firebase-emulators.Dockerfile
+    ports:
+      - "9099:9099" # Auth emulator
+      - "8080:8080" # Firestore emulator
+      - "9199:9199" # Storage emulator
+      - "4000:4000" # Emulator UI
+    volumes:
+      # Read-only: the emulators only need to read these, and mounting them
+      # (rather than baking into the image) means editing rules on the host
+      # doesn't require a rebuild.
+      - ./firebase.json:/workspace/firebase.json:ro
+      - ./.firebaserc:/workspace/.firebaserc:ro
+      - ./firestore.rules:/workspace/firestore.rules:ro
+      - ./storage.rules:/workspace/storage.rules:ro
+    command: ["firebase", "emulators:start", "--project=demo-wanote"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  functions-dev:
+    # bookworm (Debian 12, glibc >= 2.36), not bullseye (Debian 11, glibc
+    # 2.31) -- wrangler's bundled `workerd` binary requires glibc >= 2.32 and
+    # fails at startup ("GLIBC_2.32 not found") on bullseye-based images.
+    image: node:20-bookworm-slim
+    working_dir: /workspace
+    volumes:
+      # Whole functions/ dir, so `npm install` populates node_modules on the
+      # host (already gitignored: functions/node_modules/) and edits to
+      # source files are picked up by wrangler's watch mode without a
+      # rebuild. functions/.dev.vars (gitignored, created manually by the PM
+      # from functions/.dev.vars.example) is mounted along with everything
+      # else and read by `wrangler dev` automatically.
+      - ./functions:/workspace
+    ports:
+      - "8787:8787"
+    # `--ip 0.0.0.0` (added to functions/package.json's "dev" script) makes
+    # wrangler's dev server listen on all interfaces inside the container --
+    # required for Docker's port mapping to reach it; the default
+    # `wrangler dev` binds to 127.0.0.1, which is unreachable from outside
+    # the container's own network namespace.
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - firebase-emulators

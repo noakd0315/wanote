@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// =============================================================================
+// LOCAL EMULATOR USE ONLY -- DO NOT DEPLOY THIS FILE TO A REAL FIREBASE PROJECT.
+//
+// Same rationale as firestore.rules: wide open so the medical-certificate OCR
+// upload flow (and any other Storage usage) can be smoke-tested against the
+// Storage emulator without real auth wiring. Emulator storage is throwaway.
+//
+// Production rules -- restricting each pet's uploaded files (certificate
+// photos, etc.) to that pet's owner, per CLAUDE.md's access-control
+// requirement -- are a SEPARATE, NOT-YET-DONE task. Do not deploy this file.
+// =============================================================================
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
