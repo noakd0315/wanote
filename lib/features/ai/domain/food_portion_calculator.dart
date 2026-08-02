@@ -1,31 +1,49 @@
 import 'dart:math' as math;
 
-/// Standard veterinary maintenance-energy-requirement (MER) categories,
-/// each a multiplier of resting energy requirement (RER). Values follow
-/// widely-cited small-animal nutrition guidance (e.g. WSAVA/AAHA):
-/// intact adult ~1.8x, neutered adult ~1.6x, weight loss ~1.0x, active/
-/// working dogs ~2.5x, growing puppies ~2-3x.
-enum DogActivityLevel {
-  weightLoss,
-  neuteredAdult,
-  intactAdult,
-  active,
-  puppy;
-
-  double get merFactor => switch (this) {
-    DogActivityLevel.weightLoss => 1.0,
-    DogActivityLevel.neuteredAdult => 1.6,
-    DogActivityLevel.intactAdult => 1.8,
-    DogActivityLevel.active => 2.5,
-    DogActivityLevel.puppy => 3.0,
-  };
+/// Life stage -- auto-derivable from the pet's birthday (see
+/// [FoodPortionCalculator.suggestDefaultLifeStage]), but still shown as an
+/// overridable dropdown in case the birthday on file is wrong or approximate.
+enum DogLifeStage {
+  puppy,
+  adult;
 
   String get label => switch (this) {
-    DogActivityLevel.weightLoss => '減量中',
-    DogActivityLevel.neuteredAdult => '成犬（避妊・去勢済み／室内中心）',
-    DogActivityLevel.intactAdult => '成犬（未避妊・未去勢／通常の運動量）',
-    DogActivityLevel.active => '運動量が多い・活発',
-    DogActivityLevel.puppy => '成長期の子犬',
+    DogLifeStage.puppy => '子犬（成長期）',
+    DogLifeStage.adult => '成犬',
+  };
+}
+
+/// Standard veterinary Body Condition Score, simplified to the 3 buckets
+/// that actually change the calculation (the real WSAVA scale is 1-9, but
+/// this coarser split is what determines whether to aim for weight gain,
+/// maintenance, or weight loss -- the clinically meaningful decision here).
+/// Unlike life stage/neutered status, this can't be inferred from any data
+/// already on file -- it requires a physical assessment (rib/waist
+/// palpation), so it's always a direct user input.
+enum BodyCondition {
+  underweight,
+  ideal,
+  overweight;
+
+  String get label => switch (this) {
+    BodyCondition.underweight => '痩せ気味',
+    BodyCondition.ideal => '標準',
+    BodyCondition.overweight => 'ぽっちゃり気味',
+  };
+}
+
+/// Exercise/energy-expenditure level -- independent of life stage, neutered
+/// status, and body condition, and (unlike those) something only the owner
+/// can judge.
+enum ActivityLevel {
+  low,
+  normal,
+  high;
+
+  String get label => switch (this) {
+    ActivityLevel.low => '運動量少なめ',
+    ActivityLevel.normal => '普通',
+    ActivityLevel.high => '活発',
   };
 }
 
@@ -39,7 +57,7 @@ class FoodPortionResult {
   /// RER: resting energy requirement, kcal/day.
   final double restingEnergyKcal;
 
-  /// MER: maintenance energy requirement (RER x activity factor), kcal/day.
+  /// MER: maintenance energy requirement (RER x combined factor), kcal/day.
   final double maintenanceEnergyKcal;
 
   /// Recommended daily food amount in grams, derived from MER and the
@@ -57,13 +75,22 @@ class FoodPortionCalculator {
 
   FoodPortionResult calculate({
     required double weightKg,
-    required DogActivityLevel activityLevel,
+    required DogLifeStage lifeStage,
+    required bool neutered,
+    required BodyCondition bodyCondition,
+    required ActivityLevel activityLevel,
     required double foodKcalPer100g,
   }) {
     assert(weightKg > 0, 'weightKg must be positive');
     assert(foodKcalPer100g > 0, 'foodKcalPer100g must be positive');
     final rer = 70 * math.pow(weightKg, 0.75);
-    final mer = rer * activityLevel.merFactor;
+    final factor = _merFactor(
+      lifeStage: lifeStage,
+      neutered: neutered,
+      bodyCondition: bodyCondition,
+      activityLevel: activityLevel,
+    );
+    final mer = rer * factor;
     final grams = mer / foodKcalPer100g * 100;
     return FoodPortionResult(
       restingEnergyKcal: rer.toDouble(),
@@ -72,21 +99,54 @@ class FoodPortionCalculator {
     );
   }
 
-  /// Suggests a sensible starting activity level from data already on the
-  /// pet's profile (age from birthday, neutered status), so the user isn't
-  /// required to look up veterinary terminology just to get a reasonable
-  /// default -- they can still override it via the dropdown. This is also
-  /// what keeps the eventual AI-advice prompt (see FoodPortionScreen) short:
-  /// fewer fields the user has to actively decide on themselves.
-  DogActivityLevel suggestDefaultActivityLevel({
-    required DateTime birthday,
+  /// Combined RER multiplier, following widely-cited small-animal nutrition
+  /// guidance (e.g. WSAVA/AAHA): growing puppies ~3x regardless of the other
+  /// factors (a simplified stand-in for age/expected-adult-weight growth
+  /// curves, out of scope here); for adults, neutered ~1.6x / intact ~1.8x
+  /// as the baseline, adjusted by activity level, with body condition
+  /// taking priority when the dog is overweight (a body already carrying
+  /// excess weight should be aimed at gradual loss regardless of its usual
+  /// activity level) or nudging the factor up slightly when underweight (a
+  /// modest surplus to help it gain).
+  double _merFactor({
+    required DogLifeStage lifeStage,
     required bool neutered,
+    required BodyCondition bodyCondition,
+    required ActivityLevel activityLevel,
+  }) {
+    if (lifeStage == DogLifeStage.puppy) {
+      return 3.0;
+    }
+    if (bodyCondition == BodyCondition.overweight) {
+      return 1.0;
+    }
+    var factor = neutered ? 1.6 : 1.8;
+    switch (activityLevel) {
+      case ActivityLevel.low:
+        factor *= 0.85;
+      case ActivityLevel.normal:
+        break;
+      case ActivityLevel.high:
+        factor *= 1.4;
+    }
+    if (bodyCondition == BodyCondition.underweight) {
+      factor += 0.2;
+    }
+    return factor;
+  }
+
+  /// Suggests a sensible starting life stage from data already on the pet's
+  /// profile (age from birthday), so the user isn't required to work this
+  /// out themselves -- they can still override it via the dropdown (e.g. if
+  /// the recorded birthday is only approximate). Neutered status doesn't
+  /// need a similar suggestion helper since it's read directly from the
+  /// pet's profile as a fixed fact, not a judgment call; body condition and
+  /// activity level have no on-file data to infer from at all.
+  DogLifeStage suggestDefaultLifeStage({
+    required DateTime birthday,
     required DateTime now,
   }) {
     final ageInDays = now.difference(birthday).inDays;
-    if (ageInDays < 365) return DogActivityLevel.puppy;
-    return neutered
-        ? DogActivityLevel.neuteredAdult
-        : DogActivityLevel.intactAdult;
+    return ageInDays < 365 ? DogLifeStage.puppy : DogLifeStage.adult;
   }
 }

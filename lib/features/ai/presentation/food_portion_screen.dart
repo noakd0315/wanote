@@ -14,13 +14,13 @@ import 'widgets/upgrade_prompt_card.dart';
 /// costs zero AI tokens and returns instantly, no network round-trip
 /// needed. AI is only invoked for the *optional* "give me feeding advice"
 /// step below the result, and even then the prompt sent is a short,
-/// structured one-liner built from numbers already on screen (weight,
-/// activity level, computed calories/grams) rather than free-form text,
-/// per the PM's explicit ask to keep token usage down. Inputs that can be
-/// pre-filled from data the app already has (weight, activity-level
-/// default from birthday/neutered status) are pre-filled so the user only
-/// has to type the one thing nobody else could know: the food's calorie
-/// density.
+/// structured one-liner built from numbers already on screen rather than
+/// free-form text, per the PM's explicit ask to keep token usage down.
+/// Inputs that can be pre-filled/inferred from data the app already has
+/// (weight, life stage from birthday, neutered status from the pet
+/// profile) are pre-filled/hidden from manual entry; body condition and
+/// activity level have no such source and are always asked directly, since
+/// both are genuine judgment calls only the owner can make.
 class FoodPortionScreen extends StatefulWidget {
   const FoodPortionScreen({
     super.key,
@@ -63,7 +63,9 @@ enum _AdviceState { idle, loading, ready, needsUpgrade, error }
 class _FoodPortionScreenState extends State<FoodPortionScreen> {
   late final TextEditingController _weightController;
   final _foodDensityController = TextEditingController();
-  late DogActivityLevel _activityLevel;
+  late DogLifeStage _lifeStage;
+  BodyCondition _bodyCondition = BodyCondition.ideal;
+  ActivityLevel _activityLevel = ActivityLevel.normal;
 
   FoodPortionResult? _result;
   _AdviceState _adviceState = _AdviceState.idle;
@@ -75,9 +77,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     _weightController = TextEditingController(
       text: widget.initialWeightKg?.toString() ?? '',
     );
-    _activityLevel = widget.calculator.suggestDefaultActivityLevel(
+    _lifeStage = widget.calculator.suggestDefaultLifeStage(
       birthday: widget.birthday,
-      neutered: widget.neutered,
       now: DateTime.now(),
     );
   }
@@ -102,6 +103,9 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     setState(() {
       _result = widget.calculator.calculate(
         weightKg: weightKg,
+        lifeStage: _lifeStage,
+        neutered: widget.neutered,
+        bodyCondition: _bodyCondition,
         activityLevel: _activityLevel,
         foodKcalPer100g: foodKcalPer100g,
       );
@@ -126,11 +130,13 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
         return;
       }
 
+      final isAdult = _lifeStage == DogLifeStage.adult;
       // Deliberately compact/structured -- just the numbers already
       // computed, not a conversational prompt -- to keep the token cost of
       // this call low per the PM's request.
       final questionText =
-          '体重${_weightController.text}kg、${_activityLevel.label}、'
+          '体重${_weightController.text}kg、${_lifeStage.label}'
+          '${isAdult ? '（${widget.neutered ? '避妊・去勢済み' : '未避妊・未去勢'}、体型:${_bodyCondition.label}、活動量:${_activityLevel.label}）' : ''}、'
           '1日の目安摂取カロリー${result.maintenanceEnergyKcal.round()}kcal、'
           '使用フード${_foodDensityController.text}kcal/100gで'
           '1日あたり${result.dailyFoodGrams.round()}g程度と算出しました。'
@@ -153,6 +159,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   @override
   Widget build(BuildContext context) {
     final result = _result;
+    final isAdult = _lifeStage == DogLifeStage.adult;
     return Scaffold(
       appBar: AppBar(title: const Text('餌の量を計算')),
       body: ListView(
@@ -164,17 +171,61 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             decoration: const InputDecoration(labelText: '体重 (kg)'),
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<DogActivityLevel>(
-            initialValue: _activityLevel,
-            decoration: const InputDecoration(labelText: '活動レベル'),
+          DropdownButtonFormField<DogLifeStage>(
+            initialValue: _lifeStage,
+            decoration: const InputDecoration(labelText: 'ライフステージ'),
             items: [
-              for (final level in DogActivityLevel.values)
-                DropdownMenuItem(value: level, child: Text(level.label)),
+              for (final stage in DogLifeStage.values)
+                DropdownMenuItem(value: stage, child: Text(stage.label)),
             ],
             onChanged: (value) {
-              if (value != null) setState(() => _activityLevel = value);
+              if (value != null) setState(() => _lifeStage = value);
             },
           ),
+          if (isAdult) ...[
+            const SizedBox(height: 12),
+            Text(
+              '避妊・去勢：${widget.neutered ? '済み' : '未'}（プロフィールの登録内容）',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<BodyCondition>(
+              initialValue: _bodyCondition,
+              decoration: const InputDecoration(
+                labelText: '体型（ボディコンディション）',
+                helperText: 'あばら骨に触れやすい＝痩せ気味／触れるが見えない＝標準／触れにくい＝ぽっちゃり気味',
+                helperMaxLines: 2,
+              ),
+              items: [
+                for (final condition in BodyCondition.values)
+                  DropdownMenuItem(
+                    value: condition,
+                    child: Text(condition.label),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _bodyCondition = value);
+              },
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<ActivityLevel>(
+              initialValue: _activityLevel,
+              decoration: const InputDecoration(labelText: '活動レベル'),
+              items: [
+                for (final level in ActivityLevel.values)
+                  DropdownMenuItem(value: level, child: Text(level.label)),
+              ],
+              onChanged: (value) {
+                if (value != null) setState(() => _activityLevel = value);
+              },
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            const Text(
+              '※ 成長期の子犬は体型・活動量に関わらず、年齢に応じた係数で算出します。',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             controller: _foodDensityController,
