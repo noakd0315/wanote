@@ -34,6 +34,7 @@ class PetProfile extends Equatable {
     required this.sex,
     required this.neutered,
     this.weightKg,
+    this.photoUrl,
   });
 
   final String petId;
@@ -45,6 +46,12 @@ class PetProfile extends Equatable {
   final bool neutered;
   final double? weightKg;
 
+  /// Download URL for the pet's profile photo (Firebase Storage), or null
+  /// if none has been uploaded yet. Added after the initial spec 1.3 field
+  /// set -- nullable and absent-safe so existing Firestore docs without
+  /// this field still parse via [fromMap].
+  final String? photoUrl;
+
   PetProfile copyWith({
     String? name,
     String? breed,
@@ -52,6 +59,7 @@ class PetProfile extends Equatable {
     PetSex? sex,
     bool? neutered,
     double? weightKg,
+    String? photoUrl,
   }) {
     return PetProfile(
       petId: petId,
@@ -62,6 +70,7 @@ class PetProfile extends Equatable {
       sex: sex ?? this.sex,
       neutered: neutered ?? this.neutered,
       weightKg: weightKg ?? this.weightKg,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 
@@ -75,6 +84,7 @@ class PetProfile extends Equatable {
       'sex': sex.wireName,
       'neutered': neutered,
       'weight_kg': weightKg,
+      'photo_url': photoUrl,
     };
   }
 
@@ -92,6 +102,7 @@ class PetProfile extends Equatable {
       sex: PetSex.fromWireName(map['sex'] as String? ?? 'male'),
       neutered: map['neutered'] as bool? ?? false,
       weightKg: (map['weight_kg'] as num?)?.toDouble(),
+      photoUrl: map['photo_url'] as String?,
     );
   }
 
@@ -105,5 +116,6 @@ class PetProfile extends Equatable {
     sex,
     neutered,
     weightKg,
+    photoUrl,
   ];
 }

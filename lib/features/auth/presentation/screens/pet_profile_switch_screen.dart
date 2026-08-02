@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/models/pet_profile.dart';
@@ -55,9 +56,16 @@ class PetProfileSwitchScreen extends StatelessWidget {
                 final isActive = pet.petId == activePetId;
                 return ListTile(
                   leading: CircleAvatar(
-                    child: Text(
-                      pet.name.isNotEmpty ? pet.name[0].toUpperCase() : '?',
-                    ),
+                    backgroundImage: pet.photoUrl != null
+                        ? CachedNetworkImageProvider(pet.photoUrl!)
+                        : null,
+                    child: pet.photoUrl == null
+                        ? Text(
+                            pet.name.isNotEmpty
+                                ? pet.name[0].toUpperCase()
+                                : '?',
+                          )
+                        : null,
                   ),
                   title: Text(pet.name),
                   subtitle: Text(pet.breed),

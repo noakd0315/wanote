@@ -17,16 +17,18 @@ import '../features/medical/presentation/medical_home_screen.dart';
 import '../shared/services/ai_usage_repository.dart';
 import 'ai_section.dart';
 import 'daily_record_section.dart';
+import 'home_screen.dart';
 import 'settings_section.dart';
 
 /// The real app shell, handed to [LaunchGateScreen] as its `homeBuilder`
 /// from main.dart once a signed-in user has at least one pet.
 ///
-/// Owns construction of every concrete repository the 4 sections need
+/// Owns construction of every concrete repository the 5 sections need
 /// (daily_record / medical / ai / billing all expose repository
 /// interfaces + Firestore-backed implementations but no shared DI
-/// container), and renders a 4-destination bottom navigation bar across
-/// them: 日常記録 / 医療 / AI相談 / 設定・課金 (spec's top-level IA).
+/// container), and renders a 5-destination bottom navigation bar across
+/// them: ホーム / 日常記録 / 医療 / AI相談 / 設定・課金 (spec's top-level IA
+/// plus a dashboard home screen).
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key, required this.uid, required this.activePet});
 
@@ -119,6 +121,17 @@ class _HomeShellState extends State<HomeShell> {
     final petId = widget.activePet.petId;
 
     final sections = <Widget>[
+      HomeScreen(
+        uid: uid,
+        activePet: widget.activePet,
+        healthRecordRepository: _healthRecordRepository,
+        weightRecordRepository: _weightRecordRepository,
+        toiletRecordRepository: _toiletRecordRepository,
+        usageRepository: _aiUsageRepository,
+        backendClient: _aiBackendClient,
+        consultationRepository: _consultationRepository,
+        onRequestUpgrade: () => _openPaywall(context),
+      ),
       DailyRecordSection(
         uid: uid,
         petId: petId,
@@ -157,6 +170,11 @@ class _HomeShellState extends State<HomeShell> {
         onDestinationSelected: (index) =>
             setState(() => _selectedIndex = index),
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'ホーム',
+          ),
           NavigationDestination(
             icon: Icon(Icons.event_note_outlined),
             selectedIcon: Icon(Icons.event_note),
