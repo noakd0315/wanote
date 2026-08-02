@@ -1,3 +1,4 @@
+import '../../../shared/utils/calendar_period.dart';
 import '../models/weight_record.dart';
 
 /// Chart period toggle from spec 3.2 ("折れ線グラフ表示（期間切り替え：1ヶ月
@@ -77,7 +78,7 @@ class WeightTrendCalculator {
         deltaVsPrevious = latest.weightKg - previous.weightKg;
       }
 
-      final oneMonthAgoTarget = _subtractMonths(latest.measuredAt, 1);
+      final oneMonthAgoTarget = subtractCalendarMonths(latest.measuredAt, 1);
       WeightRecord? closest;
       for (final r in sorted) {
         if (!r.measuredAt.isAfter(oneMonthAgoTarget)) {
@@ -102,46 +103,20 @@ class WeightTrendCalculator {
     );
   }
 
-  /// Computed from the *date* of [now], ignoring its time-of-day.
-  ///
-  /// Bug this fixes: a manually-entered historical record is stored at
-  /// midnight (00:00:00) of its picked date, but `now` carries the actual
-  /// wall-clock time (e.g. 14:23). Subtracting months from `now` directly
-  /// would put the cutoff at "period-start-date at 14:23", which is *after*
-  /// midnight on that same calendar date -- silently excluding a record
-  /// dated exactly on the boundary (e.g. "1 year ago today"), even though
-  /// spec's own example ("1年：2025/8/2〜2026/8/2") is explicit that the
-  /// boundary date itself is included.
+  /// See [trailingCalendarMonthsStart] (lib/shared/utils/calendar_period.dart)
+  /// for why `now`'s time-of-day is truncated away before subtracting --
+  /// this is the fix for the boundary bug where a record dated exactly "N
+  /// months ago today" was silently excluded, even though spec's own
+  /// example ("1年：2025/8/2〜2026/8/2") is explicit that the boundary date
+  /// itself is included. Shared with the AI health report's period
+  /// calculation so the two features can't drift apart on what "3 months"
+  /// means.
   DateTime _periodStart(DateTime now, WeightTrendPeriod period) {
-    final today = DateTime(now.year, now.month, now.day);
-    switch (period) {
-      case WeightTrendPeriod.oneMonth:
-        return _subtractMonths(today, 1);
-      case WeightTrendPeriod.threeMonths:
-        return _subtractMonths(today, 3);
-      case WeightTrendPeriod.oneYear:
-        return _subtractMonths(today, 12);
-    }
-  }
-
-  /// Subtracts [months] calendar months from [date], clamping the day of
-  /// month down when the target month is shorter (e.g. Mar 31 - 1 month =
-  /// Feb 28/29, not an overflowed Mar 3).
-  DateTime _subtractMonths(DateTime date, int months) {
-    final totalMonths = date.year * 12 + (date.month - 1) - months;
-    final year = totalMonths ~/ 12;
-    final month = totalMonths % 12 + 1;
-    final daysInTargetMonth = DateTime(year, month + 1, 0).day;
-    final day = date.day > daysInTargetMonth ? daysInTargetMonth : date.day;
-    return DateTime(
-      year,
-      month,
-      day,
-      date.hour,
-      date.minute,
-      date.second,
-      date.millisecond,
-      date.microsecond,
-    );
+    final months = switch (period) {
+      WeightTrendPeriod.oneMonth => 1,
+      WeightTrendPeriod.threeMonths => 3,
+      WeightTrendPeriod.oneYear => 12,
+    };
+    return trailingCalendarMonthsStart(now, months);
   }
 }

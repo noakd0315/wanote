@@ -13,6 +13,7 @@ import '../features/daily_record/domain/toilet_frequency_aggregator.dart';
 import '../features/daily_record/models/toilet_record.dart';
 import '../features/daily_record/models/weight_record.dart';
 import '../shared/services/ai_usage_repository.dart';
+import '../shared/utils/calendar_period.dart';
 
 /// AI相談 section of the app shell: combines Agent D's [ConsultationScreen]
 /// and [ReportScreen] behind a small local segmented control, since neither
@@ -111,19 +112,21 @@ class _AiSectionState extends State<AiSection> {
   }
 }
 
-/// Pulls the trailing 90 days of Agent B's weight/toilet records and maps
-/// them into features/ai's self-contained [MonthlyReportInputStats] shape.
-/// That class's doc comment is explicit that "whatever screen assembles a
-/// report is responsible for pulling the real numbers out of Agent B's ...
-/// records and mapping them into this shape" -- this widget is that
-/// mapping, not a stub. It uses a rolling window rather than calendar-month
-/// boundaries since the spec doesn't pin the period down further; a real
-/// "monthly" picker would be a reasonable follow-up.
+/// Pulls the trailing 3 calendar months of Agent B's weight/toilet records
+/// and maps them into features/ai's self-contained [MonthlyReportInputStats]
+/// shape. That class's doc comment is explicit that "whatever screen
+/// assembles a report is responsible for pulling the real numbers out of
+/// Agent B's ... records and mapping them into this shape" -- this widget
+/// is that mapping, not a stub.
 ///
-/// 90 days (not 30) deliberately: weight is typically logged roughly
-/// monthly, not daily, so a 30-day window usually contains at most one
-/// point -- not enough to draw a "推移" (trend) at all. 90 days gives the
-/// chart a realistic chance of showing more than a single dot.
+/// Uses [trailingCalendarMonthsStart] -- the same calendar-month arithmetic
+/// as the weight trend chart's "3ヶ月" period -- rather than a fixed
+/// `Duration`, so the two features agree on what "3 months" means (a fixed
+/// 90-day window lands a few days off from a true 3-months-ago date, since
+/// calendar months vary from 28-31 days). 3 months (not 1) deliberately:
+/// weight is typically logged roughly monthly, not daily, so a 1-month
+/// window usually contains at most one point -- not enough to draw a "推移"
+/// (trend) at all.
 class _MonthlyReportTab extends StatefulWidget {
   const _MonthlyReportTab({
     required this.uid,
@@ -158,7 +161,7 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
 
   Future<MonthlyReportInputStats> _loadStats() async {
     final periodEnd = DateTime.now();
-    final periodStart = periodEnd.subtract(const Duration(days: 90));
+    final periodStart = trailingCalendarMonthsStart(periodEnd, 3);
 
     final List<WeightRecord> weightRecords = await widget.weightRecordRepository
         .watchAll(widget.uid, widget.petId)
