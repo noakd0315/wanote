@@ -7,6 +7,8 @@ import type { RateLimitEnv } from './lib/rateLimiter';
  *   - Agent C (medical):  POST /ocr/certificate      -> routes/ocr.ts
  *   - Agent D (ai):       POST /ai/consultation       -> routes/consultation.ts
  *   - Agent D (ai):       POST /ai/report             -> routes/report.ts
+ *   - Agent E (billing):  POST /billing/grant-promotional-entitlement
+ *                                                     -> routes/grantPromotionalEntitlement.ts
  *
  * Keep this switch flat and route-file logic self-contained; this file is a
  * likely merge-conflict point between the medical and ai worktrees, so the
@@ -41,6 +43,12 @@ export default {
       case '/ai/report': {
         const { handleReport } = await import('./routes/report');
         return handleReport(request, env);
+      }
+      case '/billing/grant-promotional-entitlement': {
+        const { handleGrantPromotionalEntitlement } = await import(
+          './routes/grantPromotionalEntitlement'
+        );
+        return handleGrantPromotionalEntitlement(request, env);
       }
       default:
         return new Response('Not found', { status: 404 });

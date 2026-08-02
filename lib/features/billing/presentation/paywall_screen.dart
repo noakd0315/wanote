@@ -1,13 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../data/billing_repository.dart';
+import '../data/campaign_code_repository.dart';
+import '../domain/campaign_code_models.dart';
 import '../domain/product_ids.dart';
 
 /// Simple, functional (not pixel-perfect) upgrade/paywall screen: lists the
 /// premium_monthly/premium_yearly subscriptions and the ai_tickets_5/15
 /// consumable packs from RevenueCat's current offering, with a purchase
-/// button on each and a "restore purchases" action.
+/// button on each and a "restore purchases" action. Also includes a
+/// placeholder campaign-code / referral-code redemption section at the
+/// bottom -- deliberately unstyled, a visual-polish pass is a separate,
+/// later piece of work per the PM.
 ///
 /// No app-wide state-management convention exists yet in this codebase
 /// (no other feature has a presentation/ layer), so this screen owns its
@@ -16,12 +23,37 @@ import '../domain/product_ids.dart';
 /// [BillingRepository] (typically the same instance app-shell configured
 /// and called [BillingRepository.logIn] on after Firebase sign-in).
 class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key, required this.billingRepository});
+  const PaywallScreen({
+    super.key,
+    required this.billingRepository,
+    CampaignCodeRepository? campaignCodeRepository,
+  }) : campaignCodeRepository = campaignCodeRepository ?? const _LazyFirestoreCampaignCodeRepository();
 
   final BillingRepository billingRepository;
+  final CampaignCodeRepository campaignCodeRepository;
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
+}
+
+/// Defers constructing [FirestoreCampaignCodeRepository] (which touches
+/// FirebaseFirestore.instance) until it's actually used, so widget tests
+/// that never exercise the campaign-code section don't need Firebase to be
+/// initialized just to build [PaywallScreen] with its default repository.
+class _LazyFirestoreCampaignCodeRepository implements CampaignCodeRepository {
+  const _LazyFirestoreCampaignCodeRepository();
+
+  @override
+  Future<CampaignCode?> checkValid(String code) => _delegate.checkValid(code);
+
+  @override
+  Future<CampaignCodeRedemptionResult> redeem({required String code, required String uid}) =>
+      _delegate.redeem(code: code, uid: uid);
+
+  @override
+  Future<String> getOrCreateReferralCode(String uid) => _delegate.getOrCreateReferralCode(uid);
+
+  static CampaignCodeRepository get _delegate => FirestoreCampaignCodeRepository();
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
@@ -89,62 +121,70 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<Offerings>(
-        future: _offeringsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Could not load offerings: ${snapshot.error}\n\n'
-                  'If this is a dev/test build, the RevenueCat dashboard '
-                  'may not be configured yet.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: FutureBuilder<Offerings>(
+              future: _offeringsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Could not load offerings: ${snapshot.error}\n\n'
+                        'If this is a dev/test build, the RevenueCat dashboard '
+                        'may not be configured yet.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
 
-          final offering = snapshot.data?.current;
-          final packages = offering?.availablePackages ?? const <Package>[];
-          if (packages.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  'No products are available yet. The RevenueCat dashboard '
-                  'has not been configured with offerings/products.',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
+                final offering = snapshot.data?.current;
+                final packages = offering?.availablePackages ?? const <Package>[];
+                if (packages.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        'No products are available yet. The RevenueCat dashboard '
+                        'has not been configured with offerings/products.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (_errorMessage != null) ...[
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                const SizedBox(height: 12),
-              ],
-              for (final package in packages) ...[
-                _PackageTile(
-                  package: package,
-                  isBusy: _busyPackageId == package.identifier,
-                  onPurchase: () => _purchase(package),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ],
-          );
-        },
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    if (_errorMessage != null) ...[
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    for (final package in packages) ...[
+                      _PackageTile(
+                        package: package,
+                        isBusy: _busyPackageId == package.identifier,
+                        onPurchase: () => _purchase(package),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          _CampaignCodeSection(repository: widget.campaignCodeRepository),
+        ],
       ),
     );
   }
@@ -188,6 +228,165 @@ class _PackageTile extends StatelessWidget {
                 onPressed: onPurchase,
                 child: Text(package.storeProduct.priceString),
               ),
+      ),
+    );
+  }
+}
+
+/// Placeholder campaign-code / referral-code section: a text field + submit
+/// button for redeeming a code, plus a "your referral code" row with a copy
+/// button. Deliberately minimal (no dedicated screen, no visual polish) --
+/// the PM explicitly scoped this as a placeholder for a later design pass.
+class _CampaignCodeSection extends StatefulWidget {
+  const _CampaignCodeSection({required this.repository});
+
+  final CampaignCodeRepository repository;
+
+  @override
+  State<_CampaignCodeSection> createState() => _CampaignCodeSectionState();
+}
+
+class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
+  final _codeController = TextEditingController();
+  bool _redeemBusy = false;
+  String? _statusMessage;
+  bool _statusIsError = false;
+  Future<String>? _referralCodeFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _referralCodeFuture = widget.repository.getOrCreateReferralCode(uid);
+    }
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _redeem() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      setState(() {
+        _statusMessage = 'Please sign in first.';
+        _statusIsError = true;
+      });
+      return;
+    }
+
+    setState(() {
+      _redeemBusy = true;
+      _statusMessage = null;
+    });
+
+    final result = await widget.repository.redeem(code: code, uid: uid);
+
+    if (!mounted) return;
+    setState(() {
+      _redeemBusy = false;
+      switch (result) {
+        case CampaignCodeRedeemed():
+          _statusIsError = false;
+          _statusMessage = '1 month of premium has been granted. Thanks!';
+          _codeController.clear();
+        case CampaignCodeRedemptionRejected(reason: final reason):
+          _statusIsError = true;
+          _statusMessage = _messageForReason(reason);
+        case CampaignCodeRedemptionFailed(message: final message):
+          _statusIsError = true;
+          _statusMessage = message;
+      }
+    });
+  }
+
+  String _messageForReason(RedemptionIneligibleReason reason) {
+    return switch (reason) {
+      RedemptionIneligibleReason.unknownCode => 'This code was not found.',
+      RedemptionIneligibleReason.inactive => 'This code is no longer active.',
+      RedemptionIneligibleReason.redemptionCapReached =>
+        'This code has reached its redemption limit.',
+      RedemptionIneligibleReason.alreadyRedeemedByUser => 'You have already redeemed this code.',
+      RedemptionIneligibleReason.selfReferral => 'You cannot redeem your own referral code.',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Have a campaign code?', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _codeController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter code',
+                    isDense: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  textCapitalization: TextCapitalization.characters,
+                  enabled: !_redeemBusy,
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _redeemBusy ? null : _redeem,
+                child: _redeemBusy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Redeem'),
+              ),
+            ],
+          ),
+          if (_statusMessage != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _statusMessage!,
+              style: TextStyle(color: _statusIsError ? Colors.red : Colors.green),
+            ),
+          ],
+          if (_referralCodeFuture != null) ...[
+            const SizedBox(height: 16),
+            FutureBuilder<String>(
+              future: _referralCodeFuture,
+              builder: (context, snapshot) {
+                final referralCode = snapshot.data;
+                if (referralCode == null) return const SizedBox.shrink();
+                return Row(
+                  children: [
+                    Expanded(child: Text('Your referral code: $referralCode')),
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 18),
+                      tooltip: 'Copy',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: referralCode));
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(const SnackBar(content: Text('Referral code copied.')));
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ],
       ),
     );
   }
