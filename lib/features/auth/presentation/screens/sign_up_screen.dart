@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,7 +30,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _referralCodeController = TextEditingController();
 
   /// true = create a new account, false = sign in to an existing one.
-  bool _isSignUpMode = true;
+  /// Defaults to sign-in (PM request: the app's initial screen should be
+  /// sign-in, not registration) -- new users still reach registration via
+  /// the "New here? Create an account" toggle below.
+  bool _isSignUpMode = false;
 
   @override
   void dispose() {
@@ -145,7 +148,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     TextButton(
                       onPressed: controller.isLoading
                           ? null
-                          : () => setState(() => _isSignUpMode = !_isSignUpMode),
+                          : () =>
+                                setState(() => _isSignUpMode = !_isSignUpMode),
                       child: Text(
                         _isSignUpMode
                             ? 'Already have an account? Sign in'

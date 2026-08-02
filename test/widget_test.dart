@@ -44,8 +44,9 @@ void main() {
     biometricService = MockBiometricService();
     authStateController = StreamController<AuthIdentity?>.broadcast();
 
-    when(() => authRepository.authStateChanges())
-        .thenAnswer((_) => authStateController.stream);
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => authStateController.stream);
 
     controller = AuthController(
       authRepository: authRepository,
@@ -71,7 +72,7 @@ void main() {
   }
 
   testWidgets(
-    'LaunchGateScreen renders the sign-up screen when there is no session',
+    'LaunchGateScreen renders the sign-in screen (not sign-up) when there is no session',
     (tester) async {
       when(() => authRepository.currentUser).thenReturn(null);
       when(() => biometricService.isAvailable()).thenAnswer((_) async => false);
@@ -80,7 +81,10 @@ void main() {
       await pumpLaunchGate(tester);
       await tester.pump();
 
-      expect(find.text('Create your account'), findsOneWidget);
+      // PM request: the app's initial screen should be sign-in, not
+      // registration.
+      expect(find.text('Sign in'), findsWidgets);
+      expect(find.text('Create your account'), findsNothing);
       expect(controller.gateAction, AuthGateAction.requireSignIn);
     },
   );
@@ -109,8 +113,9 @@ void main() {
       // testWidgets trap where a bare `Future.delayed` never fires because
       // AutomatedTestWidgetsFlutterBinding only advances real timers via
       // tester.pump()/pumpAndSettle().
-      when(() => petProfileRepository.watchPets(identity.uid))
-          .thenAnswer((_) => Stream.value(const <PetProfile>[]));
+      when(
+        () => petProfileRepository.watchPets(identity.uid),
+      ).thenAnswer((_) => Stream.value(const <PetProfile>[]));
 
       await pumpLaunchGate(tester);
       await controller.initialize();
