@@ -48,8 +48,14 @@ class LaunchGateScreen extends StatelessWidget {
           }
           // Spec 1.4: no usable biometric enrollment -> skip straight past
           // the biometric-setup step into the normal post-registration
-          // flow (first pet creation).
-          controller.markOnboardingComplete();
+          // flow (first pet creation). Deferred to a post-frame callback
+          // because calling markOnboardingComplete() here synchronously
+          // would call notifyListeners() while this very widget is still
+          // being built ("setState() or markNeedsBuild() called during
+          // build" -- caught during local emulator verification).
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => controller.markOnboardingComplete(),
+          );
         }
         if (controller.pets.isEmpty) {
           return const PetProfileFormScreen();
