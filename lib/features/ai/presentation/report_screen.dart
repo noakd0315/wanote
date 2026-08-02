@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/report_pdf_exporter.dart';
@@ -291,7 +292,11 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  String _fullDateLabel(DateTime d) => '${d.year}/${d.month}/${d.day}';
+  // Zero-padded to match WeightRecordChartScreen's DateFormat('yyyy/MM/dd')
+  // range label -- the two screens previously formatted the same kind of
+  // date range differently (this one without zero-padding), which read as
+  // a mismatch even once the underlying period calculation was unified.
+  String _fullDateLabel(DateTime d) => DateFormat('yyyy/MM/dd').format(d);
 
   /// Short axis-tick format -- the full "対象期間" line already states the
   /// year, so repeating it on every X-axis tick would just crowd the chart.
