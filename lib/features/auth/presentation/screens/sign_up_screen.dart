@@ -1,7 +1,14 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_controller.dart';
+
+/// Key the referral code typed at sign-up is stashed under until the app
+/// shell is ready to redeem it (see lib/app/home_shell.dart). Kept here
+/// (not in shared/) since it's purely an auth<->app-shell handoff detail,
+/// not a cross-feature contract other features need.
+const String pendingReferralCodePrefsKey = 'auth.pending_referral_code';
 
 /// Initial registration / sign-in screen (spec 1.2 - 初回登録画面).
 ///
@@ -20,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralCodeController = TextEditingController();
 
   /// true = create a new account, false = sign in to an existing one.
   bool _isSignUpMode = true;
@@ -28,12 +36,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
+  }
+
+  /// Stashes the typed referral code (if any) so [HomeShell] can redeem it
+  /// once the new account has an active pet and the billing system is up --
+  /// this screen must not depend on features/billing directly (auth doesn't
+  /// own promotional-code redemption), so it only persists a plain string.
+  Future<void> _stashReferralCodeIfProvided() async {
+    final code = _referralCodeController.text.trim();
+    if (code.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(pendingReferralCodePrefsKey, code);
   }
 
   Future<void> _submitEmailForm(AuthController controller) async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_isSignUpMode) {
+      await _stashReferralCodeIfProvided();
       await controller.signUpWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -93,6 +114,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         return null;
                       },
                     ),
+                    if (_isSignUpMode) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _referralCodeController,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: const InputDecoration(
+                          labelText: '紹介コード（任意）',
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     if (controller.errorMessage != null)
                       Padding(
@@ -137,7 +168,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     OutlinedButton.icon(
                       onPressed: controller.isLoading
                           ? null
-                          : () => controller.signInWithGoogle(),
+                          : () async {
+                              await _stashReferralCodeIfProvided();
+                              await controller.signInWithGoogle();
+                            },
                       icon: const Icon(Icons.g_mobiledata),
                       label: const Text('Sign in with Google'),
                     ),
@@ -145,7 +179,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     OutlinedButton.icon(
                       onPressed: controller.isLoading
                           ? null
-                          : () => controller.signInWithApple(),
+                          : () async {
+                              await _stashReferralCodeIfProvided();
+                              await controller.signInWithApple();
+                            },
                       icon: const Icon(Icons.apple),
                       label: const Text('Sign in with Apple'),
                     ),

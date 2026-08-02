@@ -275,7 +275,7 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       setState(() {
-        _statusMessage = 'Please sign in first.';
+        _statusMessage = 'サインインしてからお試しください。';
         _statusIsError = true;
       });
       return;
@@ -294,7 +294,7 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
       switch (result) {
         case CampaignCodeRedeemed():
           _statusIsError = false;
-          _statusMessage = '1 month of premium has been granted. Thanks!';
+          _statusMessage = 'プレミアムを1ヶ月分付与しました。ありがとうございます！';
           _codeController.clear();
         case CampaignCodeRedemptionRejected(reason: final reason):
           _statusIsError = true;
@@ -308,12 +308,11 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
 
   String _messageForReason(RedemptionIneligibleReason reason) {
     return switch (reason) {
-      RedemptionIneligibleReason.unknownCode => 'This code was not found.',
-      RedemptionIneligibleReason.inactive => 'This code is no longer active.',
-      RedemptionIneligibleReason.redemptionCapReached =>
-        'This code has reached its redemption limit.',
-      RedemptionIneligibleReason.alreadyRedeemedByUser => 'You have already redeemed this code.',
-      RedemptionIneligibleReason.selfReferral => 'You cannot redeem your own referral code.',
+      RedemptionIneligibleReason.unknownCode => 'このコードは見つかりませんでした。',
+      RedemptionIneligibleReason.inactive => 'このコードは現在無効です。',
+      RedemptionIneligibleReason.redemptionCapReached => 'このコードは利用上限に達しています。',
+      RedemptionIneligibleReason.alreadyRedeemedByUser => 'このコードは既に使用済みです。',
+      RedemptionIneligibleReason.selfReferral => '自分の紹介コードは使用できません。',
     };
   }
 
@@ -325,7 +324,10 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Have a campaign code?', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'プロモーションコードをお持ちですか？',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -333,7 +335,7 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
                 child: TextField(
                   controller: _codeController,
                   decoration: const InputDecoration(
-                    hintText: 'Enter code',
+                    hintText: 'コードを入力',
                     isDense: true,
                     border: OutlineInputBorder(),
                   ),
@@ -350,7 +352,7 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Redeem'),
+                    : const Text('適用する'),
               ),
             ],
           ),
@@ -370,15 +372,15 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
                 if (referralCode == null) return const SizedBox.shrink();
                 return Row(
                   children: [
-                    Expanded(child: Text('Your referral code: $referralCode')),
+                    Expanded(child: Text('あなたの紹介コード: $referralCode')),
                     IconButton(
                       icon: const Icon(Icons.copy, size: 18),
-                      tooltip: 'Copy',
+                      tooltip: 'コピー',
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: referralCode));
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text('Referral code copied.')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('紹介コードをコピーしました。')),
+                        );
                       },
                     ),
                   ],

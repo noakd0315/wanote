@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/data/consultation_repository.dart';
@@ -9,6 +10,8 @@ import '../features/ai/domain/monthly_report_generator.dart';
 import '../features/ai/presentation/consultation_screen.dart';
 import '../features/auth/auth.dart';
 import '../features/billing/data/billing_repository.dart';
+import '../features/billing/data/campaign_code_repository.dart';
+import '../features/billing/domain/campaign_code_models.dart';
 import '../features/billing/presentation/paywall_screen.dart';
 import '../features/daily_record/data/health_record_repository.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
@@ -59,6 +62,7 @@ class _HomeShellState extends State<HomeShell> {
   late final ReportRepository _reportRepository;
   late final MonthlyReportGenerator _reportGenerator;
   late final BillingRepository _billingRepository;
+  late final CampaignCodeRepository _campaignCodeRepository;
 
   @override
   void initState() {
@@ -72,7 +76,9 @@ class _HomeShellState extends State<HomeShell> {
     _reportRepository = FirestoreReportRepository();
     _reportGenerator = BackendMonthlyReportGenerator(_aiBackendClient);
     _billingRepository = RevenueCatBillingRepository();
+    _campaignCodeRepository = FirestoreCampaignCodeRepository();
     unawaited(_initializeBilling());
+    unawaited(_redeemPendingReferralCodeIfAny());
   }
 
   Future<void> _initializeBilling() async {
@@ -87,6 +93,32 @@ class _HomeShellState extends State<HomeShell> {
       await _billingRepository.logIn(widget.uid);
     } catch (_) {
       // Best-effort only.
+    }
+  }
+
+  /// If the user typed a referral code on [SignUpScreen], it's sitting in
+  /// SharedPreferences (auth doesn't depend on features/billing, so it
+  /// couldn't redeem it itself) -- this is the one place both auth's
+  /// hand-off and billing's redemption flow are already in scope, so it's
+  /// where the "started the app via a referral code -> automatically get a
+  /// promotional code" flow actually happens. Cleared either way so a
+  /// failed attempt doesn't retry forever on every future launch.
+  Future<void> _redeemPendingReferralCodeIfAny() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString(pendingReferralCodePrefsKey);
+    if (code == null || code.isEmpty) return;
+    await prefs.remove(pendingReferralCodePrefsKey);
+
+    try {
+      final result = await _campaignCodeRepository.redeem(code: code, uid: widget.uid);
+      if (result is CampaignCodeRedeemed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('紹介コードを適用し、プレミアムを1ヶ月分付与しました。')),
+        );
+      }
+    } catch (_) {
+      // Best-effort only -- the user can still redeem manually from the
+      // paywall's promotion-code section if this silently fails.
     }
   }
 
