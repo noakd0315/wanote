@@ -110,7 +110,10 @@ class _HomeShellState extends State<HomeShell> {
     await prefs.remove(pendingReferralCodePrefsKey);
 
     try {
-      final result = await _campaignCodeRepository.redeem(code: code, uid: widget.uid);
+      final result = await _campaignCodeRepository.redeem(
+        code: code,
+        uid: widget.uid,
+      );
       if (result is CampaignCodeRedeemed && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('紹介コードを適用し、プレミアムを1ヶ月分付与しました。')),
@@ -177,10 +180,8 @@ class _HomeShellState extends State<HomeShell> {
         healthRecordRepository: _healthRecordRepository,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
-        onConsultationSuggested: (suggestion) => _openConsultation(
-          context,
-          prefillRecords: [suggestion.reference],
-        ),
+        onConsultationSuggested: (suggestion) =>
+            _openConsultation(context, prefillRecords: [suggestion.reference]),
       ),
       MedicalHomeScreen(uid: uid, petId: petId),
       AiSection(
@@ -203,11 +204,18 @@ class _HomeShellState extends State<HomeShell> {
     ];
 
     return Scaffold(
+      // Persistent across every tab AND every screen pushed onto
+      // [_shellNavigatorKey] (a push only replaces the Navigator's own
+      // content, which sits inside this same outer Scaffold's body) -- this
+      // is what makes "wanote" show on every page per the PM's request,
+      // without each section/screen needing its own copy of it.
+      appBar: AppBar(title: const Text('wanote')),
       body: Navigator(
         key: _shellNavigatorKey,
         onGenerateRoute: (settings) => MaterialPageRoute(
           settings: settings,
-          builder: (_) => IndexedStack(index: _selectedIndex, children: sections),
+          builder: (_) =>
+              IndexedStack(index: _selectedIndex, children: sections),
         ),
       ),
       bottomNavigationBar: NavigationBar(

@@ -13,10 +13,21 @@ class WeightTrendResult {
     required this.series,
     required this.deltaVsPrevious,
     required this.deltaVsOneMonthAgo,
+    required this.periodStart,
+    required this.periodEnd,
   });
 
   /// Records within the selected period, sorted ascending by [WeightRecord.measuredAt].
   final List<WeightRecord> series;
+
+  /// The exact start/end of the selected window -- `periodEnd` is always
+  /// the `now` passed to [WeightTrendCalculator.calculate] and `periodStart`
+  /// is `periodEnd` minus the period's calendar months (e.g. for `now` =
+  /// 2026-08-02 and [WeightTrendPeriod.oneMonth], periodStart is 2026-07-02).
+  /// Exposed so the screen can display the range explicitly rather than the
+  /// user having to infer it from which points happen to be plotted.
+  final DateTime periodStart;
+  final DateTime periodEnd;
 
   /// latest.weightKg - secondLatest.weightKg, using the two most recent
   /// records overall (independent of the period filter — the delta badge is
@@ -83,6 +94,8 @@ class WeightTrendCalculator {
       series: series,
       deltaVsPrevious: deltaVsPrevious,
       deltaVsOneMonthAgo: deltaVsOneMonthAgo,
+      periodStart: cutoff,
+      periodEnd: now,
     );
   }
 

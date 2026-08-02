@@ -98,8 +98,7 @@ class HomeScreen extends StatelessWidget {
   void _openCertificates(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) =>
-            CertificateListScreen(uid: uid, petId: activePet.petId),
+        builder: (_) => CertificateListScreen(uid: uid, petId: activePet.petId),
       ),
     );
   }
@@ -127,20 +126,10 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final showPhoto = shouldShowPetPhotoBackground(activePet.photoUrl);
 
+    // No AppBar here -- HomeShell's outer Scaffold already renders a
+    // persistent "wanote" AppBar above every section (see its doc comment),
+    // so this screen just fills the body area below it.
     return Scaffold(
-      // Plain (non-Sliver) AppBar: always visible, doesn't need to react to
-      // scrolling per the PM's request -- this screen's body isn't even
-      // scrollable, so a normal AppBar already behaves exactly like that by
-      // default. Transparent so the background photo/illustration still
-      // shows through; extendBodyBehindAppBar lets the Stack's background
-      // extend up under it instead of leaving a solid-color gap.
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('wanote'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -174,11 +163,10 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                   child: Text(
                     activePet.name,
-                    style: Theme.of(context).textTheme.headlineMedium
-                        ?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Padding(
@@ -235,7 +223,10 @@ class _DefaultBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [colorScheme.primaryContainer, colorScheme.secondaryContainer],
+          colors: [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
         ),
       ),
       child: Center(

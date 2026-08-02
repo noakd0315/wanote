@@ -96,4 +96,38 @@ void main() {
       expect(result.deltaVsOneMonthAgo, isNull);
     });
   });
+
+  group('periodStart/periodEnd (PM-specified example: displayed date 2026-08-02)', () {
+    final displayDate = DateTime(2026, 8, 2);
+
+    test('1 month -> 2026-07-02 to 2026-08-02', () {
+      final result = calculator.calculate(
+        records: const [],
+        now: displayDate,
+        period: WeightTrendPeriod.oneMonth,
+      );
+      expect(result.periodStart, DateTime(2026, 7, 2));
+      expect(result.periodEnd, DateTime(2026, 8, 2));
+    });
+
+    test('3 months -> 2026-05-02 to 2026-08-02', () {
+      final result = calculator.calculate(
+        records: const [],
+        now: displayDate,
+        period: WeightTrendPeriod.threeMonths,
+      );
+      expect(result.periodStart, DateTime(2026, 5, 2));
+      expect(result.periodEnd, DateTime(2026, 8, 2));
+    });
+
+    test('1 year -> 2025-08-02 to 2026-08-02', () {
+      final result = calculator.calculate(
+        records: const [],
+        now: displayDate,
+        period: WeightTrendPeriod.oneYear,
+      );
+      expect(result.periodStart, DateTime(2025, 8, 2));
+      expect(result.periodEnd, DateTime(2026, 8, 2));
+    });
+  });
 }

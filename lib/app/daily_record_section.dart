@@ -14,12 +14,12 @@ import '../shared/models/consultation_reference_record.dart';
 /// records, weight chart, toilet timeline) with no umbrella widget of its
 /// own -- per wanote/.claude/CLAUDE.md's directory-ownership rule, that
 /// composition belongs at the app-shell level, not inside
-/// features/daily_record/. This file is that composition, structured to
-/// match `lib/app/../features/medical/presentation/medical_home_screen.dart`'s
-/// AppBar+TabBar pattern (previously this used a SegmentedButton, which read
-/// as a visually different design from 医療's tabs -- unified per the PM's
-/// request).
-class DailyRecordSection extends StatelessWidget {
+/// features/daily_record/. This file is that composition: a small local
+/// segmented control swaps between the three, matching AiSection's exact
+/// pattern (no Scaffold/AppBar of its own -- HomeShell's outer AppBar
+/// already covers every section, per the PM's request to unify 日常記録/
+/// 医療's design with AI相談's).
+class DailyRecordSection extends StatefulWidget {
   const DailyRecordSection({
     super.key,
     required this.uid,
@@ -40,44 +40,72 @@ class DailyRecordSection extends StatelessWidget {
   /// widget's doc comment. The app-shell wires this to push the AI
   /// consultation screen with the suggested record pre-filled, since
   /// features/daily_record must not import features/ai itself.
-  final void Function(ConsultationSuggestion suggestion)? onConsultationSuggested;
+  final void Function(ConsultationSuggestion suggestion)?
+  onConsultationSuggested;
+
+  @override
+  State<DailyRecordSection> createState() => _DailyRecordSectionState();
+}
+
+class _DailyRecordSectionState extends State<DailyRecordSection> {
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('日常記録'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.notes_outlined), text: '健康記録'),
-              Tab(icon: Icon(Icons.monitor_weight_outlined), text: '体重'),
-              Tab(icon: Icon(Icons.wc_outlined), text: 'トイレ'),
+    return Column(
+      children: [
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(
+                  value: 0,
+                  label: Text('健康記録'),
+                  icon: Icon(Icons.notes_outlined),
+                ),
+                ButtonSegment(
+                  value: 1,
+                  label: Text('体重'),
+                  icon: Icon(Icons.monitor_weight_outlined),
+                ),
+                ButtonSegment(
+                  value: 2,
+                  label: Text('トイレ'),
+                  icon: Icon(Icons.wc_outlined),
+                ),
+              ],
+              selected: {_selectedIndex},
+              onSelectionChanged: (selection) =>
+                  setState(() => _selectedIndex = selection.first),
+            ),
+          ),
+        ),
+        Expanded(
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              HealthRecordTimelineScreen(
+                uid: widget.uid,
+                petId: widget.petId,
+                repository: widget.healthRecordRepository,
+              ),
+              WeightRecordChartScreen(
+                uid: widget.uid,
+                petId: widget.petId,
+                repository: widget.weightRecordRepository,
+              ),
+              ToiletRecordTimelineScreen(
+                uid: widget.uid,
+                petId: widget.petId,
+                repository: widget.toiletRecordRepository,
+                onConsultationSuggested: widget.onConsultationSuggested,
+              ),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            HealthRecordTimelineScreen(
-              uid: uid,
-              petId: petId,
-              repository: healthRecordRepository,
-            ),
-            WeightRecordChartScreen(
-              uid: uid,
-              petId: petId,
-              repository: weightRecordRepository,
-            ),
-            ToiletRecordTimelineScreen(
-              uid: uid,
-              petId: petId,
-              repository: toiletRecordRepository,
-              onConsultationSuggested: onConsultationSuggested,
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }

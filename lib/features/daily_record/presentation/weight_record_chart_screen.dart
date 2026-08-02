@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/weight_record_repository.dart';
 import '../domain/weight_trend_calculator.dart';
@@ -27,13 +28,37 @@ class WeightRecordChartScreen extends StatefulWidget {
 }
 
 class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
+  /// Persisted so the chart/list toggle is a single shared preference rather
+  /// than per-screen-instance state -- otherwise reaching this screen via
+  /// the bottom-nav's 日常記録 tab vs. Home's 体重 shortcut would each keep
+  /// their own independent (and easily out-of-sync) toggle, and the choice
+  /// wouldn't survive leaving and re-entering either path. Defaults to the
+  /// list view (per the PM's request) until the stored preference loads.
+  static const _showTablePrefsKey = 'weight_chart.show_table';
+
   WeightTrendPeriod _period = WeightTrendPeriod.oneMonth;
-  // Default to the list view per the PM's request; the newest-first table
-  // (built from WeightTrendCalculator's already-today-anchored period
-  // filtering) naturally reads as "today, counting backward" without any
-  // extra logic.
   bool _showTable = true;
   static const _calculator = WeightTrendCalculator();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShowTablePreference();
+  }
+
+  Future<void> _loadShowTablePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getBool(_showTablePrefsKey);
+    if (stored != null && mounted) {
+      setState(() => _showTable = stored);
+    }
+  }
+
+  Future<void> _setShowTable(bool value) async {
+    setState(() => _showTable = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showTablePrefsKey, value);
+  }
 
   Future<void> _addEntry() async {
     final result = await showDialog<({DateTime date, double weightKg})>(
@@ -89,7 +114,7 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
           IconButton(
             tooltip: _showTable ? 'グラフ表示' : '表形式で表示',
             icon: Icon(_showTable ? Icons.show_chart : Icons.table_rows_outlined),
-            onPressed: () => setState(() => _showTable = !_showTable),
+            onPressed: () => _setShowTable(!_showTable),
           ),
         ],
       ),
@@ -113,6 +138,14 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                   ],
                   selected: {_period},
                   onSelectionChanged: (selection) => setState(() => _period = selection.first),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '${DateFormat('yyyy/MM/dd').format(trend.periodStart)} 〜 '
+                  '${DateFormat('yyyy/MM/dd').format(trend.periodEnd)}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               ),
               Padding(

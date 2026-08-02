@@ -27,49 +27,46 @@ class SettingsSection extends StatelessWidget {
     final controller = context.watch<AuthController>();
     final user = controller.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('設定・課金')),
-      body: ListView(
-        children: [
+    // No Scaffold/AppBar here -- HomeShell's outer AppBar already covers
+    // every section, matching AiSection/DailyRecordSection/MedicalHomeScreen.
+    return ListView(
+      children: [
+        ListTile(
+          leading: const CircleAvatar(child: Icon(Icons.pets)),
+          title: Text(activePet.name),
+          subtitle: Text(activePet.breed),
+        ),
+        if (user != null)
           ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.pets)),
-            title: Text(activePet.name),
-            subtitle: Text(activePet.breed),
+            leading: const Icon(Icons.email_outlined),
+            title: Text(user.email),
           ),
-          if (user != null)
-            ListTile(
-              leading: const Icon(Icons.email_outlined),
-              title: Text(user.email),
-            ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.swap_horiz),
-            title: const Text('ペットを切り替える・追加する'),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const PetProfileSwitchScreen(),
-              ),
-            ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.swap_horiz),
+          title: const Text('ペットを切り替える・追加する'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PetProfileSwitchScreen()),
           ),
-          ListTile(
-            leading: const Icon(Icons.workspace_premium_outlined),
-            title: const Text('プランをアップグレード'),
-            subtitle: const Text('サブスクリプション・AI相談チケットの購入'),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    PaywallScreen(billingRepository: billingRepository),
-              ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.workspace_premium_outlined),
+          title: const Text('プランをアップグレード'),
+          subtitle: const Text('サブスクリプション・AI相談チケットの購入'),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  PaywallScreen(billingRepository: billingRepository),
             ),
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('サインアウト'),
-            onTap: () => controller.signOut(),
-          ),
-        ],
-      ),
+        ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(Icons.logout),
+          title: const Text('サインアウト'),
+          onTap: () => controller.signOut(),
+        ),
+      ],
     );
   }
 }
