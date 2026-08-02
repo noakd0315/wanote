@@ -305,6 +305,24 @@ class AuthController extends ChangeNotifier {
 
   Future<void> updatePet(PetProfile pet) => _petProfileRepository.update(pet);
 
+  /// Uploads [bytes] as [petId]'s profile photo and returns the download
+  /// URL. Callers must still persist the URL onto the pet via [updatePet]
+  /// (e.g. `pet.copyWith(photoUrl: url)`) -- a brand-new pet has no id
+  /// until [createPet] returns, so the form screen uploads as a follow-up
+  /// step, same two-step pattern as the prevention-certificate flow.
+  Future<String> uploadPetPhoto({
+    required String petId,
+    required Uint8List bytes,
+  }) {
+    final uid = _currentUser?.uid;
+    if (uid == null) throw StateError('No signed-in user.');
+    return _petProfileRepository.uploadPhoto(
+      ownerId: uid,
+      petId: petId,
+      bytes: bytes,
+    );
+  }
+
   Future<void> deletePet(String petId) async {
     final uid = _currentUser?.uid;
     if (uid == null) return;

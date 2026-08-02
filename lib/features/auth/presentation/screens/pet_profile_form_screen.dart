@@ -1,4 +1,8 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:typed_data';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/models/pet_profile.dart';
@@ -26,12 +30,15 @@ class PetProfileFormScreen extends StatefulWidget {
 
 class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
   late final TextEditingController _nameController;
   late final TextEditingController _breedController;
   late final TextEditingController _weightController;
   late DateTime? _birthday;
   late PetSex _sex;
   late bool _neutered;
+  String? _existingPhotoUrl;
+  Uint8List? _pickedPhotoBytes;
   bool _isBusy = false;
 
   bool get _isEditing => widget.existingPet != null;
@@ -48,6 +55,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _birthday = pet?.birthday;
     _sex = pet?.sex ?? PetSex.male;
     _neutered = pet?.neutered ?? false;
+    _existingPhotoUrl = pet?.photoUrl;
   }
 
   @override
@@ -56,6 +64,34 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _breedController.dispose();
     _weightController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choose from gallery'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final picked = await _imagePicker.pickImage(source: source);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    if (!mounted) return;
+    setState(() => _pickedPhotoBytes = bytes);
   }
 
   Future<void> _pickBirthday() async {
@@ -86,18 +122,24 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
 
     try {
       if (_isEditing) {
-        await controller.updatePet(
-          widget.existingPet!.copyWith(
-            name: _nameController.text.trim(),
-            breed: _breedController.text.trim(),
-            birthday: _birthday,
-            sex: _sex,
-            neutered: _neutered,
-            weightKg: weightKg,
-          ),
+        var updated = widget.existingPet!.copyWith(
+          name: _nameController.text.trim(),
+          breed: _breedController.text.trim(),
+          birthday: _birthday,
+          sex: _sex,
+          neutered: _neutered,
+          weightKg: weightKg,
         );
+        if (_pickedPhotoBytes != null) {
+          final url = await controller.uploadPetPhoto(
+            petId: updated.petId,
+            bytes: _pickedPhotoBytes!,
+          );
+          updated = updated.copyWith(photoUrl: url);
+        }
+        await controller.updatePet(updated);
       } else {
-        await controller.createPet(
+        final created = await controller.createPet(
           name: _nameController.text.trim(),
           breed: _breedController.text.trim(),
           birthday: _birthday!,
@@ -105,6 +147,16 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           neutered: _neutered,
           weightKg: weightKg,
         );
+        // A new pet has no id until createPet() returns, so the photo
+        // upload (keyed by pet id) has to happen as a follow-up update --
+        // same two-step pattern as the prevention-certificate upload flow.
+        if (_pickedPhotoBytes != null) {
+          final url = await controller.uploadPetPhoto(
+            petId: created.petId,
+            bytes: _pickedPhotoBytes!,
+          );
+          await controller.updatePet(created.copyWith(photoUrl: url));
+        }
       }
       if (mounted && Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
@@ -133,6 +185,37 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 48,
+                            backgroundImage: _pickedPhotoBytes != null
+                                ? MemoryImage(_pickedPhotoBytes!)
+                                      as ImageProvider
+                                : (_existingPhotoUrl != null
+                                      ? CachedNetworkImageProvider(
+                                          _existingPhotoUrl!,
+                                        )
+                                      : null),
+                            child:
+                                (_pickedPhotoBytes == null &&
+                                    _existingPhotoUrl == null)
+                                ? const Icon(Icons.pets, size: 40)
+                                : null,
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: IconButton.filled(
+                              icon: const Icon(Icons.camera_alt, size: 18),
+                              onPressed: _pickPhoto,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(labelText: 'Name'),
