@@ -4,17 +4,14 @@ import 'package:flutter/material.dart';
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/data/consultation_repository.dart';
 import '../features/ai/presentation/consultation_screen.dart';
-import '../features/daily_record/data/health_record_repository.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/daily_record/presentation/toilet_record_timeline_screen.dart';
 import '../features/daily_record/presentation/weight_record_chart_screen.dart';
-import '../features/medical/presentation/medical_home_screen.dart';
 import '../features/medical/presentation/prevention/certificate_list_screen.dart';
 import '../shared/models/consultation_reference_record.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
-import 'daily_record_section.dart';
 
 /// Whether [HomeScreen] should render the active pet's photo as its
 /// background, vs. falling back to the default illustration. Factored out
@@ -34,16 +31,22 @@ bool shouldShowPetPhotoBackground(String? photoUrl) =>
 ///
 /// Per the PM's request, 体重/トイレ/証明書 (used often) are *direct*
 /// shortcuts implemented as plain `Navigator.push` straight to their
-/// screens, and so are the three general sections (日常記録 full section /
-/// 医療 / AI相談) -- this screen deliberately does not reach into
-/// [HomeShell]'s private `IndexedStack`/`_selectedIndex` state; direct
-/// navigation keeps Home decoupled from the shell's internals.
+/// screens. 日常記録/医療 are deliberately NOT shortcuts here -- they're
+/// already one tap away via the bottom nav bar, so duplicating them on the
+/// home screen was redundant (removed per the PM's explicit request). AI相談
+/// stays since it isn't otherwise a direct shortcut. This screen deliberately
+/// does not reach into [HomeShell]'s private `IndexedStack`/`_selectedIndex`
+/// state; direct navigation keeps Home decoupled from the shell's internals.
+///
+/// IMPORTANT: `Navigator.of(context)` here resolves to [HomeShell]'s own
+/// inner shell `Navigator` (not the app's root one) because this screen is
+/// rendered inside it -- that's what keeps the bottom nav bar visible while
+/// these shortcuts are open. See home_shell.dart's doc comment.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
     required this.uid,
     required this.activePet,
-    required this.healthRecordRepository,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
     required this.usageRepository,
@@ -54,7 +57,6 @@ class HomeScreen extends StatelessWidget {
 
   final String uid;
   final PetProfile activePet;
-  final HealthRecordRepository healthRecordRepository;
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
   final AiUsageRepository usageRepository;
@@ -102,35 +104,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _openDailyRecordSection(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('日常記録')),
-          body: DailyRecordSection(
-            uid: uid,
-            petId: activePet.petId,
-            healthRecordRepository: healthRecordRepository,
-            weightRecordRepository: weightRecordRepository,
-            toiletRecordRepository: toiletRecordRepository,
-            onConsultationSuggested: (suggestion) => _openConsultation(
-              context,
-              prefillRecords: [suggestion.reference],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openMedical(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => MedicalHomeScreen(uid: uid, petId: activePet.petId),
-      ),
-    );
-  }
-
   void _openConsultation(
     BuildContext context, {
     List<ConsultationReferenceRecord>? prefillRecords,
@@ -155,6 +128,19 @@ class HomeScreen extends StatelessWidget {
     final showPhoto = shouldShowPetPhotoBackground(activePet.photoUrl);
 
     return Scaffold(
+      // Plain (non-Sliver) AppBar: always visible, doesn't need to react to
+      // scrolling per the PM's request -- this screen's body isn't even
+      // scrollable, so a normal AppBar already behaves exactly like that by
+      // default. Transparent so the background photo/illustration still
+      // shows through; extendBodyBehindAppBar lets the Stack's background
+      // extend up under it instead of leaving a solid-color gap.
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('wanote'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -215,16 +201,6 @@ class HomeScreen extends StatelessWidget {
                         icon: Icons.description_outlined,
                         label: '証明書',
                         onTap: () => _openCertificates(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.event_note_outlined,
-                        label: '日常記録',
-                        onTap: () => _openDailyRecordSection(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.medical_information_outlined,
-                        label: '医療',
-                        onTap: () => _openMedical(context),
                       ),
                       _ShortcutChip(
                         icon: Icons.smart_toy_outlined,

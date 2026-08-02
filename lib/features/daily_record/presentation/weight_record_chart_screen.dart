@@ -28,7 +28,11 @@ class WeightRecordChartScreen extends StatefulWidget {
 
 class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   WeightTrendPeriod _period = WeightTrendPeriod.oneMonth;
-  bool _showTable = false;
+  // Default to the list view per the PM's request; the newest-first table
+  // (built from WeightTrendCalculator's already-today-anchored period
+  // filtering) naturally reads as "today, counting backward" without any
+  // extra logic.
+  bool _showTable = true;
   static const _calculator = WeightTrendCalculator();
 
   Future<void> _addEntry() async {

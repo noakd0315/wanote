@@ -14,10 +14,12 @@ import '../shared/models/consultation_reference_record.dart';
 /// records, weight chart, toilet timeline) with no umbrella widget of its
 /// own -- per wanote/.claude/CLAUDE.md's directory-ownership rule, that
 /// composition belongs at the app-shell level, not inside
-/// features/daily_record/. This file is that composition: a small local
-/// segmented control swaps between the three, each still fully in charge of
-/// its own Scaffold/AppBar/state.
-class DailyRecordSection extends StatefulWidget {
+/// features/daily_record/. This file is that composition, structured to
+/// match `lib/app/../features/medical/presentation/medical_home_screen.dart`'s
+/// AppBar+TabBar pattern (previously this used a SegmentedButton, which read
+/// as a visually different design from 医療's tabs -- unified per the PM's
+/// request).
+class DailyRecordSection extends StatelessWidget {
   const DailyRecordSection({
     super.key,
     required this.uid,
@@ -41,68 +43,41 @@ class DailyRecordSection extends StatefulWidget {
   final void Function(ConsultationSuggestion suggestion)? onConsultationSuggested;
 
   @override
-  State<DailyRecordSection> createState() => _DailyRecordSectionState();
-}
-
-class _DailyRecordSectionState extends State<DailyRecordSection> {
-  int _selectedIndex = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(
-                  value: 0,
-                  label: Text('健康記録'),
-                  icon: Icon(Icons.notes_outlined),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text('体重'),
-                  icon: Icon(Icons.monitor_weight_outlined),
-                ),
-                ButtonSegment(
-                  value: 2,
-                  label: Text('トイレ'),
-                  icon: Icon(Icons.wc_outlined),
-                ),
-              ],
-              selected: {_selectedIndex},
-              onSelectionChanged: (selection) =>
-                  setState(() => _selectedIndex = selection.first),
-            ),
-          ),
-        ),
-        Expanded(
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: [
-              HealthRecordTimelineScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.healthRecordRepository,
-              ),
-              WeightRecordChartScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.weightRecordRepository,
-              ),
-              ToiletRecordTimelineScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.toiletRecordRepository,
-                onConsultationSuggested: widget.onConsultationSuggested,
-              ),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('日常記録'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.notes_outlined), text: '健康記録'),
+              Tab(icon: Icon(Icons.monitor_weight_outlined), text: '体重'),
+              Tab(icon: Icon(Icons.wc_outlined), text: 'トイレ'),
             ],
           ),
         ),
-      ],
+        body: TabBarView(
+          children: [
+            HealthRecordTimelineScreen(
+              uid: uid,
+              petId: petId,
+              repository: healthRecordRepository,
+            ),
+            WeightRecordChartScreen(
+              uid: uid,
+              petId: petId,
+              repository: weightRecordRepository,
+            ),
+            ToiletRecordTimelineScreen(
+              uid: uid,
+              petId: petId,
+              repository: toiletRecordRepository,
+              onConsultationSuggested: onConsultationSuggested,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

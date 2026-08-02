@@ -42,6 +42,14 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
+  /// Owns navigation *within* the shell (e.g. Home's 体重/トイレ/証明書/AI相談
+  /// shortcuts, or any section's own internal pushes). Wrapping the tab
+  /// content in this inner [Navigator] -- rather than letting those pushes
+  /// fall through to the app's root `Navigator` from `MaterialApp` -- is what
+  /// keeps [NavigationBar] visible while a shortcut screen is open; without
+  /// it, a pushed route would cover the whole [Scaffold], footer included.
+  final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
   late final HealthRecordRepository _healthRecordRepository;
   late final WeightRecordRepository _weightRecordRepository;
   late final ToiletRecordRepository _toiletRecordRepository;
@@ -124,7 +132,6 @@ class _HomeShellState extends State<HomeShell> {
       HomeScreen(
         uid: uid,
         activePet: widget.activePet,
-        healthRecordRepository: _healthRecordRepository,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
         usageRepository: _aiUsageRepository,
@@ -164,11 +171,22 @@ class _HomeShellState extends State<HomeShell> {
     ];
 
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: sections),
+      body: Navigator(
+        key: _shellNavigatorKey,
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          settings: settings,
+          builder: (_) => IndexedStack(index: _selectedIndex, children: sections),
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) =>
-            setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) {
+          // Switching tabs always returns to the tab's root -- otherwise
+          // tapping e.g. 医療 while a shortcut screen is still pushed on top
+          // would leave that stale screen visible instead of the new tab.
+          _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          setState(() => _selectedIndex = index);
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
