@@ -16,14 +16,26 @@ class WeightSample extends Equatable {
 }
 
 /// Number of toilet-record entries (spec 4.3) on a given calendar day.
+/// [urineCount]/[stoolCount] split [count] by record type so the report
+/// chart can show urine vs. stool at a glance (PM request: "排尿と排便の
+/// それぞれがパッと見て分かるようにしたい") -- [count] (their sum) is kept
+/// as its own field since it's already what gets sent to the `/ai/report`
+/// backend route for the AI summary's total-visits math.
 class ToiletDayCount extends Equatable {
-  const ToiletDayCount({required this.date, required this.count});
+  const ToiletDayCount({
+    required this.date,
+    required this.count,
+    required this.urineCount,
+    required this.stoolCount,
+  });
 
   final DateTime date;
   final int count;
+  final int urineCount;
+  final int stoolCount;
 
   @override
-  List<Object?> get props => [date, count];
+  List<Object?> get props => [date, count, urineCount, stoolCount];
 }
 
 /// Self-contained input shape for [MonthlyReportGenerator] and the backend
@@ -45,5 +57,10 @@ class MonthlyReportInputStats extends Equatable {
   final List<ToiletDayCount> toiletCountsByDay;
 
   @override
-  List<Object?> get props => [periodStart, periodEnd, weightSamples, toiletCountsByDay];
+  List<Object?> get props => [
+    periodStart,
+    periodEnd,
+    weightSamples,
+    toiletCountsByDay,
+  ];
 }

@@ -196,6 +196,18 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
         ],
         titlesData: FlTitlesData(
+          // fl_chart's FlTitlesData defaults *every* side (including top
+          // and right) to showTitles: true with its own auto-computed
+          // interval -- left unset, that leaked a second, uncoordinated set
+          // of (sometimes fractional) numbers on the top/right edges of
+          // every chart in this app. Explicitly hidden here and in
+          // _buildToiletChart/ToiletFrequencyChartScreen.
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -235,6 +247,9 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
+  /// Urine and stool render as two side-by-side bars per day (rather than
+  /// one combined bar) so each is distinguishable at a glance, per the PM's
+  /// request -- same [_ToiletTypeLegend] used by ToiletFrequencyChartScreen.
   Widget _buildToiletChart() {
     final counts = widget.stats.toiletCountsByDay;
     if (counts.isEmpty) {
@@ -244,51 +259,77 @@ class _ReportScreenState extends State<ReportScreen> {
       for (var i = 0; i < counts.length; i++)
         BarChartGroupData(
           x: i,
-          barRods: [BarChartRodData(toY: counts[i].count.toDouble())],
+          barRods: [
+            BarChartRodData(
+              toY: counts[i].urineCount.toDouble(),
+              color: Colors.blue,
+              width: 6,
+            ),
+            BarChartRodData(
+              toY: counts[i].stoolCount.toDouble(),
+              color: Colors.brown,
+              width: 6,
+            ),
+          ],
         ),
     ];
-    return BarChart(
-      BarChartData(
-        barGroups: groups,
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: 1,
-              getTitlesWidget: (value, meta) {
-                final index = value.round();
-                if (index < 0 || index >= counts.length) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    _dateLabel(counts[index].date),
-                    style: const TextStyle(fontSize: 9),
+    return Column(
+      children: [
+        const _ToiletTypeLegend(),
+        const SizedBox(height: 4),
+        Expanded(
+          child: BarChart(
+            BarChartData(
+              barGroups: groups,
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.round();
+                      if (index < 0 || index >= counts.length) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _dateLabel(counts[index].date),
+                          style: const TextStyle(fontSize: 9),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ),
-          // Toilet visits are a whole-number count -- force integer-only
-          // ticks, same fix applied to ToiletFrequencyChartScreen.
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: 1,
-              getTitlesWidget: (value, meta) {
-                if (value != value.roundToDouble()) {
-                  return const SizedBox.shrink();
-                }
-                return Text(
-                  value.toInt().toString(),
-                  style: const TextStyle(fontSize: 9),
-                );
-              },
+                ),
+                // Toilet visits are a whole-number count -- force
+                // integer-only ticks, same fix applied to
+                // ToiletFrequencyChartScreen.
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      if (value != value.roundToDouble()) {
+                        return const SizedBox.shrink();
+                      }
+                      return Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(fontSize: 9),
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -301,4 +342,46 @@ class _ReportScreenState extends State<ReportScreen> {
   /// Short axis-tick format -- the full "対象期間" line already states the
   /// year, so repeating it on every X-axis tick would just crowd the chart.
   String _dateLabel(DateTime d) => '${d.month}/${d.day}';
+}
+
+/// Small color-key row so the two bars in [_ReportScreenState._buildToiletChart]
+/// are identifiable without guessing -- same colors/labels as
+/// ToiletFrequencyChartScreen's identical legend.
+class _ToiletTypeLegend extends StatelessWidget {
+  const _ToiletTypeLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _LegendDot(color: Colors.blue, label: '排尿'),
+        SizedBox(width: 16),
+        _LegendDot(color: Colors.brown, label: '排便'),
+      ],
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 11)),
+      ],
+    );
+  }
 }

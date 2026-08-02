@@ -24,7 +24,8 @@ class WeightRecordChartScreen extends StatefulWidget {
   final WeightRecordRepository repository;
 
   @override
-  State<WeightRecordChartScreen> createState() => _WeightRecordChartScreenState();
+  State<WeightRecordChartScreen> createState() =>
+      _WeightRecordChartScreenState();
 }
 
 class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
@@ -67,18 +68,32 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
     );
     if (result == null) return;
 
-    final existing = await widget.repository.findForDate(widget.uid, widget.petId, result.date);
-    var overwriteTargetId = existing.isNotEmpty ? existing.first.weightId : null;
+    final existing = await widget.repository.findForDate(
+      widget.uid,
+      widget.petId,
+      result.date,
+    );
+    var overwriteTargetId = existing.isNotEmpty
+        ? existing.first.weightId
+        : null;
 
     if (existing.isNotEmpty && mounted) {
       final choice = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('同じ日の記録があります'),
-          content: const Text('上書きしますか？それとも追加で記録しますか？（同日に複数回記録された場合の扱い、spec 3.4）'),
+          content: const Text(
+            '上書きしますか？それとも追加で記録しますか？（同日に複数回記録された場合の扱い、spec 3.4）',
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop('append'), child: const Text('追加する')),
-            TextButton(onPressed: () => Navigator.of(context).pop('overwrite'), child: const Text('上書きする')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('append'),
+              child: const Text('追加する'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('overwrite'),
+              child: const Text('上書きする'),
+            ),
           ],
         ),
       );
@@ -113,7 +128,9 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         actions: [
           IconButton(
             tooltip: _showTable ? 'グラフ表示' : '表形式で表示',
-            icon: Icon(_showTable ? Icons.show_chart : Icons.table_rows_outlined),
+            icon: Icon(
+              _showTable ? Icons.show_chart : Icons.table_rows_outlined,
+            ),
             onPressed: () => _setShowTable(!_showTable),
           ),
         ],
@@ -125,19 +142,33 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           final records = snapshot.data ?? const <WeightRecord>[];
-          final trend = _calculator.calculate(records: records, now: DateTime.now(), period: _period);
+          final trend = _calculator.calculate(
+            records: records,
+            now: DateTime.now(),
+            period: _period,
+          );
           return Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: SegmentedButton<WeightTrendPeriod>(
                   segments: const [
-                    ButtonSegment(value: WeightTrendPeriod.oneMonth, label: Text('1ヶ月')),
-                    ButtonSegment(value: WeightTrendPeriod.threeMonths, label: Text('3ヶ月')),
-                    ButtonSegment(value: WeightTrendPeriod.oneYear, label: Text('1年')),
+                    ButtonSegment(
+                      value: WeightTrendPeriod.oneMonth,
+                      label: Text('1ヶ月'),
+                    ),
+                    ButtonSegment(
+                      value: WeightTrendPeriod.threeMonths,
+                      label: Text('3ヶ月'),
+                    ),
+                    ButtonSegment(
+                      value: WeightTrendPeriod.oneYear,
+                      label: Text('1年'),
+                    ),
                   ],
                   selected: {_period},
-                  onSelectionChanged: (selection) => setState(() => _period = selection.first),
+                  onSelectionChanged: (selection) =>
+                      setState(() => _period = selection.first),
                 ),
               ),
               Padding(
@@ -145,7 +176,9 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                 child: Text(
                   '${DateFormat('yyyy/MM/dd').format(trend.periodStart)} 〜 '
                   '${DateFormat('yyyy/MM/dd').format(trend.periodEnd)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               ),
               Padding(
@@ -154,7 +187,10 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _DeltaBadge(label: '前回比', delta: trend.deltaVsPrevious),
-                    _DeltaBadge(label: '1ヶ月前比', delta: trend.deltaVsOneMonthAgo),
+                    _DeltaBadge(
+                      label: '1ヶ月前比',
+                      delta: trend.deltaVsOneMonthAgo,
+                    ),
                   ],
                 ),
               ),
@@ -171,23 +207,43 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                               LineChartBarData(
                                 spots: [
                                   for (var i = 0; i < trend.series.length; i++)
-                                    FlSpot(i.toDouble(), trend.series[i].weightKg),
+                                    FlSpot(
+                                      i.toDouble(),
+                                      trend.series[i].weightKg,
+                                    ),
                                 ],
                                 isCurved: false,
                                 dotData: const FlDotData(show: true),
                               ),
                             ],
                             titlesData: FlTitlesData(
+                              // fl_chart's FlTitlesData defaults *every*
+                              // side (including top and right) to
+                              // showTitles: true with its own
+                              // auto-computed interval -- left unset, that
+                              // leaked a second, uncoordinated set of
+                              // numbers on the top/right edges of the
+                              // chart (same fix applied to
+                              // ToiletFrequencyChartScreen/ReportScreen).
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
                               bottomTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   getTitlesWidget: (value, meta) {
                                     final index = value.round();
-                                    if (index < 0 || index >= trend.series.length) {
+                                    if (index < 0 ||
+                                        index >= trend.series.length) {
                                       return const SizedBox.shrink();
                                     }
                                     return Text(
-                                      DateFormat('M/d').format(trend.series[index].measuredAt),
+                                      DateFormat(
+                                        'M/d',
+                                      ).format(trend.series[index].measuredAt),
                                       style: const TextStyle(fontSize: 10),
                                     );
                                   },
@@ -230,7 +286,9 @@ class _WeightRecordTable extends StatelessWidget {
         // series is ascending by date; the row below (in display order) is
         // the chronologically-previous measurement.
         final previous = index + 1 < rows.length ? rows[index + 1] : null;
-        final delta = previous == null ? null : record.weightKg - previous.weightKg;
+        final delta = previous == null
+            ? null
+            : record.weightKg - previous.weightKg;
         return ListTile(
           title: Text(DateFormat('yyyy/MM/dd').format(record.measuredAt)),
           trailing: Row(
@@ -268,14 +326,21 @@ class _DeltaBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = delta == null ? '-' : '${delta! >= 0 ? '+' : ''}${delta!.toStringAsFixed(1)}kg';
+    final text = delta == null
+        ? '-'
+        : '${delta! >= 0 ? '+' : ''}${delta!.toStringAsFixed(1)}kg';
     final color = delta == null
         ? null
-        : (delta! > 0 ? Colors.redAccent : (delta! < 0 ? Colors.blueAccent : null));
+        : (delta! > 0
+              ? Colors.redAccent
+              : (delta! < 0 ? Colors.blueAccent : null));
     return Column(
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        Text(
+          text,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
@@ -328,7 +393,10 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('キャンセル')),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('キャンセル'),
+        ),
         FilledButton(
           onPressed: () {
             final weight = double.tryParse(_weightController.text);

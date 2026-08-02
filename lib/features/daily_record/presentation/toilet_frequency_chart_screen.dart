@@ -35,57 +35,154 @@ class ToiletFrequencyChartScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           final records = snapshot.data ?? const <ToiletRecord>[];
-          final counts = _aggregator.aggregateDailyCounts(records);
+          // Split by type (rather than one combined count) so urine and
+          // stool are each distinguishable at a glance, per the PM's
+          // request -- rendered as two side-by-side bars per day below.
+          final urineCounts = _aggregator.aggregateDailyCounts(
+            records,
+            type: ToiletType.urine,
+          );
+          final stoolCounts = _aggregator.aggregateDailyCounts(
+            records,
+            type: ToiletType.stool,
+          );
 
           final today = DateTime.now();
           final days = List.generate(
             _daysShown,
-            (i) => DateTime(today.year, today.month, today.day).subtract(Duration(days: _daysShown - 1 - i)),
+            (i) => DateTime(
+              today.year,
+              today.month,
+              today.day,
+            ).subtract(Duration(days: _daysShown - 1 - i)),
           );
 
           return Padding(
             padding: const EdgeInsets.all(16),
-            child: BarChart(
-              BarChartData(
-                barGroups: [
-                  for (var i = 0; i < days.length; i++)
-                    BarChartGroupData(
-                      x: i,
-                      barRods: [BarChartRodData(toY: (counts[days[i]] ?? 0).toDouble())],
-                    ),
-                ],
-                minY: 0,
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.round();
-                        if (index < 0 || index >= days.length) return const SizedBox.shrink();
-                        return Text(DateFormat('M/d').format(days[index]), style: const TextStyle(fontSize: 10));
-                      },
-                    ),
-                  ),
-                  // Toilet visits are a whole-number count -- force
-                  // integer-only ticks/labels so fl_chart's default "nice"
-                  // interval (which can land on e.g. 2.5) never shows a
-                  // fractional visit count.
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        if (value != value.roundToDouble()) return const SizedBox.shrink();
-                        return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10));
-                      },
+            child: Column(
+              children: [
+                const _ToiletTypeLegend(),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: BarChart(
+                    BarChartData(
+                      barGroups: [
+                        for (var i = 0; i < days.length; i++)
+                          BarChartGroupData(
+                            x: i,
+                            barRods: [
+                              BarChartRodData(
+                                toY: (urineCounts[days[i]] ?? 0).toDouble(),
+                                color: Colors.blue,
+                                width: 6,
+                              ),
+                              BarChartRodData(
+                                toY: (stoolCounts[days[i]] ?? 0).toDouble(),
+                                color: Colors.brown,
+                                width: 6,
+                              ),
+                            ],
+                          ),
+                      ],
+                      minY: 0,
+                      titlesData: FlTitlesData(
+                        // fl_chart's FlTitlesData defaults *every* side
+                        // (including top and right) to showTitles: true
+                        // with its own auto-computed interval -- left
+                        // unset, that leaked a second, uncoordinated set of
+                        // (sometimes fractional) numbers on the top/right
+                        // edges of the chart.
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) {
+                              final index = value.round();
+                              if (index < 0 || index >= days.length) {
+                                return const SizedBox.shrink();
+                              }
+                              return Text(
+                                DateFormat('M/d').format(days[index]),
+                                style: const TextStyle(fontSize: 10),
+                              );
+                            },
+                          ),
+                        ),
+                        // Toilet visits are a whole-number count -- force
+                        // integer-only ticks/labels so fl_chart's default
+                        // "nice" interval (which can land on e.g. 2.5)
+                        // never shows a fractional visit count.
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            interval: 1,
+                            getTitlesWidget: (value, meta) {
+                              if (value != value.roundToDouble()) {
+                                return const SizedBox.shrink();
+                              }
+                              return Text(
+                                value.toInt().toString(),
+                                style: const TextStyle(fontSize: 10),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+/// Small color-key row so the two bars per day are identifiable without
+/// guessing -- same colors/labels as the AI health report's identical
+/// legend for its own urine/stool bar chart.
+class _ToiletTypeLegend extends StatelessWidget {
+  const _ToiletTypeLegend();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _LegendDot(color: Colors.blue, label: '排尿'),
+        SizedBox(width: 16),
+        _LegendDot(color: Colors.brown, label: '排便'),
+      ],
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 11)),
+      ],
     );
   }
 }

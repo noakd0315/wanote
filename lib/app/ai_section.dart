@@ -181,15 +181,30 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
             .toList()
           ..sort((a, b) => a.date.compareTo(b.date));
 
-    final dailyCounts = _aggregator.aggregateDailyCounts(toiletRecords);
-    final toiletCountsByDay =
-        dailyCounts.entries
+    final urineCounts = _aggregator.aggregateDailyCounts(
+      toiletRecords,
+      type: ToiletType.urine,
+    );
+    final stoolCounts = _aggregator.aggregateDailyCounts(
+      toiletRecords,
+      type: ToiletType.stool,
+    );
+    final days =
+        {...urineCounts.keys, ...stoolCounts.keys}
             .where(
-              (e) => !e.key.isBefore(periodStart) && !e.key.isAfter(periodEnd),
+              (day) => !day.isBefore(periodStart) && !day.isAfter(periodEnd),
             )
-            .map((e) => ToiletDayCount(date: e.key, count: e.value))
             .toList()
-          ..sort((a, b) => a.date.compareTo(b.date));
+          ..sort();
+    final toiletCountsByDay = [
+      for (final day in days)
+        ToiletDayCount(
+          date: day,
+          count: (urineCounts[day] ?? 0) + (stoolCounts[day] ?? 0),
+          urineCount: urineCounts[day] ?? 0,
+          stoolCount: stoolCounts[day] ?? 0,
+        ),
+    ];
 
     return MonthlyReportInputStats(
       periodStart: periodStart,
