@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/data/consultation_repository.dart';
 import '../features/ai/presentation/consultation_screen.dart';
+import '../features/ai/presentation/food_portion_screen.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/daily_record/presentation/toilet_record_timeline_screen.dart';
@@ -103,6 +104,37 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _openFoodPortion(BuildContext context) async {
+    // Resolve the latest known weight before navigating so
+    // FoodPortionScreen can be pre-filled -- it takes a plain double rather
+    // than the repository itself, mirroring how ReportScreen receives
+    // MonthlyReportInputStats instead of reaching into daily_record itself.
+    final records = await weightRecordRepository
+        .watchAll(uid, activePet.petId)
+        .first;
+    final latestWeightKg = records.isEmpty
+        ? activePet.weightKg
+        : records
+              .reduce((a, b) => a.measuredAt.isAfter(b.measuredAt) ? a : b)
+              .weightKg;
+    if (!context.mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => FoodPortionScreen(
+          uid: uid,
+          petId: activePet.petId,
+          birthday: activePet.birthday,
+          neutered: activePet.neutered,
+          initialWeightKg: latestWeightKg,
+          usageRepository: usageRepository,
+          backendClient: backendClient,
+          onRequestUpgrade: onRequestUpgrade,
+        ),
+      ),
+    );
+  }
+
   void _openConsultation(
     BuildContext context, {
     List<ConsultationReferenceRecord>? prefillRecords,
@@ -194,6 +226,11 @@ class HomeScreen extends StatelessWidget {
                         icon: Icons.smart_toy_outlined,
                         label: 'AI相談',
                         onTap: () => _openConsultation(context),
+                      ),
+                      _ShortcutChip(
+                        icon: Icons.restaurant_outlined,
+                        label: '餌の量',
+                        onTap: () => _openFoodPortion(context),
                       ),
                     ],
                   ),

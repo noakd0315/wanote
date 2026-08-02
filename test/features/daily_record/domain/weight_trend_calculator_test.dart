@@ -130,4 +130,43 @@ void main() {
       expect(result.periodEnd, DateTime(2026, 8, 2));
     });
   });
+
+  group('time-of-day boundary bug (regression)', () {
+    // Reproduces a real bug found via manual testing: `now` carries the
+    // actual wall-clock time (afternoon), but a manually-entered historical
+    // record is stored at midnight of its picked date. A record dated
+    // exactly "N months ago" must still count as within the period, even
+    // though midnight-that-day is technically before afternoon-that-day.
+    final nowInTheAfternoon = DateTime(2026, 8, 2, 14, 30);
+
+    test('a record at midnight exactly 1 year before now is included in the 1-year period', () {
+      final boundaryRecord = record('boundary', DateTime(2025, 8, 2), 1.0);
+      final result = calculator.calculate(
+        records: [boundaryRecord],
+        now: nowInTheAfternoon,
+        period: WeightTrendPeriod.oneYear,
+      );
+      expect(result.series, [boundaryRecord]);
+    });
+
+    test('a record at midnight exactly 3 months before now is included in the 3-month period', () {
+      final boundaryRecord = record('boundary', DateTime(2026, 5, 2), 1.0);
+      final result = calculator.calculate(
+        records: [boundaryRecord],
+        now: nowInTheAfternoon,
+        period: WeightTrendPeriod.threeMonths,
+      );
+      expect(result.series, [boundaryRecord]);
+    });
+
+    test('a record at midnight exactly 1 month before now is included in the 1-month period', () {
+      final boundaryRecord = record('boundary', DateTime(2026, 7, 2), 1.0);
+      final result = calculator.calculate(
+        records: [boundaryRecord],
+        now: nowInTheAfternoon,
+        period: WeightTrendPeriod.oneMonth,
+      );
+      expect(result.series, [boundaryRecord]);
+    });
+  });
 }

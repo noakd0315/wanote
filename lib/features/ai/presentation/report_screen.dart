@@ -105,7 +105,7 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            '対象期間: ${_dateLabel(widget.stats.periodStart)} 〜 ${_dateLabel(widget.stats.periodEnd)}',
+            '対象期間: ${_fullDateLabel(widget.stats.periodStart)} 〜 ${_fullDateLabel(widget.stats.periodEnd)}',
           ),
           const SizedBox(height: 16),
           const Text('体重の推移', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -153,7 +153,8 @@ class _ReportScreenState extends State<ReportScreen> {
         return const Center(child: CircularProgressIndicator());
       case _SummaryState.needsUpgrade:
         return UpgradePromptCard(
-          message: 'AIサマリーは有料プラン限定機能です。'
+          message:
+              'AIサマリーは有料プラン限定機能です。'
               'グラフは無料版でも引き続きご覧いただけます。',
           onUpgrade: widget.onRequestUpgrade,
         );
@@ -162,7 +163,9 @@ class _ReportScreenState extends State<ReportScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(_summaryText ?? ''),
@@ -176,14 +179,50 @@ class _ReportScreenState extends State<ReportScreen> {
       return const Center(child: Text('体重の記録がありません。'));
     }
     final spots = <FlSpot>[
-      for (var i = 0; i < samples.length; i++) FlSpot(i.toDouble(), samples[i].weightKg),
+      for (var i = 0; i < samples.length; i++)
+        FlSpot(i.toDouble(), samples[i].weightKg),
     ];
     return LineChart(
       LineChartData(
         lineBarsData: [
-          LineChartBarData(spots: spots, isCurved: true, dotData: const FlDotData(show: false)),
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            // A single-point series (common for a fresh account) is
+            // otherwise completely invisible with no dot and no line to
+            // draw -- always show the dot so there's something to see.
+            dotData: const FlDotData(show: true),
+          ),
         ],
-        titlesData: const FlTitlesData(show: false),
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.round();
+                if (index < 0 || index >= samples.length)
+                  return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    _dateLabel(samples[index].date),
+                    style: const TextStyle(fontSize: 9),
+                  ),
+                );
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 36,
+              getTitlesWidget: (value, meta) => Text(
+                '${value.toStringAsFixed(1)}kg',
+                style: const TextStyle(fontSize: 9),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -201,9 +240,50 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
     ];
     return BarChart(
-      BarChartData(barGroups: groups, titlesData: const FlTitlesData(show: false)),
+      BarChartData(
+        barGroups: groups,
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.round();
+                if (index < 0 || index >= counts.length)
+                  return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    _dateLabel(counts[index].date),
+                    style: const TextStyle(fontSize: 9),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Toilet visits are a whole-number count -- force integer-only
+          // ticks, same fix applied to ToiletFrequencyChartScreen.
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 1,
+              getTitlesWidget: (value, meta) {
+                if (value != value.roundToDouble())
+                  return const SizedBox.shrink();
+                return Text(
+                  value.toInt().toString(),
+                  style: const TextStyle(fontSize: 9),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  String _dateLabel(DateTime d) => '${d.year}/${d.month}/${d.day}';
+  String _fullDateLabel(DateTime d) => '${d.year}/${d.month}/${d.day}';
+
+  /// Short axis-tick format -- the full "対象期間" line already states the
+  /// year, so repeating it on every X-axis tick would just crowd the chart.
+  String _dateLabel(DateTime d) => '${d.month}/${d.day}';
 }

@@ -111,14 +111,19 @@ class _AiSectionState extends State<AiSection> {
   }
 }
 
-/// Pulls the trailing 30 days of Agent B's weight/toilet records and maps
+/// Pulls the trailing 90 days of Agent B's weight/toilet records and maps
 /// them into features/ai's self-contained [MonthlyReportInputStats] shape.
 /// That class's doc comment is explicit that "whatever screen assembles a
 /// report is responsible for pulling the real numbers out of Agent B's ...
 /// records and mapping them into this shape" -- this widget is that
-/// mapping, not a stub. It uses a rolling 30-day window rather than
-/// calendar-month boundaries since the spec doesn't pin the period down
-/// further; a real "monthly" picker would be a reasonable follow-up.
+/// mapping, not a stub. It uses a rolling window rather than calendar-month
+/// boundaries since the spec doesn't pin the period down further; a real
+/// "monthly" picker would be a reasonable follow-up.
+///
+/// 90 days (not 30) deliberately: weight is typically logged roughly
+/// monthly, not daily, so a 30-day window usually contains at most one
+/// point -- not enough to draw a "推移" (trend) at all. 90 days gives the
+/// chart a realistic chance of showing more than a single dot.
 class _MonthlyReportTab extends StatefulWidget {
   const _MonthlyReportTab({
     required this.uid,
@@ -153,7 +158,7 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
 
   Future<MonthlyReportInputStats> _loadStats() async {
     final periodEnd = DateTime.now();
-    final periodStart = periodEnd.subtract(const Duration(days: 30));
+    final periodStart = periodEnd.subtract(const Duration(days: 90));
 
     final List<WeightRecord> weightRecords = await widget.weightRecordRepository
         .watchAll(widget.uid, widget.petId)

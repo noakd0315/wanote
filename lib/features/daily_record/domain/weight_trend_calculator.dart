@@ -56,11 +56,14 @@ class WeightTrendCalculator {
     required DateTime now,
     required WeightTrendPeriod period,
   }) {
-    final sorted = [...records]..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
+    final sorted = [...records]
+      ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
 
     final cutoff = _periodStart(now, period);
     final series = sorted
-        .where((r) => !r.measuredAt.isBefore(cutoff) && !r.measuredAt.isAfter(now))
+        .where(
+          (r) => !r.measuredAt.isBefore(cutoff) && !r.measuredAt.isAfter(now),
+        )
         .toList();
 
     double? deltaVsPrevious;
@@ -99,14 +102,25 @@ class WeightTrendCalculator {
     );
   }
 
+  /// Computed from the *date* of [now], ignoring its time-of-day.
+  ///
+  /// Bug this fixes: a manually-entered historical record is stored at
+  /// midnight (00:00:00) of its picked date, but `now` carries the actual
+  /// wall-clock time (e.g. 14:23). Subtracting months from `now` directly
+  /// would put the cutoff at "period-start-date at 14:23", which is *after*
+  /// midnight on that same calendar date -- silently excluding a record
+  /// dated exactly on the boundary (e.g. "1 year ago today"), even though
+  /// spec's own example ("1年：2025/8/2〜2026/8/2") is explicit that the
+  /// boundary date itself is included.
   DateTime _periodStart(DateTime now, WeightTrendPeriod period) {
+    final today = DateTime(now.year, now.month, now.day);
     switch (period) {
       case WeightTrendPeriod.oneMonth:
-        return _subtractMonths(now, 1);
+        return _subtractMonths(today, 1);
       case WeightTrendPeriod.threeMonths:
-        return _subtractMonths(now, 3);
+        return _subtractMonths(today, 3);
       case WeightTrendPeriod.oneYear:
-        return _subtractMonths(now, 12);
+        return _subtractMonths(today, 12);
     }
   }
 
