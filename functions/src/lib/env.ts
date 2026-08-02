@@ -11,4 +11,14 @@ export interface Env {
    * real deployment's `wrangler secret` config, so production always keeps
    * full signature verification. */
   FIREBASE_AUTH_EMULATOR_HOST?: string;
+  /** RevenueCat secret API key, used by lib/revenueCatClient.ts to call the
+   * Promotional Entitlements REST API (routes/grantPromotionalEntitlement.ts,
+   * the campaign-code redemption backend). Optional because the RevenueCat
+   * dashboard/secret key are not provisioned yet as of writing -- when unset,
+   * lib/revenueCatClient.ts falls back to a clearly-labeled mock success
+   * result instead of calling the real API, mirroring
+   * lib/anthropicClient.ts's callClaude() mock fallback. Set with
+   * `wrangler secret put REVENUECAT_SECRET_KEY` once the PM has a real key;
+   * never commit a real value. */
+  REVENUECAT_SECRET_KEY?: string;
 }

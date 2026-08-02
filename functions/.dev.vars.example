@@ -27,3 +27,12 @@ FIREBASE_PROJECT_ID=demo-wanote
 # are never signed. Leave this UNSET when pointing the backend at a real
 # Firebase project (production, or a real project during manual testing).
 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+
+# RevenueCat secret key, used by functions/src/lib/revenueCatClient.ts to call
+# the Promotional Entitlements REST API (campaign-code / referral-code
+# redemption -- routes/grantPromotionalEntitlement.ts). Not provisioned yet as
+# of writing (no RevenueCat dashboard/secret key exists). Leave blank to use
+# a clearly-labeled mock "granted" result instead of calling the real
+# RevenueCat API, so the campaign-code redemption flow still works
+# end-to-end with zero cost and without a RevenueCat account.
+REVENUECAT_SECRET_KEY=
