@@ -198,10 +198,17 @@ class _ReportScreenState extends State<ReportScreen> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              // Forces one tick per data point (fl_chart's default interval
+              // guess otherwise tries to space ticks evenly across the
+              // value range, which for a handful of points rounds several
+              // different tick positions to the same nearest sample --
+              // showing the same date repeated).
+              interval: 1,
               getTitlesWidget: (value, meta) {
                 final index = value.round();
-                if (index < 0 || index >= samples.length)
+                if (index < 0 || index >= samples.length) {
                   return const SizedBox.shrink();
+                }
                 return Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
@@ -246,10 +253,12 @@ class _ReportScreenState extends State<ReportScreen> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              interval: 1,
               getTitlesWidget: (value, meta) {
                 final index = value.round();
-                if (index < 0 || index >= counts.length)
+                if (index < 0 || index >= counts.length) {
                   return const SizedBox.shrink();
+                }
                 return Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
@@ -267,8 +276,9 @@ class _ReportScreenState extends State<ReportScreen> {
               showTitles: true,
               interval: 1,
               getTitlesWidget: (value, meta) {
-                if (value != value.roundToDouble())
+                if (value != value.roundToDouble()) {
                   return const SizedBox.shrink();
+                }
                 return Text(
                   value.toInt().toString(),
                   style: const TextStyle(fontSize: 9),
