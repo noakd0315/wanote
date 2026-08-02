@@ -44,10 +44,16 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
   final Map<ConsultationSuggestionReason, DateTime> _lastSuggestedAt = {};
 
   Future<void> _recordUrine() async {
+    final recordedAt = await showDialog<DateTime>(
+      context: context,
+      builder: (_) => const _RecordedAtDialog(),
+    );
+    if (recordedAt == null) return;
     await widget.repository.create(
       uid: widget.uid,
       petId: widget.petId,
       type: ToiletType.urine,
+      recordedAt: recordedAt,
     );
   }
 
@@ -176,6 +182,93 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
           );
         },
       ),
+    );
+  }
+}
+
+/// Confirms the timestamp for a one-tap record before saving it. Defaults to
+/// "now" so a plain tap-through reproduces the original one-tap behavior
+/// (spec 4.2's "記録時刻は自動入力"); the date/time fields are editable for
+/// logging something that happened a little earlier.
+class _RecordedAtDialog extends StatefulWidget {
+  const _RecordedAtDialog();
+
+  @override
+  State<_RecordedAtDialog> createState() => _RecordedAtDialogState();
+}
+
+class _RecordedAtDialogState extends State<_RecordedAtDialog> {
+  late DateTime _recordedAt = DateTime.now();
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _recordedAt,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked == null) return;
+    setState(() {
+      _recordedAt = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _recordedAt.hour,
+        _recordedAt.minute,
+      );
+    });
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_recordedAt),
+    );
+    if (picked == null) return;
+    setState(() {
+      _recordedAt = DateTime(
+        _recordedAt.year,
+        _recordedAt.month,
+        _recordedAt.day,
+        picked.hour,
+        picked.minute,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('排尿を記録'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('日付'),
+            subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
+            trailing: const Icon(Icons.edit_calendar),
+            onTap: _pickDate,
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('時刻'),
+            subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
+            trailing: const Icon(Icons.access_time),
+            onTap: _pickTime,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('キャンセル'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_recordedAt),
+          child: const Text('記録する'),
+        ),
+      ],
     );
   }
 }

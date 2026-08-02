@@ -28,6 +28,7 @@ class WeightRecordChartScreen extends StatefulWidget {
 
 class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   WeightTrendPeriod _period = WeightTrendPeriod.oneMonth;
+  bool _showTable = false;
   static const _calculator = WeightTrendCalculator();
 
   Future<void> _addEntry() async {
@@ -78,7 +79,16 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('体重記録')),
+      appBar: AppBar(
+        title: const Text('体重記録'),
+        actions: [
+          IconButton(
+            tooltip: _showTable ? 'グラフ表示' : '表形式で表示',
+            icon: Icon(_showTable ? Icons.show_chart : Icons.table_rows_outlined),
+            onPressed: () => setState(() => _showTable = !_showTable),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<WeightRecord>>(
         stream: widget.repository.watchAll(widget.uid, widget.petId),
         builder: (context, snapshot) {
@@ -114,6 +124,8 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
               Expanded(
                 child: trend.series.isEmpty
                     ? const Center(child: Text('この期間の記録がありません'))
+                    : _showTable
+                    ? _WeightRecordTable(series: trend.series)
                     : Padding(
                         padding: const EdgeInsets.all(16),
                         child: LineChart(
@@ -157,6 +169,56 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         onPressed: _addEntry,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+}
+
+/// Tabular alternative to the line chart, newest entry first. Reuses the
+/// same period-filtered [WeightTrendCalculator] output as the chart, so
+/// both views always agree.
+class _WeightRecordTable extends StatelessWidget {
+  const _WeightRecordTable({required this.series});
+
+  final List<WeightRecord> series;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = series.reversed.toList();
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: rows.length,
+      separatorBuilder: (_, _) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final record = rows[index];
+        // series is ascending by date; the row below (in display order) is
+        // the chronologically-previous measurement.
+        final previous = index + 1 < rows.length ? rows[index + 1] : null;
+        final delta = previous == null ? null : record.weightKg - previous.weightKg;
+        return ListTile(
+          title: Text(DateFormat('yyyy/MM/dd').format(record.measuredAt)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${record.weightKg.toStringAsFixed(1)}kg',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (delta != null) ...[
+                const SizedBox(width: 12),
+                Text(
+                  '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: delta > 0
+                        ? Colors.redAccent
+                        : (delta < 0 ? Colors.blueAccent : Colors.grey),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }

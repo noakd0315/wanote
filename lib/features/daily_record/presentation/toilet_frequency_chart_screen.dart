@@ -54,6 +54,7 @@ class ToiletFrequencyChartScreen extends StatelessWidget {
                       barRods: [BarChartRodData(toY: (counts[days[i]] ?? 0).toDouble())],
                     ),
                 ],
+                minY: 0,
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -62,6 +63,20 @@ class ToiletFrequencyChartScreen extends StatelessWidget {
                         final index = value.round();
                         if (index < 0 || index >= days.length) return const SizedBox.shrink();
                         return Text(DateFormat('M/d').format(days[index]), style: const TextStyle(fontSize: 10));
+                      },
+                    ),
+                  ),
+                  // Toilet visits are a whole-number count -- force
+                  // integer-only ticks/labels so fl_chart's default "nice"
+                  // interval (which can land on e.g. 2.5) never shows a
+                  // fractional visit count.
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        if (value != value.roundToDouble()) return const SizedBox.shrink();
+                        return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10));
                       },
                     ),
                   ),
