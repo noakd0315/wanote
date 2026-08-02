@@ -83,6 +83,21 @@ class HttpCertificateOcrService implements CertificateOcrService {
   final String baseUrl;
   final http.Client _httpClient;
 
+  /// Reads the base URL from the same `--dart-define=AI_BACKEND_BASE_URL=...`
+  /// build-time constant the ai feature's AiBackendClient uses (both hit the
+  /// same Cloudflare Worker, just different routes), falling back to
+  /// [fallbackBaseUrl] for local `wrangler dev`.
+  factory HttpCertificateOcrService.fromEnvironment({
+    String fallbackBaseUrl = 'http://localhost:8787',
+    http.Client? httpClient,
+  }) {
+    const configured = String.fromEnvironment('AI_BACKEND_BASE_URL');
+    return HttpCertificateOcrService(
+      baseUrl: configured.isEmpty ? fallbackBaseUrl : configured,
+      httpClient: httpClient,
+    );
+  }
+
   @override
   Future<OcrExtractionResult> extractCertificateData({
     required String base64Image,

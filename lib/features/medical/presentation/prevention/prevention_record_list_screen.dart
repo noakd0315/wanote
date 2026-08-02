@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/certificate_ocr_service.dart';
 import '../../data/prevention_record_repository.dart';
 import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
@@ -13,12 +14,21 @@ class PreventionRecordListScreen extends StatelessWidget {
     required this.petId,
     required this.program,
     PreventionRecordRepository? repository,
-  }) : repository = repository ?? FirestorePreventionRecordRepository();
+    CertificateOcrService? ocrService,
+  }) : repository = repository ?? FirestorePreventionRecordRepository(),
+       // Wired to the real backend by default so certificate photo capture +
+       // AI-OCR auto-fill actually runs for every prevention type (vaccine,
+       // heartworm, flea/tick all share this one form) -- previously this
+       // was left null everywhere it was constructed, so the OCR button
+       // always showed "自動読取は準備中" even though functions/src/routes/
+       // ocr.ts and this HTTP client both already existed.
+       ocrService = ocrService ?? HttpCertificateOcrService.fromEnvironment();
 
   final String uid;
   final String petId;
   final PreventionProgram program;
   final PreventionRecordRepository repository;
+  final CertificateOcrService ocrService;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +78,7 @@ class PreventionRecordListScreen extends StatelessWidget {
                         program: program,
                         repository: repository,
                         record: record,
+                        ocrService: ocrService,
                       ),
                     ),
                   ),
@@ -85,6 +96,7 @@ class PreventionRecordListScreen extends StatelessWidget {
               petId: petId,
               program: program,
               repository: repository,
+              ocrService: ocrService,
             ),
           ),
         ),
