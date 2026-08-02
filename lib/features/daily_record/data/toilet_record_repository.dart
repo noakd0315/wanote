@@ -17,12 +17,14 @@ abstract class ToiletRecordRepository {
   /// Creates a one-tap record. [recordedAt] defaults to `DateTime.now()` to
   /// match spec 4.2's "記録時刻は自動入力". [stoolCondition] is required when
   /// [type] is [ToiletType.stool] (asserted here) and ignored for
-  /// [ToiletType.urine].
+  /// [ToiletType.urine]; [urineColor] is the reverse -- only stored when
+  /// [type] is [ToiletType.urine], ignored for [ToiletType.stool].
   Future<ToiletRecord> create({
     required String uid,
     required String petId,
     required ToiletType type,
     StoolCondition? stoolCondition,
+    UrineColor? urineColor,
     Uint8List? photoBytes,
     DateTime? recordedAt,
   });
@@ -31,6 +33,7 @@ abstract class ToiletRecordRepository {
     required String uid,
     required ToiletRecord record,
     StoolCondition? stoolCondition,
+    UrineColor? urineColor,
     Uint8List? newPhotoBytes,
     bool clearPhoto = false,
   });
@@ -46,7 +49,8 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     Uuid? uuid,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _storage = storage ?? FirebaseStorage.instance,
-       _photoCompressor = photoCompressor ?? const FlutterImagePhotoCompressor(),
+       _photoCompressor =
+           photoCompressor ?? const FlutterImagePhotoCompressor(),
        _uuid = uuid ?? const Uuid();
 
   final FirebaseFirestore _firestore;
@@ -54,20 +58,32 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
   final PhotoCompressor _photoCompressor;
   final Uuid _uuid;
 
-  CollectionReference<Map<String, dynamic>> _collection(String uid, String petId) =>
-      _firestore.collection(FirestorePaths.toiletRecords(uid, petId));
+  CollectionReference<Map<String, dynamic>> _collection(
+    String uid,
+    String petId,
+  ) => _firestore.collection(FirestorePaths.toiletRecords(uid, petId));
 
   @override
   Stream<List<ToiletRecord>> watchTimeline(String uid, String petId) {
     return _collection(uid, petId)
         .orderBy('recorded_at', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => ToiletRecord.fromMap(d.data())).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => ToiletRecord.fromMap(d.data())).toList(),
+        );
   }
 
-  Future<String> _uploadPhoto(String uid, String petId, String toiletId, Uint8List bytes) async {
+  Future<String> _uploadPhoto(
+    String uid,
+    String petId,
+    String toiletId,
+    Uint8List bytes,
+  ) async {
     final compressed = await _photoCompressor.compress(bytes);
-    final ref = _storage.ref('users/$uid/pets/$petId/toilet_records/$toiletId.jpg');
+    final ref = _storage.ref(
+      'users/$uid/pets/$petId/toilet_records/$toiletId.jpg',
+    );
     await ref.putData(compressed, SettableMetadata(contentType: 'image/jpeg'));
     return ref.getDownloadURL();
   }
@@ -78,6 +94,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     required String petId,
     required ToiletType type,
     StoolCondition? stoolCondition,
+    UrineColor? urineColor,
     Uint8List? photoBytes,
     DateTime? recordedAt,
   }) async {
@@ -95,6 +112,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
       recordedAt: recordedAt ?? DateTime.now(),
       type: type,
       stoolCondition: type == ToiletType.stool ? stoolCondition : null,
+      urineColor: type == ToiletType.urine ? urineColor : null,
       photo: photoUrl,
     );
     await _collection(uid, petId).doc(toiletId).set(record.toMap());
@@ -106,6 +124,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     required String uid,
     required ToiletRecord record,
     StoolCondition? stoolCondition,
+    UrineColor? urineColor,
     Uint8List? newPhotoBytes,
     bool clearPhoto = false,
   }) async {
@@ -114,19 +133,30 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
         : (clearPhoto ? null : record.photo);
     final updated = record.copyWith(
       stoolCondition: stoolCondition,
+      urineColor: urineColor,
       photo: photoUrl,
       clearPhoto: photoUrl == null,
     );
-    await _collection(uid, record.petId).doc(record.toiletId).set(updated.toMap());
+    await _collection(
+      uid,
+      record.petId,
+    ).doc(record.toiletId).set(updated.toMap());
     return updated;
   }
 
   @override
-  Future<void> delete({required String uid, required ToiletRecord record}) async {
+  Future<void> delete({
+    required String uid,
+    required ToiletRecord record,
+  }) async {
     await _collection(uid, record.petId).doc(record.toiletId).delete();
     if (record.photo != null) {
       try {
-        await _storage.ref('users/$uid/pets/${record.petId}/toilet_records/${record.toiletId}.jpg').delete();
+        await _storage
+            .ref(
+              'users/$uid/pets/${record.petId}/toilet_records/${record.toiletId}.jpg',
+            )
+            .delete();
       } catch (_) {
         // Best-effort cleanup only.
       }

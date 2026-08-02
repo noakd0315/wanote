@@ -30,13 +30,16 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
   final String petId;
   final ToiletRecordRepository repository;
   final AnomalyDetector anomalyDetector;
-  final void Function(ConsultationSuggestion suggestion)? onConsultationSuggested;
+  final void Function(ConsultationSuggestion suggestion)?
+  onConsultationSuggested;
 
   @override
-  State<ToiletRecordTimelineScreen> createState() => _ToiletRecordTimelineScreenState();
+  State<ToiletRecordTimelineScreen> createState() =>
+      _ToiletRecordTimelineScreenState();
 }
 
-class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen> {
+class _ToiletRecordTimelineScreenState
+    extends State<ToiletRecordTimelineScreen> {
   /// Per-reason "last shown" timestamps, for AnomalyDetector's dedupe-by-day
   /// input. Held in memory here for simplicity; a production build should
   /// persist this (e.g. shared_preferences or a small Firestore doc) so the
@@ -44,16 +47,17 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
   final Map<ConsultationSuggestionReason, DateTime> _lastSuggestedAt = {};
 
   Future<void> _recordUrine() async {
-    final recordedAt = await showDialog<DateTime>(
+    final result = await showDialog<_UrineRecordDialogResult>(
       context: context,
       builder: (_) => const _RecordedAtDialog(),
     );
-    if (recordedAt == null) return;
+    if (result == null) return;
     await widget.repository.create(
       uid: widget.uid,
       petId: widget.petId,
       type: ToiletType.urine,
-      recordedAt: recordedAt,
+      recordedAt: result.recordedAt,
+      urineColor: result.color,
     );
   }
 
@@ -100,7 +104,9 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
             return const Center(child: CircularProgressIndicator());
           }
           final records = snapshot.data ?? const <ToiletRecord>[];
-          WidgetsBinding.instance.addPostFrameCallback((_) => _handleSuggestions(records));
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _handleSuggestions(records),
+          );
 
           final now = DateTime.now();
           final currentSuggestions = widget.anomalyDetector.detect(
@@ -114,10 +120,15 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
               if (currentSuggestions.isNotEmpty)
                 MaterialBanner(
                   content: Text(currentSuggestions.first.message),
-                  leading: const Icon(Icons.warning_amber, color: Colors.orange),
+                  leading: const Icon(
+                    Icons.warning_amber,
+                    color: Colors.orange,
+                  ),
                   actions: [
                     TextButton(
-                      onPressed: () => widget.onConsultationSuggested?.call(currentSuggestions.first),
+                      onPressed: () => widget.onConsultationSuggested?.call(
+                        currentSuggestions.first,
+                      ),
                       child: const Text('AI相談する'),
                     ),
                   ],
@@ -163,16 +174,27 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
                           final record = records[index];
                           final isUrine = record.type == ToiletType.urine;
                           return ListTile(
-                            leading: Icon(isUrine ? Icons.water_drop : Icons.circle),
-                            title: Text(DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt)),
+                            leading: Icon(
+                              isUrine ? Icons.water_drop : Icons.circle,
+                            ),
+                            title: Text(
+                              DateFormat(
+                                'yyyy/MM/dd HH:mm',
+                              ).format(record.recordedAt),
+                            ),
                             subtitle: isUrine
-                                ? null
+                                ? (record.urineColor != null
+                                      ? Text('色: ${record.urineColor!.label}')
+                                      : null)
                                 : Text(
                                     '硬さ: ${record.stoolCondition?.hardness.wireName ?? '-'} / 色: ${record.stoolCondition?.color.wireName ?? '-'}',
                                   ),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
-                              onPressed: () => widget.repository.delete(uid: widget.uid, record: record),
+                              onPressed: () => widget.repository.delete(
+                                uid: widget.uid,
+                                record: record,
+                              ),
                             ),
                           );
                         },
@@ -186,10 +208,24 @@ class _ToiletRecordTimelineScreenState extends State<ToiletRecordTimelineScreen>
   }
 }
 
-/// Confirms the timestamp for a one-tap record before saving it. Defaults to
-/// "now" so a plain tap-through reproduces the original one-tap behavior
-/// (spec 4.2's "記録時刻は自動入力"); the date/time fields are editable for
-/// logging something that happened a little earlier.
+/// Return value of [_RecordedAtDialog]: the confirmed timestamp plus the
+/// optional urine color shade (PM request: "排尿に色の濃淡を設定できるように
+/// したい").
+class _UrineRecordDialogResult {
+  const _UrineRecordDialogResult({
+    required this.recordedAt,
+    required this.color,
+  });
+
+  final DateTime recordedAt;
+  final UrineColor? color;
+}
+
+/// Confirms the timestamp (and optionally the color shade) for a one-tap
+/// urine record before saving it. Defaults to "now" and "正常" so a plain
+/// tap-through reproduces the original one-tap behavior (spec 4.2's "記録
+/// 時刻は自動入力"); all fields are editable for logging something noticed
+/// after the fact.
 class _RecordedAtDialog extends StatefulWidget {
   const _RecordedAtDialog();
 
@@ -199,6 +235,7 @@ class _RecordedAtDialog extends StatefulWidget {
 
 class _RecordedAtDialogState extends State<_RecordedAtDialog> {
   late DateTime _recordedAt = DateTime.now();
+  UrineColor _color = UrineColor.normal;
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -257,6 +294,22 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
             trailing: const Icon(Icons.access_time),
             onTap: _pickTime,
           ),
+          const SizedBox(height: 8),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text('色の濃淡', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            children: UrineColor.values.map((c) {
+              return ChoiceChip(
+                label: Text(c.label),
+                selected: _color == c,
+                onSelected: (_) => setState(() => _color = c),
+              );
+            }).toList(),
+          ),
         ],
       ),
       actions: [
@@ -265,7 +318,9 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
           child: const Text('キャンセル'),
         ),
         FilledButton(
-          onPressed: () => Navigator.of(context).pop(_recordedAt),
+          onPressed: () => Navigator.of(context).pop(
+            _UrineRecordDialogResult(recordedAt: _recordedAt, color: _color),
+          ),
           child: const Text('記録する'),
         ),
       ],
