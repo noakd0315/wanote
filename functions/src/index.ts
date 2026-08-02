@@ -23,35 +23,64 @@ import type { RateLimitEnv } from './lib/rateLimiter';
  * `[[kv_namespaces]]` binding should also fold `RateLimitEnv` into `Env`
  * directly at that point.
  */
+// The Flutter web target calls this Worker cross-origin (localhost:5000 ->
+// localhost:8787 locally; the deployed app's own origin -> the Worker's
+// *.workers.dev origin in production), which makes the browser send a CORS
+// preflight OPTIONS request before the real POST. Every response (including
+// errors and the preflight itself) needs these headers, or the browser
+// blocks the request client-side before it ever reaches a route handler --
+// found by manually exercising the food-portion-advice call through a real
+// browser session, where it surfaced as the POST never firing at all and
+// the OPTIONS preflight 404ing. `*` is fine here since auth is a Bearer
+// token (verified per-route via verifyFirebaseToken), not a cookie CORS
+// would need to restrict.
+const CORS_HEADERS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, { status: response.status, headers });
+}
+
 export default {
   async fetch(request: Request, env: Env & RateLimitEnv): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     const url = new URL(request.url);
 
     if (request.method !== 'POST') {
-      return new Response('Not found', { status: 404 });
+      return withCors(new Response('Not found', { status: 404 }));
     }
 
     switch (url.pathname) {
       case '/ocr/certificate': {
         const { handleOcrCertificate } = await import('./routes/ocr');
-        return handleOcrCertificate(request, env);
+        return withCors(await handleOcrCertificate(request, env));
       }
       case '/ai/consultation': {
         const { handleConsultation } = await import('./routes/consultation');
-        return handleConsultation(request, env);
+        return withCors(await handleConsultation(request, env));
       }
       case '/ai/report': {
         const { handleReport } = await import('./routes/report');
-        return handleReport(request, env);
+        return withCors(await handleReport(request, env));
       }
       case '/billing/grant-promotional-entitlement': {
         const { handleGrantPromotionalEntitlement } = await import(
           './routes/grantPromotionalEntitlement'
         );
-        return handleGrantPromotionalEntitlement(request, env);
+        return withCors(await handleGrantPromotionalEntitlement(request, env));
       }
       default:
-        return new Response('Not found', { status: 404 });
+        return withCors(new Response('Not found', { status: 404 }));
     }
   },
 };
