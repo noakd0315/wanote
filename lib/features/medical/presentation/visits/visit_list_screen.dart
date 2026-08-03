@@ -21,6 +21,10 @@ class VisitListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('通院履歴')),
       body: StreamBuilder<List<Visit>>(
         stream: repository.watchVisits(uid, petId),
@@ -68,11 +72,8 @@ class VisitListScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => VisitFormScreen(
-              uid: uid,
-              petId: petId,
-              repository: repository,
-            ),
+            builder: (_) =>
+                VisitFormScreen(uid: uid, petId: petId, repository: repository),
           ),
         ),
         child: const Icon(Icons.add),

@@ -245,10 +245,9 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// Simple Flutter-only placeholder used when the active pet has no photo
-/// yet -- deliberately not a missing-asset image reference, since no
-/// illustration assets exist in this project (per the PM's explicit
-/// direction not to source/fabricate one).
+/// Placeholder used when the active pet has no photo yet -- shows the
+/// wanote mascot illustration (PM-provided artwork) rather than a bare
+/// Material icon.
 class _DefaultBackground extends StatelessWidget {
   const _DefaultBackground();
 
@@ -267,11 +266,7 @@ class _DefaultBackground extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Icon(
-          Icons.pets,
-          size: 120,
-          color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
-        ),
+        child: Image.asset('assets/images/wanote_icon.png', width: 220),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'app/home_shell.dart';
 import 'features/auth/auth.dart';
 import 'shared/config/emulator_config.dart';
 import 'shared/config/firebase_options_demo.dart';
+import 'shared/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +58,7 @@ class WanoteApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'wanote',
-        theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
+        theme: buildWanoteTheme(),
         home: LaunchGateScreen(
           homeBuilder: (context) {
             final controller = context.watch<AuthController>();

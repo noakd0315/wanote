@@ -123,6 +123,10 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('体重記録'),
         actions: [

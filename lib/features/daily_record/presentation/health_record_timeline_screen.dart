@@ -22,6 +22,10 @@ class HealthRecordTimelineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('健康記録')),
       body: StreamBuilder<List<HealthRecord>>(
         stream: repository.watchTimeline(uid, petId),
@@ -45,9 +49,13 @@ class HealthRecordTimelineScreen extends StatelessWidget {
                 leading: record.photos.isNotEmpty
                     ? const Icon(Icons.photo)
                     : const Icon(Icons.notes),
-                title: Text(DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt)),
+                title: Text(
+                  DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt),
+                ),
                 subtitle: Text(
-                  record.tags.isEmpty ? (record.memo ?? '') : record.tags.map((t) => t.wireName).join(', '),
+                  record.tags.isEmpty
+                      ? (record.memo ?? '')
+                      : record.tags.map((t) => t.wireName).join(', '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

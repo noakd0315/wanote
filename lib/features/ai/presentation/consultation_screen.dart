@@ -116,7 +116,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         petId: widget.petId,
         questionText: questionText,
         aiResponse: responseText,
-        referencedRecordIds: _selectedReferences.map((r) => r.recordId).toList(),
+        referencedRecordIds: _selectedReferences
+            .map((r) => r.recordId)
+            .toList(),
       );
 
       setState(() {
@@ -140,6 +142,10 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   Widget build(BuildContext context) {
     final prefill = widget.prefillRecords ?? const [];
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('AI相談')),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -147,7 +153,10 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           const DisclaimerBanner(),
           const SizedBox(height: 16),
           if (prefill.isNotEmpty) ...[
-            const Text('関連する記録を参照する（任意）', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              '関連する記録を参照する（任意）',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -212,7 +221,8 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         return const EmergencyNotice();
       case _ResultKind.needsUpgrade:
         return UpgradePromptCard(
-          message: '今月の無料相談回数とチケットを使い切りました。'
+          message:
+              '今月の無料相談回数とチケットを使い切りました。'
               'チケットを購入するか、有料プランにアップグレードすると引き続きご利用いただけます。',
           onUpgrade: widget.onRequestUpgrade,
         );
@@ -226,7 +236,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(_resultText ?? ''),
@@ -236,7 +248,10 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
 
   Widget _buildHistory() {
     return StreamBuilder<List<Consultation>>(
-      stream: widget.consultationRepository.watchHistory(widget.uid, widget.petId),
+      stream: widget.consultationRepository.watchHistory(
+        widget.uid,
+        widget.petId,
+      ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Padding(
@@ -256,8 +271,16 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
               .map(
                 (c) => Card(
                   child: ListTile(
-                    title: Text(c.questionText, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(c.aiResponse, maxLines: 3, overflow: TextOverflow.ellipsis),
+                    title: Text(
+                      c.questionText,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      c.aiResponse,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: Text(
                       '${c.createdAt.month}/${c.createdAt.day}',
                       style: const TextStyle(fontSize: 12),

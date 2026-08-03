@@ -18,6 +18,7 @@ import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/medical/presentation/medical_home_screen.dart';
 import '../shared/services/ai_usage_repository.dart';
+import '../shared/widgets/dog_silhouette_background.dart';
 import 'ai_section.dart';
 import 'daily_record_section.dart';
 import 'home_screen.dart';
@@ -207,16 +208,31 @@ class _HomeShellState extends State<HomeShell> {
       // Persistent across every tab AND every screen pushed onto
       // [_shellNavigatorKey] (a push only replaces the Navigator's own
       // content, which sits inside this same outer Scaffold's body) -- this
-      // is what makes "wanote" show on every page per the PM's request,
-      // without each section/screen needing its own copy of it.
-      appBar: AppBar(title: const Text('wanote')),
-      body: Navigator(
-        key: _shellNavigatorKey,
-        onGenerateRoute: (settings) => MaterialPageRoute(
-          settings: settings,
-          builder: (_) =>
-              IndexedStack(index: _selectedIndex, children: sections),
-        ),
+      // is what makes the header show on every page per the PM's request,
+      // without each section/screen needing its own copy of it. The title
+      // is the logo image (PM request) rather than a plain "wanote" text.
+      appBar: AppBar(
+        title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
+      ),
+      // The dog-silhouette pattern sits behind the Navigator so it shows
+      // through the 4 tab-root sections that don't paint their own opaque
+      // background (DailyRecordSection/MedicalHomeScreen/AiSection/
+      // SettingsSection are bare Column/ListView content) -- HomeScreen
+      // (tab 0) keeps its own dedicated photo/gradient background instead,
+      // and individual screens pushed on top of a tab (their own Scaffold)
+      // still cover it, same as they'd cover any other backdrop.
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DogSilhouetteBackground()),
+          Navigator(
+            key: _shellNavigatorKey,
+            onGenerateRoute: (settings) => MaterialPageRoute(
+              settings: settings,
+              builder: (_) =>
+                  IndexedStack(index: _selectedIndex, children: sections),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,

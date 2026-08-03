@@ -1,8 +1,9 @@
-﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/models/pet_profile.dart';
+import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../auth_controller.dart';
 import 'pet_profile_form_screen.dart';
 
@@ -47,61 +48,68 @@ class PetProfileSwitchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Your pets')),
-      body: pets.isEmpty
-          ? const Center(child: Text('No pets yet. Add your first pet below.'))
-          : ListView.builder(
-              itemCount: pets.length,
-              itemBuilder: (context, index) {
-                final pet = pets[index];
-                final isActive = pet.petId == activePetId;
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: pet.photoUrl != null
-                        ? CachedNetworkImageProvider(pet.photoUrl!)
-                        : null,
-                    child: pet.photoUrl == null
-                        ? Text(
-                            pet.name.isNotEmpty
-                                ? pet.name[0].toUpperCase()
-                                : '?',
-                          )
-                        : null,
-                  ),
-                  title: Text(pet.name),
-                  subtitle: Text(pet.breed),
-                  selected: isActive,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isActive)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: Icon(Icons.check_circle),
-                        ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                PetProfileFormScreen(existingPet: pet),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DogSilhouetteBackground()),
+          pets.isEmpty
+              ? const Center(
+                  child: Text('No pets yet. Add your first pet below.'),
+                )
+              : ListView.builder(
+                  itemCount: pets.length,
+                  itemBuilder: (context, index) {
+                    final pet = pets[index];
+                    final isActive = pet.petId == activePetId;
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: pet.photoUrl != null
+                            ? CachedNetworkImageProvider(pet.photoUrl!)
+                            : null,
+                        child: pet.photoUrl == null
+                            ? Text(
+                                pet.name.isNotEmpty
+                                    ? pet.name[0].toUpperCase()
+                                    : '?',
+                              )
+                            : null,
+                      ),
+                      title: Text(pet.name),
+                      subtitle: Text(pet.breed),
+                      selected: isActive,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isActive)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 4),
+                              child: Icon(Icons.check_circle),
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PetProfileFormScreen(existingPet: pet),
+                              ),
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () =>
+                                _confirmDelete(context, controller, pet),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () =>
-                            _confirmDelete(context, controller, pet),
-                      ),
-                    ],
-                  ),
-                  onTap: () => controller.switchActivePet(pet.petId),
-                );
-              },
-            ),
+                      onTap: () => controller.switchActivePet(pet.petId),
+                    );
+                  },
+                ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const PetProfileFormScreen()),
-        ),
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const PetProfileFormScreen())),
         icon: const Icon(Icons.add),
         label: const Text('Add pet'),
       ),

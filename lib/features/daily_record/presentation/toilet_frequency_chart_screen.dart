@@ -27,6 +27,10 @@ class ToiletFrequencyChartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through, per the PM's request to scatter the
+      // pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('トイレ頻度')),
       body: StreamBuilder<List<ToiletRecord>>(
         stream: repository.watchTimeline(uid, petId),

@@ -35,6 +35,10 @@ class CertificateListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('証明書一覧')),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecords(uid, petId),
@@ -54,10 +58,7 @@ class CertificateListScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.description_outlined, size: 48),
                     const SizedBox(height: 12),
-                    const Text(
-                      '登録済みの証明書がありません',
-                      textAlign: TextAlign.center,
-                    ),
+                    const Text('登録済みの証明書がありません', textAlign: TextAlign.center),
                     const SizedBox(height: 4),
                     const Text(
                       '証明書は「予防医療」タブでワクチン・フィラリア・ノミダニ予防の'
@@ -87,7 +88,10 @@ class CertificateListScreen extends StatelessWidget {
             itemCount: records.length,
             itemBuilder: (context, index) {
               final record = records[index];
-              return _CertificateTile(record: record, cacheService: cacheService);
+              return _CertificateTile(
+                record: record,
+                cacheService: cacheService,
+              );
             },
           );
         },
@@ -129,7 +133,10 @@ class _CertificateTile extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: _CertificateImage(record: record, cacheService: cacheService),
+              child: _CertificateImage(
+                record: record,
+                cacheService: cacheService,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(4),

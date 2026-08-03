@@ -78,6 +78,10 @@ class _ToiletRecordTimelineScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('トイレ記録'),
         actions: [

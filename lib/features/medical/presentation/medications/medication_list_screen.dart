@@ -20,6 +20,10 @@ class MedicationListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through this tab-root screen, per the PM's
+      // request to scatter the pattern across each screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: const Text('薬の記録')),
       body: StreamBuilder<List<Medication>>(
         stream: repository.watchMedications(uid, petId),
