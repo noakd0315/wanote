@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../shared/models/pet_profile.dart';
@@ -89,38 +91,66 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     super.dispose();
   }
 
-  Future<Uint8List?> _pickImage() async {
-    final source = await showModalBottomSheet<ImageSource>(
+  /// Shows the camera/gallery choice, then hands the picked bytes (if any)
+  /// to [onPicked].
+  ///
+  /// iOS Safari only treats a file-picker invocation as a trusted user
+  /// gesture when it's triggered *synchronously* from an actual tap/click
+  /// handler -- not after `await`-ing some other Future first (e.g. this
+  /// bottom sheet's own dismissal). The previous version awaited
+  /// `showModalBottomSheet`'s result in the outer function and only called
+  /// `pickImage` afterwards, which crosses exactly that boundary: it
+  /// silently no-ops on iPhone (PM report: "アルバムから写真を設定できませ
+  /// ん"), even though it works fine on Android/desktop, which don't
+  /// enforce this as strictly. Fixed by calling `pickImage` directly
+  /// inside each `ListTile`'s own `onTap` (fire-and-forget, not awaited by
+  /// the caller), so the picker call stays in that tap's own gesture
+  /// context.
+  void _pickImage(void Function(Uint8List bytes) onPicked) {
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => SafeArea(
+      builder: (sheetContext) => SafeArea(
         child: Wrap(
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
               title: const Text('Take a photo'),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                unawaited(_pickAndDeliver(ImageSource.camera, onPicked));
+              },
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
               title: const Text('Choose from gallery'),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                unawaited(_pickAndDeliver(ImageSource.gallery, onPicked));
+              },
             ),
           ],
         ),
       ),
     );
-    if (source == null) return null;
-    final picked = await _imagePicker.pickImage(source: source);
-    if (picked == null) return null;
-    return picked.readAsBytes();
   }
 
-  Future<void> _pickBackgroundPhoto() async {
-    final bytes = await _pickImage();
-    if (bytes == null || !mounted) return;
-    setState(() {
-      _pickedBackgroundBytes = bytes;
-      _backgroundWasDeleted = false;
+  Future<void> _pickAndDeliver(
+    ImageSource source,
+    void Function(Uint8List bytes) onPicked,
+  ) async {
+    final picked = await _imagePicker.pickImage(source: source);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    if (!mounted) return;
+    onPicked(bytes);
+  }
+
+  void _pickBackgroundPhoto() {
+    _pickImage((bytes) {
+      setState(() {
+        _pickedBackgroundBytes = bytes;
+        _backgroundWasDeleted = false;
+      });
     });
   }
 
@@ -132,12 +162,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     });
   }
 
-  Future<void> _pickIconPhoto() async {
-    final bytes = await _pickImage();
-    if (bytes == null || !mounted) return;
-    setState(() {
-      _pickedIconBytes = bytes;
-      _iconWasDeleted = false;
+  void _pickIconPhoto() {
+    _pickImage((bytes) {
+      setState(() {
+        _pickedIconBytes = bytes;
+        _iconWasDeleted = false;
+      });
     });
   }
 
@@ -282,9 +312,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                           title: Text(
                             _birthday == null
                                 ? 'Select birthday'
-                                : 'Birthday: ${_birthday!.toLocal()}'
-                                      .split(' ')
-                                      .first,
+                                : 'Birthday: ${DateFormat('yyyy/MM/dd').format(_birthday!)}',
                           ),
                           trailing: const Icon(Icons.calendar_today),
                           onTap: _pickBirthday,
