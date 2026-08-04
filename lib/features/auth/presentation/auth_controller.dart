@@ -197,6 +197,13 @@ class AuthController extends ChangeNotifier {
     () => _authRepository.signInWithEmail(email: email, password: password),
   );
 
+  /// Not routed through [_runAuthAction] -- this doesn't change auth state
+  /// (no identity comes back, gateAction stays whatever it was), it's a
+  /// plain side-effecting call the sign-in screen awaits directly to show
+  /// its own success/error message.
+  Future<void> sendPasswordResetEmail(String email) =>
+      _authRepository.sendPasswordResetEmail(email);
+
   Future<void> signInWithGoogle() =>
       _runAuthAction(_authRepository.signInWithGoogle);
 

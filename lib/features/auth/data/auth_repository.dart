@@ -37,6 +37,13 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Sends a password-reset email (spec gap the PM flagged after locking
+  /// themselves out of a test account: "パスワードを忘れてしまった場合の
+  /// 対処"). In the local emulator this doesn't deliver a real email, but
+  /// the same call sends a genuine reset email once a real Firebase project
+  /// is configured.
+  Future<void> sendPasswordResetEmail(String email);
+
   /// Re-verifies the current email/password user's password. Used as the
   /// biometric-failure fallback for email accounts (spec 1.4).
   Future<void> reauthenticateWithPassword(String password);
@@ -105,6 +112,11 @@ class FirebaseAuthRepository implements AuthRepository {
       password: password,
     );
     return _toIdentity(credential.user)!;
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email: email);
   }
 
   @override
