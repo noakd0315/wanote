@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../shared/models/pet_profile.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
+import '../../../../shared/widgets/image_source_sheet.dart';
 import '../auth_controller.dart';
 
 /// Create or edit a single pet profile (spec 1.2 -
@@ -92,45 +93,15 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   }
 
   /// Shows the camera/gallery choice, then hands the picked bytes (if any)
-  /// to [onPicked].
-  ///
-  /// iOS Safari only treats a file-picker invocation as a trusted user
-  /// gesture when it's triggered *synchronously* from an actual tap/click
-  /// handler -- not after `await`-ing some other Future first (e.g. this
-  /// bottom sheet's own dismissal). The previous version awaited
-  /// `showModalBottomSheet`'s result in the outer function and only called
-  /// `pickImage` afterwards, which crosses exactly that boundary: it
-  /// silently no-ops on iPhone (PM report: "アルバムから写真を設定できませ
-  /// ん"), even though it works fine on Android/desktop, which don't
-  /// enforce this as strictly. Fixed by calling `pickImage` directly
-  /// inside each `ListTile`'s own `onTap` (fire-and-forget, not awaited by
-  /// the caller), so the picker call stays in that tap's own gesture
-  /// context.
+  /// to [onPicked]. See `shared/widgets/image_source_sheet.dart`'s doc
+  /// comment for why the picker calls happen where they do (iOS Safari
+  /// gesture requirements).
   void _pickImage(void Function(Uint8List bytes) onPicked) {
-    showModalBottomSheet<void>(
+    showImageSourceSheet(
       context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a photo'),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                unawaited(_pickAndDeliver(ImageSource.camera, onPicked));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                unawaited(_pickAndDeliver(ImageSource.gallery, onPicked));
-              },
-            ),
-          ],
-        ),
-      ),
+      onCamera: () => unawaited(_pickAndDeliver(ImageSource.camera, onPicked)),
+      onGallery: () =>
+          unawaited(_pickAndDeliver(ImageSource.gallery, onPicked)),
     );
   }
 

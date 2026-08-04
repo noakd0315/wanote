@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
 
@@ -32,10 +34,21 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   Uint8List? _photoBytes;
   bool _saving = false;
 
-  Future<void> _pickPhoto() async {
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
+  final _imagePicker = ImagePicker();
+
+  void _pickPhoto() {
+    showImageSourceSheet(
+      context: context,
+      onCamera: () => unawaited(_pickAndSet(ImageSource.camera)),
+      onGallery: () => unawaited(_pickAndSet(ImageSource.gallery)),
+    );
+  }
+
+  Future<void> _pickAndSet(ImageSource source) async {
+    final file = await _imagePicker.pickImage(source: source);
     if (file == null) return;
     final bytes = await file.readAsBytes();
+    if (!mounted) return;
     setState(() => _photoBytes = bytes);
   }
 

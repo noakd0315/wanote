@@ -8,14 +8,19 @@ import '../domain/models/prevention_program.dart';
 abstract class PreventionProgramRepository {
   Stream<List<PreventionProgram>> watchPrograms(String uid, String petId);
 
+  /// [startDate] is optional and defaults to now -- PM request: "開始日は
+  /// 不要" (the start date input isn't needed). The field itself is kept
+  /// internally (still always populated) rather than removed outright,
+  /// since [watchPrograms] orders by it and a Firestore `orderBy` silently
+  /// excludes any doc missing the ordered field.
   Future<PreventionProgram> create({
     required String uid,
     required String petId,
     required PreventionType type,
     required String productName,
     required ScheduleType scheduleType,
-    required DateTime startDate,
     required bool active,
+    DateTime? startDate,
     int? intervalDays,
   });
 
@@ -55,8 +60,8 @@ class FirestorePreventionProgramRepository
     required PreventionType type,
     required String productName,
     required ScheduleType scheduleType,
-    required DateTime startDate,
     required bool active,
+    DateTime? startDate,
     int? intervalDays,
   }) async {
     final program = PreventionProgram(
@@ -66,7 +71,7 @@ class FirestorePreventionProgramRepository
       productName: productName,
       scheduleType: scheduleType,
       intervalDays: intervalDays,
-      startDate: startDate,
+      startDate: startDate ?? DateTime.now(),
       active: active,
     );
     await _firestore

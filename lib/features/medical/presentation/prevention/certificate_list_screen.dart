@@ -97,9 +97,12 @@ class CertificateListScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        // Plain "+" (not a camera icon) -- PM note: this button navigates
+        // to 予防医療 rather than directly launching the camera, so a
+        // photo-specific icon was misleading.
         tooltip: '予防医療の記録を追加する',
         onPressed: () => _openPreventionPrograms(context),
-        child: const Icon(Icons.add_a_photo_outlined),
+        child: const Icon(Icons.add),
       ),
     );
   }

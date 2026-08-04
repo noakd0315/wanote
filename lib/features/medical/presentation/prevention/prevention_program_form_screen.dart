@@ -160,21 +160,6 @@ class _PreventionProgramFormScreenState
                   return null;
                 },
               ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('開始日'),
-              subtitle: Text(_startDate.toLocal().toString().split(' ').first),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _startDate,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null) setState(() => _startDate = picked);
-              },
-            ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('有効'),

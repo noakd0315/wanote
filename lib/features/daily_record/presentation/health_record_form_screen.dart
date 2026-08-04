@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 
@@ -59,9 +61,28 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
     super.dispose();
   }
 
-  Future<void> _pickPhotos() async {
+  void _pickPhotos() {
     if (_totalPhotoCount >= HealthRecord.maxPhotos) return;
+    showImageSourceSheet(
+      context: context,
+      onCamera: () => unawaited(_pickFromCamera()),
+      onGallery: () => unawaited(_pickFromGallery()),
+    );
+  }
+
+  // Camera capture is inherently one photo at a time, unlike the gallery
+  // multi-select below.
+  Future<void> _pickFromCamera() async {
+    final file = await _picker.pickImage(source: ImageSource.camera);
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
+    setState(() => _newPhotoBytes.add(bytes));
+  }
+
+  Future<void> _pickFromGallery() async {
     final remaining = HealthRecord.maxPhotos - _totalPhotoCount;
+    if (remaining <= 0) return;
     final picked = await _picker.pickMultiImage(limit: remaining);
     for (final file in picked.take(remaining)) {
       final bytes = await file.readAsBytes();

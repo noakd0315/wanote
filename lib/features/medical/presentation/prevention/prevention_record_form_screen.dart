@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../shared/widgets/image_source_sheet.dart';
 import '../../data/certificate_ocr_service.dart';
 import '../../data/certificate_storage_service.dart';
 import '../../data/prevention_record_repository.dart';
@@ -112,10 +114,16 @@ class _PreventionRecordFormScreenState
     });
   }
 
-  Future<void> _pickAndAnalyzeCertificate() async {
-    final picked = await widget.imagePicker.pickImage(
-      source: ImageSource.camera,
+  void _pickAndAnalyzeCertificate() {
+    showImageSourceSheet(
+      context: context,
+      onCamera: () => unawaited(_captureAndAnalyze(ImageSource.camera)),
+      onGallery: () => unawaited(_captureAndAnalyze(ImageSource.gallery)),
     );
+  }
+
+  Future<void> _captureAndAnalyze(ImageSource source) async {
+    final picked = await widget.imagePicker.pickImage(source: source);
     if (picked == null) return;
 
     // Resize/compress client-side BEFORE any upload/API call (spec 5.4 step
@@ -336,8 +344,8 @@ class _PreventionRecordFormScreenState
                   : const Icon(Icons.camera_alt),
               label: Text(
                 widget.ocrService == null
-                    ? '証明書を撮影（自動読取は準備中）'
-                    : '証明書を撮影してAIで自動入力',
+                    ? '証明書を撮影／選択（自動読取は準備中）'
+                    : '証明書を撮影／選択してAIで自動入力',
               ),
             ),
             if (_ocrFallbackMessage != null)

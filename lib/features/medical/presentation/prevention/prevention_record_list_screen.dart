@@ -30,6 +30,13 @@ class PreventionRecordListScreen extends StatelessWidget {
   final PreventionRecordRepository repository;
   final CertificateOcrService ocrService;
 
+  /// PM request: ワクチンは「接種履歴」、薬（フィラリア／ノミ・ダニ予防）は
+  /// 「投薬履歴」-- vaccines are injected ("接種"), heartworm/flea-tick
+  /// prevention is administered as an oral/topical medication ("投薬").
+  bool get _isVaccine => program.type == PreventionType.vaccine;
+  String get _historyLabel => _isVaccine ? '接種履歴' : '投薬履歴';
+  String get _recordLabel => _isVaccine ? '接種記録' : '投薬記録';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +44,7 @@ class PreventionRecordListScreen extends StatelessWidget {
       // its Navigator) shows through, per the PM's request to scatter the
       // pattern across every non-input-form screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text('${program.productName} の投与履歴')),
+      appBar: AppBar(title: Text('${program.productName} の$_historyLabel')),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecordsForProgram(
           uid,
@@ -50,7 +57,7 @@ class PreventionRecordListScreen extends StatelessWidget {
           }
           final records = snapshot.data!;
           if (records.isEmpty) {
-            return const Center(child: Text('投与記録がありません'));
+            return Center(child: Text('$_recordLabelがありません'));
           }
           return ListView.builder(
             itemCount: records.length,
