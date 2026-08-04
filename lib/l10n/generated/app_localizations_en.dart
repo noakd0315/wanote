@@ -633,4 +633,191 @@ class AppLocalizationsEn extends AppLocalizations {
   String visitCostYenSuffix(int cost) {
     return '¥$cost';
   }
+
+  @override
+  String get aiDisclaimerText =>
+      'This feature is not a medical diagnosis -- it\'s reference information to help you judge whether a vet visit is needed. If symptoms continue or you\'re concerned, please be sure to see a veterinarian.';
+
+  @override
+  String get aiEmergencyMessage =>
+      'Please contact or visit a veterinary hospital immediately.\nThis may be a high-urgency situation, so the AI response has been skipped -- we recommend consulting a vet right away.';
+
+  @override
+  String get aiUpgradeCardButtonLabel => 'Buy tickets / View premium plans';
+
+  @override
+  String get consultationScreenAppBarTitle => 'AI Consultation';
+
+  @override
+  String get consultationReferenceRecordsLabel =>
+      'Reference related records (optional)';
+
+  @override
+  String get consultationInputHintText =>
+      'Describe the symptoms or condition you\'re concerned about (e.g. \"lethargic since this morning\")';
+
+  @override
+  String get consultationSubmitButton => 'Ask';
+
+  @override
+  String get consultationUsageLimitMessage =>
+      'You\'ve used up this month\'s free consultations and tickets. Purchase tickets or upgrade to a premium plan to keep using this feature.';
+
+  @override
+  String get consultationSubmitFailedMessage =>
+      'Failed to send your consultation. Please check your connection and try again.';
+
+  @override
+  String get consultationHistoryTitle => 'Consultation history';
+
+  @override
+  String get consultationHistoryEmptyMessage => 'No consultation history yet.';
+
+  @override
+  String get foodPortionAppBarTitle => 'Calculate food portion';
+
+  @override
+  String get foodPortionWeightLabel => 'Weight (kg)';
+
+  @override
+  String get foodPortionLifeStageLabel => 'Life stage';
+
+  @override
+  String foodPortionNeuteredStatusLabel(String status) {
+    return 'Neutered/spayed: $status (from profile)';
+  }
+
+  @override
+  String get neuteredStatusDone => 'Yes';
+
+  @override
+  String get neuteredStatusNotDone => 'No';
+
+  @override
+  String get foodPortionBodyConditionLabel => 'Body condition';
+
+  @override
+  String get foodPortionBodyConditionHelperText =>
+      'Ribs easy to feel = underweight / Feelable but not visible = ideal / Hard to feel = overweight';
+
+  @override
+  String get foodPortionActivityLevelLabel => 'Activity level';
+
+  @override
+  String get foodPortionPuppyNoteText =>
+      '* For growing puppies, the amount is calculated using an age-based factor regardless of body condition or activity level.';
+
+  @override
+  String get foodPortionCalorieDensityLabel =>
+      'Food calorie density (kcal/100g)';
+
+  @override
+  String get foodPortionCalorieDensityHelperText =>
+      'Enter the value printed on your food\'s packaging';
+
+  @override
+  String get foodPortionCalculateButton => 'Calculate';
+
+  @override
+  String get foodPortionRerLabel => 'Resting Energy Requirement (RER)';
+
+  @override
+  String get foodPortionMerLabel => 'Maintenance Energy Requirement (MER)';
+
+  @override
+  String get foodPortionDailyFoodLabel => 'Daily food amount';
+
+  @override
+  String foodPortionKcalPerDayValue(int value) {
+    return '$value kcal/day';
+  }
+
+  @override
+  String foodPortionGramsPerDayValue(int value) {
+    return '$value g/day';
+  }
+
+  @override
+  String get foodPortionResultDisclaimerText =>
+      '* This is a guideline. Adjust based on changes in condition or body shape, and consult your veterinarian for details.';
+
+  @override
+  String get foodPortionRequestAdviceButton => 'Ask AI for feeding advice';
+
+  @override
+  String get foodPortionAdviceUsageLimitMessage =>
+      'You\'ve reached your AI consultation usage limit.';
+
+  @override
+  String get foodPortionAdviceFailedMessage => 'Failed to get advice.';
+
+  @override
+  String get foodPortionAdviceRetryButton => 'Retry';
+
+  @override
+  String get dogLifeStagePuppyLabel => 'Puppy (growing)';
+
+  @override
+  String get dogLifeStageAdultLabel => 'Adult';
+
+  @override
+  String get bodyConditionUnderweightLabel => 'Underweight';
+
+  @override
+  String get bodyConditionIdealLabel => 'Ideal';
+
+  @override
+  String get bodyConditionOverweightLabel => 'Overweight';
+
+  @override
+  String get activityLevelLowLabel => 'Low activity';
+
+  @override
+  String get activityLevelNormalLabel => 'Normal';
+
+  @override
+  String get activityLevelHighLabel => 'Active';
+
+  @override
+  String get reportAppBarTitle => 'AI Health Report';
+
+  @override
+  String get reportExportPdfTooltip => 'Export as PDF';
+
+  @override
+  String reportPeriodLabel(String start, String end) {
+    return 'Period: $start - $end';
+  }
+
+  @override
+  String get reportWeightTrendTitle => 'Weight trend';
+
+  @override
+  String get reportToiletTrendTitle => 'Toilet frequency trend';
+
+  @override
+  String get reportAiSummaryTitle => 'AI summary';
+
+  @override
+  String get reportGenerationFailedMessage =>
+      'Failed to generate the report. Please try again.';
+
+  @override
+  String get reportGenerateSummaryButton => 'Generate AI summary';
+
+  @override
+  String get reportSummaryUsageLimitMessage =>
+      'The AI summary is a premium-only feature. Graphs remain available on the free plan.';
+
+  @override
+  String get reportNoWeightDataMessage => 'No weight records.';
+
+  @override
+  String get reportNoToiletDataMessage => 'No toilet records.';
+
+  @override
+  String get reportUrineLegendLabel => 'Urine';
+
+  @override
+  String get reportStoolLegendLabel => 'Stool';
 }

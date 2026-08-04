@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/models/consultation_reference_record.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
@@ -140,22 +141,23 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final prefill = widget.prefillRecords ?? const [];
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('AI相談')),
+      appBar: AppBar(title: Text(l10n.consultationScreenAppBarTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const DisclaimerBanner(),
           const SizedBox(height: 16),
           if (prefill.isNotEmpty) ...[
-            const Text(
-              '関連する記録を参照する（任意）',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.consultationReferenceRecordsLabel,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -184,9 +186,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           TextField(
             controller: _controller,
             maxLines: 5,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: '気になる症状や様子を入力してください（例：今朝からぐったりしている）',
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: l10n.consultationInputHintText,
             ),
           ),
           const SizedBox(height: 12),
@@ -198,14 +200,17 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                     width: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('相談する'),
+                : Text(l10n.consultationSubmitButton),
           ),
           const SizedBox(height: 16),
-          _buildResult(),
+          _buildResult(l10n),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 8),
-          const Text('相談履歴', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.consultationHistoryTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           _buildHistory(),
         ],
@@ -213,7 +218,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     );
   }
 
-  Widget _buildResult() {
+  Widget _buildResult(AppLocalizations l10n) {
     switch (_resultKind) {
       case _ResultKind.none:
         return const SizedBox.shrink();
@@ -221,15 +226,13 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         return const EmergencyNotice();
       case _ResultKind.needsUpgrade:
         return UpgradePromptCard(
-          message:
-              '今月の無料相談回数とチケットを使い切りました。'
-              'チケットを購入するか、有料プランにアップグレードすると引き続きご利用いただけます。',
+          message: l10n.consultationUsageLimitMessage,
           onUpgrade: widget.onRequestUpgrade,
         );
       case _ResultKind.error:
-        return const Text(
-          '相談の送信に失敗しました。通信状況をご確認のうえ、もう一度お試しください。',
-          style: TextStyle(color: Colors.red),
+        return Text(
+          l10n.consultationSubmitFailedMessage,
+          style: const TextStyle(color: Colors.red),
         );
       case _ResultKind.response:
         return Container(
@@ -261,9 +264,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         }
         final history = snapshot.data!;
         if (history.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Text('相談履歴はまだありません。'),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              AppLocalizations.of(context)!.consultationHistoryEmptyMessage,
+            ),
           );
         }
         return Column(

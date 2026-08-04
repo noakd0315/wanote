@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
+
 /// Permanent, always-visible disclaimer required by spec 6.5: "本機能は医療
 /// 診断ではなく、受診目安の参考情報です". Must be shown on every AI response
 /// screen, not just on first use — do not gate this behind a dismiss button.
 class DisclaimerBanner extends StatelessWidget {
   const DisclaimerBanner({super.key});
 
-  static const String text =
-      '本機能は医療診断ではなく、受診目安の参考情報です。'
-      '症状が続く場合や心配な場合は、必ず動物病院を受診してください。';
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
@@ -32,7 +31,7 @@ class DisclaimerBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              text,
+              l10n.aiDisclaimerText,
               style: TextStyle(
                 fontSize: 12,
                 color: colorScheme.onSurfaceVariant,

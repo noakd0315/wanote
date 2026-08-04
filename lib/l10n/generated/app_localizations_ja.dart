@@ -618,4 +618,185 @@ class AppLocalizationsJa extends AppLocalizations {
   String visitCostYenSuffix(int cost) {
     return '$cost円';
   }
+
+  @override
+  String get aiDisclaimerText =>
+      '本機能は医療診断ではなく、受診目安の参考情報です。症状が続く場合や心配な場合は、必ず動物病院を受診してください。';
+
+  @override
+  String get aiEmergencyMessage =>
+      '至急動物病院へ連絡・受診してください。\nこの内容は緊急性が高い可能性があるため、AIによる回答はスキップし、すぐに動物病院に相談することをおすすめします。';
+
+  @override
+  String get aiUpgradeCardButtonLabel => 'チケットを購入 / 有料プランを見る';
+
+  @override
+  String get consultationScreenAppBarTitle => 'AI相談';
+
+  @override
+  String get consultationReferenceRecordsLabel => '関連する記録を参照する（任意）';
+
+  @override
+  String get consultationInputHintText => '気になる症状や様子を入力してください（例：今朝からぐったりしている）';
+
+  @override
+  String get consultationSubmitButton => '相談する';
+
+  @override
+  String get consultationUsageLimitMessage =>
+      '今月の無料相談回数とチケットを使い切りました。チケットを購入するか、有料プランにアップグレードすると引き続きご利用いただけます。';
+
+  @override
+  String get consultationSubmitFailedMessage =>
+      '相談の送信に失敗しました。通信状況をご確認のうえ、もう一度お試しください。';
+
+  @override
+  String get consultationHistoryTitle => '相談履歴';
+
+  @override
+  String get consultationHistoryEmptyMessage => '相談履歴はまだありません。';
+
+  @override
+  String get foodPortionAppBarTitle => '餌の量を計算';
+
+  @override
+  String get foodPortionWeightLabel => '体重 (kg)';
+
+  @override
+  String get foodPortionLifeStageLabel => 'ライフステージ';
+
+  @override
+  String foodPortionNeuteredStatusLabel(String status) {
+    return '避妊・去勢：$status（プロフィールの登録内容）';
+  }
+
+  @override
+  String get neuteredStatusDone => '済み';
+
+  @override
+  String get neuteredStatusNotDone => '未';
+
+  @override
+  String get foodPortionBodyConditionLabel => '体型（ボディコンディション）';
+
+  @override
+  String get foodPortionBodyConditionHelperText =>
+      'あばら骨に触れやすい＝痩せ気味／触れるが見えない＝標準／触れにくい＝ぽっちゃり気味';
+
+  @override
+  String get foodPortionActivityLevelLabel => '活動レベル';
+
+  @override
+  String get foodPortionPuppyNoteText => '※ 成長期の子犬は体型・活動量に関わらず、年齢に応じた係数で算出します。';
+
+  @override
+  String get foodPortionCalorieDensityLabel => 'フードのカロリー密度 (kcal/100g)';
+
+  @override
+  String get foodPortionCalorieDensityHelperText =>
+      'フードのパッケージに記載されている値を入力してください';
+
+  @override
+  String get foodPortionCalculateButton => '計算する';
+
+  @override
+  String get foodPortionRerLabel => '安静時代謝エネルギー (RER)';
+
+  @override
+  String get foodPortionMerLabel => '1日の目安摂取カロリー (MER)';
+
+  @override
+  String get foodPortionDailyFoodLabel => '1日あたりの給餌量';
+
+  @override
+  String foodPortionKcalPerDayValue(int value) {
+    return '$value kcal/日';
+  }
+
+  @override
+  String foodPortionGramsPerDayValue(int value) {
+    return '$value g/日';
+  }
+
+  @override
+  String get foodPortionResultDisclaimerText =>
+      '※ 目安です。体調・体型の変化に応じて調整し、詳しくは獣医師にご相談ください。';
+
+  @override
+  String get foodPortionRequestAdviceButton => 'AIに給餌のアドバイスを聞く';
+
+  @override
+  String get foodPortionAdviceUsageLimitMessage => 'AI相談の利用回数上限に達しています。';
+
+  @override
+  String get foodPortionAdviceFailedMessage => 'アドバイスの取得に失敗しました。';
+
+  @override
+  String get foodPortionAdviceRetryButton => '再試行';
+
+  @override
+  String get dogLifeStagePuppyLabel => '子犬（成長期）';
+
+  @override
+  String get dogLifeStageAdultLabel => '成犬';
+
+  @override
+  String get bodyConditionUnderweightLabel => '痩せ気味';
+
+  @override
+  String get bodyConditionIdealLabel => '標準';
+
+  @override
+  String get bodyConditionOverweightLabel => 'ぽっちゃり気味';
+
+  @override
+  String get activityLevelLowLabel => '運動量少なめ';
+
+  @override
+  String get activityLevelNormalLabel => '普通';
+
+  @override
+  String get activityLevelHighLabel => '活発';
+
+  @override
+  String get reportAppBarTitle => 'AI健康レポート';
+
+  @override
+  String get reportExportPdfTooltip => 'PDFで書き出す';
+
+  @override
+  String reportPeriodLabel(String start, String end) {
+    return '対象期間: $start 〜 $end';
+  }
+
+  @override
+  String get reportWeightTrendTitle => '体重の推移';
+
+  @override
+  String get reportToiletTrendTitle => 'トイレ回数の推移';
+
+  @override
+  String get reportAiSummaryTitle => 'AIサマリー';
+
+  @override
+  String get reportGenerationFailedMessage => 'レポート生成に失敗しました。もう一度お試しください。';
+
+  @override
+  String get reportGenerateSummaryButton => 'AIサマリーを生成';
+
+  @override
+  String get reportSummaryUsageLimitMessage =>
+      'AIサマリーは有料プラン限定機能です。グラフは無料版でも引き続きご覧いただけます。';
+
+  @override
+  String get reportNoWeightDataMessage => '体重の記録がありません。';
+
+  @override
+  String get reportNoToiletDataMessage => 'トイレの記録がありません。';
+
+  @override
+  String get reportUrineLegendLabel => '排尿';
+
+  @override
+  String get reportStoolLegendLabel => '排便';
 }

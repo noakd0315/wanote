@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/report_pdf_exporter.dart';
 import '../data/report_repository.dart';
@@ -91,17 +92,18 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('AI健康レポート'),
+        title: Text(l10n.reportAppBarTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: 'PDFで書き出す',
+            tooltip: l10n.reportExportPdfTooltip,
             onPressed: _exportPdf,
           ),
         ],
@@ -110,30 +112,42 @@ class _ReportScreenState extends State<ReportScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            '対象期間: ${_fullDateLabel(widget.stats.periodStart)} 〜 ${_fullDateLabel(widget.stats.periodEnd)}',
+            l10n.reportPeriodLabel(
+              _fullDateLabel(widget.stats.periodStart),
+              _fullDateLabel(widget.stats.periodEnd),
+            ),
           ),
           const SizedBox(height: 16),
-          const Text('体重の推移', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.reportWeightTrendTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
-          SizedBox(height: 180, child: _buildWeightChart()),
+          SizedBox(height: 180, child: _buildWeightChart(l10n)),
           const SizedBox(height: 24),
-          const Text('トイレ回数の推移', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.reportToiletTrendTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
-          SizedBox(height: 180, child: _buildToiletChart()),
+          SizedBox(height: 180, child: _buildToiletChart(l10n)),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 8),
-          const Text('AIサマリー', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.reportAiSummaryTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           const DisclaimerBanner(),
           const SizedBox(height: 12),
-          _buildSummarySection(),
+          _buildSummarySection(l10n),
         ],
       ),
     );
   }
 
-  Widget _buildSummarySection() {
+  Widget _buildSummarySection(AppLocalizations l10n) {
     switch (_state) {
       case _SummaryState.idle:
       case _SummaryState.error:
@@ -141,16 +155,16 @@ class _ReportScreenState extends State<ReportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_state == _SummaryState.error)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  'レポート生成に失敗しました。もう一度お試しください。',
-                  style: TextStyle(color: Colors.red),
+                  l10n.reportGenerationFailedMessage,
+                  style: const TextStyle(color: Colors.red),
                 ),
               ),
             FilledButton(
               onPressed: _generateSummary,
-              child: const Text('AIサマリーを生成'),
+              child: Text(l10n.reportGenerateSummaryButton),
             ),
           ],
         );
@@ -158,9 +172,7 @@ class _ReportScreenState extends State<ReportScreen> {
         return const Center(child: CircularProgressIndicator());
       case _SummaryState.needsUpgrade:
         return UpgradePromptCard(
-          message:
-              'AIサマリーは有料プラン限定機能です。'
-              'グラフは無料版でも引き続きご覧いただけます。',
+          message: l10n.reportSummaryUsageLimitMessage,
           onUpgrade: widget.onRequestUpgrade,
         );
       case _SummaryState.ready:
@@ -178,10 +190,10 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  Widget _buildWeightChart() {
+  Widget _buildWeightChart(AppLocalizations l10n) {
     final samples = widget.stats.weightSamples;
     if (samples.isEmpty) {
-      return const Center(child: Text('体重の記録がありません。'));
+      return Center(child: Text(l10n.reportNoWeightDataMessage));
     }
     final spots = <FlSpot>[
       for (var i = 0; i < samples.length; i++)
@@ -254,10 +266,10 @@ class _ReportScreenState extends State<ReportScreen> {
   /// Urine and stool render as two side-by-side bars per day (rather than
   /// one combined bar) so each is distinguishable at a glance, per the PM's
   /// request -- same [_ToiletTypeLegend] used by ToiletFrequencyChartScreen.
-  Widget _buildToiletChart() {
+  Widget _buildToiletChart(AppLocalizations l10n) {
     final counts = widget.stats.toiletCountsByDay;
     if (counts.isEmpty) {
-      return const Center(child: Text('トイレの記録がありません。'));
+      return Center(child: Text(l10n.reportNoToiletDataMessage));
     }
     final groups = <BarChartGroupData>[
       for (var i = 0; i < counts.length; i++)
@@ -279,7 +291,7 @@ class _ReportScreenState extends State<ReportScreen> {
     ];
     return Column(
       children: [
-        const _ToiletTypeLegend(),
+        _ToiletTypeLegend(l10n: l10n),
         const SizedBox(height: 4),
         Expanded(
           child: BarChart(
@@ -352,16 +364,18 @@ class _ReportScreenState extends State<ReportScreen> {
 /// are identifiable without guessing -- same colors/labels as
 /// ToiletFrequencyChartScreen's identical legend.
 class _ToiletTypeLegend extends StatelessWidget {
-  const _ToiletTypeLegend();
+  const _ToiletTypeLegend({required this.l10n});
+
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _LegendDot(color: Colors.blue, label: '排尿'),
-        SizedBox(width: 16),
-        _LegendDot(color: Colors.brown, label: '排便'),
+        _LegendDot(color: Colors.blue, label: l10n.reportUrineLegendLabel),
+        const SizedBox(width: 16),
+        _LegendDot(color: Colors.brown, label: l10n.reportStoolLegendLabel),
       ],
     );
   }

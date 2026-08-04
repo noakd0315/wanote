@@ -864,5 +864,253 @@
         "type": "int"
       }
     }
+  },
+
+  "aiDisclaimerText": "This feature is not a medical diagnosis -- it's reference information to help you judge whether a vet visit is needed. If symptoms continue or you're concerned, please be sure to see a veterinarian.",
+  "@aiDisclaimerText": {
+    "description": "Permanent disclaimer shown on every AI response screen (consultation, food portion, report)."
+  },
+  "aiEmergencyMessage": "Please contact or visit a veterinary hospital immediately.\nThis may be a high-urgency situation, so the AI response has been skipped -- we recommend consulting a vet right away.",
+  "@aiEmergencyMessage": {
+    "description": "Fixed emergency notice shown instead of an AI response when EmergencyKeywordDetector fires."
+  },
+  "aiUpgradeCardButtonLabel": "Buy tickets / View premium plans",
+  "@aiUpgradeCardButtonLabel": {
+    "description": "Button label on the AI feature's usage-limit upgrade prompt card."
+  },
+
+  "consultationScreenAppBarTitle": "AI Consultation",
+  "@consultationScreenAppBarTitle": {
+    "description": "AppBar title of the AI consultation screen."
+  },
+  "consultationReferenceRecordsLabel": "Reference related records (optional)",
+  "@consultationReferenceRecordsLabel": {
+    "description": "Heading above the chip list of prefilled records the user can attach to their consultation."
+  },
+  "consultationInputHintText": "Describe the symptoms or condition you're concerned about (e.g. \"lethargic since this morning\")",
+  "@consultationInputHintText": {
+    "description": "Hint text in the consultation question text field."
+  },
+  "consultationSubmitButton": "Ask",
+  "@consultationSubmitButton": {
+    "description": "Button that submits the consultation question."
+  },
+  "consultationUsageLimitMessage": "You've used up this month's free consultations and tickets. Purchase tickets or upgrade to a premium plan to keep using this feature.",
+  "@consultationUsageLimitMessage": {
+    "description": "Message on the upgrade prompt card shown when the user has no consultations left."
+  },
+  "consultationSubmitFailedMessage": "Failed to send your consultation. Please check your connection and try again.",
+  "@consultationSubmitFailedMessage": {
+    "description": "Error message shown when submitting a consultation fails."
+  },
+  "consultationHistoryTitle": "Consultation history",
+  "@consultationHistoryTitle": {
+    "description": "Heading above the consultation history list."
+  },
+  "consultationHistoryEmptyMessage": "No consultation history yet.",
+  "@consultationHistoryEmptyMessage": {
+    "description": "Empty-state message shown when the pet has no past consultations."
+  },
+
+  "foodPortionAppBarTitle": "Calculate food portion",
+  "@foodPortionAppBarTitle": {
+    "description": "AppBar title of the food portion calculator screen."
+  },
+  "foodPortionWeightLabel": "Weight (kg)",
+  "@foodPortionWeightLabel": {
+    "description": "Label for the weight text field on the food portion screen."
+  },
+  "foodPortionLifeStageLabel": "Life stage",
+  "@foodPortionLifeStageLabel": {
+    "description": "Label for the life stage dropdown on the food portion screen."
+  },
+  "foodPortionNeuteredStatusLabel": "Neutered/spayed: {status} (from profile)",
+  "@foodPortionNeuteredStatusLabel": {
+    "description": "Read-only note showing the pet's neutered status as recorded on its profile.",
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "neuteredStatusDone": "Yes",
+  "@neuteredStatusDone": {
+    "description": "Status value meaning the pet is neutered/spayed, embedded in foodPortionNeuteredStatusLabel."
+  },
+  "neuteredStatusNotDone": "No",
+  "@neuteredStatusNotDone": {
+    "description": "Status value meaning the pet is not neutered/spayed, embedded in foodPortionNeuteredStatusLabel."
+  },
+  "foodPortionBodyConditionLabel": "Body condition",
+  "@foodPortionBodyConditionLabel": {
+    "description": "Label for the body condition dropdown on the food portion screen."
+  },
+  "foodPortionBodyConditionHelperText": "Ribs easy to feel = underweight / Feelable but not visible = ideal / Hard to feel = overweight",
+  "@foodPortionBodyConditionHelperText": {
+    "description": "Helper text explaining how to judge body condition."
+  },
+  "foodPortionActivityLevelLabel": "Activity level",
+  "@foodPortionActivityLevelLabel": {
+    "description": "Label for the activity level dropdown on the food portion screen."
+  },
+  "foodPortionPuppyNoteText": "* For growing puppies, the amount is calculated using an age-based factor regardless of body condition or activity level.",
+  "@foodPortionPuppyNoteText": {
+    "description": "Note shown instead of the body condition/activity level dropdowns when the life stage is puppy."
+  },
+  "foodPortionCalorieDensityLabel": "Food calorie density (kcal/100g)",
+  "@foodPortionCalorieDensityLabel": {
+    "description": "Label for the food calorie density text field."
+  },
+  "foodPortionCalorieDensityHelperText": "Enter the value printed on your food's packaging",
+  "@foodPortionCalorieDensityHelperText": {
+    "description": "Helper text under the food calorie density field."
+  },
+  "foodPortionCalculateButton": "Calculate",
+  "@foodPortionCalculateButton": {
+    "description": "Button that runs the food portion calculation."
+  },
+  "foodPortionRerLabel": "Resting Energy Requirement (RER)",
+  "@foodPortionRerLabel": {
+    "description": "Result row label for the resting energy requirement."
+  },
+  "foodPortionMerLabel": "Maintenance Energy Requirement (MER)",
+  "@foodPortionMerLabel": {
+    "description": "Result row label for the daily maintenance energy requirement."
+  },
+  "foodPortionDailyFoodLabel": "Daily food amount",
+  "@foodPortionDailyFoodLabel": {
+    "description": "Result row label for the recommended daily food amount in grams."
+  },
+  "foodPortionKcalPerDayValue": "{value} kcal/day",
+  "@foodPortionKcalPerDayValue": {
+    "description": "Formatted kcal-per-day value shown in the RER/MER result rows.",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "foodPortionGramsPerDayValue": "{value} g/day",
+  "@foodPortionGramsPerDayValue": {
+    "description": "Formatted grams-per-day value shown in the daily food amount result row.",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "foodPortionResultDisclaimerText": "* This is a guideline. Adjust based on changes in condition or body shape, and consult your veterinarian for details.",
+  "@foodPortionResultDisclaimerText": {
+    "description": "Disclaimer shown below the calculation result."
+  },
+  "foodPortionRequestAdviceButton": "Ask AI for feeding advice",
+  "@foodPortionRequestAdviceButton": {
+    "description": "Button that requests AI-generated feeding advice based on the calculated result."
+  },
+  "foodPortionAdviceUsageLimitMessage": "You've reached your AI consultation usage limit.",
+  "@foodPortionAdviceUsageLimitMessage": {
+    "description": "Message on the upgrade prompt card shown when the user has no AI advice requests left."
+  },
+  "foodPortionAdviceFailedMessage": "Failed to get advice.",
+  "@foodPortionAdviceFailedMessage": {
+    "description": "Error message shown when requesting AI feeding advice fails."
+  },
+  "foodPortionAdviceRetryButton": "Retry",
+  "@foodPortionAdviceRetryButton": {
+    "description": "Button that retries a failed AI feeding advice request."
+  },
+
+  "dogLifeStagePuppyLabel": "Puppy (growing)",
+  "@dogLifeStagePuppyLabel": {
+    "description": "Display label for DogLifeStage.puppy, used in the food portion screen's life stage dropdown."
+  },
+  "dogLifeStageAdultLabel": "Adult",
+  "@dogLifeStageAdultLabel": {
+    "description": "Display label for DogLifeStage.adult, used in the food portion screen's life stage dropdown."
+  },
+  "bodyConditionUnderweightLabel": "Underweight",
+  "@bodyConditionUnderweightLabel": {
+    "description": "Display label for BodyCondition.underweight, used in the food portion screen's body condition dropdown."
+  },
+  "bodyConditionIdealLabel": "Ideal",
+  "@bodyConditionIdealLabel": {
+    "description": "Display label for BodyCondition.ideal, used in the food portion screen's body condition dropdown."
+  },
+  "bodyConditionOverweightLabel": "Overweight",
+  "@bodyConditionOverweightLabel": {
+    "description": "Display label for BodyCondition.overweight, used in the food portion screen's body condition dropdown."
+  },
+  "activityLevelLowLabel": "Low activity",
+  "@activityLevelLowLabel": {
+    "description": "Display label for ActivityLevel.low, used in the food portion screen's activity level dropdown."
+  },
+  "activityLevelNormalLabel": "Normal",
+  "@activityLevelNormalLabel": {
+    "description": "Display label for ActivityLevel.normal, used in the food portion screen's activity level dropdown."
+  },
+  "activityLevelHighLabel": "Active",
+  "@activityLevelHighLabel": {
+    "description": "Display label for ActivityLevel.high, used in the food portion screen's activity level dropdown."
+  },
+
+  "reportAppBarTitle": "AI Health Report",
+  "@reportAppBarTitle": {
+    "description": "AppBar title of the AI health report screen."
+  },
+  "reportExportPdfTooltip": "Export as PDF",
+  "@reportExportPdfTooltip": {
+    "description": "Tooltip for the AppBar action that exports the report as a PDF."
+  },
+  "reportPeriodLabel": "Period: {start} - {end}",
+  "@reportPeriodLabel": {
+    "description": "Shows the report's date range, each already formatted as yyyy/MM/dd.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "reportWeightTrendTitle": "Weight trend",
+  "@reportWeightTrendTitle": {
+    "description": "Heading above the weight trend chart."
+  },
+  "reportToiletTrendTitle": "Toilet frequency trend",
+  "@reportToiletTrendTitle": {
+    "description": "Heading above the toilet frequency chart."
+  },
+  "reportAiSummaryTitle": "AI summary",
+  "@reportAiSummaryTitle": {
+    "description": "Heading above the AI summary section."
+  },
+  "reportGenerationFailedMessage": "Failed to generate the report. Please try again.",
+  "@reportGenerationFailedMessage": {
+    "description": "Error message shown when generating the AI summary fails."
+  },
+  "reportGenerateSummaryButton": "Generate AI summary",
+  "@reportGenerateSummaryButton": {
+    "description": "Button that triggers AI summary generation."
+  },
+  "reportSummaryUsageLimitMessage": "The AI summary is a premium-only feature. Graphs remain available on the free plan.",
+  "@reportSummaryUsageLimitMessage": {
+    "description": "Message on the upgrade prompt card shown when the user isn't subscribed to premium."
+  },
+  "reportNoWeightDataMessage": "No weight records.",
+  "@reportNoWeightDataMessage": {
+    "description": "Empty-state message shown in place of the weight chart when there is no weight data."
+  },
+  "reportNoToiletDataMessage": "No toilet records.",
+  "@reportNoToiletDataMessage": {
+    "description": "Empty-state message shown in place of the toilet chart when there is no toilet data."
+  },
+  "reportUrineLegendLabel": "Urine",
+  "@reportUrineLegendLabel": {
+    "description": "Legend label for the urine bar in the toilet frequency chart."
+  },
+  "reportStoolLegendLabel": "Stool",
+  "@reportStoolLegendLabel": {
+    "description": "Legend label for the stool bar in the toilet frequency chart."
   }
 }

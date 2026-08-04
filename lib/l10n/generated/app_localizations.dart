@@ -1249,6 +1249,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'¥{cost}'**
   String visitCostYenSuffix(int cost);
+
+  /// Permanent disclaimer shown on every AI response screen (consultation, food portion, report).
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is not a medical diagnosis -- it\'s reference information to help you judge whether a vet visit is needed. If symptoms continue or you\'re concerned, please be sure to see a veterinarian.'**
+  String get aiDisclaimerText;
+
+  /// Fixed emergency notice shown instead of an AI response when EmergencyKeywordDetector fires.
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact or visit a veterinary hospital immediately.\nThis may be a high-urgency situation, so the AI response has been skipped -- we recommend consulting a vet right away.'**
+  String get aiEmergencyMessage;
+
+  /// Button label on the AI feature's usage-limit upgrade prompt card.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy tickets / View premium plans'**
+  String get aiUpgradeCardButtonLabel;
+
+  /// AppBar title of the AI consultation screen.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Consultation'**
+  String get consultationScreenAppBarTitle;
+
+  /// Heading above the chip list of prefilled records the user can attach to their consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference related records (optional)'**
+  String get consultationReferenceRecordsLabel;
+
+  /// Hint text in the consultation question text field.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the symptoms or condition you\'re concerned about (e.g. \"lethargic since this morning\")'**
+  String get consultationInputHintText;
+
+  /// Button that submits the consultation question.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get consultationSubmitButton;
+
+  /// Message on the upgrade prompt card shown when the user has no consultations left.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used up this month\'s free consultations and tickets. Purchase tickets or upgrade to a premium plan to keep using this feature.'**
+  String get consultationUsageLimitMessage;
+
+  /// Error message shown when submitting a consultation fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send your consultation. Please check your connection and try again.'**
+  String get consultationSubmitFailedMessage;
+
+  /// Heading above the consultation history list.
+  ///
+  /// In en, this message translates to:
+  /// **'Consultation history'**
+  String get consultationHistoryTitle;
+
+  /// Empty-state message shown when the pet has no past consultations.
+  ///
+  /// In en, this message translates to:
+  /// **'No consultation history yet.'**
+  String get consultationHistoryEmptyMessage;
+
+  /// AppBar title of the food portion calculator screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate food portion'**
+  String get foodPortionAppBarTitle;
+
+  /// Label for the weight text field on the food portion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get foodPortionWeightLabel;
+
+  /// Label for the life stage dropdown on the food portion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Life stage'**
+  String get foodPortionLifeStageLabel;
+
+  /// Read-only note showing the pet's neutered status as recorded on its profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutered/spayed: {status} (from profile)'**
+  String foodPortionNeuteredStatusLabel(String status);
+
+  /// Status value meaning the pet is neutered/spayed, embedded in foodPortionNeuteredStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get neuteredStatusDone;
+
+  /// Status value meaning the pet is not neutered/spayed, embedded in foodPortionNeuteredStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get neuteredStatusNotDone;
+
+  /// Label for the body condition dropdown on the food portion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Body condition'**
+  String get foodPortionBodyConditionLabel;
+
+  /// Helper text explaining how to judge body condition.
+  ///
+  /// In en, this message translates to:
+  /// **'Ribs easy to feel = underweight / Feelable but not visible = ideal / Hard to feel = overweight'**
+  String get foodPortionBodyConditionHelperText;
+
+  /// Label for the activity level dropdown on the food portion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity level'**
+  String get foodPortionActivityLevelLabel;
+
+  /// Note shown instead of the body condition/activity level dropdowns when the life stage is puppy.
+  ///
+  /// In en, this message translates to:
+  /// **'* For growing puppies, the amount is calculated using an age-based factor regardless of body condition or activity level.'**
+  String get foodPortionPuppyNoteText;
+
+  /// Label for the food calorie density text field.
+  ///
+  /// In en, this message translates to:
+  /// **'Food calorie density (kcal/100g)'**
+  String get foodPortionCalorieDensityLabel;
+
+  /// Helper text under the food calorie density field.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the value printed on your food\'s packaging'**
+  String get foodPortionCalorieDensityHelperText;
+
+  /// Button that runs the food portion calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate'**
+  String get foodPortionCalculateButton;
+
+  /// Result row label for the resting energy requirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting Energy Requirement (RER)'**
+  String get foodPortionRerLabel;
+
+  /// Result row label for the daily maintenance energy requirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Energy Requirement (MER)'**
+  String get foodPortionMerLabel;
+
+  /// Result row label for the recommended daily food amount in grams.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily food amount'**
+  String get foodPortionDailyFoodLabel;
+
+  /// Formatted kcal-per-day value shown in the RER/MER result rows.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kcal/day'**
+  String foodPortionKcalPerDayValue(int value);
+
+  /// Formatted grams-per-day value shown in the daily food amount result row.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g/day'**
+  String foodPortionGramsPerDayValue(int value);
+
+  /// Disclaimer shown below the calculation result.
+  ///
+  /// In en, this message translates to:
+  /// **'* This is a guideline. Adjust based on changes in condition or body shape, and consult your veterinarian for details.'**
+  String get foodPortionResultDisclaimerText;
+
+  /// Button that requests AI-generated feeding advice based on the calculated result.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI for feeding advice'**
+  String get foodPortionRequestAdviceButton;
+
+  /// Message on the upgrade prompt card shown when the user has no AI advice requests left.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached your AI consultation usage limit.'**
+  String get foodPortionAdviceUsageLimitMessage;
+
+  /// Error message shown when requesting AI feeding advice fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to get advice.'**
+  String get foodPortionAdviceFailedMessage;
+
+  /// Button that retries a failed AI feeding advice request.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get foodPortionAdviceRetryButton;
+
+  /// Display label for DogLifeStage.puppy, used in the food portion screen's life stage dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Puppy (growing)'**
+  String get dogLifeStagePuppyLabel;
+
+  /// Display label for DogLifeStage.adult, used in the food portion screen's life stage dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult'**
+  String get dogLifeStageAdultLabel;
+
+  /// Display label for BodyCondition.underweight, used in the food portion screen's body condition dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Underweight'**
+  String get bodyConditionUnderweightLabel;
+
+  /// Display label for BodyCondition.ideal, used in the food portion screen's body condition dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Ideal'**
+  String get bodyConditionIdealLabel;
+
+  /// Display label for BodyCondition.overweight, used in the food portion screen's body condition dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Overweight'**
+  String get bodyConditionOverweightLabel;
+
+  /// Display label for ActivityLevel.low, used in the food portion screen's activity level dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Low activity'**
+  String get activityLevelLowLabel;
+
+  /// Display label for ActivityLevel.normal, used in the food portion screen's activity level dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get activityLevelNormalLabel;
+
+  /// Display label for ActivityLevel.high, used in the food portion screen's activity level dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activityLevelHighLabel;
+
+  /// AppBar title of the AI health report screen.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Health Report'**
+  String get reportAppBarTitle;
+
+  /// Tooltip for the AppBar action that exports the report as a PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get reportExportPdfTooltip;
+
+  /// Shows the report's date range, each already formatted as yyyy/MM/dd.
+  ///
+  /// In en, this message translates to:
+  /// **'Period: {start} - {end}'**
+  String reportPeriodLabel(String start, String end);
+
+  /// Heading above the weight trend chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight trend'**
+  String get reportWeightTrendTitle;
+
+  /// Heading above the toilet frequency chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Toilet frequency trend'**
+  String get reportToiletTrendTitle;
+
+  /// Heading above the AI summary section.
+  ///
+  /// In en, this message translates to:
+  /// **'AI summary'**
+  String get reportAiSummaryTitle;
+
+  /// Error message shown when generating the AI summary fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate the report. Please try again.'**
+  String get reportGenerationFailedMessage;
+
+  /// Button that triggers AI summary generation.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate AI summary'**
+  String get reportGenerateSummaryButton;
+
+  /// Message on the upgrade prompt card shown when the user isn't subscribed to premium.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI summary is a premium-only feature. Graphs remain available on the free plan.'**
+  String get reportSummaryUsageLimitMessage;
+
+  /// Empty-state message shown in place of the weight chart when there is no weight data.
+  ///
+  /// In en, this message translates to:
+  /// **'No weight records.'**
+  String get reportNoWeightDataMessage;
+
+  /// Empty-state message shown in place of the toilet chart when there is no toilet data.
+  ///
+  /// In en, this message translates to:
+  /// **'No toilet records.'**
+  String get reportNoToiletDataMessage;
+
+  /// Legend label for the urine bar in the toilet frequency chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Urine'**
+  String get reportUrineLegendLabel;
+
+  /// Legend label for the stool bar in the toilet frequency chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Stool'**
+  String get reportStoolLegendLabel;
 }
 
 class _AppLocalizationsDelegate

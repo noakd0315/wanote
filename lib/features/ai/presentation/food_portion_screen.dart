@@ -1,10 +1,39 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
 import '../domain/food_portion_calculator.dart';
 import '../domain/usage_limit_policy.dart';
 import 'widgets/upgrade_prompt_card.dart';
+
+/// Display labels for [DogLifeStage], kept here (not on the enum itself)
+/// since the enum lives in the framework-free domain layer and can't call
+/// [AppLocalizations.of] -- see the model's `.label` getter, which is left
+/// in place for the non-UI AI-prompt use in [_FoodPortionScreenState._requestAdvice].
+String _lifeStageLabel(AppLocalizations l10n, DogLifeStage stage) =>
+    switch (stage) {
+      DogLifeStage.puppy => l10n.dogLifeStagePuppyLabel,
+      DogLifeStage.adult => l10n.dogLifeStageAdultLabel,
+    };
+
+/// Display labels for [BodyCondition] -- see [_lifeStageLabel] for why this
+/// lives in the presentation layer instead of on the enum.
+String _bodyConditionLabel(AppLocalizations l10n, BodyCondition condition) =>
+    switch (condition) {
+      BodyCondition.underweight => l10n.bodyConditionUnderweightLabel,
+      BodyCondition.ideal => l10n.bodyConditionIdealLabel,
+      BodyCondition.overweight => l10n.bodyConditionOverweightLabel,
+    };
+
+/// Display labels for [ActivityLevel] -- see [_lifeStageLabel] for why this
+/// lives in the presentation layer instead of on the enum.
+String _activityLevelLabel(AppLocalizations l10n, ActivityLevel level) =>
+    switch (level) {
+      ActivityLevel.low => l10n.activityLevelLowLabel,
+      ActivityLevel.normal => l10n.activityLevelNormalLabel,
+      ActivityLevel.high => l10n.activityLevelHighLabel,
+    };
 
 /// Dog food-portion calculator, reachable from the home screen icon per the
 /// PM's request.
@@ -158,25 +187,31 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final result = _result;
     final isAdult = _lifeStage == DogLifeStage.adult;
     return Scaffold(
-      appBar: AppBar(title: const Text('餌の量を計算')),
+      appBar: AppBar(title: Text(l10n.foodPortionAppBarTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: '体重 (kg)'),
+            decoration: InputDecoration(labelText: l10n.foodPortionWeightLabel),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<DogLifeStage>(
             initialValue: _lifeStage,
-            decoration: const InputDecoration(labelText: 'ライフステージ'),
+            decoration: InputDecoration(
+              labelText: l10n.foodPortionLifeStageLabel,
+            ),
             items: [
               for (final stage in DogLifeStage.values)
-                DropdownMenuItem(value: stage, child: Text(stage.label)),
+                DropdownMenuItem(
+                  value: stage,
+                  child: Text(_lifeStageLabel(l10n, stage)),
+                ),
             ],
             onChanged: (value) {
               if (value != null) setState(() => _lifeStage = value);
@@ -185,22 +220,26 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           if (isAdult) ...[
             const SizedBox(height: 12),
             Text(
-              '避妊・去勢：${widget.neutered ? '済み' : '未'}（プロフィールの登録内容）',
+              l10n.foodPortionNeuteredStatusLabel(
+                widget.neutered
+                    ? l10n.neuteredStatusDone
+                    : l10n.neuteredStatusNotDone,
+              ),
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<BodyCondition>(
               initialValue: _bodyCondition,
-              decoration: const InputDecoration(
-                labelText: '体型（ボディコンディション）',
-                helperText: 'あばら骨に触れやすい＝痩せ気味／触れるが見えない＝標準／触れにくい＝ぽっちゃり気味',
+              decoration: InputDecoration(
+                labelText: l10n.foodPortionBodyConditionLabel,
+                helperText: l10n.foodPortionBodyConditionHelperText,
                 helperMaxLines: 2,
               ),
               items: [
                 for (final condition in BodyCondition.values)
                   DropdownMenuItem(
                     value: condition,
-                    child: Text(condition.label),
+                    child: Text(_bodyConditionLabel(l10n, condition)),
                   ),
               ],
               onChanged: (value) {
@@ -210,10 +249,15 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<ActivityLevel>(
               initialValue: _activityLevel,
-              decoration: const InputDecoration(labelText: '活動レベル'),
+              decoration: InputDecoration(
+                labelText: l10n.foodPortionActivityLevelLabel,
+              ),
               items: [
                 for (final level in ActivityLevel.values)
-                  DropdownMenuItem(value: level, child: Text(level.label)),
+                  DropdownMenuItem(
+                    value: level,
+                    child: Text(_activityLevelLabel(l10n, level)),
+                  ),
               ],
               onChanged: (value) {
                 if (value != null) setState(() => _activityLevel = value);
@@ -221,79 +265,91 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             ),
           ] else ...[
             const SizedBox(height: 12),
-            const Text(
-              '※ 成長期の子犬は体型・活動量に関わらず、年齢に応じた係数で算出します。',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            Text(
+              l10n.foodPortionPuppyNoteText,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
           const SizedBox(height: 12),
           TextField(
             controller: _foodDensityController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'フードのカロリー密度 (kcal/100g)',
-              helperText: 'フードのパッケージに記載されている値を入力してください',
+            decoration: InputDecoration(
+              labelText: l10n.foodPortionCalorieDensityLabel,
+              helperText: l10n.foodPortionCalorieDensityHelperText,
             ),
           ),
           const SizedBox(height: 16),
-          FilledButton(onPressed: _calculate, child: const Text('計算する')),
+          FilledButton(
+            onPressed: _calculate,
+            child: Text(l10n.foodPortionCalculateButton),
+          ),
           if (result != null) ...[
             const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 8),
             _ResultRow(
-              label: '安静時代謝エネルギー (RER)',
-              value: '${result.restingEnergyKcal.round()} kcal/日',
+              label: l10n.foodPortionRerLabel,
+              value: l10n.foodPortionKcalPerDayValue(
+                result.restingEnergyKcal.round(),
+              ),
             ),
             _ResultRow(
-              label: '1日の目安摂取カロリー (MER)',
-              value: '${result.maintenanceEnergyKcal.round()} kcal/日',
+              label: l10n.foodPortionMerLabel,
+              value: l10n.foodPortionKcalPerDayValue(
+                result.maintenanceEnergyKcal.round(),
+              ),
             ),
             _ResultRow(
-              label: '1日あたりの給餌量',
-              value: '${result.dailyFoodGrams.round()} g/日',
+              label: l10n.foodPortionDailyFoodLabel,
+              value: l10n.foodPortionGramsPerDayValue(
+                result.dailyFoodGrams.round(),
+              ),
               emphasize: true,
             ),
             const SizedBox(height: 8),
-            const Text(
-              '※ 目安です。体調・体型の変化に応じて調整し、詳しくは獣医師にご相談ください。',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            Text(
+              l10n.foodPortionResultDisclaimerText,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 16),
-            _buildAdviceSection(),
+            _buildAdviceSection(l10n),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildAdviceSection() {
+  Widget _buildAdviceSection(AppLocalizations l10n) {
     switch (_adviceState) {
       case _AdviceState.idle:
         return OutlinedButton.icon(
           onPressed: _requestAdvice,
           icon: const Icon(Icons.smart_toy_outlined),
-          label: const Text('AIに給餌のアドバイスを聞く'),
+          label: Text(l10n.foodPortionRequestAdviceButton),
         );
       case _AdviceState.loading:
         return const Center(child: CircularProgressIndicator());
       case _AdviceState.needsUpgrade:
         return UpgradePromptCard(
-          message: 'AI相談の利用回数上限に達しています。',
+          message: l10n.foodPortionAdviceUsageLimitMessage,
           onUpgrade: widget.onRequestUpgrade,
         );
       case _AdviceState.error:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                'アドバイスの取得に失敗しました。',
-                style: TextStyle(color: Colors.red),
+                l10n.foodPortionAdviceFailedMessage,
+                style: const TextStyle(color: Colors.red),
               ),
             ),
-            OutlinedButton(onPressed: _requestAdvice, child: const Text('再試行')),
+            OutlinedButton(
+              onPressed: _requestAdvice,
+              child: Text(l10n.foodPortionAdviceRetryButton),
+            ),
           ],
         );
       case _AdviceState.ready:

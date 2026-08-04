@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/emergency_keyword_detector.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 
 /// Fixed "至急動物病院へ" notice shown instead of an AI response when
 /// [EmergencyKeywordDetector] fires (spec 6.5). No AI/backend call happens
@@ -10,6 +10,7 @@ class EmergencyNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
@@ -28,7 +29,7 @@ class EmergencyNotice extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              EmergencyKeywordDetector.emergencyMessage,
+              l10n.aiEmergencyMessage,
               style: TextStyle(
                 color: colorScheme.onErrorContainer,
                 fontWeight: FontWeight.bold,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
+
 /// Shown in place of an AI result when [UsageLimitPolicy] (or the
 /// hasUnlimitedSubscription gate on the report screen) says the caller can't
 /// proceed. This is a stub hook point for Agent E's billing UI: features/ai
@@ -17,6 +19,7 @@ class UpgradePromptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
@@ -35,7 +38,7 @@ class UpgradePromptCard extends StatelessWidget {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: onUpgrade,
-            child: const Text('チケットを購入 / 有料プランを見る'),
+            child: Text(l10n.aiUpgradeCardButtonLabel),
           ),
         ],
       ),
