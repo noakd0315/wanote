@@ -1112,5 +1112,285 @@
   "reportStoolLegendLabel": "Stool",
   "@reportStoolLegendLabel": {
     "description": "Legend label for the stool bar in the toilet frequency chart."
+  },
+
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Generic cancel button label used across daily-record dialogs."
+  },
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "Generic save button label used across daily-record forms."
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Generic delete button/action label used across daily-record screens."
+  },
+  "commonNoRecordsYet": "No records yet",
+  "@commonNoRecordsYet": {
+    "description": "Empty-state message shown when a record timeline has no entries."
+  },
+  "commonDateLabel": "Date",
+  "@commonDateLabel": {
+    "description": "Label for a date field/list tile that opens a date picker."
+  },
+  "commonTimeLabel": "Time",
+  "@commonTimeLabel": {
+    "description": "Label for a time field/list tile that opens a time picker."
+  },
+
+  "healthRecordDeleteConfirmTitle": "Delete this record?",
+  "@healthRecordDeleteConfirmTitle": {
+    "description": "Title of the confirmation dialog shown before deleting a health record."
+  },
+  "healthRecordNoCommentPlaceholder": "(No comment)",
+  "@healthRecordNoCommentPlaceholder": {
+    "description": "Placeholder shown in the health record detail screen when no memo/comment was entered."
+  },
+  "healthRecordFormTitleNew": "New health record",
+  "@healthRecordFormTitleNew": {
+    "description": "AppBar title of the health record form when creating a new record."
+  },
+  "healthRecordFormTitleEdit": "Edit health record",
+  "@healthRecordFormTitleEdit": {
+    "description": "AppBar title of the health record form when editing an existing record."
+  },
+  "healthRecordDateTimeLabel": "Recorded at",
+  "@healthRecordDateTimeLabel": {
+    "description": "Label for the recorded-at date/time list tile in the health record form."
+  },
+  "healthRecordTagsSectionLabel": "Category tags",
+  "@healthRecordTagsSectionLabel": {
+    "description": "Section heading above the category tag chips in the health record form."
+  },
+  "healthRecordPhotosSectionLabel": "Photos",
+  "@healthRecordPhotosSectionLabel": {
+    "description": "Section heading above the photo picker in the health record form."
+  },
+  "healthRecordPhotoCount": "{count}/{max} photos",
+  "@healthRecordPhotoCount": {
+    "description": "Shows how many photos are attached out of the maximum allowed, e.g. '2/6 photos'.",
+    "placeholders": {
+      "count": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "healthRecordCommentLabel": "Comment",
+  "@healthRecordCommentLabel": {
+    "description": "Label for the free-text comment field in the health record form."
+  },
+  "healthRecordTimelineTitle": "Health records",
+  "@healthRecordTimelineTitle": {
+    "description": "AppBar title of the health record timeline screen."
+  },
+
+  "healthRecordTagSkin": "Skin",
+  "@healthRecordTagSkin": {
+    "description": "Display label for the HealthRecordTag.skin category tag."
+  },
+  "healthRecordTagAppetiteLoss": "Loss of appetite",
+  "@healthRecordTagAppetiteLoss": {
+    "description": "Display label for the HealthRecordTag.appetiteLoss category tag."
+  },
+  "healthRecordTagLowEnergy": "Low energy",
+  "@healthRecordTagLowEnergy": {
+    "description": "Display label for the HealthRecordTag.lowEnergy category tag."
+  },
+  "healthRecordTagVomiting": "Vomiting",
+  "@healthRecordTagVomiting": {
+    "description": "Display label for the HealthRecordTag.vomiting category tag."
+  },
+  "healthRecordTagDiarrhea": "Diarrhea",
+  "@healthRecordTagDiarrhea": {
+    "description": "Display label for the HealthRecordTag.diarrhea category tag."
+  },
+  "healthRecordTagOther": "Other",
+  "@healthRecordTagOther": {
+    "description": "Display label for the HealthRecordTag.other category tag."
+  },
+
+  "toiletFrequencyChartTitle": "Toilet frequency",
+  "@toiletFrequencyChartTitle": {
+    "description": "AppBar title of the toilet frequency chart screen."
+  },
+  "toiletUrineLabel": "Urine",
+  "@toiletUrineLabel": {
+    "description": "Short label for the urine toilet-record type, used on buttons and the chart legend."
+  },
+  "toiletStoolLabel": "Stool",
+  "@toiletStoolLabel": {
+    "description": "Short label for the stool toilet-record type, used on buttons and the chart legend."
+  },
+
+  "toiletRecordStoolFormTitle": "Record stool",
+  "@toiletRecordStoolFormTitle": {
+    "description": "AppBar title of the stool record form."
+  },
+  "toiletHardnessSectionLabel": "Hardness",
+  "@toiletHardnessSectionLabel": {
+    "description": "Section heading above the stool hardness choice chips."
+  },
+  "toiletColorSectionLabel": "Color",
+  "@toiletColorSectionLabel": {
+    "description": "Section heading above the stool color choice chips."
+  },
+  "toiletPhotoAddLabel": "Add photo (optional)",
+  "@toiletPhotoAddLabel": {
+    "description": "Button label to attach a photo to a stool record when none is attached yet."
+  },
+  "toiletPhotoChangeLabel": "Change photo",
+  "@toiletPhotoChangeLabel": {
+    "description": "Button label to replace the already-attached photo on a stool record."
+  },
+  "toiletLocationOptionalLabel": "Location (optional)",
+  "@toiletLocationOptionalLabel": {
+    "description": "Label for the optional free-text location field on the stool record form and the urine record dialog."
+  },
+  "toiletLocationSubtitle": "Location: {location}",
+  "@toiletLocationSubtitle": {
+    "description": "Timeline list-tile subtitle segment showing the recorded location, appended after the color/condition segment when present.",
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+
+  "toiletRecordTimelineTitle": "Toilet records",
+  "@toiletRecordTimelineTitle": {
+    "description": "AppBar title of the toilet record timeline screen."
+  },
+  "toiletConsultAiButtonLabel": "Consult AI",
+  "@toiletConsultAiButtonLabel": {
+    "description": "Button label on the anomaly-suggestion banner that opens the AI consultation flow."
+  },
+  "toiletUrineColorSubtitle": "Color: {color}",
+  "@toiletUrineColorSubtitle": {
+    "description": "Timeline list-tile subtitle for a urine record, showing the recorded color shade.",
+    "placeholders": {
+      "color": {"type": "String"}
+    }
+  },
+  "toiletStoolConditionSubtitle": "Hardness: {hardness} / Color: {color}",
+  "@toiletStoolConditionSubtitle": {
+    "description": "Timeline list-tile subtitle for a stool record, showing its hardness and color.",
+    "placeholders": {
+      "hardness": {"type": "String"},
+      "color": {"type": "String"}
+    }
+  },
+  "toiletRecordUrineDialogTitle": "Record urine",
+  "@toiletRecordUrineDialogTitle": {
+    "description": "Title of the dialog used to confirm/edit a one-tap urine record before saving."
+  },
+  "toiletUrineColorShadeLabel": "Color shade",
+  "@toiletUrineColorShadeLabel": {
+    "description": "Section heading above the urine color shade choice chips in the urine record dialog."
+  },
+  "toiletRecordSubmitButtonLabel": "Record",
+  "@toiletRecordSubmitButtonLabel": {
+    "description": "Submit button label in the urine record dialog."
+  },
+
+  "toiletHardnessNormal": "Normal",
+  "@toiletHardnessNormal": {
+    "description": "Display label for StoolHardness.normal."
+  },
+  "toiletHardnessSoft": "Soft",
+  "@toiletHardnessSoft": {
+    "description": "Display label for StoolHardness.soft."
+  },
+  "toiletHardnessDiarrhea": "Diarrhea",
+  "@toiletHardnessDiarrhea": {
+    "description": "Display label for StoolHardness.diarrhea."
+  },
+  "toiletHardnessHard": "Hard",
+  "@toiletHardnessHard": {
+    "description": "Display label for StoolHardness.hard."
+  },
+  "toiletColorNormal": "Normal",
+  "@toiletColorNormal": {
+    "description": "Display label for StoolColor.normal."
+  },
+  "toiletColorBloodSuspected": "Blood suspected",
+  "@toiletColorBloodSuspected": {
+    "description": "Display label for StoolColor.bloodSuspected."
+  },
+  "toiletColorPale": "Pale",
+  "@toiletColorPale": {
+    "description": "Display label for StoolColor.pale."
+  },
+  "urineColorPale": "Pale (nearly colorless)",
+  "@urineColorPale": {
+    "description": "Display label for UrineColor.pale."
+  },
+  "urineColorNormal": "Normal (pale yellow)",
+  "@urineColorNormal": {
+    "description": "Display label for UrineColor.normal."
+  },
+  "urineColorDark": "Dark (concentrated)",
+  "@urineColorDark": {
+    "description": "Display label for UrineColor.dark."
+  },
+
+  "weightRecordTimelineTitle": "Weight records",
+  "@weightRecordTimelineTitle": {
+    "description": "AppBar title of the weight record chart/table screen."
+  },
+  "weightShowChartTooltip": "Show chart",
+  "@weightShowChartTooltip": {
+    "description": "Tooltip for the toggle icon button when currently showing the table (tap to switch to chart)."
+  },
+  "weightShowTableTooltip": "Show table",
+  "@weightShowTableTooltip": {
+    "description": "Tooltip for the toggle icon button when currently showing the chart (tap to switch to table)."
+  },
+  "weightDuplicateDateDialogTitle": "A record already exists for this date",
+  "@weightDuplicateDateDialogTitle": {
+    "description": "Title of the dialog shown when adding a weight entry for a date that already has one."
+  },
+  "weightDuplicateDateDialogContent": "Overwrite the existing entry, or add this as an additional entry? (See spec 3.4 for how multiple entries on the same day are handled.)",
+  "@weightDuplicateDateDialogContent": {
+    "description": "Body text of the duplicate-date dialog explaining the overwrite-vs-append choice."
+  },
+  "weightAddAsNewEntryButtonLabel": "Add as new entry",
+  "@weightAddAsNewEntryButtonLabel": {
+    "description": "Button label to append a new weight entry alongside an existing same-day one."
+  },
+  "weightOverwriteButtonLabel": "Overwrite",
+  "@weightOverwriteButtonLabel": {
+    "description": "Button label to overwrite the existing same-day weight entry."
+  },
+  "weightPeriodOneMonth": "1 month",
+  "@weightPeriodOneMonth": {
+    "description": "Segmented button label for the one-month trend period."
+  },
+  "weightPeriodThreeMonths": "3 months",
+  "@weightPeriodThreeMonths": {
+    "description": "Segmented button label for the three-month trend period."
+  },
+  "weightPeriodOneYear": "1 year",
+  "@weightPeriodOneYear": {
+    "description": "Segmented button label for the one-year trend period."
+  },
+  "weightDeltaVsPreviousLabel": "vs. previous",
+  "@weightDeltaVsPreviousLabel": {
+    "description": "Label above the weight delta badge comparing against the previous measurement."
+  },
+  "weightDeltaVsOneMonthAgoLabel": "vs. 1 month ago",
+  "@weightDeltaVsOneMonthAgoLabel": {
+    "description": "Label above the weight delta badge comparing against the measurement one month ago."
+  },
+  "weightNoRecordsForPeriod": "No records for this period",
+  "@weightNoRecordsForPeriod": {
+    "description": "Empty-state message when the selected trend period has no weight records."
+  },
+  "weightEntryDialogTitle": "Record weight",
+  "@weightEntryDialogTitle": {
+    "description": "Title of the dialog used to add a new weight entry."
+  },
+  "weightKgFieldLabel": "Weight (kg)",
+  "@weightKgFieldLabel": {
+    "description": "Label for the numeric weight input field in the weight entry dialog."
   }
 }

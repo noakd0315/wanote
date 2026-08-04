@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
+import 'widgets/toilet_labels.dart';
 
 /// Spec 4.2: "便の状態選択（硬さ：正常／軟便／下痢／硬い、色：正常／血便疑い
 /// ／白っぽい 等）" plus optional photo attachment for abnormal findings, plus
@@ -126,6 +128,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // See health_record_form_screen.dart's build() for why this guard
     // exists (PM report about photos not saving if you navigate away
     // mid-upload).
@@ -135,46 +138,52 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
         if (didPop) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+        ).showSnackBar(SnackBar(content: Text(l10n.savingInProgressMessage)));
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('排便を記録')),
+        appBar: AppBar(title: Text(l10n.toiletRecordStoolFormTitle)),
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('日付'),
+              title: Text(l10n.commonDateLabel),
               subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
               trailing: const Icon(Icons.edit_calendar),
               onTap: _pickDate,
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('時刻'),
+              title: Text(l10n.commonTimeLabel),
               subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
               trailing: const Icon(Icons.access_time),
               onTap: _pickTime,
             ),
             const SizedBox(height: 8),
-            const Text('硬さ', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.toiletHardnessSectionLabel,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             Wrap(
               spacing: 8,
               children: StoolHardness.values.map((h) {
                 return ChoiceChip(
-                  label: Text(h.wireName),
+                  label: Text(stoolHardnessLabel(context, h)),
                   selected: _hardness == h,
                   onSelected: (_) => setState(() => _hardness = h),
                 );
               }).toList(),
             ),
             const SizedBox(height: 16),
-            const Text('色', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.toiletColorSectionLabel,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             Wrap(
               spacing: 8,
               children: StoolColor.values.map((c) {
                 return ChoiceChip(
-                  label: Text(c.wireName),
+                  label: Text(stoolColorLabel(context, c)),
                   selected: _color == c,
                   onSelected: (_) => setState(() => _color = c),
                 );
@@ -183,13 +192,19 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _locationController,
-              decoration: const InputDecoration(labelText: '場所（任意）'),
+              decoration: InputDecoration(
+                labelText: l10n.toiletLocationOptionalLabel,
+              ),
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: _pickPhoto,
               icon: const Icon(Icons.camera_alt),
-              label: Text(_photoBytes == null ? '写真を追加（任意）' : '写真を変更'),
+              label: Text(
+                _photoBytes == null
+                    ? l10n.toiletPhotoAddLabel
+                    : l10n.toiletPhotoChangeLabel,
+              ),
             ),
             if (_photoBytes != null)
               Padding(
@@ -209,7 +224,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
               onPressed: _saving ? null : _save,
               child: _saving
                   ? const CircularProgressIndicator()
-                  : const Text('保存'),
+                  : Text(l10n.commonSave),
             ),
           ],
         ),
