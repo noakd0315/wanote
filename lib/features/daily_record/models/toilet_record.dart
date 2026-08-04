@@ -122,6 +122,7 @@ class ToiletRecord extends Equatable {
     this.stoolCondition,
     this.urineColor,
     this.photo,
+    this.location,
   });
 
   final String toiletId;
@@ -132,15 +133,22 @@ class ToiletRecord extends Equatable {
   final UrineColor? urineColor;
   final String? photo;
 
+  /// Optional free-text place the record happened (e.g. "庭", "散歩中") --
+  /// PM request: "排尿、排便とも任意項目で場所の入力欄が欲しいです". Applies to
+  /// both toilet types alike, unlike [stoolCondition]/[urineColor].
+  final String? location;
+
   ToiletRecord copyWith({
     DateTime? recordedAt,
     ToiletType? type,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
     String? photo,
+    String? location,
     bool clearStoolCondition = false,
     bool clearUrineColor = false,
     bool clearPhoto = false,
+    bool clearLocation = false,
   }) {
     return ToiletRecord(
       toiletId: toiletId,
@@ -152,6 +160,7 @@ class ToiletRecord extends Equatable {
           : (stoolCondition ?? this.stoolCondition),
       urineColor: clearUrineColor ? null : (urineColor ?? this.urineColor),
       photo: clearPhoto ? null : (photo ?? this.photo),
+      location: clearLocation ? null : (location ?? this.location),
     );
   }
 
@@ -164,6 +173,7 @@ class ToiletRecord extends Equatable {
       'stool_condition': stoolCondition?.toMap(),
       'urine_color': urineColor?.wireName,
       'photo': photo,
+      'location': location,
     };
   }
 
@@ -186,6 +196,7 @@ class ToiletRecord extends Equatable {
           ? UrineColor.fromWireName(rawUrineColor)
           : null,
       photo: map['photo'] as String?,
+      location: map['location'] as String?,
     );
   }
 
@@ -198,5 +209,6 @@ class ToiletRecord extends Equatable {
     stoolCondition,
     urineColor,
     photo,
+    location,
   ];
 }

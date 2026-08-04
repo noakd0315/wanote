@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -60,10 +60,21 @@ void main() {
     authStateController = StreamController<AuthIdentity?>.broadcast();
     petsController = StreamController<List<PetProfile>>.broadcast();
 
-    when(() => authRepository.authStateChanges())
-        .thenAnswer((_) => authStateController.stream);
-    when(() => petProfileRepository.watchPets(any()))
-        .thenAnswer((_) => petsController.stream);
+    when(
+      () => authRepository.authStateChanges(),
+    ).thenAnswer((_) => authStateController.stream);
+    when(
+      () => petProfileRepository.watchPets(any()),
+    ).thenAnswer((_) => petsController.stream);
+    when(
+      () => userAccountRepository.watchActiveSessionId(any()),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => userAccountRepository.setActiveSession(
+        uid: any(named: 'uid'),
+        sessionId: any(named: 'sessionId'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   tearDown(() async {
@@ -93,43 +104,53 @@ void main() {
       expect(controller.currentUser, isNull);
     });
 
-    test('existing session, biometric off -> enterApp, not justRegistered', () async {
-      when(() => authRepository.currentUser).thenReturn(_identity);
-      when(() => biometricService.isAvailable()).thenAnswer((_) async => true);
-      when(() => userAccountRepository.get(_uid)).thenAnswer(
-        (_) async => const AppUser(
-          uid: _uid,
-          email: _email,
-          authProvider: AuthProviderType.email,
-          biometricEnabled: false,
-        ),
-      );
+    test(
+      'existing session, biometric off -> enterApp, not justRegistered',
+      () async {
+        when(() => authRepository.currentUser).thenReturn(_identity);
+        when(
+          () => biometricService.isAvailable(),
+        ).thenAnswer((_) async => true);
+        when(() => userAccountRepository.get(_uid)).thenAnswer(
+          (_) async => const AppUser(
+            uid: _uid,
+            email: _email,
+            authProvider: AuthProviderType.email,
+            biometricEnabled: false,
+          ),
+        );
 
-      final controller = buildController();
-      await controller.initialize();
+        final controller = buildController();
+        await controller.initialize();
 
-      expect(controller.gateAction, AuthGateAction.enterApp);
-      expect(controller.justRegistered, isFalse);
-      expect(controller.currentUser?.uid, _uid);
-    });
+        expect(controller.gateAction, AuthGateAction.enterApp);
+        expect(controller.justRegistered, isFalse);
+        expect(controller.currentUser?.uid, _uid);
+      },
+    );
 
-    test('existing session, biometric on and available -> requireBiometric', () async {
-      when(() => authRepository.currentUser).thenReturn(_identity);
-      when(() => biometricService.isAvailable()).thenAnswer((_) async => true);
-      when(() => userAccountRepository.get(_uid)).thenAnswer(
-        (_) async => const AppUser(
-          uid: _uid,
-          email: _email,
-          authProvider: AuthProviderType.email,
-          biometricEnabled: true,
-        ),
-      );
+    test(
+      'existing session, biometric on and available -> requireBiometric',
+      () async {
+        when(() => authRepository.currentUser).thenReturn(_identity);
+        when(
+          () => biometricService.isAvailable(),
+        ).thenAnswer((_) async => true);
+        when(() => userAccountRepository.get(_uid)).thenAnswer(
+          (_) async => const AppUser(
+            uid: _uid,
+            email: _email,
+            authProvider: AuthProviderType.email,
+            biometricEnabled: true,
+          ),
+        );
 
-      final controller = buildController();
-      await controller.initialize();
+        final controller = buildController();
+        await controller.initialize();
 
-      expect(controller.gateAction, AuthGateAction.requireBiometric);
-    });
+        expect(controller.gateAction, AuthGateAction.requireBiometric);
+      },
+    );
   });
 
   test('signUpWithEmail on brand-new account sets justRegistered', () async {
@@ -169,7 +190,9 @@ void main() {
   });
 
   group('biometric prompt', () {
-    Future<AuthController> signedInController({required bool biometricEnabled}) async {
+    Future<AuthController> signedInController({
+      required bool biometricEnabled,
+    }) async {
       when(() => authRepository.currentUser).thenReturn(_identity);
       when(() => biometricService.isAvailable()).thenAnswer((_) async => true);
       when(() => userAccountRepository.get(_uid)).thenAnswer(
@@ -187,8 +210,9 @@ void main() {
 
     test('success -> enterApp, no pending fallback', () async {
       final controller = await signedInController(biometricEnabled: true);
-      when(() => biometricService.authenticate(reason: any(named: 'reason')))
-          .thenAnswer((_) async => BiometricPromptResult.success);
+      when(
+        () => biometricService.authenticate(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => BiometricPromptResult.success);
 
       await controller.promptBiometric();
 
@@ -198,8 +222,9 @@ void main() {
 
     test('cancelled + email provider -> reenterPassword fallback', () async {
       final controller = await signedInController(biometricEnabled: true);
-      when(() => biometricService.authenticate(reason: any(named: 'reason')))
-          .thenAnswer((_) async => BiometricPromptResult.cancelled);
+      when(
+        () => biometricService.authenticate(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => BiometricPromptResult.cancelled);
 
       await controller.promptBiometric();
 
@@ -208,8 +233,9 @@ void main() {
         BiometricFallbackAction.reenterPassword,
       );
 
-      when(() => authRepository.reauthenticateWithPassword(any()))
-          .thenAnswer((_) async {});
+      when(
+        () => authRepository.reauthenticateWithPassword(any()),
+      ).thenAnswer((_) async {});
       await controller.completeReenterPassword('password1');
 
       expect(controller.gateAction, AuthGateAction.enterApp);
@@ -273,51 +299,142 @@ void main() {
       expect(controller.pets, [newPet]);
     });
 
-    test('deleting the active pet falls back to the next pet via ActivePetResolver', () async {
-      when(() => authRepository.currentUser).thenReturn(_identity);
-      when(() => biometricService.isAvailable()).thenAnswer((_) async => false);
-      when(() => userAccountRepository.get(_uid)).thenAnswer(
-        (_) async => const AppUser(
-          uid: _uid,
-          email: _email,
-          authProvider: AuthProviderType.email,
-          biometricEnabled: false,
-        ),
-      );
-      when(() => petProfileRepository.delete(any(), any()))
-          .thenAnswer((_) async {});
+    test(
+      'deleting the active pet falls back to the next pet via ActivePetResolver',
+      () async {
+        when(() => authRepository.currentUser).thenReturn(_identity);
+        when(
+          () => biometricService.isAvailable(),
+        ).thenAnswer((_) async => false);
+        when(() => userAccountRepository.get(_uid)).thenAnswer(
+          (_) async => const AppUser(
+            uid: _uid,
+            email: _email,
+            authProvider: AuthProviderType.email,
+            biometricEnabled: false,
+          ),
+        );
+        when(
+          () => petProfileRepository.delete(any(), any()),
+        ).thenAnswer((_) async {});
 
-      final petA = PetProfile(
-        petId: 'a',
-        ownerId: _uid,
-        name: 'A',
-        breed: 'Breed',
-        birthday: DateTime(2020, 1, 1),
-        sex: PetSex.male,
-        neutered: false,
-      );
-      final petB = PetProfile(
-        petId: 'b',
-        ownerId: _uid,
-        name: 'B',
-        breed: 'Breed',
-        birthday: DateTime(2020, 1, 1),
-        sex: PetSex.female,
-        neutered: true,
-      );
+        final petA = PetProfile(
+          petId: 'a',
+          ownerId: _uid,
+          name: 'A',
+          breed: 'Breed',
+          birthday: DateTime(2020, 1, 1),
+          sex: PetSex.male,
+          neutered: false,
+        );
+        final petB = PetProfile(
+          petId: 'b',
+          ownerId: _uid,
+          name: 'B',
+          breed: 'Breed',
+          birthday: DateTime(2020, 1, 1),
+          sex: PetSex.female,
+          neutered: true,
+        );
 
-      final controller = buildController();
-      await controller.initialize();
+        final controller = buildController();
+        await controller.initialize();
 
-      petsController.add([petA, petB]);
-      await _settle();
-      expect(controller.activePet?.petId, 'a');
+        petsController.add([petA, petB]);
+        await _settle();
+        expect(controller.activePet?.petId, 'a');
 
-      await controller.deletePet('a');
-      petsController.add([petB]);
-      await _settle();
+        await controller.deletePet('a');
+        petsController.add([petB]);
+        await _settle();
 
-      expect(controller.activePet?.petId, 'b');
-    });
+        expect(controller.activePet?.petId, 'b');
+      },
+    );
+  });
+
+  group('multi-device session enforcement', () {
+    test(
+      'signs out when a different device claims a new active session',
+      () async {
+        when(() => authRepository.currentUser).thenReturn(null);
+        when(
+          () => biometricService.isAvailable(),
+        ).thenAnswer((_) async => false);
+        when(() => userAccountRepository.get(_uid)).thenAnswer(
+          (_) async => const AppUser(
+            uid: _uid,
+            email: _email,
+            authProvider: AuthProviderType.email,
+            biometricEnabled: false,
+          ),
+        );
+        when(
+          () => authRepository.signInWithEmail(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          ),
+        ).thenAnswer((_) async => _identity);
+        when(() => authRepository.signOut()).thenAnswer((_) async {});
+
+        final sessionController = StreamController<String?>.broadcast();
+        when(
+          () => userAccountRepository.watchActiveSessionId(_uid),
+        ).thenAnswer((_) => sessionController.stream);
+
+        final controller = buildController();
+        await controller.initialize();
+        await controller.signInWithEmail(email: _email, password: 'password1');
+        await _settle();
+
+        // A different device claims the session with a new id.
+        sessionController.add('some-other-devices-session-id');
+        await _settle();
+
+        verify(() => authRepository.signOut()).called(1);
+        expect(controller.wasForcedSignedOut, isTrue);
+
+        await sessionController.close();
+      },
+    );
+
+    test(
+      'does not sign out on the very first session value it ever sees (adopts it instead)',
+      () async {
+        when(() => authRepository.currentUser).thenReturn(_identity);
+        when(
+          () => biometricService.isAvailable(),
+        ).thenAnswer((_) async => false);
+        when(() => userAccountRepository.get(_uid)).thenAnswer(
+          (_) async => const AppUser(
+            uid: _uid,
+            email: _email,
+            authProvider: AuthProviderType.email,
+            biometricEnabled: false,
+          ),
+        );
+        when(() => authRepository.signOut()).thenAnswer((_) async {});
+
+        final sessionController = StreamController<String?>.broadcast();
+        when(
+          () => userAccountRepository.watchActiveSessionId(_uid),
+        ).thenAnswer((_) => sessionController.stream);
+
+        final controller = buildController();
+        await controller.initialize();
+
+        // First value ever seen for this device -- e.g. a pre-existing
+        // session from before this feature existed, or an app restart
+        // resuming a persisted session with no local record yet. Should be
+        // adopted, not treated as a foreign device taking over.
+        sessionController.add('pre-existing-session-id');
+        await _settle();
+
+        verifyNever(() => authRepository.signOut());
+        expect(controller.wasForcedSignedOut, isFalse);
+
+        await sessionController.close();
+      },
+    );
   });
 }

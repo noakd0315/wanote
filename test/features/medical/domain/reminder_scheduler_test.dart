@@ -48,61 +48,55 @@ void main() {
       expect(result.first.recordId, 'vaccine-1');
     });
 
-    test(
-      'heartworm/flea_tick reminder uses the shorter recurring lead time',
-      () {
-        final now = DateTime(2026, 1, 1);
-        final nextDueDate = DateTime(2026, 1, 20);
+    test('medication reminder uses the shorter recurring lead time', () {
+      final now = DateTime(2026, 1, 1);
+      final nextDueDate = DateTime(2026, 1, 20);
 
-        final heartwormResult = scheduler.computeReminders(
-          records: [
-            ReminderCandidate(
-              recordId: 'heartworm-1',
-              type: PreventionType.heartworm,
-              productName: 'フィラリア予防薬',
-              nextDueDate: nextDueDate,
-            ),
-          ],
-          now: now,
-        );
-        final fleaTickResult = scheduler.computeReminders(
-          records: [
-            ReminderCandidate(
-              recordId: 'flea-1',
-              type: PreventionType.fleaTick,
-              productName: 'ノミ・ダニ予防薬',
-              nextDueDate: nextDueDate,
-            ),
-          ],
-          now: now,
-        );
+      final heartwormResult = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'heartworm-1',
+            type: PreventionType.medication,
+            productName: 'フィラリア予防薬',
+            nextDueDate: nextDueDate,
+          ),
+        ],
+        now: now,
+      );
+      final fleaTickResult = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'flea-1',
+            type: PreventionType.medication,
+            productName: 'ノミ・ダニ予防薬',
+            nextDueDate: nextDueDate,
+          ),
+        ],
+        now: now,
+      );
 
-        expect(heartwormResult.single.fireAt, DateTime(2026, 1, 17, 9));
-        expect(fleaTickResult.single.fireAt, DateTime(2026, 1, 17, 9));
-      },
-    );
+      expect(heartwormResult.single.fireAt, DateTime(2026, 1, 17, 9));
+      expect(fleaTickResult.single.fireAt, DateTime(2026, 1, 17, 9));
+    });
 
-    test(
-      'already-overdue next_due_date produces no upcoming reminder',
-      () {
-        final now = DateTime(2026, 2, 1);
-        final nextDueDate = DateTime(2026, 1, 20); // in the past
+    test('already-overdue next_due_date produces no upcoming reminder', () {
+      final now = DateTime(2026, 2, 1);
+      final nextDueDate = DateTime(2026, 1, 20); // in the past
 
-        final result = scheduler.computeReminders(
-          records: [
-            ReminderCandidate(
-              recordId: 'overdue-1',
-              type: PreventionType.vaccine,
-              productName: '混合ワクチン',
-              nextDueDate: nextDueDate,
-            ),
-          ],
-          now: now,
-        );
+      final result = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'overdue-1',
+            type: PreventionType.vaccine,
+            productName: '混合ワクチン',
+            nextDueDate: nextDueDate,
+          ),
+        ],
+        now: now,
+      );
 
-        expect(result, isEmpty);
-      },
-    );
+      expect(result, isEmpty);
+    });
 
     test(
       'a due date already inside the lead window fires immediately (catch-up)',
@@ -140,10 +134,7 @@ void main() {
       );
 
       final first = scheduler.computeReminders(records: [candidate], now: now);
-      final second = scheduler.computeReminders(
-        records: [candidate],
-        now: now,
-      );
+      final second = scheduler.computeReminders(records: [candidate], now: now);
 
       expect(first.single.notificationId, second.single.notificationId);
     });
@@ -160,13 +151,13 @@ void main() {
           ),
           ReminderCandidate(
             recordId: 'b',
-            type: PreventionType.heartworm,
+            type: PreventionType.medication,
             productName: 'B',
             nextDueDate: DateTime(2026, 2, 5),
           ),
           const ReminderCandidate(
             recordId: 'c',
-            type: PreventionType.fleaTick,
+            type: PreventionType.medication,
             productName: 'C',
             nextDueDate: null,
           ),

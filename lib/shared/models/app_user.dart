@@ -11,6 +11,7 @@ class AppUser extends Equatable {
     required this.email,
     required this.authProvider,
     required this.biometricEnabled,
+    this.activeSessionId,
   });
 
   final String uid;
@@ -18,12 +19,21 @@ class AppUser extends Equatable {
   final AuthProviderType authProvider;
   final bool biometricEnabled;
 
-  AppUser copyWith({bool? biometricEnabled}) {
+  /// Random id claimed by whichever device most recently signed in (PM
+  /// report: multiple devices could stay signed in to the same account at
+  /// once, which shouldn't be allowed). Compared against each device's own
+  /// locally-stored copy so a device can tell when a *different* device has
+  /// taken over the account and sign itself out -- see
+  /// AuthController._subscribeToSession's doc comment for the full flow.
+  final String? activeSessionId;
+
+  AppUser copyWith({bool? biometricEnabled, String? activeSessionId}) {
     return AppUser(
       uid: uid,
       email: email,
       authProvider: authProvider,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
+      activeSessionId: activeSessionId ?? this.activeSessionId,
     );
   }
 
@@ -33,6 +43,7 @@ class AppUser extends Equatable {
       'email': email,
       'auth_provider': authProvider.wireName,
       'biometric_enabled': biometricEnabled,
+      'active_session_id': activeSessionId,
     };
   }
 
@@ -44,9 +55,16 @@ class AppUser extends Equatable {
         map['auth_provider'] as String? ?? 'email',
       ),
       biometricEnabled: map['biometric_enabled'] as bool? ?? false,
+      activeSessionId: map['active_session_id'] as String?,
     );
   }
 
   @override
-  List<Object?> get props => [uid, email, authProvider, biometricEnabled];
+  List<Object?> get props => [
+    uid,
+    email,
+    authProvider,
+    biometricEnabled,
+    activeSessionId,
+  ];
 }

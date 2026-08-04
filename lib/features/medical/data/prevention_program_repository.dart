@@ -42,9 +42,14 @@ class FirestorePreventionProgramRepository
 
   @override
   Stream<List<PreventionProgram>> watchPrograms(String uid, String petId) {
+    // Ascending (oldest-created first) so the seeded defaults display in
+    // the PM-requested order -- 狂犬病>混合ワクチン>フィラリア予防>ノミ・
+    // ダニ予防 -- which matches the order _seedDefaultsIfEmpty creates them
+    // in, since start_date defaults to the creation instant (see `create`'s
+    // doc comment).
     return _firestore
         .collection(FirestorePaths.preventionPrograms(uid, petId))
-        .orderBy('start_date', descending: true)
+        .orderBy('start_date')
         .snapshots()
         .map(
           (snap) => snap.docs

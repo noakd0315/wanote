@@ -27,6 +27,7 @@ abstract class ToiletRecordRepository {
     UrineColor? urineColor,
     Uint8List? photoBytes,
     DateTime? recordedAt,
+    String? location,
   });
 
   Future<ToiletRecord> update({
@@ -97,6 +98,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     UrineColor? urineColor,
     Uint8List? photoBytes,
     DateTime? recordedAt,
+    String? location,
   }) async {
     assert(
       type != ToiletType.stool || stoolCondition != null,
@@ -114,6 +116,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
       stoolCondition: type == ToiletType.stool ? stoolCondition : null,
       urineColor: type == ToiletType.urine ? urineColor : null,
       photo: photoUrl,
+      location: location,
     );
     await _collection(uid, petId).doc(toiletId).set(record.toMap());
     return record;

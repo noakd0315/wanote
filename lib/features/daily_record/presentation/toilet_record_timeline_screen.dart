@@ -58,6 +58,7 @@ class _ToiletRecordTimelineScreenState
       type: ToiletType.urine,
       recordedAt: result.recordedAt,
       urineColor: result.color,
+      location: result.location,
     );
   }
 
@@ -177,6 +178,15 @@ class _ToiletRecordTimelineScreenState
                         itemBuilder: (context, index) {
                           final record = records[index];
                           final isUrine = record.type == ToiletType.urine;
+                          final subtitleParts = [
+                            if (isUrine)
+                              if (record.urineColor != null)
+                                '色: ${record.urineColor!.label}',
+                            if (!isUrine)
+                              '硬さ: ${record.stoolCondition?.hardness.wireName ?? '-'} / 色: ${record.stoolCondition?.color.wireName ?? '-'}',
+                            if (record.location != null)
+                              '場所: ${record.location}',
+                          ];
                           return ListTile(
                             leading: Icon(
                               isUrine ? Icons.water_drop : Icons.circle,
@@ -186,13 +196,9 @@ class _ToiletRecordTimelineScreenState
                                 'yyyy/MM/dd HH:mm',
                               ).format(record.recordedAt),
                             ),
-                            subtitle: isUrine
-                                ? (record.urineColor != null
-                                      ? Text('色: ${record.urineColor!.label}')
-                                      : null)
-                                : Text(
-                                    '硬さ: ${record.stoolCondition?.hardness.wireName ?? '-'} / 色: ${record.stoolCondition?.color.wireName ?? '-'}',
-                                  ),
+                            subtitle: subtitleParts.isEmpty
+                                ? null
+                                : Text(subtitleParts.join(' ・ ')),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
                               onPressed: () => widget.repository.delete(
@@ -219,10 +225,12 @@ class _UrineRecordDialogResult {
   const _UrineRecordDialogResult({
     required this.recordedAt,
     required this.color,
+    required this.location,
   });
 
   final DateTime recordedAt;
   final UrineColor? color;
+  final String? location;
 }
 
 /// Confirms the timestamp (and optionally the color shade) for a one-tap
@@ -240,6 +248,13 @@ class _RecordedAtDialog extends StatefulWidget {
 class _RecordedAtDialogState extends State<_RecordedAtDialog> {
   late DateTime _recordedAt = DateTime.now();
   UrineColor _color = UrineColor.normal;
+  final _locationController = TextEditingController();
+
+  @override
+  void dispose() {
+    _locationController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -314,6 +329,11 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
               );
             }).toList(),
           ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _locationController,
+            decoration: const InputDecoration(labelText: '場所（任意）'),
+          ),
         ],
       ),
       actions: [
@@ -322,9 +342,16 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
           child: const Text('キャンセル'),
         ),
         FilledButton(
-          onPressed: () => Navigator.of(context).pop(
-            _UrineRecordDialogResult(recordedAt: _recordedAt, color: _color),
-          ),
+          onPressed: () {
+            final location = _locationController.text.trim();
+            Navigator.of(context).pop(
+              _UrineRecordDialogResult(
+                recordedAt: _recordedAt,
+                color: _color,
+                location: location.isEmpty ? null : location,
+              ),
+            );
+          },
           child: const Text('記録する'),
         ),
       ],

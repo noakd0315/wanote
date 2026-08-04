@@ -3,18 +3,27 @@ import 'package:equatable/equatable.dart';
 
 /// Spec 5.3: 混合ワクチン／狂犬病ワクチンは vaccine 内のサブ種別として扱う,
 /// so we don't model those as separate top-level types.
+///
+/// Heartworm and flea/tick prevention were originally two separate types,
+/// but combined flea+tick+heartworm products exist as a single medication
+/// (PM report: "ノミ・ダニ・フィラリアが１つの薬になっていることがある") --
+/// splitting them didn't match how these are actually prescribed/sold, so
+/// they're merged into one non-vaccine [medication] type.
 enum PreventionType {
   vaccine,
-  heartworm,
-  fleaTick;
+  medication;
 
   String get wireName => switch (this) {
     PreventionType.vaccine => 'vaccine',
-    PreventionType.heartworm => 'heartworm',
-    PreventionType.fleaTick => 'flea_tick',
+    PreventionType.medication => 'medication',
   };
 
   static PreventionType fromWireName(String value) {
+    // 'heartworm'/'flea_tick' are legacy wire values from before the merge
+    // above -- mapped forward so existing Firestore docs keep working.
+    if (value == 'heartworm' || value == 'flea_tick') {
+      return PreventionType.medication;
+    }
     return PreventionType.values.firstWhere(
       (e) => e.wireName == value,
       orElse: () => PreventionType.vaccine,

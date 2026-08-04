@@ -79,4 +79,63 @@ void main() {
       expect(cleared.urineColor, isNull);
     });
   });
+
+  group('ToiletRecord location field', () {
+    test('toMap/fromMap round-trip preserves location for either type', () {
+      final record = ToiletRecord(
+        toiletId: 't4',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 2, 9, 30),
+        type: ToiletType.stool,
+        stoolCondition: const StoolCondition(
+          hardness: StoolHardness.normal,
+          color: StoolColor.normal,
+        ),
+        location: '庭',
+      );
+      final map = record.toMap();
+      expect(map['location'], '庭');
+
+      final roundTripped = ToiletRecord.fromMap({
+        ...map,
+        'recorded_at': Timestamp.fromDate(record.recordedAt),
+      });
+      expect(roundTripped.location, '庭');
+      expect(roundTripped, record);
+    });
+
+    test('location is null when absent from the map', () {
+      final record = ToiletRecord(
+        toiletId: 't5',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 2),
+        type: ToiletType.urine,
+        urineColor: UrineColor.normal,
+      );
+      final map = record.toMap();
+      expect(map['location'], isNull);
+
+      final roundTripped = ToiletRecord.fromMap({
+        ...map,
+        'recorded_at': Timestamp.fromDate(record.recordedAt),
+      });
+      expect(roundTripped.location, isNull);
+    });
+
+    test('copyWith can set and clear location independently', () {
+      final record = ToiletRecord(
+        toiletId: 't6',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 2),
+        type: ToiletType.urine,
+        urineColor: UrineColor.normal,
+        location: '散歩中',
+      );
+      final updated = record.copyWith(location: '庭');
+      expect(updated.location, '庭');
+
+      final cleared = record.copyWith(clearLocation: true);
+      expect(cleared.location, isNull);
+    });
+  });
 }

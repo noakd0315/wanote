@@ -276,107 +276,123 @@ class _PreventionRecordFormScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.record == null ? '投与記録を追加' : '投与記録を編集'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('実施日'),
-              subtitle: Text(
-                _administeredAt.toLocal().toString().split(' ').first,
-              ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () => _pickDate(
-                initial: _administeredAt,
-                onPicked: (d) {
-                  setState(() => _administeredAt = d);
-                  _recalculateNextDueDateIfNotManuallyEdited();
-                },
-              ),
-            ),
-            TextFormField(
-              controller: _hospitalController,
-              decoration: const InputDecoration(labelText: '動物病院名（自宅投与の場合は任意）'),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('次回予定日'),
-              subtitle: Text(
-                _nextDueDate == null
-                    ? '未設定'
-                    : _nextDueDate!.toLocal().toString().split(' ').first,
-              ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () => _pickDate(
-                initial: _nextDueDate,
-                onPicked: (d) {
-                  setState(() {
-                    _nextDueDate = d;
-                    _nextDueDateManuallyEdited = true;
-                  });
-                },
-              ),
-            ),
-            const Divider(height: 32),
-            Text('証明書（画像）', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            if (_pickedImageBytes != null)
-              Image.memory(_pickedImageBytes!, height: 160)
-            else if (_existingCertificateUrl != null)
-              const Text('登録済みの証明書があります')
-            else
-              const Text('証明書は未登録です'),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _ocrRunning ? null : _pickAndAnalyzeCertificate,
-              icon: _ocrRunning
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.camera_alt),
-              label: Text(
-                widget.ocrService == null
-                    ? '証明書を撮影／選択（自動読取は準備中）'
-                    : '証明書を撮影／選択してAIで自動入力',
-              ),
-            ),
-            if (_ocrFallbackMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  _ocrFallbackMessage!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+    // See daily_record's health_record_form_screen.dart build() for why
+    // this guard exists (PM report about photos not saving if you
+    // navigate away mid-upload).
+    return PopScope(
+      canPop: !_saving,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.record == null ? '投与記録を追加' : '投与記録を編集'),
+        ),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('実施日'),
+                subtitle: Text(
+                  _administeredAt.toLocal().toString().split(' ').first,
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () => _pickDate(
+                  initial: _administeredAt,
+                  onPicked: (d) {
+                    setState(() => _administeredAt = d);
+                    _recalculateNextDueDateIfNotManuallyEdited();
+                  },
                 ),
               ),
-            if (_ocrConfidence != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  'AI読み取り信頼度: ${(_ocrConfidence! * 100).toStringAsFixed(0)}%'
-                  '（内容は必ずご確認ください）',
-                  style: Theme.of(context).textTheme.bodySmall,
+              TextFormField(
+                controller: _hospitalController,
+                decoration: const InputDecoration(
+                  labelText: '動物病院名（自宅投与の場合は任意）',
                 ),
               ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _saving ? null : _save,
-              child: _saving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('保存'),
-            ),
-          ],
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('次回予定日'),
+                subtitle: Text(
+                  _nextDueDate == null
+                      ? '未設定'
+                      : _nextDueDate!.toLocal().toString().split(' ').first,
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () => _pickDate(
+                  initial: _nextDueDate,
+                  onPicked: (d) {
+                    setState(() {
+                      _nextDueDate = d;
+                      _nextDueDateManuallyEdited = true;
+                    });
+                  },
+                ),
+              ),
+              const Divider(height: 32),
+              Text('証明書（画像）', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              if (_pickedImageBytes != null)
+                Image.memory(_pickedImageBytes!, height: 160)
+              else if (_existingCertificateUrl != null)
+                const Text('登録済みの証明書があります')
+              else
+                const Text('証明書は未登録です'),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _ocrRunning ? null : _pickAndAnalyzeCertificate,
+                icon: _ocrRunning
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.camera_alt),
+                label: Text(
+                  widget.ocrService == null
+                      ? '証明書を撮影／選択（自動読取は準備中）'
+                      : '証明書を撮影／選択してAIで自動入力',
+                ),
+              ),
+              if (_ocrFallbackMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _ocrFallbackMessage!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              if (_ocrConfidence != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'AI読み取り信頼度: ${(_ocrConfidence! * 100).toStringAsFixed(0)}%'
+                    '（内容は必ずご確認ください）',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _saving ? null : _save,
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('保存'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -152,9 +152,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
 
   Future<void> _pickBirthday() async {
     final now = DateTime.now();
+    // Defaults the calendar to today rather than a year ago -- a lot of
+    // pets registered here will be puppies, so "one year old" was a worse
+    // starting guess than "born today" (PM report).
     final picked = await showDatePicker(
       context: context,
-      initialDate: _birthday ?? DateTime(now.year - 1, now.month, now.day),
+      initialDate: _birthday ?? now,
       firstDate: DateTime(now.year - 30),
       lastDate: now,
     );
@@ -240,110 +243,129 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
 
-    return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit pet' : 'Add a pet')),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: DogSilhouetteBackground()),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildIconSection(),
-                        const SizedBox(height: 24),
-                        _buildBackgroundSection(),
-                        const SizedBox(height: 24),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(labelText: 'Name'),
-                          validator: (value) =>
-                              (value == null || value.trim().isEmpty)
-                              ? 'Name is required'
-                              : null,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _breedController,
-                          decoration: const InputDecoration(labelText: 'Breed'),
-                          validator: (value) =>
-                              (value == null || value.trim().isEmpty)
-                              ? 'Breed is required'
-                              : null,
-                        ),
-                        const SizedBox(height: 12),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            _birthday == null
-                                ? 'Select birthday'
-                                : 'Birthday: ${DateFormat('yyyy/MM/dd').format(_birthday!)}',
+    // Blocks back-navigation while a save (incl. photo upload) is in
+    // flight -- otherwise leaving mid-upload (e.g. a system back gesture)
+    // could land the user on another screen before the pet's photo URL is
+    // actually persisted, making it look like the photo silently failed to
+    // save (PM report: "写真データの送信が完了する前にほかの画面に移ると、
+    // 写真登録がされません").
+    return PopScope(
+      canPop: !_isBusy,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(_isEditing ? 'Edit pet' : 'Add a pet')),
+        body: Stack(
+          children: [
+            const Positioned.fill(child: DogSilhouetteBackground()),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildIconSection(),
+                          const SizedBox(height: 24),
+                          _buildBackgroundSection(),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Name',
+                            ),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                ? 'Name is required'
+                                : null,
                           ),
-                          trailing: const Icon(Icons.calendar_today),
-                          onTap: _pickBirthday,
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<PetSex>(
-                          initialValue: _sex,
-                          decoration: const InputDecoration(labelText: 'Sex'),
-                          items: PetSex.values
-                              .map(
-                                (sex) => DropdownMenuItem(
-                                  value: sex,
-                                  child: Text(sex.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) setState(() => _sex = value);
-                          },
-                        ),
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('Neutered / spayed'),
-                          value: _neutered,
-                          onChanged: (value) =>
-                              setState(() => _neutered = value),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _weightController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _breedController,
+                            decoration: const InputDecoration(
+                              labelText: 'Breed',
+                            ),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                ? 'Breed is required'
+                                : null,
                           ),
-                          decoration: const InputDecoration(
-                            labelText: 'Weight (kg) - optional',
+                          const SizedBox(height: 12),
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              _birthday == null
+                                  ? 'Select birthday'
+                                  : 'Birthday: ${DateFormat('yyyy/MM/dd').format(_birthday!)}',
+                            ),
+                            trailing: const Icon(Icons.calendar_today),
+                            onTap: _pickBirthday,
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return null;
-                            }
-                            return double.tryParse(value.trim()) == null
-                                ? 'Enter a valid number'
-                                : null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: (_isBusy || controller.isLoading)
-                              ? null
-                              : () => _submit(controller),
-                          child: Text(_isEditing ? 'Save' : 'Add pet'),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<PetSex>(
+                            initialValue: _sex,
+                            decoration: const InputDecoration(labelText: 'Sex'),
+                            items: PetSex.values
+                                .map(
+                                  (sex) => DropdownMenuItem(
+                                    value: sex,
+                                    child: Text(sex.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) setState(() => _sex = value);
+                            },
+                          ),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Neutered / spayed'),
+                            value: _neutered,
+                            onChanged: (value) =>
+                                setState(() => _neutered = value),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _weightController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: const InputDecoration(
+                              labelText: 'Weight (kg) - optional',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return null;
+                              }
+                              return double.tryParse(value.trim()) == null
+                                  ? 'Enter a valid number'
+                                  : null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton(
+                            onPressed: (_isBusy || controller.isLoading)
+                                ? null
+                                : () => _submit(controller),
+                            child: Text(_isEditing ? 'Save' : 'Add pet'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../shared/models/app_user.dart';
 import '../../../shared/models/auth_provider_type.dart';
@@ -44,6 +45,14 @@ class AuthController extends ChangeNotifier {
 
   static const _lastActivePetIdPrefsKey = 'auth.last_active_pet_id';
 
+  /// Prefix for the per-uid key this device's own claimed session id is
+  /// stored under (see [_subscribeToSession]'s doc comment). Keyed by uid
+  /// rather than a single global key so switching accounts on the same
+  /// device/browser doesn't confuse one account's session for another's.
+  static const _localSessionIdPrefsKeyPrefix = 'auth.local_session_id.';
+
+  final Uuid _uuid = const Uuid();
+
   final AuthRepository _authRepository;
   final UserAccountRepository _userAccountRepository;
   final PetProfileRepository _petProfileRepository;
@@ -55,6 +64,7 @@ class AuthController extends ChangeNotifier {
 
   StreamSubscription<AuthIdentity?>? _authSub;
   StreamSubscription<List<PetProfile>>? _petsSub;
+  StreamSubscription<String?>? _sessionSub;
 
   AppUser? _currentUser;
   AppUser? get currentUser => _currentUser;
@@ -76,6 +86,20 @@ class AuthController extends ChangeNotifier {
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  /// Set once when [_subscribeToSession] notices a different device has
+  /// taken over this account and forces a local sign-out (PM request:
+  /// prevent staying signed in on multiple devices at once). Deliberately a
+  /// bare flag, not the message text itself -- this controller has no
+  /// BuildContext to localize with, so the sign-in screen supplies the
+  /// actual (localized) copy once it sees this flag, via
+  /// [clearForcedSignOutFlag].
+  bool _wasForcedSignedOut = false;
+  bool get wasForcedSignedOut => _wasForcedSignedOut;
+
+  void clearForcedSignOutFlag() {
+    _wasForcedSignedOut = false;
+  }
 
   /// True from the moment a brand-new account is created until
   /// [markOnboardingComplete] is called. Drives the one-time post-
@@ -101,6 +125,8 @@ class AuthController extends ChangeNotifier {
     if (identity == null) {
       await _petsSub?.cancel();
       _petsSub = null;
+      await _sessionSub?.cancel();
+      _sessionSub = null;
       _currentUser = null;
       _pets = const [];
       _activePet = null;
@@ -142,9 +168,56 @@ class AuthController extends ChangeNotifier {
     );
     _pendingBiometricFallback = null;
     _subscribeToPets(identity.uid);
+    _subscribeToSession(identity.uid);
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Watches this account's `active_session_id` and signs this device out
+  /// the moment a *different* device claims it (see [_claimSession] --
+  /// called by every explicit sign-in action) -- PM report: multiple
+  /// devices could stay signed in to the same account simultaneously,
+  /// which shouldn't be allowed.
+  ///
+  /// The very first value this device ever sees for an account (no local
+  /// copy yet -- e.g. this feature shipping after the account already had
+  /// an active session elsewhere, or this being the device that *just*
+  /// claimed it) is adopted rather than treated as a foreign device, so it
+  /// never spuriously signs itself out.
+  void _subscribeToSession(String uid) {
+    _sessionSub?.cancel();
+    _sessionSub = _userAccountRepository.watchActiveSessionId(uid).listen((
+      remoteSessionId,
+    ) async {
+      if (remoteSessionId == null) return;
+      final prefs = await _prefsFuture;
+      final key = '$_localSessionIdPrefsKeyPrefix$uid';
+      final localSessionId = prefs.getString(key);
+      if (localSessionId == null) {
+        await prefs.setString(key, remoteSessionId);
+        return;
+      }
+      if (localSessionId != remoteSessionId) {
+        _wasForcedSignedOut = true;
+        await signOut();
+      }
+    });
+  }
+
+  /// Claims the account's single active session for this device, called by
+  /// every explicit sign-in action ([signUpWithEmail]/[signInWithEmail]/
+  /// [signInWithGoogle]/[signInWithApple] via [_runAuthAction]) -- but not
+  /// on an ordinary app restart resuming an already-persisted session,
+  /// since that's the same device continuing, not a new one taking over.
+  Future<void> _claimSession(String uid) async {
+    final sessionId = _uuid.v4();
+    final prefs = await _prefsFuture;
+    await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
+    await _userAccountRepository.setActiveSession(
+      uid: uid,
+      sessionId: sessionId,
+    );
   }
 
   void _subscribeToPets(String uid) {
@@ -175,6 +248,11 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
     try {
       final identity = await action();
+      // This device is actively signing in right now (as opposed to
+      // _onAuthChanged firing from a merely-resumed persisted session on
+      // app restart), so it claims the account's single active session --
+      // see _claimSession's doc comment.
+      await _claimSession(identity.uid);
       await _onAuthChanged(identity);
     } catch (e) {
       _errorMessage = e.toString();
@@ -387,6 +465,7 @@ class AuthController extends ChangeNotifier {
   void dispose() {
     _authSub?.cancel();
     _petsSub?.cancel();
+    _sessionSub?.cancel();
     super.dispose();
   }
 }

@@ -16,6 +16,19 @@ abstract class UserAccountRepository {
   Future<AppUser?> get(String uid);
 
   Future<void> setBiometricEnabled(String uid, bool enabled);
+
+  /// Claims the account's single active session for whichever device just
+  /// signed in (PM request: prevent staying signed in on multiple devices
+  /// at once). Overwrites any previous [sessionId].
+  Future<void> setActiveSession({
+    required String uid,
+    required String sessionId,
+  });
+
+  /// Live `active_session_id` value, so a signed-in device can notice when
+  /// a *different* device claims the session (see [setActiveSession]) and
+  /// sign itself out. Null until a session has ever been claimed.
+  Stream<String?> watchActiveSessionId(String uid);
 }
 
 class FirestoreUserAccountRepository implements UserAccountRepository {
@@ -57,5 +70,20 @@ class FirestoreUserAccountRepository implements UserAccountRepository {
   @override
   Future<void> setBiometricEnabled(String uid, bool enabled) async {
     await _doc(uid).update({'biometric_enabled': enabled});
+  }
+
+  @override
+  Future<void> setActiveSession({
+    required String uid,
+    required String sessionId,
+  }) async {
+    await _doc(uid).update({'active_session_id': sessionId});
+  }
+
+  @override
+  Stream<String?> watchActiveSessionId(String uid) {
+    return _doc(
+      uid,
+    ).snapshots().map((snap) => snap.data()?['active_session_id'] as String?);
   }
 }

@@ -112,12 +112,8 @@ class _PreventionProgramFormScreenState
                   child: Text('ワクチン'),
                 ),
                 DropdownMenuItem(
-                  value: PreventionType.heartworm,
-                  child: Text('フィラリア予防'),
-                ),
-                DropdownMenuItem(
-                  value: PreventionType.fleaTick,
-                  child: Text('ノミ・ダニ予防'),
+                  value: PreventionType.medication,
+                  child: Text('投薬'),
                 ),
               ],
               onChanged: (v) => setState(() => _type = v!),

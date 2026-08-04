@@ -81,6 +81,10 @@ class _BiometricGateState extends State<_BiometricGate> {
   bool _isBusy = false;
   String? _error;
 
+  /// PM request: let the user reveal what they typed to confirm it's
+  /// correct before submitting, instead of only ever seeing dots.
+  bool _obscurePassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -213,8 +217,19 @@ class _BiometricGateState extends State<_BiometricGate> {
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             FilledButton(

@@ -156,8 +156,7 @@ class ReminderScheduler {
     switch (record.type) {
       case PreventionType.vaccine:
         return '次回接種予定日が近づいています（あと$leadDays日以内）。動物病院の予約をご検討ください。';
-      case PreventionType.heartworm:
-      case PreventionType.fleaTick:
+      case PreventionType.medication:
         return 'そろそろ次回投与の時期です。忘れずに投与しましょう。';
     }
   }

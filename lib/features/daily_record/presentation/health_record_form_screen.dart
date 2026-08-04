@@ -127,153 +127,167 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.existingRecord == null ? '新規健康記録' : '健康記録を編集'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('記録日時'),
-            subtitle: Text(_recordedAt.toString()),
-            trailing: const Icon(Icons.edit_calendar),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _recordedAt,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-              if (date != null) setState(() => _recordedAt = date);
-            },
-          ),
-          const SizedBox(height: 8),
-          const Text('カテゴリタグ', style: TextStyle(fontWeight: FontWeight.bold)),
-          Wrap(
-            spacing: 8,
-            children: HealthRecordTag.values.map((tag) {
-              final selected = _selectedTags.contains(tag);
-              return FilterChip(
-                label: Text(tag.wireName),
-                selected: selected,
-                onSelected: (value) {
-                  setState(() {
-                    if (value) {
-                      _selectedTags.add(tag);
-                    } else {
-                      _selectedTags.remove(tag);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          const Text('写真', style: TextStyle(fontWeight: FontWeight.bold)),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final url in _retainedPhotoUrls)
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Image.network(
-                        url,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _retainedPhotoUrls.remove(url)),
-                        child: const CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.black54,
-                          child: Icon(
-                            Icons.close,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              for (final bytes in _newPhotoBytes)
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Image.memory(
-                        bytes,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: GestureDetector(
-                        onTap: () =>
-                            setState(() => _newPhotoBytes.remove(bytes)),
-                        child: const CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.black54,
-                          child: Icon(
-                            Icons.close,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              if (_totalPhotoCount < HealthRecord.maxPhotos)
-                InkWell(
-                  onTap: _pickPhotos,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Icon(Icons.add_a_photo),
-                  ),
-                ),
-            ],
-          ),
-          Text(
-            '$_totalPhotoCount/${HealthRecord.maxPhotos}枚',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _memoController,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              labelText: 'コメント',
-              border: OutlineInputBorder(),
+    // Blocks back-navigation while saving (incl. photo upload) is in
+    // flight -- otherwise leaving mid-upload could land the user on
+    // another screen before the photos are actually persisted, making it
+    // look like they silently failed to save (PM report: "写真データの
+    // 送信が完了する前にほかの画面に移ると、写真登録がされません").
+    return PopScope(
+      canPop: !_saving,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.existingRecord == null ? '新規健康記録' : '健康記録を編集'),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('記録日時'),
+              subtitle: Text(_recordedAt.toString()),
+              trailing: const Icon(Icons.edit_calendar),
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: _recordedAt,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (date != null) setState(() => _recordedAt = date);
+              },
             ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _saving ? null : _save,
-            child: _saving
-                ? const CircularProgressIndicator()
-                : const Text('保存'),
-          ),
-        ],
+            const SizedBox(height: 8),
+            const Text('カテゴリタグ', style: TextStyle(fontWeight: FontWeight.bold)),
+            Wrap(
+              spacing: 8,
+              children: HealthRecordTag.values.map((tag) {
+                final selected = _selectedTags.contains(tag);
+                return FilterChip(
+                  label: Text(tag.wireName),
+                  selected: selected,
+                  onSelected: (value) {
+                    setState(() {
+                      if (value) {
+                        _selectedTags.add(tag);
+                      } else {
+                        _selectedTags.remove(tag);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            const Text('写真', style: TextStyle(fontWeight: FontWeight.bold)),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final url in _retainedPhotoUrls)
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          url,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _retainedPhotoUrls.remove(url)),
+                          child: const CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.black54,
+                            child: Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                for (final bytes in _newPhotoBytes)
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.memory(
+                          bytes,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _newPhotoBytes.remove(bytes)),
+                          child: const CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.black54,
+                            child: Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                if (_totalPhotoCount < HealthRecord.maxPhotos)
+                  InkWell(
+                    onTap: _pickPhotos,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Icon(Icons.add_a_photo),
+                    ),
+                  ),
+              ],
+            ),
+            Text(
+              '$_totalPhotoCount/${HealthRecord.maxPhotos}枚',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _memoController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'コメント',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const CircularProgressIndicator()
+                  : const Text('保存'),
+            ),
+          ],
+        ),
       ),
     );
   }

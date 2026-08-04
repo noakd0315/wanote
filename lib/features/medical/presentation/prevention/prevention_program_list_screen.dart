@@ -40,12 +40,16 @@ class _PreventionProgramListScreenState
     extends State<PreventionProgramListScreen> {
   /// (type, productName, scheduleType) -- standard defaults per common
   /// veterinary guidance (annual rabies/core-vaccine boosters, monthly
-  /// heartworm/flea-tick prevention); all editable afterwards.
+  /// heartworm/flea-tick prevention); all editable afterwards. Listed here
+  /// (and seeded below) in the PM-requested display order -- 狂犬病>混合
+  /// ワクチン>フィラリア予防>ノミ・ダニ予防 -- which the list screen then
+  /// preserves by showing programs oldest-created-first (see
+  /// PreventionProgramRepository.watchPrograms's ordering).
   static const _defaults = [
     (PreventionType.vaccine, '狂犬病ワクチン', ScheduleType.annual),
     (PreventionType.vaccine, '混合ワクチン', ScheduleType.annual),
-    (PreventionType.heartworm, 'フィラリア予防', ScheduleType.monthly),
-    (PreventionType.fleaTick, 'ノミ・ダニ予防', ScheduleType.monthly),
+    (PreventionType.medication, 'フィラリア予防', ScheduleType.monthly),
+    (PreventionType.medication, 'ノミ・ダニ予防', ScheduleType.monthly),
   ];
 
   bool _seedAttempted = false;
@@ -69,10 +73,8 @@ class _PreventionProgramListScreenState
     switch (type) {
       case PreventionType.vaccine:
         return 'ワクチン';
-      case PreventionType.heartworm:
-        return 'フィラリア予防';
-      case PreventionType.fleaTick:
-        return 'ノミ・ダニ予防';
+      case PreventionType.medication:
+        return '投薬';
     }
   }
 
