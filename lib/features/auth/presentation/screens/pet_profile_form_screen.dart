@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/models/pet_profile.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
@@ -167,11 +168,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   }
 
   Future<void> _submit(AuthController controller) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_birthday == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a birthday')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.petProfileFormBirthdayRequiredMessage)),
+      );
       return;
     }
 
@@ -242,6 +244,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context)!;
 
     // Blocks back-navigation while a save (incl. photo upload) is in
     // flight -- otherwise leaving mid-upload (e.g. a system back gesture)
@@ -253,12 +256,18 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
       canPop: !_isBusy,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.petProfileFormSavingInProgressMessage)),
+        );
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(_isEditing ? 'Edit pet' : 'Add a pet')),
+        appBar: AppBar(
+          title: Text(
+            _isEditing
+                ? l10n.petProfileFormEditTitle
+                : l10n.petProfileFormAddTitle,
+          ),
+        ),
         body: Stack(
           children: [
             const Positioned.fill(child: DogSilhouetteBackground()),
@@ -273,29 +282,29 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildIconSection(),
+                          _buildIconSection(l10n),
                           const SizedBox(height: 24),
-                          _buildBackgroundSection(),
+                          _buildBackgroundSection(l10n),
                           const SizedBox(height: 24),
                           TextFormField(
                             controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Name',
+                            decoration: InputDecoration(
+                              labelText: l10n.petProfileFormNameLabel,
                             ),
                             validator: (value) =>
                                 (value == null || value.trim().isEmpty)
-                                ? 'Name is required'
+                                ? l10n.petProfileFormNameRequiredError
                                 : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
                             controller: _breedController,
-                            decoration: const InputDecoration(
-                              labelText: 'Breed',
+                            decoration: InputDecoration(
+                              labelText: l10n.petProfileFormBreedLabel,
                             ),
                             validator: (value) =>
                                 (value == null || value.trim().isEmpty)
-                                ? 'Breed is required'
+                                ? l10n.petProfileFormBreedRequiredError
                                 : null,
                           ),
                           const SizedBox(height: 12),
@@ -303,8 +312,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               _birthday == null
-                                  ? 'Select birthday'
-                                  : 'Birthday: ${DateFormat('yyyy/MM/dd').format(_birthday!)}',
+                                  ? l10n.petProfileFormSelectBirthdayLabel
+                                  : l10n.petProfileFormBirthdayLabel(
+                                      DateFormat(
+                                        'yyyy/MM/dd',
+                                      ).format(_birthday!),
+                                    ),
                             ),
                             trailing: const Icon(Icons.calendar_today),
                             onTap: _pickBirthday,
@@ -312,12 +325,14 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                           const SizedBox(height: 12),
                           DropdownButtonFormField<PetSex>(
                             initialValue: _sex,
-                            decoration: const InputDecoration(labelText: 'Sex'),
+                            decoration: InputDecoration(
+                              labelText: l10n.petProfileFormSexLabel,
+                            ),
                             items: PetSex.values
                                 .map(
                                   (sex) => DropdownMenuItem(
                                     value: sex,
-                                    child: Text(sex.name),
+                                    child: Text(_sexLabel(l10n, sex)),
                                   ),
                                 )
                                 .toList(),
@@ -327,7 +342,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                           ),
                           SwitchListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: const Text('Neutered / spayed'),
+                            title: Text(l10n.petProfileFormNeuteredLabel),
                             value: _neutered,
                             onChanged: (value) =>
                                 setState(() => _neutered = value),
@@ -338,15 +353,15 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
-                            decoration: const InputDecoration(
-                              labelText: 'Weight (kg) - optional',
+                            decoration: InputDecoration(
+                              labelText: l10n.petProfileFormWeightLabel,
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return null;
                               }
                               return double.tryParse(value.trim()) == null
-                                  ? 'Enter a valid number'
+                                  ? l10n.petProfileFormWeightValidationError
                                   : null;
                             },
                           ),
@@ -355,7 +370,11 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                             onPressed: (_isBusy || controller.isLoading)
                                 ? null
                                 : () => _submit(controller),
-                            child: Text(_isEditing ? 'Save' : 'Add pet'),
+                            child: Text(
+                              _isEditing
+                                  ? l10n.petProfileFormSaveButton
+                                  : l10n.addPetButton,
+                            ),
                           ),
                         ],
                       ),
@@ -370,20 +389,35 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     );
   }
 
+  /// [PetSex]'s own `.name` doubles as its display text (see the enum's doc
+  /// comment), so localizing it means mapping the enum value to a
+  /// translated string rather than swapping a literal in this file.
+  String _sexLabel(AppLocalizations l10n, PetSex sex) {
+    switch (sex) {
+      case PetSex.male:
+        return l10n.petSexOptionMale;
+      case PetSex.female:
+        return l10n.petSexOptionFemale;
+    }
+  }
+
   ImageProvider? _iconImageProvider() {
     if (_pickedIconBytes != null) return MemoryImage(_pickedIconBytes!);
     if (_iconUrl != null) return CachedNetworkImageProvider(_iconUrl!);
     return null;
   }
 
-  Widget _buildIconSection() {
+  Widget _buildIconSection(AppLocalizations l10n) {
     final iconImage = _iconImageProvider();
     const previewSize = 96.0;
     return Column(
       children: [
-        const Align(
+        Align(
           alignment: Alignment.centerLeft,
-          child: Text('アイコン写真', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text(
+            l10n.petProfileFormIconSectionTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(height: 8),
         Center(
@@ -432,15 +466,18 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           TextButton.icon(
             onPressed: _deleteIconPhoto,
             icon: const Icon(Icons.delete_outline, size: 18),
-            label: const Text('アイコン写真を削除'),
+            label: Text(l10n.petProfileFormDeleteIconButton),
           ),
           // Reposition/zoom controls -- PM request: "出力するアイコンに
           // ついて表示位置やサイズを設定できるようにしたい".
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 56,
-                child: Text('左右', style: TextStyle(fontSize: 12)),
+                child: Text(
+                  l10n.petProfileFormIconOffsetXLabel,
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
               Expanded(
                 child: Slider(
@@ -454,9 +491,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           ),
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 56,
-                child: Text('上下', style: TextStyle(fontSize: 12)),
+                child: Text(
+                  l10n.petProfileFormIconOffsetYLabel,
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
               Expanded(
                 child: Slider(
@@ -470,9 +510,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           ),
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 56,
-                child: Text('ズーム', style: TextStyle(fontSize: 12)),
+                child: Text(
+                  l10n.petProfileFormIconZoomLabel,
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
               Expanded(
                 child: Slider(
@@ -499,15 +542,15 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     return null;
   }
 
-  Widget _buildBackgroundSection() {
+  Widget _buildBackgroundSection(AppLocalizations l10n) {
     final backgroundImage = _backgroundImageProvider();
     return Column(
       children: [
-        const Align(
+        Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            '背景写真（ホーム画面）',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            l10n.petProfileFormBackgroundSectionTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 8),
@@ -531,14 +574,14 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
             OutlinedButton.icon(
               onPressed: _pickBackgroundPhoto,
               icon: const Icon(Icons.camera_alt_outlined, size: 18),
-              label: const Text('変更'),
+              label: Text(l10n.petProfileFormChangeBackgroundButton),
             ),
             if (backgroundImage != null) ...[
               const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: _deleteBackgroundPhoto,
                 icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('削除'),
+                label: Text(l10n.petProfileFormDeleteBackgroundButton),
               ),
             ],
           ],

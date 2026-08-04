@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/models/pet_profile.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/pet_icon_avatar.dart';
@@ -15,22 +16,23 @@ class PetProfileSwitchScreen extends StatelessWidget {
 
   Future<void> _confirmDelete(
     BuildContext context,
+    AppLocalizations l10n,
     AuthController controller,
     PetProfile pet,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove pet'),
-        content: Text('Remove ${pet.name} from this account?'),
+        title: Text(l10n.removePetDialogTitle),
+        content: Text(l10n.removePetDialogContent(pet.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.removePetDialogCancelButton),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Remove'),
+            child: Text(l10n.removePetDialogConfirmButton),
           ),
         ],
       ),
@@ -43,18 +45,17 @@ class PetProfileSwitchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context)!;
     final pets = controller.pets;
     final activePetId = controller.activePet?.petId;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your pets')),
+      appBar: AppBar(title: Text(l10n.yourPetsScreenTitle)),
       body: Stack(
         children: [
           const Positioned.fill(child: DogSilhouetteBackground()),
           pets.isEmpty
-              ? const Center(
-                  child: Text('No pets yet. Add your first pet below.'),
-                )
+              ? Center(child: Text(l10n.noPetsYetMessage))
               : ListView.builder(
                   itemCount: pets.length,
                   itemBuilder: (context, index) {
@@ -85,7 +86,7 @@ class PetProfileSwitchScreen extends StatelessWidget {
                           IconButton(
                             icon: const Icon(Icons.delete_outline),
                             onPressed: () =>
-                                _confirmDelete(context, controller, pet),
+                                _confirmDelete(context, l10n, controller, pet),
                           ),
                         ],
                       ),
@@ -100,7 +101,7 @@ class PetProfileSwitchScreen extends StatelessWidget {
           context,
         ).push(MaterialPageRoute(builder: (_) => const PetProfileFormScreen())),
         icon: const Icon(Icons.add),
-        label: const Text('Add pet'),
+        label: Text(l10n.addPetButton),
       ),
     );
   }

@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../auth_controller.dart';
 
@@ -35,9 +36,10 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Biometric login')),
+      appBar: AppBar(title: Text(l10n.biometricSetupAppBarTitle)),
       body: Stack(
         children: [
           const Positioned.fill(child: DogSilhouetteBackground()),
@@ -53,26 +55,24 @@ class _BiometricSetupScreenState extends State<BiometricSetupScreen> {
                       const Icon(Icons.fingerprint, size: 64),
                       const SizedBox(height: 16),
                       Text(
-                        'Enable biometric login?',
+                        l10n.biometricSetupHeadline,
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Use Face ID / Touch ID / fingerprint to unlock wanote '
-                        'next time instead of typing your password. Your '
-                        'biometric data itself never leaves this device.',
+                      Text(
+                        l10n.biometricSetupDescription,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
                       FilledButton(
                         onPressed: _isBusy ? null : () => _enable(controller),
-                        child: const Text('Enable'),
+                        child: Text(l10n.biometricSetupEnableButton),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: _isBusy ? null : () => _skip(controller),
-                        child: const Text('Not now'),
+                        child: Text(l10n.biometricSetupSkipButton),
                       ),
                     ],
                   ),

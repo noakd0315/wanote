@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/models/auth_provider_type.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../domain/auth_gate_resolver.dart';
@@ -108,6 +109,7 @@ class _BiometricGateState extends State<_BiometricGate> {
   }
 
   Future<void> _submitPassword(AuthController controller) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isBusy = true;
       _error = null;
@@ -115,13 +117,14 @@ class _BiometricGateState extends State<_BiometricGate> {
     try {
       await controller.completeReenterPassword(_passwordController.text);
     } catch (e) {
-      setState(() => _error = 'Incorrect password. Try again.');
+      setState(() => _error = l10n.biometricGateIncorrectPasswordError);
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
   }
 
   Future<void> _reauthenticateWithProvider(AuthController controller) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isBusy = true;
       _error = null;
@@ -129,7 +132,7 @@ class _BiometricGateState extends State<_BiometricGate> {
     try {
       await controller.completeReauthenticateWithProvider();
     } catch (e) {
-      setState(() => _error = 'Sign-in was not completed.');
+      setState(() => _error = l10n.biometricGateReauthFailedError);
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
@@ -138,11 +141,12 @@ class _BiometricGateState extends State<_BiometricGate> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context)!;
     final fallback = controller.pendingBiometricFallback;
     final provider = controller.currentUser?.authProvider;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Unlock wanote')),
+      appBar: AppBar(title: Text(l10n.biometricGateAppBarTitle)),
       body: Stack(
         children: [
           const Positioned.fill(child: DogSilhouetteBackground()),
@@ -162,10 +166,16 @@ class _BiometricGateState extends State<_BiometricGate> {
                       else if (fallback == null)
                         FilledButton(
                           onPressed: _promptNow,
-                          child: const Text('Unlock'),
+                          child: Text(l10n.biometricGateUnlockButton),
                         )
                       else
-                        _buildFallback(context, controller, fallback, provider),
+                        _buildFallback(
+                          context,
+                          l10n,
+                          controller,
+                          fallback,
+                          provider,
+                        ),
                       if (_error != null) ...[
                         const SizedBox(height: 12),
                         Text(
@@ -188,6 +198,7 @@ class _BiometricGateState extends State<_BiometricGate> {
 
   Widget _buildFallback(
     BuildContext context,
+    AppLocalizations l10n,
     AuthController controller,
     BiometricFallbackAction fallback,
     AuthProviderType? provider,
@@ -200,11 +211,11 @@ class _BiometricGateState extends State<_BiometricGate> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Biometric authentication did not match.'),
+            Text(l10n.biometricGateMismatchMessage),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => controller.retryBiometric(),
-              child: const Text('Try again'),
+              child: Text(l10n.biometricGateRetryButton),
             ),
           ],
         );
@@ -213,13 +224,13 @@ class _BiometricGateState extends State<_BiometricGate> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Enter your password to continue.'),
+            Text(l10n.biometricGatePasswordPrompt),
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: l10n.passwordLabel,
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
@@ -234,18 +245,18 @@ class _BiometricGateState extends State<_BiometricGate> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => _submitPassword(controller),
-              child: const Text('Continue'),
+              child: Text(l10n.biometricGateContinueButton),
             ),
           ],
         );
       case BiometricFallbackAction.reauthenticateWithProvider:
         final label = provider == AuthProviderType.google
-            ? 'Sign in with Google'
-            : 'Sign in with Apple';
+            ? l10n.signInWithGoogle
+            : l10n.signInWithApple;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Please sign in again to continue.'),
+            Text(l10n.biometricGateReauthPrompt),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () => _reauthenticateWithProvider(controller),
