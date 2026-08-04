@@ -4,9 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
+import 'widgets/health_record_labels.dart';
 
 /// Spec 2.2: "新規記録画面：写真添付（複数枚、最大4〜6枚程度を想定）、
 /// カテゴリタグ選択、コメント入力". Also doubles as the edit form when
@@ -127,16 +129,21 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.existingRecord == null ? '新規健康記録' : '健康記録を編集'),
+        title: Text(
+          widget.existingRecord == null
+              ? l10n.healthRecordFormTitleNew
+              : l10n.healthRecordFormTitleEdit,
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('記録日時'),
+            title: Text(l10n.healthRecordDateTimeLabel),
             subtitle: Text(_recordedAt.toString()),
             trailing: const Icon(Icons.edit_calendar),
             onTap: () async {
@@ -150,13 +157,16 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             },
           ),
           const SizedBox(height: 8),
-          const Text('カテゴリタグ', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.healthRecordTagsSectionLabel,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: HealthRecordTag.values.map((tag) {
               final selected = _selectedTags.contains(tag);
               return FilterChip(
-                label: Text(tag.wireName),
+                label: Text(healthRecordTagLabel(context, tag)),
                 selected: selected,
                 onSelected: (value) {
                   setState(() {
@@ -171,7 +181,10 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             }).toList(),
           ),
           const SizedBox(height: 16),
-          const Text('写真', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.healthRecordPhotosSectionLabel,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -254,16 +267,19 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             ],
           ),
           Text(
-            '$_totalPhotoCount/${HealthRecord.maxPhotos}枚',
+            l10n.healthRecordPhotoCount(
+              _totalPhotoCount,
+              HealthRecord.maxPhotos,
+            ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _memoController,
             maxLines: 4,
-            decoration: const InputDecoration(
-              labelText: 'コメント',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.healthRecordCommentLabel,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 24),
@@ -271,7 +287,7 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const CircularProgressIndicator()
-                : const Text('保存'),
+                : Text(l10n.commonSave),
           ),
         ],
       ),

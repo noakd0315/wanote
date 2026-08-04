@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'health_record_form_screen.dart';
+import 'widgets/health_record_labels.dart';
 
 /// Spec 2.2: "記録詳細画面：編集・削除".
 class HealthRecordDetailScreen extends StatelessWidget {
@@ -19,18 +21,19 @@ class HealthRecordDetailScreen extends StatelessWidget {
   final HealthRecordRepository repository;
 
   Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('この記録を削除しますか？'),
+        title: Text(l10n.healthRecordDeleteConfirmTitle),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('削除'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -43,6 +46,7 @@ class HealthRecordDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through, per the PM's request to scatter the
@@ -79,7 +83,9 @@ class HealthRecordDetailScreen extends StatelessWidget {
             Wrap(
               spacing: 8,
               children: record.tags
-                  .map((t) => Chip(label: Text(t.wireName)))
+                  .map(
+                    (t) => Chip(label: Text(healthRecordTagLabel(context, t))),
+                  )
                   .toList(),
             ),
           const SizedBox(height: 16),
@@ -102,7 +108,7 @@ class HealthRecordDetailScreen extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 16),
-          Text(record.memo ?? '(コメントなし)'),
+          Text(record.memo ?? l10n.healthRecordNoCommentPlaceholder),
         ],
       ),
     );

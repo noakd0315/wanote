@@ -4,9 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
+import 'widgets/toilet_labels.dart';
 
 /// Spec 4.2: "便の状態選択（硬さ：正常／軟便／下痢／硬い、色：正常／血便疑い
 /// ／白っぽい 等）" plus optional photo attachment for abnormal findings.
@@ -70,29 +72,36 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('排便を記録')),
+      appBar: AppBar(title: Text(l10n.toiletRecordStoolFormTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('硬さ', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.toiletHardnessSectionLabel,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: StoolHardness.values.map((h) {
               return ChoiceChip(
-                label: Text(h.wireName),
+                label: Text(stoolHardnessLabel(context, h)),
                 selected: _hardness == h,
                 onSelected: (_) => setState(() => _hardness = h),
               );
             }).toList(),
           ),
           const SizedBox(height: 16),
-          const Text('色', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            l10n.toiletColorSectionLabel,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: StoolColor.values.map((c) {
               return ChoiceChip(
-                label: Text(c.wireName),
+                label: Text(stoolColorLabel(context, c)),
                 selected: _color == c,
                 onSelected: (_) => setState(() => _color = c),
               );
@@ -102,7 +111,11 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
           OutlinedButton.icon(
             onPressed: _pickPhoto,
             icon: const Icon(Icons.camera_alt),
-            label: Text(_photoBytes == null ? '写真を追加（任意）' : '写真を変更'),
+            label: Text(
+              _photoBytes == null
+                  ? l10n.toiletPhotoAddLabel
+                  : l10n.toiletPhotoChangeLabel,
+            ),
           ),
           if (_photoBytes != null)
             Padding(
@@ -122,7 +135,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const CircularProgressIndicator()
-                : const Text('保存'),
+                : Text(l10n.commonSave),
           ),
         ],
       ),

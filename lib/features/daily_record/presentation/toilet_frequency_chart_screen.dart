@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../data/toilet_record_repository.dart';
 import '../domain/toilet_frequency_aggregator.dart';
 import '../models/toilet_record.dart';
@@ -26,12 +27,13 @@ class ToiletFrequencyChartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through, per the PM's request to scatter the
       // pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('トイレ頻度')),
+      appBar: AppBar(title: Text(l10n.toiletFrequencyChartTitle)),
       body: StreamBuilder<List<ToiletRecord>>(
         stream: repository.watchTimeline(uid, petId),
         builder: (context, snapshot) {
@@ -157,12 +159,13 @@ class _ToiletTypeLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _LegendDot(color: Colors.blue, label: '排尿'),
-        SizedBox(width: 16),
-        _LegendDot(color: Colors.brown, label: '排便'),
+        _LegendDot(color: Colors.blue, label: l10n.toiletUrineLabel),
+        const SizedBox(width: 16),
+        _LegendDot(color: Colors.brown, label: l10n.toiletStoolLabel),
       ],
     );
   }

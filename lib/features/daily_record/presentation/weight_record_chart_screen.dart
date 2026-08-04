@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../data/weight_record_repository.dart';
 import '../domain/weight_trend_calculator.dart';
 import '../models/weight_record.dart';
@@ -78,21 +79,20 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         : null;
 
     if (existing.isNotEmpty && mounted) {
+      final l10n = AppLocalizations.of(context)!;
       final choice = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('同じ日の記録があります'),
-          content: const Text(
-            '上書きしますか？それとも追加で記録しますか？（同日に複数回記録された場合の扱い、spec 3.4）',
-          ),
+          title: Text(l10n.weightDuplicateDateDialogTitle),
+          content: Text(l10n.weightDuplicateDateDialogContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('append'),
-              child: const Text('追加する'),
+              child: Text(l10n.weightAddAsNewEntryButtonLabel),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop('overwrite'),
-              child: const Text('上書きする'),
+              child: Text(l10n.weightOverwriteButtonLabel),
             ),
           ],
         ),
@@ -122,16 +122,19 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('体重記録'),
+        title: Text(l10n.weightRecordTimelineTitle),
         actions: [
           IconButton(
-            tooltip: _showTable ? 'グラフ表示' : '表形式で表示',
+            tooltip: _showTable
+                ? l10n.weightShowChartTooltip
+                : l10n.weightShowTableTooltip,
             icon: Icon(
               _showTable ? Icons.show_chart : Icons.table_rows_outlined,
             ),
@@ -156,18 +159,18 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: SegmentedButton<WeightTrendPeriod>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: WeightTrendPeriod.oneMonth,
-                      label: Text('1ヶ月'),
+                      label: Text(l10n.weightPeriodOneMonth),
                     ),
                     ButtonSegment(
                       value: WeightTrendPeriod.threeMonths,
-                      label: Text('3ヶ月'),
+                      label: Text(l10n.weightPeriodThreeMonths),
                     ),
                     ButtonSegment(
                       value: WeightTrendPeriod.oneYear,
-                      label: Text('1年'),
+                      label: Text(l10n.weightPeriodOneYear),
                     ),
                   ],
                   selected: {_period},
@@ -190,9 +193,12 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _DeltaBadge(label: '前回比', delta: trend.deltaVsPrevious),
                     _DeltaBadge(
-                      label: '1ヶ月前比',
+                      label: l10n.weightDeltaVsPreviousLabel,
+                      delta: trend.deltaVsPrevious,
+                    ),
+                    _DeltaBadge(
+                      label: l10n.weightDeltaVsOneMonthAgoLabel,
                       delta: trend.deltaVsOneMonthAgo,
                     ),
                   ],
@@ -200,7 +206,7 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
               ),
               Expanded(
                 child: trend.series.isEmpty
-                    ? const Center(child: Text('この期間の記録がありません'))
+                    ? Center(child: Text(l10n.weightNoRecordsForPeriod))
                     : _showTable
                     ? _WeightRecordTable(series: trend.series)
                     : Padding(
@@ -369,14 +375,15 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('体重を記録'),
+      title: Text(l10n.weightEntryDialogTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('日付'),
+            title: Text(l10n.commonDateLabel),
             subtitle: Text(DateFormat('yyyy/MM/dd').format(_date)),
             trailing: const Icon(Icons.edit_calendar),
             onTap: () async {
@@ -392,14 +399,14 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
           TextField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: '体重 (kg)'),
+            decoration: InputDecoration(labelText: l10n.weightKgFieldLabel),
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -407,7 +414,7 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
             if (weight == null) return;
             Navigator.of(context).pop((date: _date, weightKg: weight));
           },
-          child: const Text('保存'),
+          child: Text(l10n.commonSave),
         ),
       ],
     );

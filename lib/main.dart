@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'app/home_shell.dart';
 import 'features/auth/auth.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'shared/config/emulator_config.dart';
 import 'shared/config/firebase_options_demo.dart';
 import 'shared/theme/app_theme.dart';
@@ -59,6 +60,8 @@ class WanoteApp extends StatelessWidget {
       child: MaterialApp(
         title: 'wanote',
         theme: buildWanoteTheme(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: LaunchGateScreen(
           homeBuilder: (context) {
             final controller = context.watch<AuthController>();

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'health_record_detail_screen.dart';
 import 'health_record_form_screen.dart';
+import 'widgets/health_record_labels.dart';
 
 /// Spec 2.2: "記録一覧（タイムライン表示、日付降順）".
 class HealthRecordTimelineScreen extends StatelessWidget {
@@ -21,12 +23,13 @@ class HealthRecordTimelineScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('健康記録')),
+      appBar: AppBar(title: Text(l10n.healthRecordTimelineTitle)),
       body: StreamBuilder<List<HealthRecord>>(
         stream: repository.watchTimeline(uid, petId),
         builder: (context, snapshot) {
@@ -39,7 +42,7 @@ class HealthRecordTimelineScreen extends StatelessWidget {
           final sorted = [...records]
             ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
           if (sorted.isEmpty) {
-            return const Center(child: Text('記録がまだありません'));
+            return Center(child: Text(l10n.commonNoRecordsYet));
           }
           return ListView.builder(
             itemCount: sorted.length,
@@ -55,7 +58,9 @@ class HealthRecordTimelineScreen extends StatelessWidget {
                 subtitle: Text(
                   record.tags.isEmpty
                       ? (record.memo ?? '')
-                      : record.tags.map((t) => t.wireName).join(', '),
+                      : record.tags
+                            .map((t) => healthRecordTagLabel(context, t))
+                            .join(', '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

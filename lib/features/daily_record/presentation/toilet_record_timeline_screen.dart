@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/models/consultation_reference_record.dart';
 import '../data/toilet_record_repository.dart';
 import '../domain/anomaly_detector.dart';
 import '../models/toilet_record.dart';
 import 'toilet_frequency_chart_screen.dart';
 import 'toilet_record_form_screen.dart';
+import 'widgets/toilet_labels.dart';
 
 /// Spec 4.2's one-tap timeline, plus the anomaly-driven AI-consultation
 /// banner from spec 4.4.
@@ -77,13 +79,14 @@ class _ToiletRecordTimelineScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('トイレ記録'),
+        title: Text(l10n.toiletRecordTimelineTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
@@ -133,7 +136,7 @@ class _ToiletRecordTimelineScreenState
                       onPressed: () => widget.onConsultationSuggested?.call(
                         currentSuggestions.first,
                       ),
-                      child: const Text('AI相談する'),
+                      child: Text(l10n.toiletConsultAiButtonLabel),
                     ),
                   ],
                 ),
@@ -145,7 +148,7 @@ class _ToiletRecordTimelineScreenState
                       child: FilledButton.icon(
                         onPressed: _recordUrine,
                         icon: const Icon(Icons.water_drop),
-                        label: const Text('排尿'),
+                        label: Text(l10n.toiletUrineLabel),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -163,7 +166,7 @@ class _ToiletRecordTimelineScreenState
                           );
                         },
                         icon: const Icon(Icons.circle),
-                        label: const Text('排便'),
+                        label: Text(l10n.toiletStoolLabel),
                       ),
                     ),
                   ],
@@ -171,7 +174,7 @@ class _ToiletRecordTimelineScreenState
               ),
               Expanded(
                 child: records.isEmpty
-                    ? const Center(child: Text('記録がまだありません'))
+                    ? Center(child: Text(l10n.commonNoRecordsYet))
                     : ListView.builder(
                         itemCount: records.length,
                         itemBuilder: (context, index) {
@@ -188,10 +191,30 @@ class _ToiletRecordTimelineScreenState
                             ),
                             subtitle: isUrine
                                 ? (record.urineColor != null
-                                      ? Text('色: ${record.urineColor!.label}')
+                                      ? Text(
+                                          l10n.toiletUrineColorSubtitle(
+                                            urineColorLabel(
+                                              context,
+                                              record.urineColor!,
+                                            ),
+                                          ),
+                                        )
                                       : null)
                                 : Text(
-                                    '硬さ: ${record.stoolCondition?.hardness.wireName ?? '-'} / 色: ${record.stoolCondition?.color.wireName ?? '-'}',
+                                    l10n.toiletStoolConditionSubtitle(
+                                      record.stoolCondition != null
+                                          ? stoolHardnessLabel(
+                                              context,
+                                              record.stoolCondition!.hardness,
+                                            )
+                                          : '-',
+                                      record.stoolCondition != null
+                                          ? stoolColorLabel(
+                                              context,
+                                              record.stoolCondition!.color,
+                                            )
+                                          : '-',
+                                    ),
                                   ),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
@@ -279,36 +302,40 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('排尿を記録'),
+      title: Text(l10n.toiletRecordUrineDialogTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('日付'),
+            title: Text(l10n.commonDateLabel),
             subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
             trailing: const Icon(Icons.edit_calendar),
             onTap: _pickDate,
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('時刻'),
+            title: Text(l10n.commonTimeLabel),
             subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
             trailing: const Icon(Icons.access_time),
             onTap: _pickTime,
           ),
           const SizedBox(height: 8),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
-            child: Text('色の濃淡', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.toiletUrineColorShadeLabel,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 4),
           Wrap(
             spacing: 8,
             children: UrineColor.values.map((c) {
               return ChoiceChip(
-                label: Text(c.label),
+                label: Text(urineColorLabel(context, c)),
                 selected: _color == c,
                 onSelected: (_) => setState(() => _color = c),
               );
@@ -319,13 +346,13 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(
             _UrineRecordDialogResult(recordedAt: _recordedAt, color: _color),
           ),
-          child: const Text('記録する'),
+          child: Text(l10n.toiletRecordSubmitButtonLabel),
         ),
       ],
     );

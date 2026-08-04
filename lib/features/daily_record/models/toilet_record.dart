@@ -62,12 +62,6 @@ enum UrineColor {
 
   String get wireName => name;
 
-  String get label => switch (this) {
-    UrineColor.pale => '薄い（無色に近い）',
-    UrineColor.normal => '正常（淡黄色）',
-    UrineColor.dark => '濃い（濃縮尿）',
-  };
-
   static UrineColor fromWireName(String value) {
     return UrineColor.values.firstWhere(
       (e) => e.wireName == value,
