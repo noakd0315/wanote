@@ -28,10 +28,12 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
   // TabBar (not SegmentedButton) per the PM's request -- the segmented
   // button's icon+label segments could overflow/wrap on narrower widths
   // with 4 segments, which is exactly the "内部メニューが崩れる" breakage
-  // being reverted here. The controller only drives the TabBar's own
-  // visuals/gestures; actual content switching still goes through
-  // IndexedStack (see build below) so each tab keeps its own state across
-  // switches, same as before.
+  // being reverted here. Non-scrollable (the TabBar default) so all 4 tabs
+  // split the width evenly, matching DailyRecordSection/AiSection's tab
+  // bars (PM request: "タブサイズを均等に割り当ててください"). The
+  // controller only drives the TabBar's own visuals/gestures; actual
+  // content switching still goes through IndexedStack (see build below) so
+  // each tab keeps its own state across switches, same as before.
   late final TabController _tabController;
 
   @override
@@ -57,8 +59,6 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
           bottom: false,
           child: TabBar(
             controller: _tabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
             tabs: const [
               Tab(icon: Icon(Icons.local_hospital_outlined), text: '通院'),
               Tab(icon: Icon(Icons.medication_outlined), text: '薬'),
