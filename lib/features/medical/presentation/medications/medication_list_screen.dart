@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/medication_repository.dart';
 import '../../domain/models/medication.dart';
 import 'medication_form_screen.dart';
@@ -19,12 +20,13 @@ class MedicationListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('薬の記録')),
+      appBar: AppBar(title: Text(l10n.medicationListTitle)),
       body: StreamBuilder<List<Medication>>(
         stream: repository.watchMedications(uid, petId),
         builder: (context, snapshot) {
@@ -33,7 +35,7 @@ class MedicationListScreen extends StatelessWidget {
           }
           final medications = snapshot.data!;
           if (medications.isEmpty) {
-            return const Center(child: Text('薬の記録がありません'));
+            return Center(child: Text(l10n.medicationListEmptyMessage));
           }
           return ListView.builder(
             itemCount: medications.length,
@@ -49,8 +51,14 @@ class MedicationListScreen extends StatelessWidget {
                   title: Text(medication.name),
                   subtitle: Text(
                     medication.isOngoing
-                        ? '継続中'
-                        : '〜${medication.endDate!.toLocal().toString().split(' ').first}',
+                        ? l10n.medicationOngoingLabel
+                        : l10n.medicationEndDateSubtitle(
+                            medication.endDate!
+                                .toLocal()
+                                .toString()
+                                .split(' ')
+                                .first,
+                          ),
                   ),
                   trailing: medication.reminderEnabled
                       ? const Icon(Icons.notifications_active)

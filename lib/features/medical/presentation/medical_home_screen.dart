@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import 'medications/medication_list_screen.dart';
 import 'prevention/certificate_list_screen.dart';
 import 'prevention/prevention_program_list_screen.dart';
@@ -53,17 +54,30 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         SafeArea(
           bottom: false,
           child: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.local_hospital_outlined), text: '通院'),
-              Tab(icon: Icon(Icons.medication_outlined), text: '薬'),
-              Tab(icon: Icon(Icons.vaccines_outlined), text: '予防医療'),
-              Tab(icon: Icon(Icons.description_outlined), text: '証明書'),
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.local_hospital_outlined),
+                text: l10n.medicalTabVisits,
+              ),
+              Tab(
+                icon: const Icon(Icons.medication_outlined),
+                text: l10n.medicalTabMedications,
+              ),
+              Tab(
+                icon: const Icon(Icons.vaccines_outlined),
+                text: l10n.medicalTabPrevention,
+              ),
+              Tab(
+                icon: const Icon(Icons.description_outlined),
+                text: l10n.medicalTabCertificates,
+              ),
             ],
           ),
         ),

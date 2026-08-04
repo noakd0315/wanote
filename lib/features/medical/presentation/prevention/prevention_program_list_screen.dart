@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/prevention_program_repository.dart';
 import '../../domain/models/prevention_program.dart';
+import '../prevention_type_label.dart';
 import 'prevention_program_form_screen.dart';
 import 'prevention_record_list_screen.dart';
 
@@ -69,36 +71,28 @@ class _PreventionProgramListScreenState
     }
   }
 
-  String _typeLabel(PreventionType type) {
-    switch (type) {
-      case PreventionType.vaccine:
-        return 'ワクチン';
-      case PreventionType.medication:
-        return '投薬';
-    }
-  }
-
-  String _scheduleLabel(PreventionProgram program) {
+  String _scheduleLabel(AppLocalizations l10n, PreventionProgram program) {
     switch (program.scheduleType) {
       case ScheduleType.single:
-        return '単発';
+        return l10n.scheduleTypeSingleBadge;
       case ScheduleType.monthly:
-        return '毎月';
+        return l10n.scheduleTypeMonthly;
       case ScheduleType.annual:
-        return '毎年';
+        return l10n.scheduleTypeAnnual;
       case ScheduleType.custom:
-        return '${program.intervalDays}日ごと';
+        return l10n.scheduleIntervalDaysLabel(program.intervalDays!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('予防医療プログラム')),
+      appBar: AppBar(title: Text(l10n.preventionProgramListTitle)),
       body: StreamBuilder<List<PreventionProgram>>(
         stream: widget.repository.watchPrograms(widget.uid, widget.petId),
         builder: (context, snapshot) {
@@ -114,7 +108,7 @@ class _PreventionProgramListScreenState
             return const Center(child: CircularProgressIndicator());
           }
           if (programs.isEmpty) {
-            return const Center(child: Text('予防プログラムがありません'));
+            return Center(child: Text(l10n.preventionProgramListEmptyMessage));
           }
           return ListView.builder(
             itemCount: programs.length,
@@ -123,8 +117,9 @@ class _PreventionProgramListScreenState
               return ListTile(
                 title: Text(program.productName),
                 subtitle: Text(
-                  '${_typeLabel(program.type)} ・ ${_scheduleLabel(program)}'
-                  '${program.active ? '' : '（無効）'}',
+                  '${preventionTypeLabel(l10n, program.type)} ・ '
+                  '${_scheduleLabel(l10n, program)}'
+                  '${program.active ? '' : l10n.preventionProgramInactiveSuffix}',
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.edit),

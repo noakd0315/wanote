@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
 import '../../data/certificate_ocr_service.dart';
 import '../../data/certificate_storage_service.dart';
@@ -123,6 +124,7 @@ class _PreventionRecordFormScreenState
   }
 
   Future<void> _captureAndAnalyze(ImageSource source) async {
+    final l10n = AppLocalizations.of(context)!;
     final picked = await widget.imagePicker.pickImage(source: source);
     if (picked == null) return;
 
@@ -183,12 +185,12 @@ class _PreventionRecordFormScreenState
         });
       } else {
         setState(() {
-          _ocrFallbackMessage = '読み取れませんでした。手動で入力してください';
+          _ocrFallbackMessage = l10n.ocrReadFailedMessage;
         });
       }
     } catch (_) {
       setState(() {
-        _ocrFallbackMessage = '読み取れませんでした。手動で入力してください';
+        _ocrFallbackMessage = l10n.ocrReadFailedMessage;
       });
     } finally {
       if (mounted) setState(() => _ocrRunning = false);
@@ -276,6 +278,7 @@ class _PreventionRecordFormScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // See daily_record's health_record_form_screen.dart build() for why
     // this guard exists (PM report about photos not saving if you
     // navigate away mid-upload).
@@ -285,11 +288,15 @@ class _PreventionRecordFormScreenState
         if (didPop) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('保存中です。しばらくお待ちください')));
+        ).showSnackBar(SnackBar(content: Text(l10n.savingInProgressMessage)));
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.record == null ? '投与記録を追加' : '投与記録を編集'),
+          title: Text(
+            widget.record == null
+                ? l10n.preventionRecordFormAddTitle
+                : l10n.preventionRecordFormEditTitle,
+          ),
         ),
         body: Form(
           key: _formKey,
@@ -298,7 +305,7 @@ class _PreventionRecordFormScreenState
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('実施日'),
+                title: Text(l10n.administeredAtLabel),
                 subtitle: Text(
                   _administeredAt.toLocal().toString().split(' ').first,
                 ),
@@ -313,16 +320,16 @@ class _PreventionRecordFormScreenState
               ),
               TextFormField(
                 controller: _hospitalController,
-                decoration: const InputDecoration(
-                  labelText: '動物病院名（自宅投与の場合は任意）',
+                decoration: InputDecoration(
+                  labelText: l10n.hospitalNameOptionalLabel,
                 ),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('次回予定日'),
+                title: Text(l10n.nextDueDateLabel),
                 subtitle: Text(
                   _nextDueDate == null
-                      ? '未設定'
+                      ? l10n.notSetLabel
                       : _nextDueDate!.toLocal().toString().split(' ').first,
                 ),
                 trailing: const Icon(Icons.calendar_today),
@@ -337,14 +344,17 @@ class _PreventionRecordFormScreenState
                 ),
               ),
               const Divider(height: 32),
-              Text('証明書（画像）', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                l10n.certificateImageSectionTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               if (_pickedImageBytes != null)
                 Image.memory(_pickedImageBytes!, height: 160)
               else if (_existingCertificateUrl != null)
-                const Text('登録済みの証明書があります')
+                Text(l10n.certificateAlreadyRegisteredMessage)
               else
-                const Text('証明書は未登録です'),
+                Text(l10n.certificateNotRegisteredMessage),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _ocrRunning ? null : _pickAndAnalyzeCertificate,
@@ -357,8 +367,8 @@ class _PreventionRecordFormScreenState
                     : const Icon(Icons.camera_alt),
                 label: Text(
                   widget.ocrService == null
-                      ? '証明書を撮影／選択（自動読取は準備中）'
-                      : '証明書を撮影／選択してAIで自動入力',
+                      ? l10n.certificateCaptureManualLabel
+                      : l10n.certificateCaptureAiLabel,
                 ),
               ),
               if (_ocrFallbackMessage != null)
@@ -375,8 +385,9 @@ class _PreventionRecordFormScreenState
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    'AI読み取り信頼度: ${(_ocrConfidence! * 100).toStringAsFixed(0)}%'
-                    '（内容は必ずご確認ください）',
+                    l10n.ocrConfidenceLabel(
+                      (_ocrConfidence! * 100).toStringAsFixed(0),
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
@@ -389,7 +400,7 @@ class _PreventionRecordFormScreenState
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('保存'),
+                    : Text(l10n.saveButton),
               ),
             ],
           ),

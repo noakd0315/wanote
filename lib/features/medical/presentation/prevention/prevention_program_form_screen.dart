@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/prevention_program_repository.dart';
 import '../../domain/models/prevention_program.dart';
+import '../prevention_type_label.dart';
 
 /// Create/edit screen for a `prevention_programs` entry (spec 5.3).
 class PreventionProgramFormScreen extends StatefulWidget {
@@ -94,9 +96,14 @@ class _PreventionProgramFormScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.program == null ? '予防プログラムを追加' : '予防プログラムを編集'),
+        title: Text(
+          widget.program == null
+              ? l10n.preventionProgramFormAddTitle
+              : l10n.preventionProgramFormEditTitle,
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -105,41 +112,55 @@ class _PreventionProgramFormScreenState
           children: [
             DropdownButtonFormField<PreventionType>(
               initialValue: _type,
-              decoration: const InputDecoration(labelText: '種別'),
-              items: const [
+              decoration: InputDecoration(
+                labelText: l10n.preventionTypeFieldLabel,
+              ),
+              items: [
                 DropdownMenuItem(
                   value: PreventionType.vaccine,
-                  child: Text('ワクチン'),
+                  child: Text(
+                    preventionTypeLabel(l10n, PreventionType.vaccine),
+                  ),
                 ),
                 DropdownMenuItem(
                   value: PreventionType.medication,
-                  child: Text('投薬'),
+                  child: Text(
+                    preventionTypeLabel(l10n, PreventionType.medication),
+                  ),
                 ),
               ],
               onChanged: (v) => setState(() => _type = v!),
             ),
             TextFormField(
               controller: _productNameController,
-              decoration: const InputDecoration(labelText: 'ワクチン名／予防薬名'),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? '必須項目です' : null,
+              decoration: InputDecoration(
+                labelText: l10n.preventionProductNameLabel,
+              ),
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.requiredFieldValidationError
+                  : null,
             ),
             DropdownButtonFormField<ScheduleType>(
               initialValue: _scheduleType,
-              decoration: const InputDecoration(labelText: '頻度'),
-              items: const [
+              decoration: InputDecoration(
+                labelText: l10n.scheduleTypeFieldLabel,
+              ),
+              items: [
                 DropdownMenuItem(
                   value: ScheduleType.single,
-                  child: Text('単発（都度登録）'),
+                  child: Text(l10n.scheduleTypeSingleOption),
                 ),
                 DropdownMenuItem(
                   value: ScheduleType.monthly,
-                  child: Text('毎月'),
+                  child: Text(l10n.scheduleTypeMonthly),
                 ),
-                DropdownMenuItem(value: ScheduleType.annual, child: Text('毎年')),
+                DropdownMenuItem(
+                  value: ScheduleType.annual,
+                  child: Text(l10n.scheduleTypeAnnual),
+                ),
                 DropdownMenuItem(
                   value: ScheduleType.custom,
-                  child: Text('カスタム間隔'),
+                  child: Text(l10n.scheduleTypeCustomOption),
                 ),
               ],
               onChanged: (v) => setState(() => _scheduleType = v!),
@@ -147,18 +168,22 @@ class _PreventionProgramFormScreenState
             if (_scheduleType == ScheduleType.custom)
               TextFormField(
                 controller: _intervalDaysController,
-                decoration: const InputDecoration(labelText: '間隔（日数）'),
+                decoration: InputDecoration(labelText: l10n.intervalDaysLabel),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   if (_scheduleType != ScheduleType.custom) return null;
-                  if (v == null || v.trim().isEmpty) return '必須項目です';
-                  if (int.tryParse(v.trim()) == null) return '数値を入力してください';
+                  if (v == null || v.trim().isEmpty) {
+                    return l10n.requiredFieldValidationError;
+                  }
+                  if (int.tryParse(v.trim()) == null) {
+                    return l10n.numericValueValidationError;
+                  }
                   return null;
                 },
               ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('有効'),
+              title: Text(l10n.preventionProgramActiveSwitchLabel),
               value: _active,
               onChanged: (v) => setState(() => _active = v),
             ),
@@ -171,7 +196,7 @@ class _PreventionProgramFormScreenState
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('保存'),
+                  : Text(l10n.saveButton),
             ),
           ],
         ),

@@ -381,4 +381,241 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get removePetDialogConfirmButton => 'Remove';
+
+  @override
+  String get saveButton => '保存';
+
+  @override
+  String get requiredFieldValidationError => '必須項目です';
+
+  @override
+  String get notSetLabel => '未設定';
+
+  @override
+  String get preventionTypeVaccine => 'ワクチン';
+
+  @override
+  String get preventionTypeMedication => '投薬';
+
+  @override
+  String get scheduleTypeMonthly => '毎月';
+
+  @override
+  String get scheduleTypeAnnual => '毎年';
+
+  @override
+  String get medicalTabVisits => '通院';
+
+  @override
+  String get medicalTabMedications => '薬';
+
+  @override
+  String get medicalTabPrevention => '予防医療';
+
+  @override
+  String get medicalTabCertificates => '証明書';
+
+  @override
+  String get medicationFormAddTitle => '薬の記録を追加';
+
+  @override
+  String get medicationFormEditTitle => '薬の記録を編集';
+
+  @override
+  String get medicationNameLabel => '薬品名';
+
+  @override
+  String get medicationDosageLabel => '用量';
+
+  @override
+  String get medicationStartDateLabel => '開始日';
+
+  @override
+  String get medicationOngoingSwitchLabel => '継続中（終了日未定）';
+
+  @override
+  String get medicationEndDateLabel => '終了日';
+
+  @override
+  String get medicationReminderSwitchLabel => 'リマインダーを有効にする';
+
+  @override
+  String get medicationReminderTimeLabel => 'リマインダー時刻';
+
+  @override
+  String get medicationListTitle => '薬の記録';
+
+  @override
+  String get medicationListEmptyMessage => '薬の記録がありません';
+
+  @override
+  String get medicationOngoingLabel => '継続中';
+
+  @override
+  String medicationEndDateSubtitle(String date) {
+    return '〜$date';
+  }
+
+  @override
+  String get certificateListTitle => '証明書一覧';
+
+  @override
+  String get certificateListEmptyTitle => '登録済みの証明書がありません';
+
+  @override
+  String get certificateListEmptyDescription =>
+      '証明書は「予防医療」タブでワクチン・フィラリア・ノミダニ予防の記録を追加するときに撮影・登録します。';
+
+  @override
+  String get certificateAddPreventionRecordLabel => '予防医療の記録を追加する';
+
+  @override
+  String get preventionProgramFormAddTitle => '予防プログラムを追加';
+
+  @override
+  String get preventionProgramFormEditTitle => '予防プログラムを編集';
+
+  @override
+  String get preventionTypeFieldLabel => '種別';
+
+  @override
+  String get preventionProductNameLabel => 'ワクチン名／予防薬名';
+
+  @override
+  String get scheduleTypeFieldLabel => '頻度';
+
+  @override
+  String get scheduleTypeSingleOption => '単発（都度登録）';
+
+  @override
+  String get scheduleTypeCustomOption => 'カスタム間隔';
+
+  @override
+  String get intervalDaysLabel => '間隔（日数）';
+
+  @override
+  String get numericValueValidationError => '数値を入力してください';
+
+  @override
+  String get preventionProgramActiveSwitchLabel => '有効';
+
+  @override
+  String get preventionProgramListTitle => '予防医療プログラム';
+
+  @override
+  String get preventionProgramListEmptyMessage => '予防プログラムがありません';
+
+  @override
+  String get scheduleTypeSingleBadge => '単発';
+
+  @override
+  String scheduleIntervalDaysLabel(int days) {
+    return '$days日ごと';
+  }
+
+  @override
+  String get preventionProgramInactiveSuffix => '（無効）';
+
+  @override
+  String get savingInProgressMessage => '保存中です。しばらくお待ちください';
+
+  @override
+  String get preventionRecordFormAddTitle => '投与記録を追加';
+
+  @override
+  String get preventionRecordFormEditTitle => '投与記録を編集';
+
+  @override
+  String get administeredAtLabel => '実施日';
+
+  @override
+  String get hospitalNameOptionalLabel => '動物病院名（自宅投与の場合は任意）';
+
+  @override
+  String get nextDueDateLabel => '次回予定日';
+
+  @override
+  String get certificateImageSectionTitle => '証明書（画像）';
+
+  @override
+  String get certificateAlreadyRegisteredMessage => '登録済みの証明書があります';
+
+  @override
+  String get certificateNotRegisteredMessage => '証明書は未登録です';
+
+  @override
+  String get certificateCaptureManualLabel => '証明書を撮影／選択（自動読取は準備中）';
+
+  @override
+  String get certificateCaptureAiLabel => '証明書を撮影／選択してAIで自動入力';
+
+  @override
+  String get ocrReadFailedMessage => '読み取れませんでした。手動で入力してください';
+
+  @override
+  String ocrConfidenceLabel(String percent) {
+    return 'AI読み取り信頼度: $percent%（内容は必ずご確認ください）';
+  }
+
+  @override
+  String get vaccinationHistoryLabel => '接種履歴';
+
+  @override
+  String get medicationHistoryLabel => '投薬履歴';
+
+  @override
+  String get vaccinationRecordLabel => '接種記録';
+
+  @override
+  String get medicationRecordLabel => '投薬記録';
+
+  @override
+  String preventionRecordListTitle(String productName, String historyLabel) {
+    return '$productName の$historyLabel';
+  }
+
+  @override
+  String preventionRecordListEmptyMessage(String recordLabel) {
+    return '$recordLabelがありません';
+  }
+
+  @override
+  String nextDueDatePrefixLabel(String date) {
+    return '次回: $date';
+  }
+
+  @override
+  String get visitFormAddTitle => '通院記録を追加';
+
+  @override
+  String get visitFormEditTitle => '通院記録を編集';
+
+  @override
+  String get visitedAtLabel => '通院日';
+
+  @override
+  String get hospitalNameLabel => '動物病院名';
+
+  @override
+  String get diagnosisLabel => '診断内容';
+
+  @override
+  String get visitCostLabel => '費用（円）';
+
+  @override
+  String get nextVisitDateLabel => '次回通院予定日';
+
+  @override
+  String get visitListTitle => '通院履歴';
+
+  @override
+  String get visitListEmptyMessage => '通院記録がありません';
+
+  @override
+  String get visitFallbackTitle => '通院記録';
+
+  @override
+  String visitCostYenSuffix(int cost) {
+    return '$cost円';
+  }
 }

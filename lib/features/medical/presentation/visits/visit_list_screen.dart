@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/visit_repository.dart';
 import '../../domain/models/visit.dart';
 import 'visit_form_screen.dart';
@@ -20,12 +21,13 @@ class VisitListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('通院履歴')),
+      appBar: AppBar(title: Text(l10n.visitListTitle)),
       body: StreamBuilder<List<Visit>>(
         stream: repository.watchVisits(uid, petId),
         builder: (context, snapshot) {
@@ -34,7 +36,7 @@ class VisitListScreen extends StatelessWidget {
           }
           final visits = snapshot.data!;
           if (visits.isEmpty) {
-            return const Center(child: Text('通院記録がありません'));
+            return Center(child: Text(l10n.visitListEmptyMessage));
           }
           return ListView.builder(
             itemCount: visits.length,
@@ -47,12 +49,14 @@ class VisitListScreen extends StatelessWidget {
                 onDismissed: (_) =>
                     repository.delete(uid, petId, visit.visitId),
                 child: ListTile(
-                  title: Text(visit.hospitalName ?? '通院記録'),
+                  title: Text(visit.hospitalName ?? l10n.visitFallbackTitle),
                   subtitle: Text(
                     '${visit.visitedAt.toLocal().toString().split(' ').first}'
                     '${visit.diagnosis != null ? ' - ${visit.diagnosis}' : ''}',
                   ),
-                  trailing: visit.cost != null ? Text('${visit.cost}円') : null,
+                  trailing: visit.cost != null
+                      ? Text(l10n.visitCostYenSuffix(visit.cost!))
+                      : null,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => VisitFormScreen(

@@ -805,6 +805,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get removePetDialogConfirmButton;
+
+  /// Generic save button label used across the medical feature's create/edit forms.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveButton;
+
+  /// Validation error shown when a required text field is left empty.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredFieldValidationError;
+
+  /// Shown as the subtitle of an optional date field (e.g. end date, next due date) when no date has been picked yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSetLabel;
+
+  /// Display label for PreventionType.vaccine, used in the prevention program type dropdown and the program list's type badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine'**
+  String get preventionTypeVaccine;
+
+  /// Display label for PreventionType.medication, used in the prevention program type dropdown and the program list's type badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get preventionTypeMedication;
+
+  /// Display label for ScheduleType.monthly, used in the prevention program frequency dropdown and the program list's schedule badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get scheduleTypeMonthly;
+
+  /// Display label for ScheduleType.annual, used in the prevention program frequency dropdown and the program list's schedule badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Annually'**
+  String get scheduleTypeAnnual;
+
+  /// Tab label for the visit-history tab on the medical home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Visits'**
+  String get medicalTabVisits;
+
+  /// Tab label for the medications tab on the medical home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get medicalTabMedications;
+
+  /// Tab label for the prevention-care tab on the medical home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevention'**
+  String get medicalTabPrevention;
+
+  /// Tab label for the certificates tab on the medical home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates'**
+  String get medicalTabCertificates;
+
+  /// AppBar title of the medication form when adding a new medication.
+  ///
+  /// In en, this message translates to:
+  /// **'Add medication record'**
+  String get medicationFormAddTitle;
+
+  /// AppBar title of the medication form when editing an existing medication.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit medication record'**
+  String get medicationFormEditTitle;
+
+  /// Label for the medication-name text field.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication name'**
+  String get medicationNameLabel;
+
+  /// Label for the dosage text field.
+  ///
+  /// In en, this message translates to:
+  /// **'Dosage'**
+  String get medicationDosageLabel;
+
+  /// ListTile title for the medication start-date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get medicationStartDateLabel;
+
+  /// SwitchListTile title toggling whether the medication is ongoing with no set end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing (no end date)'**
+  String get medicationOngoingSwitchLabel;
+
+  /// ListTile title for the medication end-date picker, shown when the medication is not ongoing.
+  ///
+  /// In en, this message translates to:
+  /// **'End date'**
+  String get medicationEndDateLabel;
+
+  /// SwitchListTile title toggling the medication reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable reminder'**
+  String get medicationReminderSwitchLabel;
+
+  /// ListTile title for the medication reminder time picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time'**
+  String get medicationReminderTimeLabel;
+
+  /// AppBar title of the medication list screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Medications'**
+  String get medicationListTitle;
+
+  /// Empty-state message shown when the pet has no medication records.
+  ///
+  /// In en, this message translates to:
+  /// **'No medication records'**
+  String get medicationListEmptyMessage;
+
+  /// Subtitle shown for a medication list entry that has no end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get medicationOngoingLabel;
+
+  /// Subtitle shown for a medication list entry that has an end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String medicationEndDateSubtitle(String date);
+
+  /// AppBar title of the certificate list screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates'**
+  String get certificateListTitle;
+
+  /// Empty-state title shown when the pet has no registered certificates.
+  ///
+  /// In en, this message translates to:
+  /// **'No certificates yet'**
+  String get certificateListEmptyTitle;
+
+  /// Empty-state description explaining how to register a certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates are captured and saved from the Prevention tab when you add a vaccine, heartworm, or flea/tick prevention record.'**
+  String get certificateListEmptyDescription;
+
+  /// Button label and FAB tooltip that navigate from the certificate list to the prevention programs screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a prevention record'**
+  String get certificateAddPreventionRecordLabel;
+
+  /// AppBar title of the prevention program form when adding a new program.
+  ///
+  /// In en, this message translates to:
+  /// **'Add prevention program'**
+  String get preventionProgramFormAddTitle;
+
+  /// AppBar title of the prevention program form when editing an existing program.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit prevention program'**
+  String get preventionProgramFormEditTitle;
+
+  /// Label for the prevention program type dropdown (vaccine/medication).
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get preventionTypeFieldLabel;
+
+  /// Label for the product-name text field on the prevention program form.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine or medication name'**
+  String get preventionProductNameLabel;
+
+  /// Label for the prevention program frequency/schedule dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get scheduleTypeFieldLabel;
+
+  /// Dropdown option label for ScheduleType.single on the prevention program form.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time (register as needed)'**
+  String get scheduleTypeSingleOption;
+
+  /// Dropdown option label for ScheduleType.custom on the prevention program form.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom interval'**
+  String get scheduleTypeCustomOption;
+
+  /// Label for the custom interval-days text field, shown when the schedule type is custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (days)'**
+  String get intervalDaysLabel;
+
+  /// Validation error shown when the interval-days field isn't a valid number.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a number'**
+  String get numericValueValidationError;
+
+  /// SwitchListTile title toggling whether the prevention program is active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get preventionProgramActiveSwitchLabel;
+
+  /// AppBar title of the prevention program list screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevention programs'**
+  String get preventionProgramListTitle;
+
+  /// Empty-state message shown when the pet has no prevention programs.
+  ///
+  /// In en, this message translates to:
+  /// **'No prevention programs'**
+  String get preventionProgramListEmptyMessage;
+
+  /// Short schedule-type badge text for ScheduleType.single on the prevention program list.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get scheduleTypeSingleBadge;
+
+  /// Short schedule-type badge text for ScheduleType.custom on the prevention program list.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {days} days'**
+  String scheduleIntervalDaysLabel(int days);
+
+  /// Suffix appended to a prevention program list entry's subtitle when the program is inactive.
+  ///
+  /// In en, this message translates to:
+  /// **' (inactive)'**
+  String get preventionProgramInactiveSuffix;
+
+  /// Snackbar shown when the user tries to leave the prevention record form while a save is still in progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving, please wait'**
+  String get savingInProgressMessage;
+
+  /// AppBar title of the prevention record form when adding a new record.
+  ///
+  /// In en, this message translates to:
+  /// **'Add administration record'**
+  String get preventionRecordFormAddTitle;
+
+  /// AppBar title of the prevention record form when editing an existing record.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit administration record'**
+  String get preventionRecordFormEditTitle;
+
+  /// ListTile title for the administered-date picker on the prevention record form.
+  ///
+  /// In en, this message translates to:
+  /// **'Date administered'**
+  String get administeredAtLabel;
+
+  /// Label for the hospital-name text field on the prevention record form.
+  ///
+  /// In en, this message translates to:
+  /// **'Veterinary clinic (optional if administered at home)'**
+  String get hospitalNameOptionalLabel;
+
+  /// ListTile title for the next-due-date picker on the prevention record form.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due date'**
+  String get nextDueDateLabel;
+
+  /// Section heading above the certificate image/capture controls on the prevention record form.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate (image)'**
+  String get certificateImageSectionTitle;
+
+  /// Shown when editing a record that already has a certificate image but none has been newly picked.
+  ///
+  /// In en, this message translates to:
+  /// **'A certificate is already registered'**
+  String get certificateAlreadyRegisteredMessage;
+
+  /// Shown when the record has no certificate image at all.
+  ///
+  /// In en, this message translates to:
+  /// **'No certificate registered'**
+  String get certificateNotRegisteredMessage;
+
+  /// Button label shown when no OCR backend is configured, so capture is manual-only.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph or choose a certificate (auto-fill coming soon)'**
+  String get certificateCaptureManualLabel;
+
+  /// Button label shown when an OCR backend is configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph or choose a certificate for AI auto-fill'**
+  String get certificateCaptureAiLabel;
+
+  /// Shown when the AI-OCR certificate read fails or returns low-confidence results.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read it automatically. Please enter the details manually'**
+  String get ocrReadFailedMessage;
+
+  /// Shows the AI-OCR confidence percentage after a successful certificate read.
+  ///
+  /// In en, this message translates to:
+  /// **'AI reading confidence: {percent}% (please double-check the details)'**
+  String ocrConfidenceLabel(String percent);
+
+  /// Short label for a vaccine-type prevention program's administration history, used in the record list's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccination history'**
+  String get vaccinationHistoryLabel;
+
+  /// Short label for a medication-type prevention program's administration history, used in the record list's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication history'**
+  String get medicationHistoryLabel;
+
+  /// Lowercase plural noun for vaccine-type prevention records, embedded in the record list's empty-state message.
+  ///
+  /// In en, this message translates to:
+  /// **'vaccination records'**
+  String get vaccinationRecordLabel;
+
+  /// Lowercase plural noun for medication-type prevention records, embedded in the record list's empty-state message.
+  ///
+  /// In en, this message translates to:
+  /// **'medication records'**
+  String get medicationRecordLabel;
+
+  /// AppBar title of the prevention record list screen, combining the program's product name with its vaccination/medication history label.
+  ///
+  /// In en, this message translates to:
+  /// **'{historyLabel} for {productName}'**
+  String preventionRecordListTitle(String productName, String historyLabel);
+
+  /// Empty-state message on the prevention record list screen, combining a generic "no records" phrase with the vaccination/medication record label.
+  ///
+  /// In en, this message translates to:
+  /// **'No {recordLabel} found'**
+  String preventionRecordListEmptyMessage(String recordLabel);
+
+  /// Subtitle prefix shown on a prevention record list entry that has a next-due date.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due: {date}'**
+  String nextDueDatePrefixLabel(String date);
+
+  /// AppBar title of the visit form when adding a new visit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add visit record'**
+  String get visitFormAddTitle;
+
+  /// AppBar title of the visit form when editing an existing visit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit visit record'**
+  String get visitFormEditTitle;
+
+  /// ListTile title for the visit-date picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit date'**
+  String get visitedAtLabel;
+
+  /// Label for the hospital-name text field on the visit form.
+  ///
+  /// In en, this message translates to:
+  /// **'Veterinary clinic'**
+  String get hospitalNameLabel;
+
+  /// Label for the diagnosis text field on the visit form.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnosis'**
+  String get diagnosisLabel;
+
+  /// Label for the cost text field on the visit form.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost (yen)'**
+  String get visitCostLabel;
+
+  /// ListTile title for the next-visit-date picker on the visit form.
+  ///
+  /// In en, this message translates to:
+  /// **'Next visit date'**
+  String get nextVisitDateLabel;
+
+  /// AppBar title of the visit list screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit history'**
+  String get visitListTitle;
+
+  /// Empty-state message shown when the pet has no visit records.
+  ///
+  /// In en, this message translates to:
+  /// **'No visit records'**
+  String get visitListEmptyMessage;
+
+  /// Fallback list-tile title for a visit entry that has no hospital name set.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit record'**
+  String get visitFallbackTitle;
+
+  /// Trailing cost text on a visit list entry, shown when the visit has a recorded cost.
+  ///
+  /// In en, this message translates to:
+  /// **'¥{cost}'**
+  String visitCostYenSuffix(int cost);
 }
 
 class _AppLocalizationsDelegate

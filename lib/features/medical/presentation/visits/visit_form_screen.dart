@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/visit_repository.dart';
 import '../../domain/models/visit.dart';
 
@@ -113,8 +114,15 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.visit == null ? '通院記録を追加' : '通院記録を編集')),
+      appBar: AppBar(
+        title: Text(
+          widget.visit == null
+              ? l10n.visitFormAddTitle
+              : l10n.visitFormEditTitle,
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -122,7 +130,7 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
           children: [
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('通院日'),
+              title: Text(l10n.visitedAtLabel),
               subtitle: Text(_visitedAt.toLocal().toString().split(' ').first),
               trailing: const Icon(Icons.calendar_today),
               onTap: () => _pickDate(
@@ -132,24 +140,24 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
             ),
             TextFormField(
               controller: _hospitalController,
-              decoration: const InputDecoration(labelText: '動物病院名'),
+              decoration: InputDecoration(labelText: l10n.hospitalNameLabel),
             ),
             TextFormField(
               controller: _diagnosisController,
-              decoration: const InputDecoration(labelText: '診断内容'),
+              decoration: InputDecoration(labelText: l10n.diagnosisLabel),
               maxLines: 3,
             ),
             TextFormField(
               controller: _costController,
-              decoration: const InputDecoration(labelText: '費用（円）'),
+              decoration: InputDecoration(labelText: l10n.visitCostLabel),
               keyboardType: TextInputType.number,
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('次回通院予定日'),
+              title: Text(l10n.nextVisitDateLabel),
               subtitle: Text(
                 _nextVisitDate == null
-                    ? '未設定'
+                    ? l10n.notSetLabel
                     : _nextVisitDate!.toLocal().toString().split(' ').first,
               ),
               trailing: const Icon(Icons.calendar_today),
@@ -167,7 +175,7 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('保存'),
+                  : Text(l10n.saveButton),
             ),
           ],
         ),

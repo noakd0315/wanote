@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/medication_repository.dart';
 import '../../domain/models/medication.dart';
 
@@ -119,9 +120,14 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.medication == null ? '薬の記録を追加' : '薬の記録を編集'),
+        title: Text(
+          widget.medication == null
+              ? l10n.medicationFormAddTitle
+              : l10n.medicationFormEditTitle,
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -130,17 +136,20 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: '薬品名'),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? '必須項目です' : null,
+              decoration: InputDecoration(labelText: l10n.medicationNameLabel),
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? l10n.requiredFieldValidationError
+                  : null,
             ),
             TextFormField(
               controller: _dosageController,
-              decoration: const InputDecoration(labelText: '用量'),
+              decoration: InputDecoration(
+                labelText: l10n.medicationDosageLabel,
+              ),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('開始日'),
+              title: Text(l10n.medicationStartDateLabel),
               subtitle: Text(_startDate.toLocal().toString().split(' ').first),
               trailing: const Icon(Icons.calendar_today),
               onTap: () => _pickDate(
@@ -150,17 +159,17 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('継続中（終了日未定）'),
+              title: Text(l10n.medicationOngoingSwitchLabel),
               value: _ongoing,
               onChanged: (v) => setState(() => _ongoing = v),
             ),
             if (!_ongoing)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('終了日'),
+                title: Text(l10n.medicationEndDateLabel),
                 subtitle: Text(
                   _endDate == null
-                      ? '未設定'
+                      ? l10n.notSetLabel
                       : _endDate!.toLocal().toString().split(' ').first,
                 ),
                 trailing: const Icon(Icons.calendar_today),
@@ -171,14 +180,14 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
               ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('リマインダーを有効にする'),
+              title: Text(l10n.medicationReminderSwitchLabel),
               value: _reminderEnabled,
               onChanged: (v) => setState(() => _reminderEnabled = v),
             ),
             if (_reminderEnabled)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('リマインダー時刻'),
+                title: Text(l10n.medicationReminderTimeLabel),
                 subtitle: Text(_reminderTime.format(context)),
                 trailing: const Icon(Icons.access_time),
                 onTap: () async {
@@ -198,7 +207,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('保存'),
+                  : Text(l10n.saveButton),
             ),
           ],
         ),

@@ -391,4 +391,246 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removePetDialogConfirmButton => 'Remove';
+
+  @override
+  String get saveButton => 'Save';
+
+  @override
+  String get requiredFieldValidationError => 'This field is required';
+
+  @override
+  String get notSetLabel => 'Not set';
+
+  @override
+  String get preventionTypeVaccine => 'Vaccine';
+
+  @override
+  String get preventionTypeMedication => 'Medication';
+
+  @override
+  String get scheduleTypeMonthly => 'Monthly';
+
+  @override
+  String get scheduleTypeAnnual => 'Annually';
+
+  @override
+  String get medicalTabVisits => 'Visits';
+
+  @override
+  String get medicalTabMedications => 'Medications';
+
+  @override
+  String get medicalTabPrevention => 'Prevention';
+
+  @override
+  String get medicalTabCertificates => 'Certificates';
+
+  @override
+  String get medicationFormAddTitle => 'Add medication record';
+
+  @override
+  String get medicationFormEditTitle => 'Edit medication record';
+
+  @override
+  String get medicationNameLabel => 'Medication name';
+
+  @override
+  String get medicationDosageLabel => 'Dosage';
+
+  @override
+  String get medicationStartDateLabel => 'Start date';
+
+  @override
+  String get medicationOngoingSwitchLabel => 'Ongoing (no end date)';
+
+  @override
+  String get medicationEndDateLabel => 'End date';
+
+  @override
+  String get medicationReminderSwitchLabel => 'Enable reminder';
+
+  @override
+  String get medicationReminderTimeLabel => 'Reminder time';
+
+  @override
+  String get medicationListTitle => 'Medications';
+
+  @override
+  String get medicationListEmptyMessage => 'No medication records';
+
+  @override
+  String get medicationOngoingLabel => 'Ongoing';
+
+  @override
+  String medicationEndDateSubtitle(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String get certificateListTitle => 'Certificates';
+
+  @override
+  String get certificateListEmptyTitle => 'No certificates yet';
+
+  @override
+  String get certificateListEmptyDescription =>
+      'Certificates are captured and saved from the Prevention tab when you add a vaccine, heartworm, or flea/tick prevention record.';
+
+  @override
+  String get certificateAddPreventionRecordLabel => 'Add a prevention record';
+
+  @override
+  String get preventionProgramFormAddTitle => 'Add prevention program';
+
+  @override
+  String get preventionProgramFormEditTitle => 'Edit prevention program';
+
+  @override
+  String get preventionTypeFieldLabel => 'Type';
+
+  @override
+  String get preventionProductNameLabel => 'Vaccine or medication name';
+
+  @override
+  String get scheduleTypeFieldLabel => 'Frequency';
+
+  @override
+  String get scheduleTypeSingleOption => 'One-time (register as needed)';
+
+  @override
+  String get scheduleTypeCustomOption => 'Custom interval';
+
+  @override
+  String get intervalDaysLabel => 'Interval (days)';
+
+  @override
+  String get numericValueValidationError => 'Please enter a number';
+
+  @override
+  String get preventionProgramActiveSwitchLabel => 'Active';
+
+  @override
+  String get preventionProgramListTitle => 'Prevention programs';
+
+  @override
+  String get preventionProgramListEmptyMessage => 'No prevention programs';
+
+  @override
+  String get scheduleTypeSingleBadge => 'One-time';
+
+  @override
+  String scheduleIntervalDaysLabel(int days) {
+    return 'Every $days days';
+  }
+
+  @override
+  String get preventionProgramInactiveSuffix => ' (inactive)';
+
+  @override
+  String get savingInProgressMessage => 'Saving, please wait';
+
+  @override
+  String get preventionRecordFormAddTitle => 'Add administration record';
+
+  @override
+  String get preventionRecordFormEditTitle => 'Edit administration record';
+
+  @override
+  String get administeredAtLabel => 'Date administered';
+
+  @override
+  String get hospitalNameOptionalLabel =>
+      'Veterinary clinic (optional if administered at home)';
+
+  @override
+  String get nextDueDateLabel => 'Next due date';
+
+  @override
+  String get certificateImageSectionTitle => 'Certificate (image)';
+
+  @override
+  String get certificateAlreadyRegisteredMessage =>
+      'A certificate is already registered';
+
+  @override
+  String get certificateNotRegisteredMessage => 'No certificate registered';
+
+  @override
+  String get certificateCaptureManualLabel =>
+      'Photograph or choose a certificate (auto-fill coming soon)';
+
+  @override
+  String get certificateCaptureAiLabel =>
+      'Photograph or choose a certificate for AI auto-fill';
+
+  @override
+  String get ocrReadFailedMessage =>
+      'Couldn\'t read it automatically. Please enter the details manually';
+
+  @override
+  String ocrConfidenceLabel(String percent) {
+    return 'AI reading confidence: $percent% (please double-check the details)';
+  }
+
+  @override
+  String get vaccinationHistoryLabel => 'Vaccination history';
+
+  @override
+  String get medicationHistoryLabel => 'Medication history';
+
+  @override
+  String get vaccinationRecordLabel => 'vaccination records';
+
+  @override
+  String get medicationRecordLabel => 'medication records';
+
+  @override
+  String preventionRecordListTitle(String productName, String historyLabel) {
+    return '$historyLabel for $productName';
+  }
+
+  @override
+  String preventionRecordListEmptyMessage(String recordLabel) {
+    return 'No $recordLabel found';
+  }
+
+  @override
+  String nextDueDatePrefixLabel(String date) {
+    return 'Next due: $date';
+  }
+
+  @override
+  String get visitFormAddTitle => 'Add visit record';
+
+  @override
+  String get visitFormEditTitle => 'Edit visit record';
+
+  @override
+  String get visitedAtLabel => 'Visit date';
+
+  @override
+  String get hospitalNameLabel => 'Veterinary clinic';
+
+  @override
+  String get diagnosisLabel => 'Diagnosis';
+
+  @override
+  String get visitCostLabel => 'Cost (yen)';
+
+  @override
+  String get nextVisitDateLabel => 'Next visit date';
+
+  @override
+  String get visitListTitle => 'Visit history';
+
+  @override
+  String get visitListEmptyMessage => 'No visit records';
+
+  @override
+  String get visitFallbackTitle => 'Visit record';
+
+  @override
+  String visitCostYenSuffix(int cost) {
+    return '¥$cost';
+  }
 }

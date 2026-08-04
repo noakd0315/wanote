@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/certificate_cache_service.dart';
 import '../../data/prevention_record_repository.dart';
 import '../../domain/models/prevention_record.dart';
@@ -34,12 +35,13 @@ class CertificateListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: const Text('証明書一覧')),
+      appBar: AppBar(title: Text(l10n.certificateListTitle)),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecords(uid, petId),
         builder: (context, snapshot) {
@@ -58,19 +60,21 @@ class CertificateListScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.description_outlined, size: 48),
                     const SizedBox(height: 12),
-                    const Text('登録済みの証明書がありません', textAlign: TextAlign.center),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '証明書は「予防医療」タブでワクチン・フィラリア・ノミダニ予防の'
-                      '記録を追加するときに撮影・登録します。',
+                    Text(
+                      l10n.certificateListEmptyTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.certificateListEmptyDescription,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
                       onPressed: () => _openPreventionPrograms(context),
                       icon: const Icon(Icons.vaccines_outlined),
-                      label: const Text('予防医療の記録を追加する'),
+                      label: Text(l10n.certificateAddPreventionRecordLabel),
                     ),
                   ],
                 ),
@@ -100,7 +104,7 @@ class CertificateListScreen extends StatelessWidget {
         // Plain "+" (not a camera icon) -- PM note: this button navigates
         // to 予防医療 rather than directly launching the camera, so a
         // photo-specific icon was misleading.
-        tooltip: '予防医療の記録を追加する',
+        tooltip: l10n.certificateAddPreventionRecordLabel,
         onPressed: () => _openPreventionPrograms(context),
         child: const Icon(Icons.add),
       ),

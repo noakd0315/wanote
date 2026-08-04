@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/certificate_ocr_service.dart';
 import '../../data/prevention_record_repository.dart';
 import '../../domain/models/prevention_program.dart';
@@ -34,17 +35,27 @@ class PreventionRecordListScreen extends StatelessWidget {
   /// 「投薬履歴」-- vaccines are injected ("接種"), heartworm/flea-tick
   /// prevention is administered as an oral/topical medication ("投薬").
   bool get _isVaccine => program.type == PreventionType.vaccine;
-  String get _historyLabel => _isVaccine ? '接種履歴' : '投薬履歴';
-  String get _recordLabel => _isVaccine ? '接種記録' : '投薬記録';
+  String _historyLabel(AppLocalizations l10n) =>
+      _isVaccine ? l10n.vaccinationHistoryLabel : l10n.medicationHistoryLabel;
+  String _recordLabel(AppLocalizations l10n) =>
+      _isVaccine ? l10n.vaccinationRecordLabel : l10n.medicationRecordLabel;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through, per the PM's request to scatter the
       // pattern across every non-input-form screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text('${program.productName} の$_historyLabel')),
+      appBar: AppBar(
+        title: Text(
+          l10n.preventionRecordListTitle(
+            program.productName,
+            _historyLabel(l10n),
+          ),
+        ),
+      ),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecordsForProgram(
           uid,
@@ -57,7 +68,11 @@ class PreventionRecordListScreen extends StatelessWidget {
           }
           final records = snapshot.data!;
           if (records.isEmpty) {
-            return Center(child: Text('$_recordLabelがありません'));
+            return Center(
+              child: Text(
+                l10n.preventionRecordListEmptyMessage(_recordLabel(l10n)),
+              ),
+            );
           }
           return ListView.builder(
             itemCount: records.length,
@@ -79,7 +94,13 @@ class PreventionRecordListScreen extends StatelessWidget {
                   subtitle: Text(
                     record.nextDueDate == null
                         ? (record.hospitalName ?? '')
-                        : '次回: ${record.nextDueDate!.toLocal().toString().split(' ').first}',
+                        : l10n.nextDueDatePrefixLabel(
+                            record.nextDueDate!
+                                .toLocal()
+                                .toString()
+                                .split(' ')
+                                .first,
+                          ),
                   ),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(

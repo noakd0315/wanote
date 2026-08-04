@@ -519,5 +519,350 @@
   "removePetDialogConfirmButton": "Remove",
   "@removePetDialogConfirmButton": {
     "description": "Confirm button on the remove-pet confirmation dialog."
+  },
+
+  "saveButton": "Save",
+  "@saveButton": {
+    "description": "Generic save button label used across the medical feature's create/edit forms."
+  },
+  "requiredFieldValidationError": "This field is required",
+  "@requiredFieldValidationError": {
+    "description": "Validation error shown when a required text field is left empty."
+  },
+  "notSetLabel": "Not set",
+  "@notSetLabel": {
+    "description": "Shown as the subtitle of an optional date field (e.g. end date, next due date) when no date has been picked yet."
+  },
+  "preventionTypeVaccine": "Vaccine",
+  "@preventionTypeVaccine": {
+    "description": "Display label for PreventionType.vaccine, used in the prevention program type dropdown and the program list's type badge."
+  },
+  "preventionTypeMedication": "Medication",
+  "@preventionTypeMedication": {
+    "description": "Display label for PreventionType.medication, used in the prevention program type dropdown and the program list's type badge."
+  },
+  "scheduleTypeMonthly": "Monthly",
+  "@scheduleTypeMonthly": {
+    "description": "Display label for ScheduleType.monthly, used in the prevention program frequency dropdown and the program list's schedule badge."
+  },
+  "scheduleTypeAnnual": "Annually",
+  "@scheduleTypeAnnual": {
+    "description": "Display label for ScheduleType.annual, used in the prevention program frequency dropdown and the program list's schedule badge."
+  },
+
+  "medicalTabVisits": "Visits",
+  "@medicalTabVisits": {
+    "description": "Tab label for the visit-history tab on the medical home screen."
+  },
+  "medicalTabMedications": "Medications",
+  "@medicalTabMedications": {
+    "description": "Tab label for the medications tab on the medical home screen."
+  },
+  "medicalTabPrevention": "Prevention",
+  "@medicalTabPrevention": {
+    "description": "Tab label for the prevention-care tab on the medical home screen."
+  },
+  "medicalTabCertificates": "Certificates",
+  "@medicalTabCertificates": {
+    "description": "Tab label for the certificates tab on the medical home screen."
+  },
+
+  "medicationFormAddTitle": "Add medication record",
+  "@medicationFormAddTitle": {
+    "description": "AppBar title of the medication form when adding a new medication."
+  },
+  "medicationFormEditTitle": "Edit medication record",
+  "@medicationFormEditTitle": {
+    "description": "AppBar title of the medication form when editing an existing medication."
+  },
+  "medicationNameLabel": "Medication name",
+  "@medicationNameLabel": {
+    "description": "Label for the medication-name text field."
+  },
+  "medicationDosageLabel": "Dosage",
+  "@medicationDosageLabel": {
+    "description": "Label for the dosage text field."
+  },
+  "medicationStartDateLabel": "Start date",
+  "@medicationStartDateLabel": {
+    "description": "ListTile title for the medication start-date picker."
+  },
+  "medicationOngoingSwitchLabel": "Ongoing (no end date)",
+  "@medicationOngoingSwitchLabel": {
+    "description": "SwitchListTile title toggling whether the medication is ongoing with no set end date."
+  },
+  "medicationEndDateLabel": "End date",
+  "@medicationEndDateLabel": {
+    "description": "ListTile title for the medication end-date picker, shown when the medication is not ongoing."
+  },
+  "medicationReminderSwitchLabel": "Enable reminder",
+  "@medicationReminderSwitchLabel": {
+    "description": "SwitchListTile title toggling the medication reminder."
+  },
+  "medicationReminderTimeLabel": "Reminder time",
+  "@medicationReminderTimeLabel": {
+    "description": "ListTile title for the medication reminder time picker."
+  },
+
+  "medicationListTitle": "Medications",
+  "@medicationListTitle": {
+    "description": "AppBar title of the medication list screen."
+  },
+  "medicationListEmptyMessage": "No medication records",
+  "@medicationListEmptyMessage": {
+    "description": "Empty-state message shown when the pet has no medication records."
+  },
+  "medicationOngoingLabel": "Ongoing",
+  "@medicationOngoingLabel": {
+    "description": "Subtitle shown for a medication list entry that has no end date."
+  },
+  "medicationEndDateSubtitle": "Until {date}",
+  "@medicationEndDateSubtitle": {
+    "description": "Subtitle shown for a medication list entry that has an end date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "certificateListTitle": "Certificates",
+  "@certificateListTitle": {
+    "description": "AppBar title of the certificate list screen."
+  },
+  "certificateListEmptyTitle": "No certificates yet",
+  "@certificateListEmptyTitle": {
+    "description": "Empty-state title shown when the pet has no registered certificates."
+  },
+  "certificateListEmptyDescription": "Certificates are captured and saved from the Prevention tab when you add a vaccine, heartworm, or flea/tick prevention record.",
+  "@certificateListEmptyDescription": {
+    "description": "Empty-state description explaining how to register a certificate."
+  },
+  "certificateAddPreventionRecordLabel": "Add a prevention record",
+  "@certificateAddPreventionRecordLabel": {
+    "description": "Button label and FAB tooltip that navigate from the certificate list to the prevention programs screen."
+  },
+
+  "preventionProgramFormAddTitle": "Add prevention program",
+  "@preventionProgramFormAddTitle": {
+    "description": "AppBar title of the prevention program form when adding a new program."
+  },
+  "preventionProgramFormEditTitle": "Edit prevention program",
+  "@preventionProgramFormEditTitle": {
+    "description": "AppBar title of the prevention program form when editing an existing program."
+  },
+  "preventionTypeFieldLabel": "Type",
+  "@preventionTypeFieldLabel": {
+    "description": "Label for the prevention program type dropdown (vaccine/medication)."
+  },
+  "preventionProductNameLabel": "Vaccine or medication name",
+  "@preventionProductNameLabel": {
+    "description": "Label for the product-name text field on the prevention program form."
+  },
+  "scheduleTypeFieldLabel": "Frequency",
+  "@scheduleTypeFieldLabel": {
+    "description": "Label for the prevention program frequency/schedule dropdown."
+  },
+  "scheduleTypeSingleOption": "One-time (register as needed)",
+  "@scheduleTypeSingleOption": {
+    "description": "Dropdown option label for ScheduleType.single on the prevention program form."
+  },
+  "scheduleTypeCustomOption": "Custom interval",
+  "@scheduleTypeCustomOption": {
+    "description": "Dropdown option label for ScheduleType.custom on the prevention program form."
+  },
+  "intervalDaysLabel": "Interval (days)",
+  "@intervalDaysLabel": {
+    "description": "Label for the custom interval-days text field, shown when the schedule type is custom."
+  },
+  "numericValueValidationError": "Please enter a number",
+  "@numericValueValidationError": {
+    "description": "Validation error shown when the interval-days field isn't a valid number."
+  },
+  "preventionProgramActiveSwitchLabel": "Active",
+  "@preventionProgramActiveSwitchLabel": {
+    "description": "SwitchListTile title toggling whether the prevention program is active."
+  },
+
+  "preventionProgramListTitle": "Prevention programs",
+  "@preventionProgramListTitle": {
+    "description": "AppBar title of the prevention program list screen."
+  },
+  "preventionProgramListEmptyMessage": "No prevention programs",
+  "@preventionProgramListEmptyMessage": {
+    "description": "Empty-state message shown when the pet has no prevention programs."
+  },
+  "scheduleTypeSingleBadge": "One-time",
+  "@scheduleTypeSingleBadge": {
+    "description": "Short schedule-type badge text for ScheduleType.single on the prevention program list."
+  },
+  "scheduleIntervalDaysLabel": "Every {days} days",
+  "@scheduleIntervalDaysLabel": {
+    "description": "Short schedule-type badge text for ScheduleType.custom on the prevention program list.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "preventionProgramInactiveSuffix": " (inactive)",
+  "@preventionProgramInactiveSuffix": {
+    "description": "Suffix appended to a prevention program list entry's subtitle when the program is inactive."
+  },
+
+  "savingInProgressMessage": "Saving, please wait",
+  "@savingInProgressMessage": {
+    "description": "Snackbar shown when the user tries to leave the prevention record form while a save is still in progress."
+  },
+  "preventionRecordFormAddTitle": "Add administration record",
+  "@preventionRecordFormAddTitle": {
+    "description": "AppBar title of the prevention record form when adding a new record."
+  },
+  "preventionRecordFormEditTitle": "Edit administration record",
+  "@preventionRecordFormEditTitle": {
+    "description": "AppBar title of the prevention record form when editing an existing record."
+  },
+  "administeredAtLabel": "Date administered",
+  "@administeredAtLabel": {
+    "description": "ListTile title for the administered-date picker on the prevention record form."
+  },
+  "hospitalNameOptionalLabel": "Veterinary clinic (optional if administered at home)",
+  "@hospitalNameOptionalLabel": {
+    "description": "Label for the hospital-name text field on the prevention record form."
+  },
+  "nextDueDateLabel": "Next due date",
+  "@nextDueDateLabel": {
+    "description": "ListTile title for the next-due-date picker on the prevention record form."
+  },
+  "certificateImageSectionTitle": "Certificate (image)",
+  "@certificateImageSectionTitle": {
+    "description": "Section heading above the certificate image/capture controls on the prevention record form."
+  },
+  "certificateAlreadyRegisteredMessage": "A certificate is already registered",
+  "@certificateAlreadyRegisteredMessage": {
+    "description": "Shown when editing a record that already has a certificate image but none has been newly picked."
+  },
+  "certificateNotRegisteredMessage": "No certificate registered",
+  "@certificateNotRegisteredMessage": {
+    "description": "Shown when the record has no certificate image at all."
+  },
+  "certificateCaptureManualLabel": "Photograph or choose a certificate (auto-fill coming soon)",
+  "@certificateCaptureManualLabel": {
+    "description": "Button label shown when no OCR backend is configured, so capture is manual-only."
+  },
+  "certificateCaptureAiLabel": "Photograph or choose a certificate for AI auto-fill",
+  "@certificateCaptureAiLabel": {
+    "description": "Button label shown when an OCR backend is configured."
+  },
+  "ocrReadFailedMessage": "Couldn't read it automatically. Please enter the details manually",
+  "@ocrReadFailedMessage": {
+    "description": "Shown when the AI-OCR certificate read fails or returns low-confidence results."
+  },
+  "ocrConfidenceLabel": "AI reading confidence: {percent}% (please double-check the details)",
+  "@ocrConfidenceLabel": {
+    "description": "Shows the AI-OCR confidence percentage after a successful certificate read.",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+
+  "vaccinationHistoryLabel": "Vaccination history",
+  "@vaccinationHistoryLabel": {
+    "description": "Short label for a vaccine-type prevention program's administration history, used in the record list's title."
+  },
+  "medicationHistoryLabel": "Medication history",
+  "@medicationHistoryLabel": {
+    "description": "Short label for a medication-type prevention program's administration history, used in the record list's title."
+  },
+  "vaccinationRecordLabel": "vaccination records",
+  "@vaccinationRecordLabel": {
+    "description": "Lowercase plural noun for vaccine-type prevention records, embedded in the record list's empty-state message."
+  },
+  "medicationRecordLabel": "medication records",
+  "@medicationRecordLabel": {
+    "description": "Lowercase plural noun for medication-type prevention records, embedded in the record list's empty-state message."
+  },
+  "preventionRecordListTitle": "{historyLabel} for {productName}",
+  "@preventionRecordListTitle": {
+    "description": "AppBar title of the prevention record list screen, combining the program's product name with its vaccination/medication history label.",
+    "placeholders": {
+      "productName": {
+        "type": "String"
+      },
+      "historyLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "preventionRecordListEmptyMessage": "No {recordLabel} found",
+  "@preventionRecordListEmptyMessage": {
+    "description": "Empty-state message on the prevention record list screen, combining a generic \"no records\" phrase with the vaccination/medication record label.",
+    "placeholders": {
+      "recordLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "nextDueDatePrefixLabel": "Next due: {date}",
+  "@nextDueDatePrefixLabel": {
+    "description": "Subtitle prefix shown on a prevention record list entry that has a next-due date.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+
+  "visitFormAddTitle": "Add visit record",
+  "@visitFormAddTitle": {
+    "description": "AppBar title of the visit form when adding a new visit."
+  },
+  "visitFormEditTitle": "Edit visit record",
+  "@visitFormEditTitle": {
+    "description": "AppBar title of the visit form when editing an existing visit."
+  },
+  "visitedAtLabel": "Visit date",
+  "@visitedAtLabel": {
+    "description": "ListTile title for the visit-date picker."
+  },
+  "hospitalNameLabel": "Veterinary clinic",
+  "@hospitalNameLabel": {
+    "description": "Label for the hospital-name text field on the visit form."
+  },
+  "diagnosisLabel": "Diagnosis",
+  "@diagnosisLabel": {
+    "description": "Label for the diagnosis text field on the visit form."
+  },
+  "visitCostLabel": "Cost (yen)",
+  "@visitCostLabel": {
+    "description": "Label for the cost text field on the visit form."
+  },
+  "nextVisitDateLabel": "Next visit date",
+  "@nextVisitDateLabel": {
+    "description": "ListTile title for the next-visit-date picker on the visit form."
+  },
+
+  "visitListTitle": "Visit history",
+  "@visitListTitle": {
+    "description": "AppBar title of the visit list screen."
+  },
+  "visitListEmptyMessage": "No visit records",
+  "@visitListEmptyMessage": {
+    "description": "Empty-state message shown when the pet has no visit records."
+  },
+  "visitFallbackTitle": "Visit record",
+  "@visitFallbackTitle": {
+    "description": "Fallback list-tile title for a visit entry that has no hospital name set."
+  },
+  "visitCostYenSuffix": "¥{cost}",
+  "@visitCostYenSuffix": {
+    "description": "Trailing cost text on a visit list entry, shown when the visit has a recorded cost.",
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
   }
 }
