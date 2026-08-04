@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../features/auth/auth.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/presentation/paywall_screen.dart';
+import '../shared/widgets/pet_icon_avatar.dart';
 
 /// 設定・課金 section of the app shell.
 ///
@@ -32,7 +33,7 @@ class SettingsSection extends StatelessWidget {
     return ListView(
       children: [
         ListTile(
-          leading: const CircleAvatar(child: Icon(Icons.pets)),
+          leading: PetIconAvatar(pet: activePet),
           title: Text(activePet.name),
           subtitle: Text(activePet.breed),
         ),

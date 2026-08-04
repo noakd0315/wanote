@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 /// does not import lib/features/billing/ directly, so the actual
 /// navigation/paywall is supplied by the caller via [onUpgrade].
 class UpgradePromptCard extends StatelessWidget {
-  const UpgradePromptCard({super.key, required this.message, required this.onUpgrade});
+  const UpgradePromptCard({
+    super.key,
+    required this.message,
+    required this.onUpgrade,
+  });
 
   final String message;
   final VoidCallback onUpgrade;
@@ -24,7 +28,10 @@ class UpgradePromptCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(message, style: TextStyle(color: colorScheme.onSecondaryContainer)),
+          Text(
+            message,
+            style: TextStyle(color: colorScheme.onSecondaryContainer),
+          ),
           const SizedBox(height: 12),
           FilledButton(
             onPressed: onUpgrade,

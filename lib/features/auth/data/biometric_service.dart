@@ -60,7 +60,9 @@ class LocalAuthBiometricService implements BiometricService {
           stickyAuth: true,
         ),
       );
-      return didAuthenticate ? BiometricPromptResult.success : BiometricPromptResult.failed;
+      return didAuthenticate
+          ? BiometricPromptResult.success
+          : BiometricPromptResult.failed;
     } on Exception {
       return BiometricPromptResult.error;
     }

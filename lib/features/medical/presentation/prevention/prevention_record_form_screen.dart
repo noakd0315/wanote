@@ -294,9 +294,7 @@ class _PreventionRecordFormScreenState
             ),
             TextFormField(
               controller: _hospitalController,
-              decoration: const InputDecoration(
-                labelText: '動物病院名（自宅投与の場合は任意）',
-              ),
+              decoration: const InputDecoration(labelText: '動物病院名（自宅投与の場合は任意）'),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,

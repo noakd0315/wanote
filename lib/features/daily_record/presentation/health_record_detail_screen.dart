@@ -24,8 +24,14 @@ class HealthRecordDetailScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('この記録を削除しますか？'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('キャンセル')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('削除')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('削除'),
+          ),
         ],
       ),
     );
@@ -38,6 +44,10 @@ class HealthRecordDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through, per the PM's request to scatter the
+      // pattern across every non-input-form screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt)),
         actions: [
@@ -68,7 +78,9 @@ class HealthRecordDetailScreen extends StatelessWidget {
           if (record.tags.isNotEmpty)
             Wrap(
               spacing: 8,
-              children: record.tags.map((t) => Chip(label: Text(t.wireName))).toList(),
+              children: record.tags
+                  .map((t) => Chip(label: Text(t.wireName)))
+                  .toList(),
             ),
           const SizedBox(height: 16),
           if (record.photos.isNotEmpty)
@@ -80,7 +92,12 @@ class HealthRecordDetailScreen extends StatelessWidget {
                 separatorBuilder: (_, _) => const SizedBox(width: 8),
                 itemBuilder: (context, index) => ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: Image.network(record.photos[index], width: 120, height: 120, fit: BoxFit.cover),
+                  child: Image.network(
+                    record.photos[index],
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),

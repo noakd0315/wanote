@@ -80,7 +80,9 @@ class BillingBackendClient {
       }
       throw BillingBackendException(
         statusCode: response.statusCode,
-        message: message ?? 'Billing backend request failed (${response.statusCode}).',
+        message:
+            message ??
+            'Billing backend request failed (${response.statusCode}).',
       );
     }
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;

@@ -2,6 +2,7 @@
 import 'package:provider/provider.dart';
 
 import '../../../../shared/models/auth_provider_type.dart';
+import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../domain/auth_gate_resolver.dart';
 import '../../domain/biometric_fallback_resolver.dart';
 import '../auth_controller.dart';
@@ -138,40 +139,45 @@ class _BiometricGateState extends State<_BiometricGate> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Unlock wanote')),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.fingerprint, size: 64),
-                  const SizedBox(height: 16),
-                  if (_isBusy)
-                    const CircularProgressIndicator()
-                  else if (fallback == null)
-                    FilledButton(
-                      onPressed: _promptNow,
-                      child: const Text('Unlock'),
-                    )
-                  else
-                    _buildFallback(context, controller, fallback, provider),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
-                ],
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DogSilhouetteBackground()),
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.fingerprint, size: 64),
+                      const SizedBox(height: 16),
+                      if (_isBusy)
+                        const CircularProgressIndicator()
+                      else if (fallback == null)
+                        FilledButton(
+                          onPressed: _promptNow,
+                          child: const Text('Unlock'),
+                        )
+                      else
+                        _buildFallback(context, controller, fallback, provider),
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

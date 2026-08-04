@@ -32,7 +32,8 @@ class OcrExtractionResult {
   final String? hospitalName;
 
   factory OcrExtractionResult.fromJson(Map<String, dynamic> json) {
-    final extracted = (json['extracted'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final extracted =
+        (json['extracted'] as Map?)?.cast<String, dynamic>() ?? const {};
     return OcrExtractionResult(
       extractedData: extracted,
       confidence: (json['confidence'] as num?)?.toDouble(),

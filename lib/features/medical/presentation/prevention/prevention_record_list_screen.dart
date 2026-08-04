@@ -33,6 +33,10 @@ class PreventionRecordListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through, per the PM's request to scatter the
+      // pattern across every non-input-form screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text('${program.productName} の投与履歴')),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecordsForProgram(

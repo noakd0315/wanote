@@ -173,19 +173,9 @@ class HomeScreen extends StatelessWidget {
             )
           else
             const _DefaultBackground(),
-          // Scrim so the overlaid text/buttons stay legible over a photo.
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.05),
-                  Colors.black.withValues(alpha: 0.55),
-                ],
-              ),
-            ),
-          ),
+          // PM request: remove the black gradient scrim that used to sit
+          // here for text contrast -- the overlaid name/shortcuts now rely
+          // on their own text shadow / chip background instead (see below).
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -198,6 +188,13 @@ class HomeScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      // Keeps the name legible over a bright photo now that
+                      // the full-screen black gradient scrim is gone (PM
+                      // request: "黒のグラデーションがかかっていますが、
+                      // 削除したい").
+                      shadows: const [
+                        Shadow(color: Colors.black54, blurRadius: 8),
+                      ],
                     ),
                   ),
                 ),
@@ -266,7 +263,13 @@ class _DefaultBackground extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Image.asset('assets/images/wanote_icon.png', width: 220),
+        // Sized relative to screen width (PM request: "デフォルト表示アイコン
+        // を大きく表示したい") rather than a fixed px width, so it stays
+        // prominent across phone sizes without overflowing narrow screens.
+        child: Image.asset(
+          'assets/images/wanote_icon.png',
+          width: MediaQuery.sizeOf(context).width * 0.75,
+        ),
       ),
     );
   }

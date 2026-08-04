@@ -17,7 +17,11 @@ abstract class WeightRecordRepository {
 
   /// Existing records already recorded on the same calendar day as [date],
   /// for the "overwrite or append?" prompt described above.
-  Future<List<WeightRecord>> findForDate(String uid, String petId, DateTime date);
+  Future<List<WeightRecord>> findForDate(
+    String uid,
+    String petId,
+    DateTime date,
+  );
 
   Future<WeightRecord> create({
     required String uid,
@@ -39,23 +43,35 @@ class FirestoreWeightRecordRepository implements WeightRecordRepository {
   final FirebaseFirestore _firestore;
   final Uuid _uuid;
 
-  CollectionReference<Map<String, dynamic>> _collection(String uid, String petId) =>
-      _firestore.collection(FirestorePaths.weightRecords(uid, petId));
+  CollectionReference<Map<String, dynamic>> _collection(
+    String uid,
+    String petId,
+  ) => _firestore.collection(FirestorePaths.weightRecords(uid, petId));
 
   @override
   Stream<List<WeightRecord>> watchAll(String uid, String petId) {
     return _collection(uid, petId)
         .orderBy('measured_at')
         .snapshots()
-        .map((snap) => snap.docs.map((d) => WeightRecord.fromMap(d.data())).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => WeightRecord.fromMap(d.data())).toList(),
+        );
   }
 
   @override
-  Future<List<WeightRecord>> findForDate(String uid, String petId, DateTime date) async {
+  Future<List<WeightRecord>> findForDate(
+    String uid,
+    String petId,
+    DateTime date,
+  ) async {
     final dayStart = DateTime(date.year, date.month, date.day);
     final dayEnd = dayStart.add(const Duration(days: 1));
     final snap = await _collection(uid, petId)
-        .where('measured_at', isGreaterThanOrEqualTo: Timestamp.fromDate(dayStart))
+        .where(
+          'measured_at',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(dayStart),
+        )
         .where('measured_at', isLessThan: Timestamp.fromDate(dayEnd))
         .get();
     return snap.docs.map((d) => WeightRecord.fromMap(d.data())).toList();
@@ -80,7 +96,10 @@ class FirestoreWeightRecordRepository implements WeightRecordRepository {
 
   @override
   Future<void> update(String uid, WeightRecord record) async {
-    await _collection(uid, record.petId).doc(record.weightId).set(record.toMap());
+    await _collection(
+      uid,
+      record.petId,
+    ).doc(record.weightId).set(record.toMap());
   }
 
   @override

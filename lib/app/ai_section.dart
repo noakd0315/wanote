@@ -51,8 +51,31 @@ class AiSection extends StatefulWidget {
   State<AiSection> createState() => _AiSectionState();
 }
 
-class _AiSectionState extends State<AiSection> {
-  int _selectedIndex = 0;
+class _AiSectionState extends State<AiSection>
+    with SingleTickerProviderStateMixin {
+  // TabBar (not SegmentedButton) per the PM's request -- the segmented
+  // button's icon+label segments could overflow/wrap on narrower widths,
+  // which is exactly the "内部メニューが崩れる" breakage being reverted here.
+  // The controller only drives the TabBar's own visuals/gestures; actual
+  // content switching still goes through IndexedStack (see build below) so
+  // each tab's state (e.g. in-progress consultation text) survives
+  // switching away and back, which a raw TabBarView wouldn't guarantee.
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() {
+        if (!_tabController.indexIsChanging) setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,30 +83,17 @@ class _AiSectionState extends State<AiSection> {
       children: [
         SafeArea(
           bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(
-                  value: 0,
-                  label: Text('相談'),
-                  icon: Icon(Icons.chat_outlined),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text('レポート'),
-                  icon: Icon(Icons.insert_chart_outlined),
-                ),
-              ],
-              selected: {_selectedIndex},
-              onSelectionChanged: (selection) =>
-                  setState(() => _selectedIndex = selection.first),
-            ),
+          child: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.chat_outlined), text: '相談'),
+              Tab(icon: Icon(Icons.insert_chart_outlined), text: 'レポート'),
+            ],
           ),
         ),
         Expanded(
           child: IndexedStack(
-            index: _selectedIndex,
+            index: _tabController.index,
             children: [
               ConsultationScreen(
                 uid: widget.uid,

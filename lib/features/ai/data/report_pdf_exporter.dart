@@ -28,22 +28,35 @@ class ReportPdfExporter {
               style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
-            pw.Text('対象期間: ${_dateOnly(stats.periodStart)} 〜 ${_dateOnly(stats.periodEnd)}'),
+            pw.Text(
+              '対象期間: ${_dateOnly(stats.periodStart)} 〜 ${_dateOnly(stats.periodEnd)}',
+            ),
             pw.SizedBox(height: 16),
-            pw.Text('AIサマリー', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              'AIサマリー',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 4),
             pw.Text(summaryText ?? '（このレポートにはAIサマリーは含まれていません）'),
             pw.SizedBox(height: 16),
-            pw.Text('体重の推移', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              '体重の推移',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 4),
             pw.TableHelper.fromTextArray(
               headers: ['日付', '体重(kg)'],
               data: stats.weightSamples
-                  .map((s) => [_dateOnly(s.date), s.weightKg.toStringAsFixed(1)])
+                  .map(
+                    (s) => [_dateOnly(s.date), s.weightKg.toStringAsFixed(1)],
+                  )
                   .toList(),
             ),
             pw.SizedBox(height: 16),
-            pw.Text('トイレ回数の推移', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              'トイレ回数の推移',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
             pw.SizedBox(height: 4),
             pw.TableHelper.fromTextArray(
               headers: ['日付', '回数'],

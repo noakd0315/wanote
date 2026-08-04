@@ -27,7 +27,9 @@ class PaywallScreen extends StatefulWidget {
     super.key,
     required this.billingRepository,
     CampaignCodeRepository? campaignCodeRepository,
-  }) : campaignCodeRepository = campaignCodeRepository ?? const _LazyFirestoreCampaignCodeRepository();
+  }) : campaignCodeRepository =
+           campaignCodeRepository ??
+           const _LazyFirestoreCampaignCodeRepository();
 
   final BillingRepository billingRepository;
   final CampaignCodeRepository campaignCodeRepository;
@@ -47,13 +49,17 @@ class _LazyFirestoreCampaignCodeRepository implements CampaignCodeRepository {
   Future<CampaignCode?> checkValid(String code) => _delegate.checkValid(code);
 
   @override
-  Future<CampaignCodeRedemptionResult> redeem({required String code, required String uid}) =>
-      _delegate.redeem(code: code, uid: uid);
+  Future<CampaignCodeRedemptionResult> redeem({
+    required String code,
+    required String uid,
+  }) => _delegate.redeem(code: code, uid: uid);
 
   @override
-  Future<String> getOrCreateReferralCode(String uid) => _delegate.getOrCreateReferralCode(uid);
+  Future<String> getOrCreateReferralCode(String uid) =>
+      _delegate.getOrCreateReferralCode(uid);
 
-  static CampaignCodeRepository get _delegate => FirestoreCampaignCodeRepository();
+  static CampaignCodeRepository get _delegate =>
+      FirestoreCampaignCodeRepository();
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
@@ -95,9 +101,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     try {
       await widget.billingRepository.restorePurchases();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Purchases restored.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Purchases restored.')));
       }
     } catch (e) {
       if (mounted) {
@@ -109,6 +115,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Transparent so HomeShell's shared DogSilhouetteBackground (behind
+      // its Navigator) shows through, per the PM's request to scatter the
+      // pattern across every non-input-form screen.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Premium & AI tickets'),
         actions: [
@@ -145,7 +155,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 }
 
                 final offering = snapshot.data?.current;
-                final packages = offering?.availablePackages ?? const <Package>[];
+                final packages =
+                    offering?.availablePackages ?? const <Package>[];
                 if (packages.isEmpty) {
                   return const Center(
                     child: Padding(
@@ -360,7 +371,9 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
             const SizedBox(height: 8),
             Text(
               _statusMessage!,
-              style: TextStyle(color: _statusIsError ? Colors.red : Colors.green),
+              style: TextStyle(
+                color: _statusIsError ? Colors.red : Colors.green,
+              ),
             ),
           ],
           if (_referralCodeFuture != null) ...[

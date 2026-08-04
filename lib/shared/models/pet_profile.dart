@@ -35,6 +35,10 @@ class PetProfile extends Equatable {
     required this.neutered,
     this.weightKg,
     this.photoUrl,
+    this.iconPhotoUrl,
+    this.iconAlignmentX = 0.0,
+    this.iconAlignmentY = 0.0,
+    this.iconZoom = 1.0,
   });
 
   final String petId;
@@ -46,11 +50,31 @@ class PetProfile extends Equatable {
   final bool neutered;
   final double? weightKg;
 
-  /// Download URL for the pet's profile photo (Firebase Storage), or null
-  /// if none has been uploaded yet. Added after the initial spec 1.3 field
-  /// set -- nullable and absent-safe so existing Firestore docs without
-  /// this field still parse via [fromMap].
+  /// Download URL for the pet's full-bleed background photo (Home screen),
+  /// or null if none has been uploaded yet. Added after the initial spec
+  /// 1.3 field set -- nullable and absent-safe so existing Firestore docs
+  /// without this field still parse via [fromMap].
   final String? photoUrl;
+
+  /// Download URL for the pet's small icon/avatar (settings list, pet
+  /// switcher), independent of [photoUrl] (PM request: "愛犬アイコンと背景は
+  /// 別々の画像を設定できるようにしたい"). Falls back to [photoUrl] at the
+  /// call site when null, so existing pets with only a background photo
+  /// still show *something* as their icon rather than a blank avatar.
+  final String? iconPhotoUrl;
+
+  /// Where within [iconPhotoUrl] the icon crop is centered, each in
+  /// [-1.0, 1.0] (same convention as [Alignment]: 0 is centered, -1/+1 are
+  /// the left-top/right-bottom edges). Lets the owner reposition an
+  /// off-center photo instead of always cropping dead-center (PM request:
+  /// "出力するアイコンについて表示位置...を設定できるようにしたい").
+  final double iconAlignmentX;
+  final double iconAlignmentY;
+
+  /// Zoom factor applied to [iconPhotoUrl] before cropping to the icon's
+  /// circular frame, >= 1.0 (PM request: same as above, "...サイズを設定
+  /// できるように").
+  final double iconZoom;
 
   PetProfile copyWith({
     String? name,
@@ -60,6 +84,12 @@ class PetProfile extends Equatable {
     bool? neutered,
     double? weightKg,
     String? photoUrl,
+    String? iconPhotoUrl,
+    double? iconAlignmentX,
+    double? iconAlignmentY,
+    double? iconZoom,
+    bool clearPhotoUrl = false,
+    bool clearIconPhotoUrl = false,
   }) {
     return PetProfile(
       petId: petId,
@@ -70,7 +100,13 @@ class PetProfile extends Equatable {
       sex: sex ?? this.sex,
       neutered: neutered ?? this.neutered,
       weightKg: weightKg ?? this.weightKg,
-      photoUrl: photoUrl ?? this.photoUrl,
+      photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
+      iconPhotoUrl: clearIconPhotoUrl
+          ? null
+          : (iconPhotoUrl ?? this.iconPhotoUrl),
+      iconAlignmentX: iconAlignmentX ?? this.iconAlignmentX,
+      iconAlignmentY: iconAlignmentY ?? this.iconAlignmentY,
+      iconZoom: iconZoom ?? this.iconZoom,
     );
   }
 
@@ -85,6 +121,10 @@ class PetProfile extends Equatable {
       'neutered': neutered,
       'weight_kg': weightKg,
       'photo_url': photoUrl,
+      'icon_photo_url': iconPhotoUrl,
+      'icon_alignment_x': iconAlignmentX,
+      'icon_alignment_y': iconAlignmentY,
+      'icon_zoom': iconZoom,
     };
   }
 
@@ -103,6 +143,10 @@ class PetProfile extends Equatable {
       neutered: map['neutered'] as bool? ?? false,
       weightKg: (map['weight_kg'] as num?)?.toDouble(),
       photoUrl: map['photo_url'] as String?,
+      iconPhotoUrl: map['icon_photo_url'] as String?,
+      iconAlignmentX: (map['icon_alignment_x'] as num?)?.toDouble() ?? 0.0,
+      iconAlignmentY: (map['icon_alignment_y'] as num?)?.toDouble() ?? 0.0,
+      iconZoom: (map['icon_zoom'] as num?)?.toDouble() ?? 1.0,
     );
   }
 
@@ -117,5 +161,9 @@ class PetProfile extends Equatable {
     neutered,
     weightKg,
     photoUrl,
+    iconPhotoUrl,
+    iconAlignmentX,
+    iconAlignmentY,
+    iconZoom,
   ];
 }

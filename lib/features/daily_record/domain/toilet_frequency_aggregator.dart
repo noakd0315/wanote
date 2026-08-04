@@ -15,7 +15,10 @@ class ToiletFrequencyAggregator {
   /// and are not guaranteed to be in any particular order — sort the entries
   /// yourself if the chart needs a specific axis order. Days with zero
   /// records are simply absent from the map (not included as zero entries).
-  Map<DateTime, int> aggregateDailyCounts(List<ToiletRecord> records, {ToiletType? type}) {
+  Map<DateTime, int> aggregateDailyCounts(
+    List<ToiletRecord> records, {
+    ToiletType? type,
+  }) {
     final result = <DateTime, int>{};
     for (final record in records) {
       if (type != null && record.type != type) continue;

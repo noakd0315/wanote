@@ -48,12 +48,14 @@ class AnomalyDetector {
     }
 
     final bloodSuggestion = _detectBloodInStool(records);
-    if (bloodSuggestion != null && !suppressedToday(ConsultationSuggestionReason.bloodInStoolSuspected)) {
+    if (bloodSuggestion != null &&
+        !suppressedToday(ConsultationSuggestionReason.bloodInStoolSuspected)) {
       suggestions.add(bloodSuggestion);
     }
 
     final diarrheaSuggestion = _detectProlongedDiarrhea(records);
-    if (diarrheaSuggestion != null && !suppressedToday(ConsultationSuggestionReason.prolongedDiarrhea)) {
+    if (diarrheaSuggestion != null &&
+        !suppressedToday(ConsultationSuggestionReason.prolongedDiarrhea)) {
       suggestions.add(diarrheaSuggestion);
     }
 
@@ -62,7 +64,9 @@ class AnomalyDetector {
 
   ConsultationSuggestion? _detectBloodInStool(List<ToiletRecord> records) {
     final bloodRecords = records.where(
-      (r) => r.type == ToiletType.stool && r.stoolCondition?.color == StoolColor.bloodSuspected,
+      (r) =>
+          r.type == ToiletType.stool &&
+          r.stoolCondition?.color == StoolColor.bloodSuspected,
     );
     if (bloodRecords.isEmpty) return null;
 
@@ -89,12 +93,15 @@ class AnomalyDetector {
 
   ConsultationSuggestion? _detectProlongedDiarrhea(List<ToiletRecord> records) {
     final diarrheaRecords = records.where(
-      (r) => r.type == ToiletType.stool && r.stoolCondition?.hardness == StoolHardness.diarrhea,
+      (r) =>
+          r.type == ToiletType.stool &&
+          r.stoolCondition?.hardness == StoolHardness.diarrhea,
     );
     if (diarrheaRecords.isEmpty) return null;
 
-    final diarrheaDays = diarrheaRecords.map((r) => _dateOnly(r.recordedAt)).toSet().toList()
-      ..sort();
+    final diarrheaDays =
+        diarrheaRecords.map((r) => _dateOnly(r.recordedAt)).toSet().toList()
+          ..sort();
 
     final streakDayCount = _longestConsecutiveStreak(diarrheaDays);
     if (streakDayCount < diarrheaStreakThresholdDays) return null;
@@ -133,7 +140,8 @@ class AnomalyDetector {
     return longest;
   }
 
-  DateTime _dateOnly(DateTime dateTime) => DateTime(dateTime.year, dateTime.month, dateTime.day);
+  DateTime _dateOnly(DateTime dateTime) =>
+      DateTime(dateTime.year, dateTime.month, dateTime.day);
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;

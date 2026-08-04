@@ -23,8 +23,31 @@ class MedicalHomeScreen extends StatefulWidget {
   State<MedicalHomeScreen> createState() => _MedicalHomeScreenState();
 }
 
-class _MedicalHomeScreenState extends State<MedicalHomeScreen> {
-  int _selectedIndex = 0;
+class _MedicalHomeScreenState extends State<MedicalHomeScreen>
+    with SingleTickerProviderStateMixin {
+  // TabBar (not SegmentedButton) per the PM's request -- the segmented
+  // button's icon+label segments could overflow/wrap on narrower widths
+  // with 4 segments, which is exactly the "内部メニューが崩れる" breakage
+  // being reverted here. The controller only drives the TabBar's own
+  // visuals/gestures; actual content switching still goes through
+  // IndexedStack (see build below) so each tab keeps its own state across
+  // switches, same as before.
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this)
+      ..addListener(() {
+        if (!_tabController.indexIsChanging) setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,40 +55,21 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen> {
       children: [
         SafeArea(
           bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(
-                  value: 0,
-                  label: Text('通院'),
-                  icon: Icon(Icons.local_hospital_outlined),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text('薬'),
-                  icon: Icon(Icons.medication_outlined),
-                ),
-                ButtonSegment(
-                  value: 2,
-                  label: Text('予防医療'),
-                  icon: Icon(Icons.vaccines_outlined),
-                ),
-                ButtonSegment(
-                  value: 3,
-                  label: Text('証明書'),
-                  icon: Icon(Icons.description_outlined),
-                ),
-              ],
-              selected: {_selectedIndex},
-              onSelectionChanged: (selection) =>
-                  setState(() => _selectedIndex = selection.first),
-            ),
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: const [
+              Tab(icon: Icon(Icons.local_hospital_outlined), text: '通院'),
+              Tab(icon: Icon(Icons.medication_outlined), text: '薬'),
+              Tab(icon: Icon(Icons.vaccines_outlined), text: '予防医療'),
+              Tab(icon: Icon(Icons.description_outlined), text: '証明書'),
+            ],
           ),
         ),
         Expanded(
           child: IndexedStack(
-            index: _selectedIndex,
+            index: _tabController.index,
             children: [
               VisitListScreen(uid: widget.uid, petId: widget.petId),
               MedicationListScreen(uid: widget.uid, petId: widget.petId),

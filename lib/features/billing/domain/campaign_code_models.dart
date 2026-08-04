@@ -95,13 +95,19 @@ class CampaignCodeEligibility {
       return const RedemptionIneligible(RedemptionIneligibleReason.inactive);
     }
     if (uid != null && campaignCode.referrerUid == uid) {
-      return const RedemptionIneligible(RedemptionIneligibleReason.selfReferral);
+      return const RedemptionIneligible(
+        RedemptionIneligibleReason.selfReferral,
+      );
     }
     if (alreadyRedeemedByUser) {
-      return const RedemptionIneligible(RedemptionIneligibleReason.alreadyRedeemedByUser);
+      return const RedemptionIneligible(
+        RedemptionIneligibleReason.alreadyRedeemedByUser,
+      );
     }
     if (!campaignCode.hasRedemptionsRemaining) {
-      return const RedemptionIneligible(RedemptionIneligibleReason.redemptionCapReached);
+      return const RedemptionIneligible(
+        RedemptionIneligibleReason.redemptionCapReached,
+      );
     }
     return const RedemptionEligible();
   }
@@ -139,7 +145,9 @@ class ReferralCodeGenerator {
   static const int _shortIdLength = 8;
 
   static String deriveFrom(String uid) {
-    final shortId = uid.length <= _shortIdLength ? uid : uid.substring(0, _shortIdLength);
+    final shortId = uid.length <= _shortIdLength
+        ? uid
+        : uid.substring(0, _shortIdLength);
     return 'REF-${shortId.toUpperCase()}';
   }
 }

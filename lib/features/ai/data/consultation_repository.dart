@@ -32,7 +32,10 @@ class FirestoreConsultationRepository implements ConsultationRepository {
         .collection(FirestorePaths.consultations(uid, petId))
         .orderBy('created_at', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => Consultation.fromMap(d.data())).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => Consultation.fromMap(d.data())).toList(),
+        );
   }
 
   @override

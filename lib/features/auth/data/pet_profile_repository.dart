@@ -28,15 +28,29 @@ abstract class PetProfileRepository {
   Future<void> delete(String ownerId, String petId);
 
   /// Compresses [bytes] and uploads them to Firebase Storage as
-  /// `users/{ownerId}/pets/{petId}/profile.jpg`, returning the download
-  /// URL. Callers are responsible for persisting the URL onto the pet via
+  /// `users/{ownerId}/pets/{petId}/{fileName}`, returning the download URL.
+  /// Callers are responsible for persisting the URL onto the pet via
   /// [update] -- kept as two steps because a brand-new pet has no id until
   /// [create] returns, mirroring how certificate photos are uploaded in
-  /// features/medical.
+  /// features/medical. [fileName] defaults to the background photo's slot;
+  /// pass `'profile_icon.jpg'` (or similar) to upload the separate icon
+  /// photo (PM request: "愛犬アイコンと背景は別々の画像を設定できるように").
   Future<String> uploadPhoto({
     required String ownerId,
     required String petId,
     required Uint8List bytes,
+    String fileName = 'profile.jpg',
+  });
+
+  /// Deletes the Storage object at `users/{ownerId}/pets/{petId}/{fileName}`
+  /// (PM request: "愛犬の写真を削除する機能を追加したい"). Callers are still
+  /// responsible for clearing the corresponding URL field via [update].
+  /// Silently no-ops if the object doesn't exist (e.g. already deleted, or
+  /// the pet never had one).
+  Future<void> deletePhoto({
+    required String ownerId,
+    required String petId,
+    String fileName = 'profile.jpg',
   });
 }
 
@@ -63,7 +77,9 @@ class FirestorePetProfileRepository implements PetProfileRepository {
         .collection(FirestorePaths.pets(ownerId))
         .orderBy('pet_name')
         .snapshots()
-        .map((snap) => snap.docs.map((d) => PetProfile.fromMap(d.data())).toList());
+        .map(
+          (snap) => snap.docs.map((d) => PetProfile.fromMap(d.data())).toList(),
+        );
   }
 
   @override
@@ -109,10 +125,27 @@ class FirestorePetProfileRepository implements PetProfileRepository {
     required String ownerId,
     required String petId,
     required Uint8List bytes,
+    String fileName = 'profile.jpg',
   }) async {
     final compressed = await _photoCompressor.compress(bytes);
-    final ref = _storage.ref('users/$ownerId/pets/$petId/profile.jpg');
+    final ref = _storage.ref('users/$ownerId/pets/$petId/$fileName');
     await ref.putData(compressed, SettableMetadata(contentType: 'image/jpeg'));
     return ref.getDownloadURL();
+  }
+
+  @override
+  Future<void> deletePhoto({
+    required String ownerId,
+    required String petId,
+    String fileName = 'profile.jpg',
+  }) async {
+    try {
+      await _storage.ref('users/$ownerId/pets/$petId/$fileName').delete();
+    } on FirebaseException catch (e) {
+      // Already gone -- deleting a photo that was never uploaded (or was
+      // already removed) should be a no-op, not an error the caller has to
+      // special-case.
+      if (e.code != 'object-not-found') rethrow;
+    }
   }
 }

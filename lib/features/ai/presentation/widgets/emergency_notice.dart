@@ -21,7 +21,10 @@ class EmergencyNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning_amber_rounded, color: colorScheme.onErrorContainer),
+          Icon(
+            Icons.warning_amber_rounded,
+            color: colorScheme.onErrorContainer,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

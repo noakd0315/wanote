@@ -27,16 +27,16 @@ class DogSilhouetteBackground extends StatelessWidget {
   final Color? tint;
 
   static const _assets = [
-    'assets/images/dogs/dog_01_standing.png',
-    'assets/images/dogs/dog_02_greyhound.png',
-    'assets/images/dogs/dog_03_corgi.png',
-    'assets/images/dogs/dog_04_dachshund.png',
-    'assets/images/dogs/dog_05_sitting.png',
-    'assets/images/dogs/dog_06_pomeranian.png',
-    'assets/images/dogs/dog_07_running.png',
-    'assets/images/dogs/dog_08_stretch.png',
-    'assets/images/dogs/dog_09_sitting_poodle.png',
-    'assets/images/dogs/dog_10_howling.png',
+    'assets/images/dogs/dog_01_spitz_standing.png',
+    'assets/images/dogs/dog_02_bulldog_standing.png',
+    'assets/images/dogs/dog_03_poodle_standing.png',
+    'assets/images/dogs/dog_04_dachshund_standing.png',
+    'assets/images/dogs/dog_05_corgi_standing.png',
+    'assets/images/dogs/dog_06_howling_sitting.png',
+    'assets/images/dogs/dog_07_labrador_sitting.png',
+    'assets/images/dogs/dog_08_running.png',
+    'assets/images/dogs/dog_09_jumping.png',
+    'assets/images/dogs/dog_10_papillon_sitting.png',
   ];
 
   /// (asset index, left-fraction, top-fraction, width in logical px,

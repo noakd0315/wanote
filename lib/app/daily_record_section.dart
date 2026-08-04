@@ -47,8 +47,30 @@ class DailyRecordSection extends StatefulWidget {
   State<DailyRecordSection> createState() => _DailyRecordSectionState();
 }
 
-class _DailyRecordSectionState extends State<DailyRecordSection> {
-  int _selectedIndex = 0;
+class _DailyRecordSectionState extends State<DailyRecordSection>
+    with SingleTickerProviderStateMixin {
+  // TabBar (not SegmentedButton) per the PM's request -- the segmented
+  // button's icon+label segments could overflow/wrap on narrower widths,
+  // which is exactly the "内部メニューが崩れる" breakage being reverted here.
+  // The controller only drives the TabBar's own visuals/gestures; actual
+  // content switching still goes through IndexedStack (see build below) so
+  // each tab keeps its own state across switches, same as before.
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this)
+      ..addListener(() {
+        if (!_tabController.indexIsChanging) setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,35 +78,18 @@ class _DailyRecordSectionState extends State<DailyRecordSection> {
       children: [
         SafeArea(
           bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(
-                  value: 0,
-                  label: Text('健康記録'),
-                  icon: Icon(Icons.notes_outlined),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text('体重'),
-                  icon: Icon(Icons.monitor_weight_outlined),
-                ),
-                ButtonSegment(
-                  value: 2,
-                  label: Text('トイレ'),
-                  icon: Icon(Icons.wc_outlined),
-                ),
-              ],
-              selected: {_selectedIndex},
-              onSelectionChanged: (selection) =>
-                  setState(() => _selectedIndex = selection.first),
-            ),
+          child: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.notes_outlined), text: '健康記録'),
+              Tab(icon: Icon(Icons.monitor_weight_outlined), text: '体重'),
+              Tab(icon: Icon(Icons.wc_outlined), text: 'トイレ'),
+            ],
           ),
         ),
         Expanded(
           child: IndexedStack(
-            index: _selectedIndex,
+            index: _tabController.index,
             children: [
               HealthRecordTimelineScreen(
                 uid: widget.uid,

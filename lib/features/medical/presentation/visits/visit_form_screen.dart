@@ -114,9 +114,7 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.visit == null ? '通院記録を追加' : '通院記録を編集'),
-      ),
+      appBar: AppBar(title: Text(widget.visit == null ? '通院記録を追加' : '通院記録を編集')),
       body: Form(
         key: _formKey,
         child: ListView(

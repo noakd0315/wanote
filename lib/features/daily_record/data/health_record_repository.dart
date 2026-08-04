@@ -54,7 +54,8 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
     Uuid? uuid,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _storage = storage ?? FirebaseStorage.instance,
-       _photoCompressor = photoCompressor ?? const FlutterImagePhotoCompressor(),
+       _photoCompressor =
+           photoCompressor ?? const FlutterImagePhotoCompressor(),
        _uuid = uuid ?? const Uuid();
 
   final FirebaseFirestore _firestore;
@@ -62,15 +63,20 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
   final PhotoCompressor _photoCompressor;
   final Uuid _uuid;
 
-  CollectionReference<Map<String, dynamic>> _collection(String uid, String petId) =>
-      _firestore.collection(FirestorePaths.healthRecords(uid, petId));
+  CollectionReference<Map<String, dynamic>> _collection(
+    String uid,
+    String petId,
+  ) => _firestore.collection(FirestorePaths.healthRecords(uid, petId));
 
   @override
   Stream<List<HealthRecord>> watchTimeline(String uid, String petId) {
     return _collection(uid, petId)
         .orderBy('recorded_at', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => HealthRecord.fromMap(d.data())).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => HealthRecord.fromMap(d.data())).toList(),
+        );
   }
 
   Future<List<String>> _uploadPhotos({
@@ -86,7 +92,10 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
       final ref = _storage.ref(
         'users/$uid/pets/$petId/health_records/$recordId/${startIndex + i}.jpg',
       );
-      await ref.putData(compressed, SettableMetadata(contentType: 'image/jpeg'));
+      await ref.putData(
+        compressed,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
       urls.add(await ref.getDownloadURL());
     }
     return urls;
@@ -154,16 +163,24 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
       memo: memo,
       photos: [...retained, ...newUrls],
     );
-    await _collection(uid, record.petId).doc(record.recordId).set(updated.toMap());
+    await _collection(
+      uid,
+      record.petId,
+    ).doc(record.recordId).set(updated.toMap());
     return updated;
   }
 
   @override
-  Future<void> delete({required String uid, required HealthRecord record}) async {
+  Future<void> delete({
+    required String uid,
+    required HealthRecord record,
+  }) async {
     await _collection(uid, record.petId).doc(record.recordId).delete();
     // Best-effort cleanup: derive the folder ref from the known storage path
     // pattern rather than parsing download URLs (which are opaque/signed).
-    final folderRef = _storage.ref('users/$uid/pets/${record.petId}/health_records/${record.recordId}');
+    final folderRef = _storage.ref(
+      'users/$uid/pets/${record.petId}/health_records/${record.recordId}',
+    );
     try {
       final listing = await folderRef.listAll();
       await Future.wait(listing.items.map((r) => r.delete()));

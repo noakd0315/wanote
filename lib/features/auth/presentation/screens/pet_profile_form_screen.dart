@@ -20,6 +20,12 @@ import '../auth_controller.dart';
 /// shown inline by LaunchGateScreen as the forced first-pet step (no route
 /// to pop) it just relies on AuthController's pet stream to move the app
 /// forward once a pet exists.
+///
+/// Photo handling covers 3 PM requests together: separate background vs.
+/// icon images ("愛犬アイコンと背景は別々の画像を設定できるようにしたい"),
+/// deleting either one ("愛犬の写真を削除する機能を追加したい"), and
+/// repositioning/zooming the icon's crop ("出力するアイコンについて表示位置
+/// やサイズを設定できるようにしたい").
 class PetProfileFormScreen extends StatefulWidget {
   const PetProfileFormScreen({super.key, this.existingPet});
 
@@ -38,9 +44,21 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   late DateTime? _birthday;
   late PetSex _sex;
   late bool _neutered;
-  String? _existingPhotoUrl;
-  Uint8List? _pickedPhotoBytes;
   bool _isBusy = false;
+
+  // Background photo (Home screen full-bleed image).
+  Uint8List? _pickedBackgroundBytes;
+  String? _backgroundUrl;
+  bool _backgroundWasDeleted = false;
+
+  // Icon/avatar photo (settings, pet switcher) -- independent of the
+  // background, per the PM's request.
+  Uint8List? _pickedIconBytes;
+  String? _iconUrl;
+  bool _iconWasDeleted = false;
+  late double _iconAlignmentX;
+  late double _iconAlignmentY;
+  late double _iconZoom;
 
   bool get _isEditing => widget.existingPet != null;
 
@@ -56,7 +74,11 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _birthday = pet?.birthday;
     _sex = pet?.sex ?? PetSex.male;
     _neutered = pet?.neutered ?? false;
-    _existingPhotoUrl = pet?.photoUrl;
+    _backgroundUrl = pet?.photoUrl;
+    _iconUrl = pet?.iconPhotoUrl;
+    _iconAlignmentX = pet?.iconAlignmentX ?? 0.0;
+    _iconAlignmentY = pet?.iconAlignmentY ?? 0.0;
+    _iconZoom = pet?.iconZoom ?? 1.0;
   }
 
   @override
@@ -67,7 +89,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     super.dispose();
   }
 
-  Future<void> _pickPhoto() async {
+  Future<Uint8List?> _pickImage() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => SafeArea(
@@ -87,12 +109,44 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
         ),
       ),
     );
-    if (source == null) return;
+    if (source == null) return null;
     final picked = await _imagePicker.pickImage(source: source);
-    if (picked == null) return;
-    final bytes = await picked.readAsBytes();
-    if (!mounted) return;
-    setState(() => _pickedPhotoBytes = bytes);
+    if (picked == null) return null;
+    return picked.readAsBytes();
+  }
+
+  Future<void> _pickBackgroundPhoto() async {
+    final bytes = await _pickImage();
+    if (bytes == null || !mounted) return;
+    setState(() {
+      _pickedBackgroundBytes = bytes;
+      _backgroundWasDeleted = false;
+    });
+  }
+
+  void _deleteBackgroundPhoto() {
+    setState(() {
+      _pickedBackgroundBytes = null;
+      _backgroundUrl = null;
+      _backgroundWasDeleted = widget.existingPet?.photoUrl != null;
+    });
+  }
+
+  Future<void> _pickIconPhoto() async {
+    final bytes = await _pickImage();
+    if (bytes == null || !mounted) return;
+    setState(() {
+      _pickedIconBytes = bytes;
+      _iconWasDeleted = false;
+    });
+  }
+
+  void _deleteIconPhoto() {
+    setState(() {
+      _pickedIconBytes = null;
+      _iconUrl = null;
+      _iconWasDeleted = widget.existingPet?.iconPhotoUrl != null;
+    });
   }
 
   Future<void> _pickBirthday() async {
@@ -122,25 +176,24 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     final weightKg = weightText.isEmpty ? null : double.tryParse(weightText);
 
     try {
+      PetProfile pet;
       if (_isEditing) {
-        var updated = widget.existingPet!.copyWith(
+        pet = widget.existingPet!.copyWith(
           name: _nameController.text.trim(),
           breed: _breedController.text.trim(),
           birthday: _birthday,
           sex: _sex,
           neutered: _neutered,
           weightKg: weightKg,
+          iconAlignmentX: _iconAlignmentX,
+          iconAlignmentY: _iconAlignmentY,
+          iconZoom: _iconZoom,
         );
-        if (_pickedPhotoBytes != null) {
-          final url = await controller.uploadPetPhoto(
-            petId: updated.petId,
-            bytes: _pickedPhotoBytes!,
-          );
-          updated = updated.copyWith(photoUrl: url);
-        }
-        await controller.updatePet(updated);
       } else {
-        final created = await controller.createPet(
+        // A new pet has no id until createPet() returns, so any photo
+        // upload (keyed by pet id) has to happen as a follow-up update --
+        // same two-step pattern as the prevention-certificate upload flow.
+        pet = await controller.createPet(
           name: _nameController.text.trim(),
           breed: _breedController.text.trim(),
           birthday: _birthday!,
@@ -148,17 +201,32 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           neutered: _neutered,
           weightKg: weightKg,
         );
-        // A new pet has no id until createPet() returns, so the photo
-        // upload (keyed by pet id) has to happen as a follow-up update --
-        // same two-step pattern as the prevention-certificate upload flow.
-        if (_pickedPhotoBytes != null) {
-          final url = await controller.uploadPetPhoto(
-            petId: created.petId,
-            bytes: _pickedPhotoBytes!,
-          );
-          await controller.updatePet(created.copyWith(photoUrl: url));
-        }
       }
+
+      if (_pickedBackgroundBytes != null) {
+        final url = await controller.uploadPetPhoto(
+          petId: pet.petId,
+          bytes: _pickedBackgroundBytes!,
+        );
+        pet = pet.copyWith(photoUrl: url);
+      } else if (_backgroundWasDeleted) {
+        await controller.deletePetPhoto(pet.petId);
+        pet = pet.copyWith(clearPhotoUrl: true);
+      }
+
+      if (_pickedIconBytes != null) {
+        final url = await controller.uploadPetIconPhoto(
+          petId: pet.petId,
+          bytes: _pickedIconBytes!,
+        );
+        pet = pet.copyWith(iconPhotoUrl: url);
+      } else if (_iconWasDeleted) {
+        await controller.deletePetIconPhoto(pet.petId);
+        pet = pet.copyWith(clearIconPhotoUrl: true);
+      }
+
+      await controller.updatePet(pet);
+
       if (mounted && Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -187,36 +255,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Center(
-                          child: Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 48,
-                                backgroundImage: _pickedPhotoBytes != null
-                                    ? MemoryImage(_pickedPhotoBytes!)
-                                          as ImageProvider
-                                    : (_existingPhotoUrl != null
-                                          ? CachedNetworkImageProvider(
-                                              _existingPhotoUrl!,
-                                            )
-                                          : null),
-                                child:
-                                    (_pickedPhotoBytes == null &&
-                                        _existingPhotoUrl == null)
-                                    ? const Icon(Icons.pets, size: 40)
-                                    : null,
-                              ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: IconButton.filled(
-                                  icon: const Icon(Icons.camera_alt, size: 18),
-                                  onPressed: _pickPhoto,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        _buildIconSection(),
+                        const SizedBox(height: 24),
+                        _buildBackgroundSection(),
                         const SizedBox(height: 24),
                         TextFormField(
                           controller: _nameController,
@@ -281,8 +322,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                             labelText: 'Weight (kg) - optional',
                           ),
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty)
+                            if (value == null || value.trim().isEmpty) {
                               return null;
+                            }
                             return double.tryParse(value.trim()) == null
                                 ? 'Enter a valid number'
                                 : null;
@@ -304,6 +346,183 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  ImageProvider? _iconImageProvider() {
+    if (_pickedIconBytes != null) return MemoryImage(_pickedIconBytes!);
+    if (_iconUrl != null) return CachedNetworkImageProvider(_iconUrl!);
+    return null;
+  }
+
+  Widget _buildIconSection() {
+    final iconImage = _iconImageProvider();
+    const previewSize = 96.0;
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Text('アイコン写真', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: Stack(
+            children: [
+              ClipOval(
+                child: SizedBox(
+                  width: previewSize,
+                  height: previewSize,
+                  child: iconImage == null
+                      ? const ColoredBox(
+                          color: Color(0x1F000000),
+                          child: Icon(Icons.pets, size: 40),
+                        )
+                      : Transform.scale(
+                          scale: _iconZoom,
+                          alignment: Alignment(
+                            _iconAlignmentX,
+                            _iconAlignmentY,
+                          ),
+                          child: Image(
+                            image: iconImage,
+                            width: previewSize,
+                            height: previewSize,
+                            fit: BoxFit.cover,
+                            alignment: Alignment(
+                              _iconAlignmentX,
+                              _iconAlignmentY,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: IconButton.filled(
+                  icon: const Icon(Icons.camera_alt, size: 18),
+                  onPressed: _pickIconPhoto,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (iconImage != null) ...[
+          TextButton.icon(
+            onPressed: _deleteIconPhoto,
+            icon: const Icon(Icons.delete_outline, size: 18),
+            label: const Text('アイコン写真を削除'),
+          ),
+          // Reposition/zoom controls -- PM request: "出力するアイコンに
+          // ついて表示位置やサイズを設定できるようにしたい".
+          Row(
+            children: [
+              const SizedBox(
+                width: 56,
+                child: Text('左右', style: TextStyle(fontSize: 12)),
+              ),
+              Expanded(
+                child: Slider(
+                  value: _iconAlignmentX,
+                  min: -1,
+                  max: 1,
+                  onChanged: (value) => setState(() => _iconAlignmentX = value),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const SizedBox(
+                width: 56,
+                child: Text('上下', style: TextStyle(fontSize: 12)),
+              ),
+              Expanded(
+                child: Slider(
+                  value: _iconAlignmentY,
+                  min: -1,
+                  max: 1,
+                  onChanged: (value) => setState(() => _iconAlignmentY = value),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const SizedBox(
+                width: 56,
+                child: Text('ズーム', style: TextStyle(fontSize: 12)),
+              ),
+              Expanded(
+                child: Slider(
+                  value: _iconZoom,
+                  min: 1,
+                  max: 3,
+                  onChanged: (value) => setState(() => _iconZoom = value),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  ImageProvider? _backgroundImageProvider() {
+    if (_pickedBackgroundBytes != null) {
+      return MemoryImage(_pickedBackgroundBytes!);
+    }
+    if (_backgroundUrl != null) {
+      return CachedNetworkImageProvider(_backgroundUrl!);
+    }
+    return null;
+  }
+
+  Widget _buildBackgroundSection() {
+    final backgroundImage = _backgroundImageProvider();
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '背景写真（ホーム画面）',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: double.infinity,
+            height: 120,
+            child: backgroundImage == null
+                ? const ColoredBox(
+                    color: Color(0x1F000000),
+                    child: Icon(Icons.image_outlined, size: 32),
+                  )
+                : Image(image: backgroundImage, fit: BoxFit.cover),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _pickBackgroundPhoto,
+              icon: const Icon(Icons.camera_alt_outlined, size: 18),
+              label: const Text('変更'),
+            ),
+            if (backgroundImage != null) ...[
+              const SizedBox(width: 8),
+              TextButton.icon(
+                onPressed: _deleteBackgroundPhoto,
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: const Text('削除'),
+              ),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }

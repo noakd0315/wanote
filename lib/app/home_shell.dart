@@ -205,15 +205,21 @@ class _HomeShellState extends State<HomeShell> {
     ];
 
     return Scaffold(
-      // Persistent across every tab AND every screen pushed onto
-      // [_shellNavigatorKey] (a push only replaces the Navigator's own
-      // content, which sits inside this same outer Scaffold's body) -- this
-      // is what makes the header show on every page per the PM's request,
-      // without each section/screen needing its own copy of it. The title
-      // is the logo image (PM request) rather than a plain "wanote" text.
-      appBar: AppBar(
-        title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
-      ),
+      // Only shown on the ホーム tab (index 0) per the PM's request ("TOP画面
+      // 以外ヘッダーをなくしたい") -- every other tab/pushed screen now has no
+      // header chrome at all. `centerTitle: false` + `titleSpacing: 0` pins
+      // the logo flush to the leading edge with no extra gap (PM: "ヘッダー
+      // のアイコンは寄せとしてください").
+      appBar: _selectedIndex == 0
+          ? AppBar(
+              centerTitle: false,
+              titleSpacing: 0,
+              title: Image.asset(
+                'assets/images/wanote_wordmark.png',
+                height: 28,
+              ),
+            )
+          : null,
       // The dog-silhouette pattern sits behind the Navigator so it shows
       // through the 4 tab-root sections that don't paint their own opaque
       // background (DailyRecordSection/MedicalHomeScreen/AiSection/

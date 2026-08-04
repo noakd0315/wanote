@@ -81,7 +81,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
           recordedAt: _recordedAt,
           photoBytes: _newPhotoBytes,
           tags: _selectedTags.toList(),
-          memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+          memo: _memoController.text.trim().isEmpty
+              ? null
+              : _memoController.text.trim(),
         );
       } else {
         await widget.repository.update(
@@ -89,7 +91,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
           record: existing,
           recordedAt: _recordedAt,
           tags: _selectedTags.toList(),
-          memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+          memo: _memoController.text.trim().isEmpty
+              ? null
+              : _memoController.text.trim(),
           retainedPhotoUrls: _retainedPhotoUrls,
           newPhotoBytes: _newPhotoBytes,
         );
@@ -103,7 +107,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.existingRecord == null ? '新規健康記録' : '健康記録を編集')),
+      appBar: AppBar(
+        title: Text(widget.existingRecord == null ? '新規健康記録' : '健康記録を編集'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -154,17 +160,27 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
-                      child: Image.network(url, width: 80, height: 80, fit: BoxFit.cover),
+                      child: Image.network(
+                        url,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Positioned(
                       right: 0,
                       top: 0,
                       child: GestureDetector(
-                        onTap: () => setState(() => _retainedPhotoUrls.remove(url)),
+                        onTap: () =>
+                            setState(() => _retainedPhotoUrls.remove(url)),
                         child: const CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.black54,
-                          child: Icon(Icons.close, size: 14, color: Colors.white),
+                          child: Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -175,17 +191,27 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
-                      child: Image.memory(bytes, width: 80, height: 80, fit: BoxFit.cover),
+                      child: Image.memory(
+                        bytes,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Positioned(
                       right: 0,
                       top: 0,
                       child: GestureDetector(
-                        onTap: () => setState(() => _newPhotoBytes.remove(bytes)),
+                        onTap: () =>
+                            setState(() => _newPhotoBytes.remove(bytes)),
                         child: const CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.black54,
-                          child: Icon(Icons.close, size: 14, color: Colors.white),
+                          child: Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -206,17 +232,25 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
                 ),
             ],
           ),
-          Text('$_totalPhotoCount/${HealthRecord.maxPhotos}枚', style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            '$_totalPhotoCount/${HealthRecord.maxPhotos}枚',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _memoController,
             maxLines: 4,
-            decoration: const InputDecoration(labelText: 'コメント', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              labelText: 'コメント',
+              border: OutlineInputBorder(),
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _saving ? null : _save,
-            child: _saving ? const CircularProgressIndicator() : const Text('保存'),
+            child: _saving
+                ? const CircularProgressIndicator()
+                : const Text('保存'),
           ),
         ],
       ),

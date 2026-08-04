@@ -43,9 +43,11 @@ abstract class CampaignCodeRepository {
 }
 
 class FirestoreCampaignCodeRepository implements CampaignCodeRepository {
-  FirestoreCampaignCodeRepository({FirebaseFirestore? firestore, BillingBackendClient? backendClient})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _backendClient = backendClient ?? BillingBackendClient.fromEnvironment();
+  FirestoreCampaignCodeRepository({
+    FirebaseFirestore? firestore,
+    BillingBackendClient? backendClient,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _backendClient = backendClient ?? BillingBackendClient.fromEnvironment();
 
   /// Effectively-unlimited redemption cap for referral codes -- referral
   /// codes aren't meant to be scarce the way a promotional campaign code
@@ -71,7 +73,10 @@ class FirestoreCampaignCodeRepository implements CampaignCodeRepository {
   }
 
   @override
-  Future<CampaignCodeRedemptionResult> redeem({required String code, required String uid}) async {
+  Future<CampaignCodeRedemptionResult> redeem({
+    required String code,
+    required String uid,
+  }) async {
     // Phase 1: fast precheck so we don't call the backend at all for an
     // obviously invalid code. Not itself race-safe (see phase 3, which
     // re-checks atomically) -- just avoids an unnecessary network call and
@@ -124,7 +129,9 @@ class FirestoreCampaignCodeRepository implements CampaignCodeRepository {
           throw _RedemptionRaceLost(eligibility.reason);
         }
         tx.update(_codeDoc(code), {'redemptionCount': FieldValue.increment(1)});
-        tx.set(_markerDoc(uid, code), {'redeemedAt': FieldValue.serverTimestamp()});
+        tx.set(_markerDoc(uid, code), {
+          'redeemedAt': FieldValue.serverTimestamp(),
+        });
       });
     } on _RedemptionRaceLost catch (e) {
       return CampaignCodeRedemptionRejected(e.reason);

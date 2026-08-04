@@ -119,7 +119,8 @@ class AiBackendClient {
       }
       throw AiBackendException(
         statusCode: response.statusCode,
-        message: message ?? 'AI backend request failed (${response.statusCode}).',
+        message:
+            message ?? 'AI backend request failed (${response.statusCode}).',
       );
     }
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;

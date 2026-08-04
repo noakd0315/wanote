@@ -42,7 +42,14 @@ class ConsultationReferenceRecord extends Equatable {
   final List<String> tags;
 
   @override
-  List<Object?> get props => [recordId, recordType, petId, recordedAt, label, tags];
+  List<Object?> get props => [
+    recordId,
+    recordType,
+    petId,
+    recordedAt,
+    label,
+    tags,
+  ];
 }
 
 /// Why daily_record is suggesting the user open an AI consultation, and the

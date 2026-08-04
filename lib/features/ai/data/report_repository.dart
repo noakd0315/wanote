@@ -32,7 +32,10 @@ class FirestoreReportRepository implements ReportRepository {
         .collection(FirestorePaths.reports(uid, petId))
         .orderBy('generated_at', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) => MonthlyReport.fromMap(d.data())).toList());
+        .map(
+          (snap) =>
+              snap.docs.map((d) => MonthlyReport.fromMap(d.data())).toList(),
+        );
   }
 
   @override

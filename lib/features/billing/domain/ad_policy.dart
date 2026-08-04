@@ -21,8 +21,7 @@ class AdPolicy {
 
   final EntitlementState premiumState;
 
-  factory AdPolicy.fromStatus(PremiumStatus status) =>
-      AdPolicy(status.state);
+  factory AdPolicy.fromStatus(PremiumStatus status) => AdPolicy(status.state);
 
   /// True only once premium status is confirmed inactive. False both when
   /// the account is an active subscriber and while status is still

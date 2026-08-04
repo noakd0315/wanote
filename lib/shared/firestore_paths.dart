@@ -16,8 +16,7 @@ class FirestorePaths {
   static String toiletRecords(String uid, String petId) =>
       '${pet(uid, petId)}/toilet_records';
 
-  static String visits(String uid, String petId) =>
-      '${pet(uid, petId)}/visits';
+  static String visits(String uid, String petId) => '${pet(uid, petId)}/visits';
   static String medications(String uid, String petId) =>
       '${pet(uid, petId)}/medications';
   static String preventionPrograms(String uid, String petId) =>

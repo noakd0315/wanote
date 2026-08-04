@@ -77,6 +77,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
+        titleSpacing: 0,
         title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
       ),
       body: Stack(

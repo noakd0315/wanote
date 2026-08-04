@@ -65,7 +65,8 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
     final data = snapshot.data();
     if (data == null) {
       return const AiUsageStatus(
-        freeConsultationsRemainingThisMonth: FirestoreAiUsageRepository.freeMonthlyQuota,
+        freeConsultationsRemainingThisMonth:
+            FirestoreAiUsageRepository.freeMonthlyQuota,
         ticketsRemaining: 0,
         hasUnlimitedSubscription: false,
       );
@@ -75,7 +76,8 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
         ? (data['free_used'] as num?)?.toInt() ?? 0
         : 0;
     return AiUsageStatus(
-      freeConsultationsRemainingThisMonth: (freeMonthlyQuota - usedThisMonth).clamp(0, freeMonthlyQuota),
+      freeConsultationsRemainingThisMonth: (freeMonthlyQuota - usedThisMonth)
+          .clamp(0, freeMonthlyQuota),
       ticketsRemaining: (data['tickets_remaining'] as num?)?.toInt() ?? 0,
       hasUnlimitedSubscription: data['unlimited'] as bool? ?? false,
     );
@@ -90,7 +92,8 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
     if (status.hasUnlimitedSubscription) return;
 
     if (status.freeConsultationsRemainingThisMonth > 0) {
-      final usedThisMonth = freeMonthlyQuota - status.freeConsultationsRemainingThisMonth + 1;
+      final usedThisMonth =
+          freeMonthlyQuota - status.freeConsultationsRemainingThisMonth + 1;
       await _doc(uid).set({
         'period': _currentPeriodKey(),
         'free_used': usedThisMonth,

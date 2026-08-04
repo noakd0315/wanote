@@ -323,6 +323,42 @@ class AuthController extends ChangeNotifier {
     );
   }
 
+  /// Same as [uploadPetPhoto] but for the separate icon/avatar image (PM
+  /// request: "愛犬アイコンと背景は別々の画像を設定できるようにしたい").
+  Future<String> uploadPetIconPhoto({
+    required String petId,
+    required Uint8List bytes,
+  }) {
+    final uid = _currentUser?.uid;
+    if (uid == null) throw StateError('No signed-in user.');
+    return _petProfileRepository.uploadPhoto(
+      ownerId: uid,
+      petId: petId,
+      bytes: bytes,
+      fileName: 'profile_icon.jpg',
+    );
+  }
+
+  /// Deletes the background photo's Storage object (PM request: "愛犬の写真
+  /// を削除する機能を追加したい"). Callers still need to persist
+  /// `pet.copyWith(clearPhotoUrl: true)` via [updatePet].
+  Future<void> deletePetPhoto(String petId) {
+    final uid = _currentUser?.uid;
+    if (uid == null) throw StateError('No signed-in user.');
+    return _petProfileRepository.deletePhoto(ownerId: uid, petId: petId);
+  }
+
+  /// Same as [deletePetPhoto] but for the separate icon/avatar image.
+  Future<void> deletePetIconPhoto(String petId) {
+    final uid = _currentUser?.uid;
+    if (uid == null) throw StateError('No signed-in user.');
+    return _petProfileRepository.deletePhoto(
+      ownerId: uid,
+      petId: petId,
+      fileName: 'profile_icon.jpg',
+    );
+  }
+
   Future<void> deletePet(String petId) async {
     final uid = _currentUser?.uid;
     if (uid == null) return;

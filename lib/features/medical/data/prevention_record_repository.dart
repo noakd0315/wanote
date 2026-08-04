@@ -55,9 +55,8 @@ class FirestorePreventionRecordRepository
         .orderBy('administered_at', descending: true)
         .snapshots()
         .map(
-          (snap) => snap.docs
-              .map((d) => PreventionRecord.fromMap(d.data()))
-              .toList(),
+          (snap) =>
+              snap.docs.map((d) => PreventionRecord.fromMap(d.data())).toList(),
         );
   }
 
@@ -73,9 +72,8 @@ class FirestorePreventionRecordRepository
         .orderBy('administered_at', descending: true)
         .snapshots()
         .map(
-          (snap) => snap.docs
-              .map((d) => PreventionRecord.fromMap(d.data()))
-              .toList(),
+          (snap) =>
+              snap.docs.map((d) => PreventionRecord.fromMap(d.data())).toList(),
         );
   }
 

@@ -49,9 +49,11 @@ abstract class AuthRepository {
 }
 
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository({fb.FirebaseAuth? firebaseAuth, GoogleSignIn? googleSignIn})
-    : _auth = firebaseAuth ?? fb.FirebaseAuth.instance,
-      _googleSignIn = googleSignIn ?? GoogleSignIn();
+  FirebaseAuthRepository({
+    fb.FirebaseAuth? firebaseAuth,
+    GoogleSignIn? googleSignIn,
+  }) : _auth = firebaseAuth ?? fb.FirebaseAuth.instance,
+       _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   final fb.FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
@@ -66,7 +68,11 @@ class FirebaseAuthRepository implements AuthRepository {
       'apple.com' => AuthProviderType.apple,
       _ => AuthProviderType.email,
     };
-    return AuthIdentity(uid: user.uid, email: user.email ?? '', provider: provider);
+    return AuthIdentity(
+      uid: user.uid,
+      email: user.email ?? '',
+      provider: provider,
+    );
   }
 
   @override
@@ -133,7 +139,10 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<AuthIdentity> signInWithApple() async {
     final appleCredential = await SignInWithApple.getAppleIDCredential(
-      scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
     );
     final oAuthCredential = fb.OAuthProvider('apple.com').credential(
       idToken: appleCredential.identityToken,

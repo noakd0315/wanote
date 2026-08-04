@@ -96,13 +96,20 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
               padding: const EdgeInsets.only(top: 8),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
-                child: Image.memory(_photoBytes!, width: 100, height: 100, fit: BoxFit.cover),
+                child: Image.memory(
+                  _photoBytes!,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _saving ? null : _save,
-            child: _saving ? const CircularProgressIndicator() : const Text('保存'),
+            child: _saving
+                ? const CircularProgressIndicator()
+                : const Text('保存'),
           ),
         ],
       ),

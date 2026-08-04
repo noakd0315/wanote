@@ -140,10 +140,7 @@ class _PreventionProgramFormScreenState
                   value: ScheduleType.monthly,
                   child: Text('毎月'),
                 ),
-                DropdownMenuItem(
-                  value: ScheduleType.annual,
-                  child: Text('毎年'),
-                ),
+                DropdownMenuItem(value: ScheduleType.annual, child: Text('毎年')),
                 DropdownMenuItem(
                   value: ScheduleType.custom,
                   child: Text('カスタム間隔'),

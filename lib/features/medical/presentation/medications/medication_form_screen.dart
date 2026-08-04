@@ -43,7 +43,8 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
     _endDate = medication?.endDate;
     _ongoing = medication == null ? true : medication.isOngoing;
     _reminderEnabled = medication?.reminderEnabled ?? false;
-    if (medication?.reminderHour != null && medication?.reminderMinute != null) {
+    if (medication?.reminderHour != null &&
+        medication?.reminderMinute != null) {
       _reminderTime = TimeOfDay(
         hour: medication!.reminderHour!,
         minute: medication.reminderMinute!,
@@ -130,7 +131,8 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: '薬品名'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? '必須項目です' : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? '必須項目です' : null,
             ),
             TextFormField(
               controller: _dosageController,

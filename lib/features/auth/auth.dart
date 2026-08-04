@@ -1,4 +1,4 @@
-﻿/// Public API surface for the auth feature. Other features/main.dart should
+/// Public API surface for the auth feature. Other features/main.dart should
 /// only import this barrel, never files under lib/features/auth/**
 /// directly, so the feature's internal layout can change without breaking
 /// callers (per wanote/.claude/CLAUDE.md's directory-ownership rule).
