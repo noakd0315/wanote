@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import '../features/auth/auth.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/presentation/paywall_screen.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../shared/services/locale_controller.dart';
+import '../shared/widgets/language_picker.dart';
 import '../shared/widgets/pet_icon_avatar.dart';
 
 /// 設定・課金 section of the app shell.
@@ -27,6 +30,9 @@ class SettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
     final user = controller.currentUser;
+    final l10n = AppLocalizations.of(context)!;
+    final localeController = context.watch<LocaleController>();
+    final languageOverride = localeController.locale;
 
     // No Scaffold/AppBar here -- HomeShell's outer AppBar already covers
     // every section, matching AiSection/DailyRecordSection/MedicalHomeScreen.
@@ -45,15 +51,15 @@ class SettingsSection extends StatelessWidget {
         const Divider(),
         ListTile(
           leading: const Icon(Icons.swap_horiz),
-          title: const Text('ペットを切り替える・追加する'),
+          title: Text(l10n.switchPetMenuTitle),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const PetProfileSwitchScreen()),
           ),
         ),
         ListTile(
           leading: const Icon(Icons.workspace_premium_outlined),
-          title: const Text('プランをアップグレード'),
-          subtitle: const Text('サブスクリプション・AI相談チケットの購入'),
+          title: Text(l10n.upgradePlanMenuTitle),
+          subtitle: Text(l10n.upgradePlanMenuSubtitle),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) =>
@@ -61,10 +67,20 @@ class SettingsSection extends StatelessWidget {
             ),
           ),
         ),
+        ListTile(
+          leading: const Icon(Icons.language),
+          title: Text(l10n.languageMenuTitle),
+          subtitle: Text(
+            languageOverride == null
+                ? l10n.languageMenuSubtitleSystem
+                : localeEndonym(languageOverride),
+          ),
+          onTap: () => showLanguagePicker(context),
+        ),
         const Divider(),
         ListTile(
           leading: const Icon(Icons.logout),
-          title: const Text('サインアウト'),
+          title: Text(l10n.signOutMenuTitle),
           onTap: () => controller.signOut(),
         ),
       ],

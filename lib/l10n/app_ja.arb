@@ -1,0 +1,35 @@
+{
+  "@@locale": "ja",
+
+  "signInTitle": "Sign in",
+  "createAccountTitle": "Create your account",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "emailValidationError": "Enter a valid email address",
+  "passwordValidationError": "Password must be at least 6 characters",
+  "forgotPasswordLink": "パスワードをお忘れですか？",
+  "referralCodeLabel": "紹介コード（任意）",
+  "signUpButton": "Sign up",
+  "signInButton": "Sign in",
+  "switchToSignInLink": "Already have an account? Sign in",
+  "switchToSignUpLink": "New here? Create an account",
+  "orDivider": "or",
+  "signInWithGoogle": "Sign in with Google",
+  "signInWithApple": "Sign in with Apple",
+  "forgotPasswordDialogTitle": "パスワードを再設定",
+  "forgotPasswordDialogHelperText": "登録済みのメールアドレス宛に再設定用のリンクを送信します",
+  "cancelButton": "キャンセル",
+  "sendButton": "送信",
+  "passwordResetEmailSent": "パスワード再設定用のメールを送信しました",
+  "passwordResetEmailFailed": "送信に失敗しました: {error}",
+  "forcedSignOutMessage": "別の端末でログインされたため、サインアウトしました。",
+
+  "switchPetMenuTitle": "ペットを切り替える・追加する",
+  "upgradePlanMenuTitle": "プランをアップグレード",
+  "upgradePlanMenuSubtitle": "サブスクリプション・AI相談チケットの購入",
+  "signOutMenuTitle": "サインアウト",
+
+  "languageMenuTitle": "言語",
+  "languageMenuSubtitleSystem": "端末の設定に従う",
+  "languagePickerTitle": "言語を選択"
+}

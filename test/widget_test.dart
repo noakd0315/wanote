@@ -15,6 +15,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wanote/features/auth/auth.dart';
+import 'package:wanote/l10n/generated/app_localizations.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -47,6 +48,15 @@ void main() {
     when(
       () => authRepository.authStateChanges(),
     ).thenAnswer((_) => authStateController.stream);
+    when(
+      () => userAccountRepository.watchActiveSessionId(any()),
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => userAccountRepository.setActiveSession(
+        uid: any(named: 'uid'),
+        sessionId: any(named: 'sessionId'),
+      ),
+    ).thenAnswer((_) async {});
 
     controller = AuthController(
       authRepository: authRepository,
@@ -66,7 +76,11 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider<AuthController>.value(
         value: controller,
-        child: const MaterialApp(home: LaunchGateScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: LaunchGateScreen(),
+        ),
       ),
     );
   }

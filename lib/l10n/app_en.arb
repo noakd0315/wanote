@@ -1,0 +1,127 @@
+{
+  "@@locale": "en",
+
+  "signInTitle": "Sign in",
+  "@signInTitle": {
+    "description": "Heading shown on the sign-in screen in sign-in mode."
+  },
+  "createAccountTitle": "Create your account",
+  "@createAccountTitle": {
+    "description": "Heading shown on the sign-in screen in sign-up mode."
+  },
+  "emailLabel": "Email",
+  "@emailLabel": {
+    "description": "Label for the email text field."
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Label for the password text field."
+  },
+  "emailValidationError": "Enter a valid email address",
+  "@emailValidationError": {
+    "description": "Validation error shown when the typed email has no @ character."
+  },
+  "passwordValidationError": "Password must be at least 6 characters",
+  "@passwordValidationError": {
+    "description": "Validation error shown when the typed password is too short."
+  },
+  "forgotPasswordLink": "Forgot your password?",
+  "@forgotPasswordLink": {
+    "description": "Link shown below the password field, in sign-in mode only."
+  },
+  "referralCodeLabel": "Referral code (optional)",
+  "@referralCodeLabel": {
+    "description": "Label for the optional referral code field, shown in sign-up mode only."
+  },
+  "signUpButton": "Sign up",
+  "@signUpButton": {
+    "description": "Submit button label in sign-up mode."
+  },
+  "signInButton": "Sign in",
+  "@signInButton": {
+    "description": "Submit button label in sign-in mode."
+  },
+  "switchToSignInLink": "Already have an account? Sign in",
+  "@switchToSignInLink": {
+    "description": "Link that switches the form from sign-up mode to sign-in mode."
+  },
+  "switchToSignUpLink": "New here? Create an account",
+  "@switchToSignUpLink": {
+    "description": "Link that switches the form from sign-in mode to sign-up mode."
+  },
+  "orDivider": "or",
+  "@orDivider": {
+    "description": "Divider text between the email/password form and the social sign-in buttons."
+  },
+  "signInWithGoogle": "Sign in with Google",
+  "@signInWithGoogle": {
+    "description": "Google sign-in button label."
+  },
+  "signInWithApple": "Sign in with Apple",
+  "@signInWithApple": {
+    "description": "Apple sign-in button label."
+  },
+  "forgotPasswordDialogTitle": "Reset your password",
+  "@forgotPasswordDialogTitle": {
+    "description": "Title of the forgot-password dialog."
+  },
+  "forgotPasswordDialogHelperText": "We'll send a reset link to your registered email address",
+  "@forgotPasswordDialogHelperText": {
+    "description": "Helper text under the email field in the forgot-password dialog."
+  },
+  "cancelButton": "Cancel",
+  "@cancelButton": {
+    "description": "Generic cancel button label."
+  },
+  "sendButton": "Send",
+  "@sendButton": {
+    "description": "Submit button label in the forgot-password dialog."
+  },
+  "passwordResetEmailSent": "Password reset email sent",
+  "@passwordResetEmailSent": {
+    "description": "Snackbar shown after a password reset email is successfully requested."
+  },
+  "passwordResetEmailFailed": "Failed to send: {error}",
+  "@passwordResetEmailFailed": {
+    "description": "Snackbar shown when requesting a password reset email fails.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "forcedSignOutMessage": "You were signed out because your account was signed in on another device.",
+  "@forcedSignOutMessage": {
+    "description": "Snackbar shown when this device is signed out because a different device claimed the account's single active session."
+  },
+
+  "switchPetMenuTitle": "Switch or add a pet",
+  "@switchPetMenuTitle": {
+    "description": "Settings menu item that opens the pet switcher/add-pet screen."
+  },
+  "upgradePlanMenuTitle": "Upgrade your plan",
+  "@upgradePlanMenuTitle": {
+    "description": "Settings menu item that opens the paywall screen."
+  },
+  "upgradePlanMenuSubtitle": "Subscriptions & AI consultation tickets",
+  "@upgradePlanMenuSubtitle": {
+    "description": "Subtitle under the upgrade-plan settings menu item."
+  },
+  "signOutMenuTitle": "Sign out",
+  "@signOutMenuTitle": {
+    "description": "Settings menu item that signs the user out."
+  },
+
+  "languageMenuTitle": "Language",
+  "@languageMenuTitle": {
+    "description": "Label for the in-app language switcher (sign-in screen icon button, settings menu item)."
+  },
+  "languageMenuSubtitleSystem": "Follow device setting",
+  "@languageMenuSubtitleSystem": {
+    "description": "Subtitle/option shown when no manual language override is set -- the app follows the device's own language setting."
+  },
+  "languagePickerTitle": "Choose language",
+  "@languagePickerTitle": {
+    "description": "Title of the language-picker dialog opened from the sign-in screen or settings menu."
+  }
+}

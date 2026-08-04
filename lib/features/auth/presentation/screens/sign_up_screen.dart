@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
+import '../../../../shared/widgets/language_picker.dart';
 import '../auth_controller.dart';
 
 /// Key the referral code typed at sign-up is stashed under until the app
@@ -48,6 +50,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// the "New here? Create an account" toggle below.
   bool _isSignUpMode = false;
 
+  /// PM request: let the user reveal what they typed to confirm it's
+  /// correct before submitting, instead of only ever seeing dots.
+  bool _obscurePassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -68,32 +74,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _forgotPassword() async {
+    final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController(
       text: _emailController.text.trim(),
     );
     final email = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('パスワードを再設定'),
+        title: Text(l10n.forgotPasswordDialogTitle),
         content: TextField(
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            helperText: '登録済みのメールアドレス宛に再設定用のリンクを送信します',
+          decoration: InputDecoration(
+            labelText: l10n.emailLabel,
+            helperText: l10n.forgotPasswordDialogHelperText,
             helperMaxLines: 2,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l10n.cancelButton),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.of(dialogContext).pop(emailController.text.trim()),
-            child: const Text('送信'),
+            child: Text(l10n.sendButton),
           ),
         ],
       ),
@@ -107,12 +114,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('パスワード再設定用のメールを送信しました')));
+      ).showSnackBar(SnackBar(content: Text(l10n.passwordResetEmailSent)));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('送信に失敗しました: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.passwordResetEmailFailed(e.toString()))),
+      );
     }
   }
 
@@ -165,12 +172,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context)!;
+
+    if (controller.wasForcedSignedOut) {
+      controller.clearForcedSignOutFlag();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.forcedSignOutMessage)));
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
         titleSpacing: 0,
         title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
+        actions: const [LanguageIconButton()],
       ),
       body: Stack(
         children: [
@@ -188,7 +207,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          _isSignUpMode ? 'Create your account' : 'Sign in',
+                          _isSignUpMode
+                              ? l10n.createAccountTitle
+                              : l10n.signInTitle,
                           style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
@@ -206,12 +227,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 autofillHints: const [AutofillHints.email],
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
+                                decoration: InputDecoration(
+                                  labelText: l10n.emailLabel,
                                 ),
                                 validator: (value) {
                                   if (value == null || !value.contains('@')) {
-                                    return 'Enter a valid email address';
+                                    return l10n.emailValidationError;
                                   }
                                   return null;
                                 },
@@ -219,18 +240,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 controller: _passwordController,
-                                obscureText: true,
+                                obscureText: _obscurePassword,
                                 autofillHints: [
                                   _isSignUpMode
                                       ? AutofillHints.newPassword
                                       : AutofillHints.password,
                                 ],
-                                decoration: const InputDecoration(
-                                  labelText: 'Password',
+                                decoration: InputDecoration(
+                                  labelText: l10n.passwordLabel,
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                    ),
+                                    onPressed: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
+                                  ),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.length < 6) {
-                                    return 'Password must be at least 6 characters';
+                                    return l10n.passwordValidationError;
                                   }
                                   return null;
                                 },
@@ -245,7 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               onPressed: controller.isLoading
                                   ? null
                                   : _forgotPassword,
-                              child: const Text('パスワードをお忘れですか？'),
+                              child: Text(l10n.forgotPasswordLink),
                             ),
                           ),
                         if (_isSignUpMode) ...[
@@ -253,8 +285,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           TextFormField(
                             controller: _referralCodeController,
                             textCapitalization: TextCapitalization.characters,
-                            decoration: const InputDecoration(
-                              labelText: '紹介コード（任意）',
+                            decoration: InputDecoration(
+                              labelText: l10n.referralCodeLabel,
                             ),
                           ),
                         ],
@@ -274,7 +306,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onPressed: controller.isLoading
                               ? null
                               : () => _submitEmailForm(controller),
-                          child: Text(_isSignUpMode ? 'Sign up' : 'Sign in'),
+                          child: Text(
+                            _isSignUpMode
+                                ? l10n.signUpButton
+                                : l10n.signInButton,
+                          ),
                         ),
                         TextButton(
                           onPressed: controller.isLoading
@@ -284,20 +320,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                           child: Text(
                             _isSignUpMode
-                                ? 'Already have an account? Sign in'
-                                : 'New here? Create an account',
+                                ? l10n.switchToSignInLink
+                                : l10n.switchToSignUpLink,
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Row(
                             children: [
-                              Expanded(child: Divider()),
+                              const Expanded(child: Divider()),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8),
-                                child: Text('or'),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                child: Text(l10n.orDivider),
                               ),
-                              Expanded(child: Divider()),
+                              const Expanded(child: Divider()),
                             ],
                           ),
                         ),
@@ -309,7 +347,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   await controller.signInWithGoogle();
                                 },
                           icon: const Icon(Icons.g_mobiledata),
-                          label: const Text('Sign in with Google'),
+                          label: Text(l10n.signInWithGoogle),
                         ),
                         const SizedBox(height: 8),
                         OutlinedButton.icon(
@@ -320,7 +358,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   await controller.signInWithApple();
                                 },
                           icon: const Icon(Icons.apple),
-                          label: const Text('Sign in with Apple'),
+                          label: Text(l10n.signInWithApple),
                         ),
                         if (controller.isLoading)
                           const Padding(
