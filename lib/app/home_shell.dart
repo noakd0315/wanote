@@ -17,6 +17,7 @@ import '../features/daily_record/data/health_record_repository.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/medical/presentation/medical_home_screen.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/widgets/dog_silhouette_background.dart';
 import 'ai_section.dart';
@@ -116,8 +117,9 @@ class _HomeShellState extends State<HomeShell> {
         uid: widget.uid,
       );
       if (result is CampaignCodeRedeemed && mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('紹介コードを適用し、プレミアムを1ヶ月分付与しました。')),
+          SnackBar(content: Text(l10n.referralCodeAppliedMessage)),
         );
       }
     } catch (_) {
@@ -161,6 +163,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final uid = widget.uid;
     final petId = widget.activePet.petId;
 
@@ -249,31 +252,31 @@ class _HomeShellState extends State<HomeShell> {
           _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
           setState(() => _selectedIndex = index);
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'ホーム',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.navHomeLabel,
           ),
           NavigationDestination(
-            icon: Icon(Icons.event_note_outlined),
-            selectedIcon: Icon(Icons.event_note),
-            label: '日常記録',
+            icon: const Icon(Icons.event_note_outlined),
+            selectedIcon: const Icon(Icons.event_note),
+            label: l10n.navDailyRecordLabel,
           ),
           NavigationDestination(
-            icon: Icon(Icons.medical_information_outlined),
-            selectedIcon: Icon(Icons.medical_information),
-            label: '医療',
+            icon: const Icon(Icons.medical_information_outlined),
+            selectedIcon: const Icon(Icons.medical_information),
+            label: l10n.navMedicalLabel,
           ),
           NavigationDestination(
-            icon: Icon(Icons.smart_toy_outlined),
-            selectedIcon: Icon(Icons.smart_toy),
-            label: 'AI相談',
+            icon: const Icon(Icons.smart_toy_outlined),
+            selectedIcon: const Icon(Icons.smart_toy),
+            label: l10n.navAiConsultationLabel,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: '設定・課金',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.navSettingsLabel,
           ),
         ],
       ),

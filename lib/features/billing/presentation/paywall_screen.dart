@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../data/billing_repository.dart';
 import '../data/campaign_code_repository.dart';
 import '../domain/campaign_code_models.dart';
@@ -74,6 +75,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _purchase(Package package) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _busyPackageId = package.identifier;
       _errorMessage = null;
@@ -83,11 +85,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Purchase complete.')));
+        ).showSnackBar(SnackBar(content: Text(l10n.purchaseCompleteMessage)));
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = 'Purchase failed: $e');
+        setState(
+          () => _errorMessage = l10n.purchaseFailedMessage(e.toString()),
+        );
       }
     } finally {
       if (mounted) {
@@ -97,36 +101,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Future<void> _restore() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _errorMessage = null);
     try {
       await widget.billingRepository.restorePurchases();
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Purchases restored.')));
+        ).showSnackBar(SnackBar(content: Text(l10n.purchasesRestoredMessage)));
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = 'Restore failed: $e');
+        setState(() => _errorMessage = l10n.restoreFailedMessage(e.toString()));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       // Transparent so HomeShell's shared DogSilhouetteBackground (behind
       // its Navigator) shows through, per the PM's request to scatter the
       // pattern across every non-input-form screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Premium & AI tickets'),
+        title: Text(l10n.paywallAppBarTitle),
         actions: [
           TextButton(
             onPressed: _restore,
-            child: const Text(
-              'Restore purchases',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              l10n.restorePurchasesButton,
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -145,9 +151,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        'Could not load offerings: ${snapshot.error}\n\n'
-                        'If this is a dev/test build, the RevenueCat dashboard '
-                        'may not be configured yet.',
+                        l10n.offeringsLoadError(snapshot.error.toString()),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -158,12 +162,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 final packages =
                     offering?.availablePackages ?? const <Package>[];
                 if (packages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       child: Text(
-                        'No products are available yet. The RevenueCat dashboard '
-                        'has not been configured with offerings/products.',
+                        l10n.noProductsAvailableMessage,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -212,22 +215,23 @@ class _PackageTile extends StatelessWidget {
   final bool isBusy;
   final VoidCallback onPurchase;
 
-  String get _label {
+  String _label(AppLocalizations l10n) {
     final productId = package.storeProduct.identifier;
     return switch (productId) {
-      ProductIds.premiumMonthly => 'Premium (monthly)',
-      ProductIds.premiumYearly => 'Premium (yearly)',
-      ProductIds.aiTickets5 => 'AI consultation tickets x5',
-      ProductIds.aiTickets15 => 'AI consultation tickets x15',
+      ProductIds.premiumMonthly => l10n.premiumMonthlyLabel,
+      ProductIds.premiumYearly => l10n.premiumYearlyLabel,
+      ProductIds.aiTickets5 => l10n.aiTickets5Label,
+      ProductIds.aiTickets15 => l10n.aiTickets15Label,
       _ => package.storeProduct.title,
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: ListTile(
-        title: Text(_label),
+        title: Text(_label(l10n)),
         subtitle: Text(package.storeProduct.description),
         trailing: isBusy
             ? const SizedBox(
@@ -279,14 +283,14 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
     super.dispose();
   }
 
-  Future<void> _redeem() async {
+  Future<void> _redeem(AppLocalizations l10n) async {
     final code = _codeController.text.trim();
     if (code.isEmpty) return;
 
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       setState(() {
-        _statusMessage = 'サインインしてからお試しください。';
+        _statusMessage = l10n.campaignCodeSignInRequired;
         _statusIsError = true;
       });
       return;
@@ -305,11 +309,11 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
       switch (result) {
         case CampaignCodeRedeemed():
           _statusIsError = false;
-          _statusMessage = 'プレミアムを1ヶ月分付与しました。ありがとうございます！';
+          _statusMessage = l10n.campaignCodeRedeemedMessage;
           _codeController.clear();
         case CampaignCodeRedemptionRejected(reason: final reason):
           _statusIsError = true;
-          _statusMessage = _messageForReason(reason);
+          _statusMessage = _messageForReason(l10n, reason);
         case CampaignCodeRedemptionFailed(message: final message):
           _statusIsError = true;
           _statusMessage = message;
@@ -317,27 +321,34 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
     });
   }
 
-  String _messageForReason(RedemptionIneligibleReason reason) {
+  String _messageForReason(
+    AppLocalizations l10n,
+    RedemptionIneligibleReason reason,
+  ) {
     return switch (reason) {
-      RedemptionIneligibleReason.unknownCode => 'このコードは見つかりませんでした。',
-      RedemptionIneligibleReason.inactive => 'このコードは現在無効です。',
-      RedemptionIneligibleReason.redemptionCapReached => 'このコードは利用上限に達しています。',
-      RedemptionIneligibleReason.alreadyRedeemedByUser => 'このコードは既に使用済みです。',
-      RedemptionIneligibleReason.selfReferral => '自分の紹介コードは使用できません。',
+      RedemptionIneligibleReason.unknownCode => l10n.campaignCodeUnknownError,
+      RedemptionIneligibleReason.inactive => l10n.campaignCodeInactiveError,
+      RedemptionIneligibleReason.redemptionCapReached =>
+        l10n.campaignCodeCapReachedError,
+      RedemptionIneligibleReason.alreadyRedeemedByUser =>
+        l10n.campaignCodeAlreadyRedeemedError,
+      RedemptionIneligibleReason.selfReferral =>
+        l10n.campaignCodeSelfReferralError,
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'プロモーションコードをお持ちですか？',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Text(
+            l10n.campaignCodeSectionTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Row(
@@ -345,10 +356,10 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
               Expanded(
                 child: TextField(
                   controller: _codeController,
-                  decoration: const InputDecoration(
-                    hintText: 'コードを入力',
+                  decoration: InputDecoration(
+                    hintText: l10n.campaignCodeHintText,
                     isDense: true,
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.characters,
                   enabled: !_redeemBusy,
@@ -356,14 +367,14 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: _redeemBusy ? null : _redeem,
+                onPressed: _redeemBusy ? null : () => _redeem(l10n),
                 child: _redeemBusy
                     ? const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('適用する'),
+                    : Text(l10n.campaignCodeApplyButton),
               ),
             ],
           ),
@@ -385,14 +396,18 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
                 if (referralCode == null) return const SizedBox.shrink();
                 return Row(
                   children: [
-                    Expanded(child: Text('あなたの紹介コード: $referralCode')),
+                    Expanded(
+                      child: Text(l10n.referralCodeDisplay(referralCode)),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.copy, size: 18),
-                      tooltip: 'コピー',
+                      tooltip: l10n.copyTooltip,
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: referralCode));
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('紹介コードをコピーしました。')),
+                          SnackBar(
+                            content: Text(l10n.referralCodeCopiedMessage),
+                          ),
                         );
                       },
                     ),

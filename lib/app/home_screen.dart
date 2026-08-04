@@ -10,6 +10,7 @@ import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/daily_record/presentation/toilet_record_timeline_screen.dart';
 import '../features/daily_record/presentation/weight_record_chart_screen.dart';
 import '../features/medical/presentation/prevention/certificate_list_screen.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/models/consultation_reference_record.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
@@ -156,6 +157,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final showPhoto = shouldShowPetPhotoBackground(activePet.photoUrl);
 
     // No AppBar here -- HomeShell's outer Scaffold already renders a
@@ -206,27 +208,27 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       _ShortcutChip(
                         icon: Icons.monitor_weight_outlined,
-                        label: '体重',
+                        label: l10n.homeShortcutWeightLabel,
                         onTap: () => _openWeight(context),
                       ),
                       _ShortcutChip(
                         icon: Icons.wc_outlined,
-                        label: 'トイレ',
+                        label: l10n.homeShortcutToiletLabel,
                         onTap: () => _openToilet(context),
                       ),
                       _ShortcutChip(
                         icon: Icons.description_outlined,
-                        label: '証明書',
+                        label: l10n.homeShortcutCertificatesLabel,
                         onTap: () => _openCertificates(context),
                       ),
                       _ShortcutChip(
                         icon: Icons.smart_toy_outlined,
-                        label: 'AI相談',
+                        label: l10n.homeShortcutConsultationLabel,
                         onTap: () => _openConsultation(context),
                       ),
                       _ShortcutChip(
                         icon: Icons.restaurant_outlined,
-                        label: '餌の量',
+                        label: l10n.homeShortcutFoodPortionLabel,
                         onTap: () => _openFoodPortion(context),
                       ),
                     ],

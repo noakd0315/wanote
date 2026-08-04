@@ -123,5 +123,401 @@
   "languagePickerTitle": "Choose language",
   "@languagePickerTitle": {
     "description": "Title of the language-picker dialog opened from the sign-in screen or settings menu."
+  },
+
+  "paywallAppBarTitle": "Premium & AI tickets",
+  "@paywallAppBarTitle": {
+    "description": "AppBar title of the paywall/upgrade screen."
+  },
+  "restorePurchasesButton": "Restore purchases",
+  "@restorePurchasesButton": {
+    "description": "AppBar action button that restores previous purchases."
+  },
+  "purchaseCompleteMessage": "Purchase complete.",
+  "@purchaseCompleteMessage": {
+    "description": "Snackbar shown after a purchase succeeds."
+  },
+  "purchaseFailedMessage": "Purchase failed: {error}",
+  "@purchaseFailedMessage": {
+    "description": "Error message shown when a purchase fails.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "purchasesRestoredMessage": "Purchases restored.",
+  "@purchasesRestoredMessage": {
+    "description": "Snackbar shown after restoring purchases succeeds."
+  },
+  "restoreFailedMessage": "Restore failed: {error}",
+  "@restoreFailedMessage": {
+    "description": "Error message shown when restoring purchases fails.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "offeringsLoadError": "Could not load offerings: {error}\n\nIf this is a dev/test build, the RevenueCat dashboard may not be configured yet.",
+  "@offeringsLoadError": {
+    "description": "Error message shown when RevenueCat offerings fail to load.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noProductsAvailableMessage": "No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.",
+  "@noProductsAvailableMessage": {
+    "description": "Message shown when the current RevenueCat offering has no available packages."
+  },
+  "premiumMonthlyLabel": "Premium (monthly)",
+  "@premiumMonthlyLabel": {
+    "description": "Product label for the monthly premium subscription package."
+  },
+  "premiumYearlyLabel": "Premium (yearly)",
+  "@premiumYearlyLabel": {
+    "description": "Product label for the yearly premium subscription package."
+  },
+  "aiTickets5Label": "AI consultation tickets x5",
+  "@aiTickets5Label": {
+    "description": "Product label for the 5-pack AI consultation ticket package."
+  },
+  "aiTickets15Label": "AI consultation tickets x15",
+  "@aiTickets15Label": {
+    "description": "Product label for the 15-pack AI consultation ticket package."
+  },
+  "campaignCodeSectionTitle": "Have a promo code?",
+  "@campaignCodeSectionTitle": {
+    "description": "Heading of the promo/referral code redemption section on the paywall screen."
+  },
+  "campaignCodeSignInRequired": "Please sign in before trying this.",
+  "@campaignCodeSignInRequired": {
+    "description": "Error shown when trying to redeem a campaign code while signed out."
+  },
+  "campaignCodeRedeemedMessage": "You've been granted 1 month of Premium. Thank you!",
+  "@campaignCodeRedeemedMessage": {
+    "description": "Success message shown after a campaign code is redeemed."
+  },
+  "campaignCodeUnknownError": "This code could not be found.",
+  "@campaignCodeUnknownError": {
+    "description": "Error shown when a redeemed campaign code doesn't exist."
+  },
+  "campaignCodeInactiveError": "This code is currently inactive.",
+  "@campaignCodeInactiveError": {
+    "description": "Error shown when a redeemed campaign code is inactive."
+  },
+  "campaignCodeCapReachedError": "This code has reached its redemption limit.",
+  "@campaignCodeCapReachedError": {
+    "description": "Error shown when a redeemed campaign code has hit its redemption cap."
+  },
+  "campaignCodeAlreadyRedeemedError": "This code has already been redeemed.",
+  "@campaignCodeAlreadyRedeemedError": {
+    "description": "Error shown when the user already redeemed this campaign code."
+  },
+  "campaignCodeSelfReferralError": "You can't use your own referral code.",
+  "@campaignCodeSelfReferralError": {
+    "description": "Error shown when a user tries to redeem their own referral code."
+  },
+  "campaignCodeHintText": "Enter code",
+  "@campaignCodeHintText": {
+    "description": "Hint text of the campaign/referral code text field."
+  },
+  "campaignCodeApplyButton": "Apply",
+  "@campaignCodeApplyButton": {
+    "description": "Button label that submits the typed campaign/referral code."
+  },
+  "referralCodeDisplay": "Your referral code: {code}",
+  "@referralCodeDisplay": {
+    "description": "Displays the current user's own referral code.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "copyTooltip": "Copy",
+  "@copyTooltip": {
+    "description": "Tooltip for the icon button that copies the referral code."
+  },
+  "referralCodeCopiedMessage": "Referral code copied.",
+  "@referralCodeCopiedMessage": {
+    "description": "Snackbar shown after copying the referral code to the clipboard."
+  },
+
+  "aiSectionConsultationTab": "Consultation",
+  "@aiSectionConsultationTab": {
+    "description": "Tab label for the consultation tab inside the AI section."
+  },
+  "aiSectionReportTab": "Report",
+  "@aiSectionReportTab": {
+    "description": "Tab label for the monthly report tab inside the AI section."
+  },
+
+  "dailyRecordHealthTab": "Health record",
+  "@dailyRecordHealthTab": {
+    "description": "Tab label for the health record tab inside the daily record section."
+  },
+  "dailyRecordWeightTab": "Weight",
+  "@dailyRecordWeightTab": {
+    "description": "Tab label for the weight tab inside the daily record section."
+  },
+  "dailyRecordToiletTab": "Toilet",
+  "@dailyRecordToiletTab": {
+    "description": "Tab label for the toilet tab inside the daily record section."
+  },
+
+  "homeShortcutWeightLabel": "Weight",
+  "@homeShortcutWeightLabel": {
+    "description": "Home screen shortcut chip label that opens the weight chart."
+  },
+  "homeShortcutToiletLabel": "Toilet",
+  "@homeShortcutToiletLabel": {
+    "description": "Home screen shortcut chip label that opens the toilet timeline."
+  },
+  "homeShortcutCertificatesLabel": "Certificates",
+  "@homeShortcutCertificatesLabel": {
+    "description": "Home screen shortcut chip label that opens the certificate list."
+  },
+  "homeShortcutConsultationLabel": "AI consultation",
+  "@homeShortcutConsultationLabel": {
+    "description": "Home screen shortcut chip label that opens the AI consultation screen."
+  },
+  "homeShortcutFoodPortionLabel": "Food portion",
+  "@homeShortcutFoodPortionLabel": {
+    "description": "Home screen shortcut chip label that opens the food portion screen."
+  },
+
+  "navHomeLabel": "Home",
+  "@navHomeLabel": {
+    "description": "Bottom navigation bar label for the home/dashboard tab."
+  },
+  "navDailyRecordLabel": "Daily record",
+  "@navDailyRecordLabel": {
+    "description": "Bottom navigation bar label for the daily record tab."
+  },
+  "navMedicalLabel": "Medical",
+  "@navMedicalLabel": {
+    "description": "Bottom navigation bar label for the medical tab."
+  },
+  "navAiConsultationLabel": "AI consultation",
+  "@navAiConsultationLabel": {
+    "description": "Bottom navigation bar label for the AI consultation tab."
+  },
+  "navSettingsLabel": "Settings & billing",
+  "@navSettingsLabel": {
+    "description": "Bottom navigation bar label for the settings & billing tab."
+  },
+  "referralCodeAppliedMessage": "Applied your referral code and granted 1 month of Premium.",
+  "@referralCodeAppliedMessage": {
+    "description": "Snackbar shown when a pending referral code from sign-up is auto-redeemed on app shell startup."
+  },
+
+  "imageSourceCameraOption": "Take a photo",
+  "@imageSourceCameraOption": {
+    "description": "Bottom sheet option that opens the camera to take a photo."
+  },
+  "imageSourceGalleryOption": "Choose from photo library",
+  "@imageSourceGalleryOption": {
+    "description": "Bottom sheet option that opens the photo library picker."
+  },
+
+  "biometricGateAppBarTitle": "Unlock wanote",
+  "@biometricGateAppBarTitle": {
+    "description": "AppBar title on the biometric re-auth gate shown to returning users with biometric login enabled."
+  },
+  "biometricGateUnlockButton": "Unlock",
+  "@biometricGateUnlockButton": {
+    "description": "Button that re-triggers the biometric prompt on the biometric gate screen."
+  },
+  "biometricGateMismatchMessage": "Biometric authentication did not match.",
+  "@biometricGateMismatchMessage": {
+    "description": "Message shown on the biometric gate when the biometric scan fails to match."
+  },
+  "biometricGateRetryButton": "Try again",
+  "@biometricGateRetryButton": {
+    "description": "Button that retries the biometric prompt after a mismatch."
+  },
+  "biometricGatePasswordPrompt": "Enter your password to continue.",
+  "@biometricGatePasswordPrompt": {
+    "description": "Prompt shown on the biometric gate when falling back to password re-entry."
+  },
+  "biometricGateContinueButton": "Continue",
+  "@biometricGateContinueButton": {
+    "description": "Button that submits the password re-entry fallback on the biometric gate."
+  },
+  "biometricGateIncorrectPasswordError": "Incorrect password. Try again.",
+  "@biometricGateIncorrectPasswordError": {
+    "description": "Error shown on the biometric gate when the re-entered password is wrong."
+  },
+  "biometricGateReauthPrompt": "Please sign in again to continue.",
+  "@biometricGateReauthPrompt": {
+    "description": "Prompt shown on the biometric gate when falling back to provider (Google/Apple) re-authentication."
+  },
+  "biometricGateReauthFailedError": "Sign-in was not completed.",
+  "@biometricGateReauthFailedError": {
+    "description": "Error shown on the biometric gate when provider re-authentication fails or is cancelled."
+  },
+
+  "biometricSetupAppBarTitle": "Biometric login",
+  "@biometricSetupAppBarTitle": {
+    "description": "AppBar title on the post-registration biometric setup screen."
+  },
+  "biometricSetupHeadline": "Enable biometric login?",
+  "@biometricSetupHeadline": {
+    "description": "Headline on the biometric setup screen."
+  },
+  "biometricSetupDescription": "Use Face ID / Touch ID / fingerprint to unlock wanote next time instead of typing your password. Your biometric data itself never leaves this device.",
+  "@biometricSetupDescription": {
+    "description": "Explanatory body text on the biometric setup screen."
+  },
+  "biometricSetupEnableButton": "Enable",
+  "@biometricSetupEnableButton": {
+    "description": "Button that enables biometric login on the biometric setup screen."
+  },
+  "biometricSetupSkipButton": "Not now",
+  "@biometricSetupSkipButton": {
+    "description": "Button that skips biometric setup for now."
+  },
+
+  "petProfileFormAddTitle": "Add a pet",
+  "@petProfileFormAddTitle": {
+    "description": "AppBar title on the pet profile form when creating a new pet."
+  },
+  "petProfileFormEditTitle": "Edit pet",
+  "@petProfileFormEditTitle": {
+    "description": "AppBar title on the pet profile form when editing an existing pet."
+  },
+  "petProfileFormSavingInProgressMessage": "Saving in progress. Please wait.",
+  "@petProfileFormSavingInProgressMessage": {
+    "description": "Snackbar shown when the user tries to navigate away from the pet profile form while a save is in flight."
+  },
+  "petProfileFormBirthdayRequiredMessage": "Please select a birthday",
+  "@petProfileFormBirthdayRequiredMessage": {
+    "description": "Snackbar shown when the pet profile form is submitted without a birthday selected."
+  },
+  "petProfileFormNameLabel": "Name",
+  "@petProfileFormNameLabel": {
+    "description": "Label for the pet name text field on the pet profile form."
+  },
+  "petProfileFormNameRequiredError": "Name is required",
+  "@petProfileFormNameRequiredError": {
+    "description": "Validation error shown when the pet name field is left empty."
+  },
+  "petProfileFormBreedLabel": "Breed",
+  "@petProfileFormBreedLabel": {
+    "description": "Label for the pet breed text field on the pet profile form."
+  },
+  "petProfileFormBreedRequiredError": "Breed is required",
+  "@petProfileFormBreedRequiredError": {
+    "description": "Validation error shown when the pet breed field is left empty."
+  },
+  "petProfileFormSelectBirthdayLabel": "Select birthday",
+  "@petProfileFormSelectBirthdayLabel": {
+    "description": "Placeholder list-tile title for the birthday picker before a birthday is chosen."
+  },
+  "petProfileFormBirthdayLabel": "Birthday: {date}",
+  "@petProfileFormBirthdayLabel": {
+    "description": "List-tile title showing the chosen birthday, formatted as yyyy/MM/dd.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "petProfileFormSexLabel": "Sex",
+  "@petProfileFormSexLabel": {
+    "description": "Label for the sex dropdown on the pet profile form."
+  },
+  "petSexOptionMale": "male",
+  "@petSexOptionMale": {
+    "description": "Dropdown item label for the male option of the pet sex field."
+  },
+  "petSexOptionFemale": "female",
+  "@petSexOptionFemale": {
+    "description": "Dropdown item label for the female option of the pet sex field."
+  },
+  "petProfileFormNeuteredLabel": "Neutered / spayed",
+  "@petProfileFormNeuteredLabel": {
+    "description": "Title of the neutered/spayed switch on the pet profile form."
+  },
+  "petProfileFormWeightLabel": "Weight (kg) - optional",
+  "@petProfileFormWeightLabel": {
+    "description": "Label for the optional weight text field on the pet profile form."
+  },
+  "petProfileFormWeightValidationError": "Enter a valid number",
+  "@petProfileFormWeightValidationError": {
+    "description": "Validation error shown when the weight field contains non-numeric text."
+  },
+  "petProfileFormSaveButton": "Save",
+  "@petProfileFormSaveButton": {
+    "description": "Submit button label on the pet profile form when editing an existing pet."
+  },
+  "addPetButton": "Add pet",
+  "@addPetButton": {
+    "description": "Button label for adding a new pet -- used as the pet profile form's submit button in create mode, and as the pet switcher screen's floating action button."
+  },
+  "petProfileFormIconSectionTitle": "Icon photo",
+  "@petProfileFormIconSectionTitle": {
+    "description": "Section header above the pet's icon/avatar photo picker on the pet profile form."
+  },
+  "petProfileFormDeleteIconButton": "Delete icon photo",
+  "@petProfileFormDeleteIconButton": {
+    "description": "Button that deletes the pet's icon/avatar photo on the pet profile form."
+  },
+  "petProfileFormIconOffsetXLabel": "Horizontal",
+  "@petProfileFormIconOffsetXLabel": {
+    "description": "Label for the slider that adjusts the icon photo's horizontal crop position."
+  },
+  "petProfileFormIconOffsetYLabel": "Vertical",
+  "@petProfileFormIconOffsetYLabel": {
+    "description": "Label for the slider that adjusts the icon photo's vertical crop position."
+  },
+  "petProfileFormIconZoomLabel": "Zoom",
+  "@petProfileFormIconZoomLabel": {
+    "description": "Label for the slider that adjusts the icon photo's zoom level."
+  },
+  "petProfileFormBackgroundSectionTitle": "Background photo (Home screen)",
+  "@petProfileFormBackgroundSectionTitle": {
+    "description": "Section header above the pet's background photo picker on the pet profile form."
+  },
+  "petProfileFormChangeBackgroundButton": "Change",
+  "@petProfileFormChangeBackgroundButton": {
+    "description": "Button that opens the image picker to change the background photo."
+  },
+  "petProfileFormDeleteBackgroundButton": "Delete",
+  "@petProfileFormDeleteBackgroundButton": {
+    "description": "Button that deletes the background photo."
+  },
+
+  "yourPetsScreenTitle": "Your pets",
+  "@yourPetsScreenTitle": {
+    "description": "AppBar title on the pet switcher screen listing every pet on the account."
+  },
+  "noPetsYetMessage": "No pets yet. Add your first pet below.",
+  "@noPetsYetMessage": {
+    "description": "Empty-state message on the pet switcher screen when the account has no pets."
+  },
+  "removePetDialogTitle": "Remove pet",
+  "@removePetDialogTitle": {
+    "description": "Title of the confirmation dialog shown when removing a pet."
+  },
+  "removePetDialogContent": "Remove {petName} from this account?",
+  "@removePetDialogContent": {
+    "description": "Body of the confirmation dialog shown when removing a pet, naming the pet.",
+    "placeholders": {
+      "petName": {
+        "type": "String"
+      }
+    }
+  },
+  "removePetDialogCancelButton": "Cancel",
+  "@removePetDialogCancelButton": {
+    "description": "Cancel button on the remove-pet confirmation dialog."
+  },
+  "removePetDialogConfirmButton": "Remove",
+  "@removePetDialogConfirmButton": {
+    "description": "Confirm button on the remove-pet confirmation dialog."
   }
 }

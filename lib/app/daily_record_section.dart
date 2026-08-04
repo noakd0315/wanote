@@ -6,6 +6,7 @@ import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/daily_record/presentation/health_record_timeline_screen.dart';
 import '../features/daily_record/presentation/toilet_record_timeline_screen.dart';
 import '../features/daily_record/presentation/weight_record_chart_screen.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/models/consultation_reference_record.dart';
 
 /// 日常記録 section of the app shell.
@@ -74,16 +75,26 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         SafeArea(
           bottom: false,
           child: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.notes_outlined), text: '健康記録'),
-              Tab(icon: Icon(Icons.monitor_weight_outlined), text: '体重'),
-              Tab(icon: Icon(Icons.wc_outlined), text: 'トイレ'),
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.notes_outlined),
+                text: l10n.dailyRecordHealthTab,
+              ),
+              Tab(
+                icon: const Icon(Icons.monitor_weight_outlined),
+                text: l10n.dailyRecordWeightTab,
+              ),
+              Tab(
+                icon: const Icon(Icons.wc_outlined),
+                text: l10n.dailyRecordToiletTab,
+              ),
             ],
           ),
         ),

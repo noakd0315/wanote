@@ -12,6 +12,7 @@ import '../features/daily_record/data/weight_record_repository.dart';
 import '../features/daily_record/domain/toilet_frequency_aggregator.dart';
 import '../features/daily_record/models/toilet_record.dart';
 import '../features/daily_record/models/weight_record.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/utils/calendar_period.dart';
 
@@ -79,15 +80,22 @@ class _AiSectionState extends State<AiSection>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         SafeArea(
           bottom: false,
           child: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.chat_outlined), text: '相談'),
-              Tab(icon: Icon(Icons.insert_chart_outlined), text: 'レポート'),
+            tabs: [
+              Tab(
+                icon: const Icon(Icons.chat_outlined),
+                text: l10n.aiSectionConsultationTab,
+              ),
+              Tab(
+                icon: const Icon(Icons.insert_chart_outlined),
+                text: l10n.aiSectionReportTab,
+              ),
             ],
           ),
         ),

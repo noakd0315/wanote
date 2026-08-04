@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 /// Shows a "カメラで撮影" / "フォトライブラリから選択" bottom sheet. [onCamera]/
 /// [onGallery] are invoked directly inside each option's own `onTap` --
 /// *not* after `await`-ing the sheet's own result in the caller -- because
@@ -26,6 +28,7 @@ void showImageSourceSheet({
   required VoidCallback onCamera,
   required VoidCallback onGallery,
 }) {
+  final l10n = AppLocalizations.of(context)!;
   showModalBottomSheet<void>(
     context: context,
     builder: (sheetContext) => SafeArea(
@@ -33,7 +36,7 @@ void showImageSourceSheet({
         children: [
           ListTile(
             leading: const Icon(Icons.photo_camera_outlined),
-            title: const Text('カメラで撮影'),
+            title: Text(l10n.imageSourceCameraOption),
             onTap: () {
               Navigator.of(sheetContext).pop();
               onCamera();
@@ -41,7 +44,7 @@ void showImageSourceSheet({
           ),
           ListTile(
             leading: const Icon(Icons.photo_library_outlined),
-            title: const Text('フォトライブラリから選択'),
+            title: Text(l10n.imageSourceGalleryOption),
             onTap: () {
               Navigator.of(sheetContext).pop();
               onGallery();
