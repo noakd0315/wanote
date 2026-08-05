@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,7 +73,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   void initState() {
     super.initState();
-    _offeringsFuture = widget.billingRepository.getOfferings();
+    _offeringsFuture = widget.billingRepository.getOfferings().catchError((
+      Object e,
+      StackTrace stackTrace,
+    ) {
+      // Full exception -> developer log only; the FutureBuilder's error
+      // branch shows a generic friendly message instead (PM report: raw
+      // SDK error text was showing on screen).
+      developer.log(
+        'getOfferings failed',
+        name: 'PaywallScreen',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      throw e; // rethrow so the FutureBuilder still sees snapshot.hasError
+    });
   }
 
   Future<void> _purchase(Package package) async {
@@ -87,11 +103,25 @@ class _PaywallScreenState extends State<PaywallScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.purchaseCompleteMessage)));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // A cancelled purchase isn't a failure the user needs an alarming
+      // error message for -- just silently leave the sheet as-is.
+      if (e is PlatformException &&
+          PurchasesErrorHelper.getErrorCode(e) ==
+              PurchasesErrorCode.purchaseCancelledError) {
+        return;
+      }
+      // Full exception -> developer log only; the user gets a generic
+      // friendly message (PM report: raw SDK error text was showing on
+      // screen).
+      developer.log(
+        'Purchase failed',
+        name: 'PaywallScreen',
+        error: e,
+        stackTrace: stackTrace,
+      );
       if (mounted) {
-        setState(
-          () => _errorMessage = l10n.purchaseFailedMessage(e.toString()),
-        );
+        setState(() => _errorMessage = l10n.purchaseFailedMessage);
       }
     } finally {
       if (mounted) {
@@ -110,9 +140,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.purchasesRestoredMessage)));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Full exception -> developer log only; the user gets a generic
+      // friendly message (PM report: raw SDK error text was showing on
+      // screen).
+      developer.log(
+        'Restore purchases failed',
+        name: 'PaywallScreen',
+        error: e,
+        stackTrace: stackTrace,
+      );
       if (mounted) {
-        setState(() => _errorMessage = l10n.restoreFailedMessage(e.toString()));
+        setState(() => _errorMessage = l10n.restoreFailedMessage);
       }
     }
   }
@@ -151,7 +190,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        l10n.offeringsLoadError(snapshot.error.toString()),
+                        l10n.offeringsLoadError,
                         textAlign: TextAlign.center,
                       ),
                     ),

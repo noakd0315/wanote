@@ -77,7 +77,15 @@ class FirestoreUserAccountRepository implements UserAccountRepository {
     required String uid,
     required String sessionId,
   }) async {
-    await _doc(uid).update({'active_session_id': sessionId});
+    // set(merge:) rather than update() -- on a brand-new sign-up this runs
+    // (from AuthController._runAuthAction, via _claimSession) *before*
+    // getOrCreate() has had a chance to create the user's account doc, so
+    // update() would throw NOT_FOUND. merge:true creates the doc with just
+    // this field if it doesn't exist yet, and getOrCreate()'s later
+    // existence check/creation is unaffected either way.
+    await _doc(
+      uid,
+    ).set({'active_session_id': sessionId}, SetOptions(merge: true));
   }
 
   @override

@@ -218,17 +218,71 @@ abstract class AppLocalizations {
   /// **'Password reset email sent'**
   String get passwordResetEmailSent;
 
-  /// Snackbar shown when requesting a password reset email fails.
+  /// Snackbar shown when requesting a password reset email fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user (PM report: raw SDK error text was showing on screen).
   ///
   /// In en, this message translates to:
-  /// **'Failed to send: {error}'**
-  String passwordResetEmailFailed(String error);
+  /// **'Failed to send the reset email. Please try again.'**
+  String get passwordResetEmailFailed;
 
   /// Snackbar shown when this device is signed out because a different device claimed the account's single active session.
   ///
   /// In en, this message translates to:
   /// **'You were signed out because your account was signed in on another device.'**
   String get forcedSignOutMessage;
+
+  /// Friendly message for Firebase Auth's 'email-already-in-use' error code, shown when signing up with an email that's already registered.
+  ///
+  /// In en, this message translates to:
+  /// **'This email address is already registered.'**
+  String get authErrorEmailAlreadyInUse;
+
+  /// Friendly message for Firebase Auth's 'invalid-email' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get authErrorInvalidEmail;
+
+  /// Friendly message for Firebase Auth's 'weak-password' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a stronger password.'**
+  String get authErrorWeakPassword;
+
+  /// Friendly message covering Firebase Auth's 'wrong-password', 'user-not-found', and 'invalid-credential' error codes -- deliberately not distinguishing which one, so a sign-in attempt doesn't reveal whether an email is registered.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get authErrorWrongCredentials;
+
+  /// Friendly message for Firebase Auth's 'user-disabled' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Please contact support.'**
+  String get authErrorUserDisabled;
+
+  /// Friendly message for Firebase Auth's 'too-many-requests' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait a moment and try again.'**
+  String get authErrorTooManyRequests;
+
+  /// Friendly message for Firebase Auth's 'network-request-failed' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection and try again.'**
+  String get authErrorNetworkRequestFailed;
+
+  /// Friendly message for Firebase Auth's 'account-exists-with-different-credential' error code.
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists with this email using a different sign-in method.'**
+  String get authErrorAccountExistsWithDifferentCredential;
+
+  /// Fallback friendly message for any sign-in/sign-up failure whose error code isn't specifically mapped -- the underlying exception is always logged for developers, never shown on screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authErrorGeneric;
 
   /// Settings menu item that opens the pet switcher/add-pet screen.
   ///
@@ -290,11 +344,11 @@ abstract class AppLocalizations {
   /// **'Purchase complete.'**
   String get purchaseCompleteMessage;
 
-  /// Error message shown when a purchase fails.
+  /// Error message shown when a purchase fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user (PM report: raw SDK error text was showing on screen).
   ///
   /// In en, this message translates to:
-  /// **'Purchase failed: {error}'**
-  String purchaseFailedMessage(String error);
+  /// **'Purchase failed. Please try again.'**
+  String get purchaseFailedMessage;
 
   /// Snackbar shown after restoring purchases succeeds.
   ///
@@ -302,17 +356,17 @@ abstract class AppLocalizations {
   /// **'Purchases restored.'**
   String get purchasesRestoredMessage;
 
-  /// Error message shown when restoring purchases fails.
+  /// Error message shown when restoring purchases fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user.
   ///
   /// In en, this message translates to:
-  /// **'Restore failed: {error}'**
-  String restoreFailedMessage(String error);
+  /// **'Restore failed. Please try again.'**
+  String get restoreFailedMessage;
 
-  /// Error message shown when RevenueCat offerings fail to load.
+  /// Error message shown when RevenueCat offerings fail to load. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user.
   ///
   /// In en, this message translates to:
-  /// **'Could not load offerings: {error}\n\nIf this is a dev/test build, the RevenueCat dashboard may not be configured yet.'**
-  String offeringsLoadError(String error);
+  /// **'Could not load plans. Please check your connection and try again.'**
+  String get offeringsLoadError;
 
   /// Message shown when the current RevenueCat offering has no available packages.
   ///

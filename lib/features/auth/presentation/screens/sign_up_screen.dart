@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -115,11 +117,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.passwordResetEmailSent)));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.passwordResetEmailFailed(e.toString()))),
+    } catch (e, stackTrace) {
+      // Full exception -> developer log only; the user gets a generic
+      // friendly message (PM report: raw SDK error text was showing on
+      // screen).
+      developer.log(
+        'sendPasswordResetEmail failed',
+        name: 'SignUpScreen',
+        error: e,
+        stackTrace: stackTrace,
       );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.passwordResetEmailFailed)));
+    }
+  }
+
+  /// Maps [AuthController.errorCode] (a stable machine code like Firebase
+  /// Auth's `e.code`) to a friendly localized message. Falls back to
+  /// [AppLocalizations.authErrorGeneric] for any code not explicitly
+  /// handled -- the full exception is always logged for developers via
+  /// [developer.log] in AuthController, never shown here (PM report: raw
+  /// SDK error text, e.g. a Firestore NOT_FOUND dump, was showing directly
+  /// on this screen).
+  String _authErrorMessage(AppLocalizations l10n, String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return l10n.authErrorEmailAlreadyInUse;
+      case 'invalid-email':
+        return l10n.authErrorInvalidEmail;
+      case 'weak-password':
+        return l10n.authErrorWeakPassword;
+      // Deliberately mapped to the same message as wrong-password/
+      // user-not-found: telling the user *which* one it was would let an
+      // attacker enumerate registered email addresses.
+      case 'wrong-password':
+      case 'user-not-found':
+      case 'invalid-credential':
+        return l10n.authErrorWrongCredentials;
+      case 'user-disabled':
+        return l10n.authErrorUserDisabled;
+      case 'too-many-requests':
+        return l10n.authErrorTooManyRequests;
+      case 'network-request-failed':
+        return l10n.authErrorNetworkRequestFailed;
+      case 'account-exists-with-different-credential':
+        return l10n.authErrorAccountExistsWithDifferentCredential;
+      default:
+        return l10n.authErrorGeneric;
     }
   }
 
@@ -157,9 +203,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text,
       );
     }
-    // errorMessage is reset to null at the start of each attempt and only
+    // errorCode is reset to null at the start of each attempt and only
     // set on failure, so null here means the above actually succeeded.
-    if (controller.errorMessage == null) {
+    if (controller.errorCode == null) {
       await _rememberEmail(email);
       // Prompts the browser's own password manager to offer saving the
       // credentials just used -- this (not app-side storage) is how the
@@ -291,11 +337,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        if (controller.errorMessage != null)
+                        if (controller.errorCode != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Text(
-                              controller.errorMessage!,
+                              _authErrorMessage(l10n, controller.errorCode!),
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.error,
                               ),

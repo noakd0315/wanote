@@ -71,13 +71,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordResetEmailSent => 'Password reset email sent';
 
   @override
-  String passwordResetEmailFailed(String error) {
-    return 'Failed to send: $error';
-  }
+  String get passwordResetEmailFailed =>
+      'Failed to send the reset email. Please try again.';
 
   @override
   String get forcedSignOutMessage =>
       'You were signed out because your account was signed in on another device.';
+
+  @override
+  String get authErrorEmailAlreadyInUse =>
+      'This email address is already registered.';
+
+  @override
+  String get authErrorInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get authErrorWeakPassword => 'Please choose a stronger password.';
+
+  @override
+  String get authErrorWrongCredentials => 'Incorrect email or password.';
+
+  @override
+  String get authErrorUserDisabled =>
+      'This account has been disabled. Please contact support.';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'Too many attempts. Please wait a moment and try again.';
+
+  @override
+  String get authErrorNetworkRequestFailed =>
+      'Network error. Please check your connection and try again.';
+
+  @override
+  String get authErrorAccountExistsWithDifferentCredential =>
+      'An account already exists with this email using a different sign-in method.';
+
+  @override
+  String get authErrorGeneric => 'Something went wrong. Please try again.';
 
   @override
   String get switchPetMenuTitle => 'Switch or add a pet';
@@ -111,22 +142,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get purchaseCompleteMessage => 'Purchase complete.';
 
   @override
-  String purchaseFailedMessage(String error) {
-    return 'Purchase failed: $error';
-  }
+  String get purchaseFailedMessage => 'Purchase failed. Please try again.';
 
   @override
   String get purchasesRestoredMessage => 'Purchases restored.';
 
   @override
-  String restoreFailedMessage(String error) {
-    return 'Restore failed: $error';
-  }
+  String get restoreFailedMessage => 'Restore failed. Please try again.';
 
   @override
-  String offeringsLoadError(String error) {
-    return 'Could not load offerings: $error\n\nIf this is a dev/test build, the RevenueCat dashboard may not be configured yet.';
-  }
+  String get offeringsLoadError =>
+      'Could not load plans. Please check your connection and try again.';
 
   @override
   String get noProductsAvailableMessage =>

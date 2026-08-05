@@ -70,12 +70,39 @@ class AppLocalizationsJa extends AppLocalizations {
   String get passwordResetEmailSent => 'パスワード再設定用のメールを送信しました';
 
   @override
-  String passwordResetEmailFailed(String error) {
-    return '送信に失敗しました: $error';
-  }
+  String get passwordResetEmailFailed => '送信に失敗しました。もう一度お試しください。';
 
   @override
   String get forcedSignOutMessage => '別の端末でログインされたため、サインアウトしました。';
+
+  @override
+  String get authErrorEmailAlreadyInUse => 'このメールアドレスは既に登録されています。';
+
+  @override
+  String get authErrorInvalidEmail => '有効なメールアドレスを入力してください。';
+
+  @override
+  String get authErrorWeakPassword => 'より強力なパスワードを設定してください。';
+
+  @override
+  String get authErrorWrongCredentials => 'メールアドレスまたはパスワードが正しくありません。';
+
+  @override
+  String get authErrorUserDisabled => 'このアカウントは無効化されています。サポートにお問い合わせください。';
+
+  @override
+  String get authErrorTooManyRequests => '試行回数が多すぎます。しばらく待ってから再度お試しください。';
+
+  @override
+  String get authErrorNetworkRequestFailed =>
+      '通信エラーが発生しました。接続をご確認の上、再度お試しください。';
+
+  @override
+  String get authErrorAccountExistsWithDifferentCredential =>
+      'このメールアドレスは別のログイン方法で既に登録されています。';
+
+  @override
+  String get authErrorGeneric => '問題が発生しました。もう一度お試しください。';
 
   @override
   String get switchPetMenuTitle => 'ペットを切り替える・追加する';
@@ -108,22 +135,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get purchaseCompleteMessage => 'Purchase complete.';
 
   @override
-  String purchaseFailedMessage(String error) {
-    return 'Purchase failed: $error';
-  }
+  String get purchaseFailedMessage => '購入に失敗しました。もう一度お試しください。';
 
   @override
   String get purchasesRestoredMessage => 'Purchases restored.';
 
   @override
-  String restoreFailedMessage(String error) {
-    return 'Restore failed: $error';
-  }
+  String get restoreFailedMessage => '復元に失敗しました。もう一度お試しください。';
 
   @override
-  String offeringsLoadError(String error) {
-    return 'Could not load offerings: $error\n\nIf this is a dev/test build, the RevenueCat dashboard may not be configured yet.';
-  }
+  String get offeringsLoadError => 'プランの読み込みに失敗しました。接続をご確認の上、再度お試しください。';
 
   @override
   String get noProductsAvailableMessage =>

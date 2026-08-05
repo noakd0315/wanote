@@ -1,5 +1,7 @@
 ﻿import 'dart:async';
+import 'dart:developer' as developer;
 
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -84,8 +86,18 @@ class AuthController extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  String? _errorMessage;
-  String? get errorMessage => _errorMessage;
+  /// A stable machine code identifying the last sign-in/sign-up failure
+  /// (e.g. Firebase Auth's `e.code`, like 'email-already-in-use'), *not*
+  /// the raw exception text -- PM report: raw SDK error messages (English,
+  /// sometimes internal-implementation-detail-laden, e.g. a Firestore
+  /// NOT_FOUND dump) were showing directly on the sign-in screen. The full
+  /// exception is logged for developers via [developer.log] in
+  /// [_runAuthAction]'s catch block instead; the UI maps this code to a
+  /// friendly localized message (see sign_up_screen.dart's
+  /// _authErrorMessage), falling back to a generic "something went wrong"
+  /// string for codes it doesn't recognize.
+  String? _errorCode;
+  String? get errorCode => _errorCode;
 
   /// Set once when [_subscribeToSession] notices a different device has
   /// taken over this account and forces a local sign-out (PM request:
@@ -244,18 +256,36 @@ class AuthController extends ChangeNotifier {
 
   Future<void> _runAuthAction(Future<AuthIdentity> Function() action) async {
     _isLoading = true;
-    _errorMessage = null;
+    _errorCode = null;
     notifyListeners();
     try {
       final identity = await action();
+      // _onAuthChanged must run first: for a brand-new sign-up it's what
+      // creates the account's Firestore doc (via getOrCreate). Claiming
+      // the session beforehand would either write to a doc that doesn't
+      // exist yet, or (worse) partially create it with only
+      // active_session_id set, which then makes getOrCreate() mistake
+      // that partial doc for an already-existing account and skip
+      // populating the rest of AppUser's required fields.
+      await _onAuthChanged(identity);
       // This device is actively signing in right now (as opposed to
       // _onAuthChanged firing from a merely-resumed persisted session on
       // app restart), so it claims the account's single active session --
       // see _claimSession's doc comment.
       await _claimSession(identity.uid);
-      await _onAuthChanged(identity);
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (e, stackTrace) {
+      // Full exception -> developer-facing log only (PM report: raw SDK
+      // error text, e.g. "[cloud_firestore/not-found] NOT_FOUND: no
+      // entity to update: app: ..." was showing directly on the sign-in
+      // screen). _errorCode is just the stable machine code the UI maps
+      // to a friendly localized message.
+      developer.log(
+        'Auth action failed',
+        name: 'AuthController',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _errorCode = e is fb.FirebaseAuthException ? e.code : 'unknown';
       _isLoading = false;
       notifyListeners();
     }

@@ -81,18 +81,50 @@
   "@passwordResetEmailSent": {
     "description": "Snackbar shown after a password reset email is successfully requested."
   },
-  "passwordResetEmailFailed": "Failed to send: {error}",
+  "passwordResetEmailFailed": "Failed to send the reset email. Please try again.",
   "@passwordResetEmailFailed": {
-    "description": "Snackbar shown when requesting a password reset email fails.",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Snackbar shown when requesting a password reset email fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user (PM report: raw SDK error text was showing on screen)."
   },
   "forcedSignOutMessage": "You were signed out because your account was signed in on another device.",
   "@forcedSignOutMessage": {
     "description": "Snackbar shown when this device is signed out because a different device claimed the account's single active session."
+  },
+
+  "authErrorEmailAlreadyInUse": "This email address is already registered.",
+  "@authErrorEmailAlreadyInUse": {
+    "description": "Friendly message for Firebase Auth's 'email-already-in-use' error code, shown when signing up with an email that's already registered."
+  },
+  "authErrorInvalidEmail": "Enter a valid email address.",
+  "@authErrorInvalidEmail": {
+    "description": "Friendly message for Firebase Auth's 'invalid-email' error code."
+  },
+  "authErrorWeakPassword": "Please choose a stronger password.",
+  "@authErrorWeakPassword": {
+    "description": "Friendly message for Firebase Auth's 'weak-password' error code."
+  },
+  "authErrorWrongCredentials": "Incorrect email or password.",
+  "@authErrorWrongCredentials": {
+    "description": "Friendly message covering Firebase Auth's 'wrong-password', 'user-not-found', and 'invalid-credential' error codes -- deliberately not distinguishing which one, so a sign-in attempt doesn't reveal whether an email is registered."
+  },
+  "authErrorUserDisabled": "This account has been disabled. Please contact support.",
+  "@authErrorUserDisabled": {
+    "description": "Friendly message for Firebase Auth's 'user-disabled' error code."
+  },
+  "authErrorTooManyRequests": "Too many attempts. Please wait a moment and try again.",
+  "@authErrorTooManyRequests": {
+    "description": "Friendly message for Firebase Auth's 'too-many-requests' error code."
+  },
+  "authErrorNetworkRequestFailed": "Network error. Please check your connection and try again.",
+  "@authErrorNetworkRequestFailed": {
+    "description": "Friendly message for Firebase Auth's 'network-request-failed' error code."
+  },
+  "authErrorAccountExistsWithDifferentCredential": "An account already exists with this email using a different sign-in method.",
+  "@authErrorAccountExistsWithDifferentCredential": {
+    "description": "Friendly message for Firebase Auth's 'account-exists-with-different-credential' error code."
+  },
+  "authErrorGeneric": "Something went wrong. Please try again.",
+  "@authErrorGeneric": {
+    "description": "Fallback friendly message for any sign-in/sign-up failure whose error code isn't specifically mapped -- the underlying exception is always logged for developers, never shown on screen."
   },
 
   "switchPetMenuTitle": "Switch or add a pet",
@@ -137,36 +169,21 @@
   "@purchaseCompleteMessage": {
     "description": "Snackbar shown after a purchase succeeds."
   },
-  "purchaseFailedMessage": "Purchase failed: {error}",
+  "purchaseFailedMessage": "Purchase failed. Please try again.",
   "@purchaseFailedMessage": {
-    "description": "Error message shown when a purchase fails.",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Error message shown when a purchase fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user (PM report: raw SDK error text was showing on screen)."
   },
   "purchasesRestoredMessage": "Purchases restored.",
   "@purchasesRestoredMessage": {
     "description": "Snackbar shown after restoring purchases succeeds."
   },
-  "restoreFailedMessage": "Restore failed: {error}",
+  "restoreFailedMessage": "Restore failed. Please try again.",
   "@restoreFailedMessage": {
-    "description": "Error message shown when restoring purchases fails.",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Error message shown when restoring purchases fails. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user."
   },
-  "offeringsLoadError": "Could not load offerings: {error}\n\nIf this is a dev/test build, the RevenueCat dashboard may not be configured yet.",
+  "offeringsLoadError": "Could not load plans. Please check your connection and try again.",
   "@offeringsLoadError": {
-    "description": "Error message shown when RevenueCat offerings fail to load.",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Error message shown when RevenueCat offerings fail to load. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user."
   },
   "noProductsAvailableMessage": "No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.",
   "@noProductsAvailableMessage": {
