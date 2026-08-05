@@ -128,16 +128,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallAppBarTitle => 'プレミアム & AIチケット';
 
   @override
-  String get restorePurchasesButton => 'Restore purchases';
+  String get restorePurchasesButton => '購入を復元';
 
   @override
-  String get purchaseCompleteMessage => 'Purchase complete.';
+  String get purchaseCompleteMessage => '購入が完了しました。';
 
   @override
   String get purchaseFailedMessage => '購入に失敗しました。もう一度お試しください。';
 
   @override
-  String get purchasesRestoredMessage => 'Purchases restored.';
+  String get purchasesRestoredMessage => '購入を復元しました。';
 
   @override
   String get restoreFailedMessage => '復元に失敗しました。もう一度お試しください。';
@@ -147,7 +147,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get noProductsAvailableMessage =>
-      'No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.';
+      '現在ご利用いただけるプランがありません。しばらくしてから再度お試しください。';
 
   @override
   String get premiumMonthlyLabel => 'プレミアム（月額）';
@@ -301,10 +301,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get biometricSetupSkipButton => '今はしない';
 
   @override
-  String get petProfileFormAddTitle => 'Add a pet';
+  String get petProfileFormAddTitle => 'ペットを追加';
 
   @override
-  String get petProfileFormEditTitle => 'Edit pet';
+  String get petProfileFormEditTitle => 'ペットを編集';
 
   @override
   String get petProfileFormSavingInProgressMessage => '保存中です。しばらくお待ちください';
@@ -322,7 +322,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get petProfileFormBreedLabel => '犬種';
 
   @override
-  String get petProfileFormBreedRequiredError => 'Breed is required';
+  String get petProfileFormBreedRequiredError => '犬種を入力してください';
 
   @override
   String get petProfileFormSelectBirthdayLabel => '誕生日を選択';
@@ -351,7 +351,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get petProfileFormWeightValidationError => '有効な数値を入力してください';
 
   @override
-  String get petProfileFormSaveButton => 'Save';
+  String get petProfileFormSaveButton => '保存';
 
   @override
   String get addPetButton => 'ペットを追加';
@@ -381,7 +381,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get petProfileFormDeleteBackgroundButton => '削除';
 
   @override
-  String get yourPetsScreenTitle => 'Your pets';
+  String get yourPetsScreenTitle => 'ペット一覧';
 
   @override
   String get noPetsYetMessage => 'まだペットが登録されていません。下から最初のペットを追加してください。';

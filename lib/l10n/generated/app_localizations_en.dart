@@ -156,7 +156,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noProductsAvailableMessage =>
-      'No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.';
+      'No plans are available right now. Please try again later.';
 
   @override
   String get premiumMonthlyLabel => 'Premium (monthly)';

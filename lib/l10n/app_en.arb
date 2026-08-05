@@ -185,7 +185,7 @@
   "@offeringsLoadError": {
     "description": "Error message shown when RevenueCat offerings fail to load. Deliberately generic -- the underlying SDK error is logged for developers, not shown to the user."
   },
-  "noProductsAvailableMessage": "No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.",
+  "noProductsAvailableMessage": "No plans are available right now. Please try again later.",
   "@noProductsAvailableMessage": {
     "description": "Message shown when the current RevenueCat offering has no available packages."
   },

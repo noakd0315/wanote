@@ -64,6 +64,10 @@ class AuthController extends ChangeNotifier {
   final ActivePetResolver _activePetResolver;
   final Future<SharedPreferences> _prefsFuture;
 
+  /// Bumped by [_claimSession]; captured by [_subscribeToSession] so a
+  /// subscription opened before a claim can tell that it is now stale.
+  int _sessionGeneration = 0;
+
   StreamSubscription<AuthIdentity?>? _authSub;
   StreamSubscription<List<PetProfile>>? _petsSub;
   StreamSubscription<String?>? _sessionSub;
@@ -133,7 +137,15 @@ class AuthController extends ChangeNotifier {
     await _onAuthChanged(_authRepository.currentUser);
   }
 
-  Future<void> _onAuthChanged(AuthIdentity? identity) async {
+  /// [claimSession] is set only by [_runAuthAction] -- i.e. when this device
+  /// is *explicitly* signing in right now, as opposed to the auth stream
+  /// merely replaying an already-persisted session on app restart. See
+  /// [_claimSession] for why the claim has to happen inside here rather than
+  /// after this method returns.
+  Future<void> _onAuthChanged(
+    AuthIdentity? identity, {
+    bool claimSession = false,
+  }) async {
     if (identity == null) {
       await _petsSub?.cancel();
       _petsSub = null;
@@ -180,6 +192,19 @@ class AuthController extends ChangeNotifier {
     );
     _pendingBiometricFallback = null;
     _subscribeToPets(identity.uid);
+    // Claim BEFORE subscribing, never after: watchActiveSessionId() replays
+    // the account doc's *current* active_session_id to every new listener,
+    // so subscribing first would deliver the previous session's id while
+    // _claimSession had already overwritten the local copy with the new one
+    // -- the device would then compare new-local against stale-remote, decide
+    // another device had taken over, and sign itself out immediately after a
+    // perfectly good sign-in (PM report: "ログイン後ブラウザバック等でログイン
+    // 画面に戻った場合、正しいパスワードを入力してもエラーになってしまいます").
+    // Only the *second* sign-in was affected, because on a brand-new account
+    // the replayed value is null, which _subscribeToSession ignores.
+    if (claimSession) {
+      await _claimSession(identity.uid);
+    }
     _subscribeToSession(identity.uid);
 
     _isLoading = false;
@@ -199,9 +224,19 @@ class AuthController extends ChangeNotifier {
   /// never spuriously signs itself out.
   void _subscribeToSession(String uid) {
     _sessionSub?.cancel();
+    // Snapshots that were generated before this device's most recent claim
+    // are stale by definition and must never be read as a takeover. Firebase
+    // Auth fires authStateChanges() as part of a successful sign-in, so
+    // _onAuthChanged (and therefore this method) runs twice, concurrently,
+    // for a single sign-in; without this guard the stream-driven
+    // subscription can replay the *previous* session id after
+    // _claimSession has already stored the new one locally, and the device
+    // signs itself out right after signing in.
+    final generation = _sessionGeneration;
     _sessionSub = _userAccountRepository.watchActiveSessionId(uid).listen((
       remoteSessionId,
     ) async {
+      if (generation != _sessionGeneration) return;
       if (remoteSessionId == null) return;
       final prefs = await _prefsFuture;
       final key = '$_localSessionIdPrefsKeyPrefix$uid';
@@ -223,6 +258,9 @@ class AuthController extends ChangeNotifier {
   /// on an ordinary app restart resuming an already-persisted session,
   /// since that's the same device continuing, not a new one taking over.
   Future<void> _claimSession(String uid) async {
+    // Invalidates every session subscription created before this point --
+    // see _subscribeToSession.
+    _sessionGeneration++;
     final sessionId = _uuid.v4();
     final prefs = await _prefsFuture;
     await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
@@ -260,19 +298,15 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
     try {
       final identity = await action();
-      // _onAuthChanged must run first: for a brand-new sign-up it's what
-      // creates the account's Firestore doc (via getOrCreate). Claiming
-      // the session beforehand would either write to a doc that doesn't
-      // exist yet, or (worse) partially create it with only
-      // active_session_id set, which then makes getOrCreate() mistake
-      // that partial doc for an already-existing account and skip
-      // populating the rest of AppUser's required fields.
-      await _onAuthChanged(identity);
       // This device is actively signing in right now (as opposed to
       // _onAuthChanged firing from a merely-resumed persisted session on
       // app restart), so it claims the account's single active session --
-      // see _claimSession's doc comment.
-      await _claimSession(identity.uid);
+      // see _claimSession's doc comment. The claim happens *inside*
+      // _onAuthChanged, sequenced after getOrCreate() (so the account doc
+      // already exists) but before the session watcher is attached (so the
+      // watcher never replays a stale session id); doing it out here on
+      // either side of this call reintroduces one bug or the other.
+      await _onAuthChanged(identity, claimSession: true);
     } catch (e, stackTrace) {
       // Full exception -> developer-facing log only (PM report: raw SDK
       // error text, e.g. "[cloud_firestore/not-found] NOT_FOUND: no

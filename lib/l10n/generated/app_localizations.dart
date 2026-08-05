@@ -371,7 +371,7 @@ abstract class AppLocalizations {
   /// Message shown when the current RevenueCat offering has no available packages.
   ///
   /// In en, this message translates to:
-  /// **'No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.'**
+  /// **'No plans are available right now. Please try again later.'**
   String get noProductsAvailableMessage;
 
   /// Product label for the monthly premium subscription package.
