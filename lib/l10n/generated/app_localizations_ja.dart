@@ -9,10 +9,10 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get signInTitle => 'Sign in';
+  String get signInTitle => 'サインイン';
 
   @override
-  String get createAccountTitle => 'Create your account';
+  String get createAccountTitle => 'アカウントを作成';
 
   @override
   String get emailLabel => 'Email';
@@ -21,11 +21,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get passwordLabel => 'Password';
 
   @override
-  String get emailValidationError => 'Enter a valid email address';
+  String get emailValidationError => '有効なメールアドレスを入力してください';
 
   @override
-  String get passwordValidationError =>
-      'Password must be at least 6 characters';
+  String get passwordValidationError => 'パスワードは6文字以上で入力してください';
 
   @override
   String get forgotPasswordLink => 'パスワードをお忘れですか？';
@@ -34,25 +33,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get referralCodeLabel => '紹介コード（任意）';
 
   @override
-  String get signUpButton => 'Sign up';
+  String get signUpButton => 'サインアップ';
 
   @override
-  String get signInButton => 'Sign in';
+  String get signInButton => 'サインイン';
 
   @override
-  String get switchToSignInLink => 'Already have an account? Sign in';
+  String get switchToSignInLink => 'すでにアカウントをお持ちですか？サインイン';
 
   @override
-  String get switchToSignUpLink => 'New here? Create an account';
+  String get switchToSignUpLink => '初めてご利用ですか？アカウントを作成';
 
   @override
   String get orDivider => 'or';
 
   @override
-  String get signInWithGoogle => 'Sign in with Google';
+  String get signInWithGoogle => 'Googleでサインイン';
 
   @override
-  String get signInWithApple => 'Sign in with Apple';
+  String get signInWithApple => 'Appleでサインイン';
 
   @override
   String get forgotPasswordDialogTitle => 'パスワードを再設定';
@@ -126,7 +125,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languagePickerTitle => '言語を選択';
 
   @override
-  String get paywallAppBarTitle => 'Premium & AI tickets';
+  String get paywallAppBarTitle => 'プレミアム & AIチケット';
 
   @override
   String get restorePurchasesButton => 'Restore purchases';
@@ -151,16 +150,16 @@ class AppLocalizationsJa extends AppLocalizations {
       'No products are available yet. The RevenueCat dashboard has not been configured with offerings/products.';
 
   @override
-  String get premiumMonthlyLabel => 'Premium (monthly)';
+  String get premiumMonthlyLabel => 'プレミアム（月額）';
 
   @override
-  String get premiumYearlyLabel => 'Premium (yearly)';
+  String get premiumYearlyLabel => 'プレミアム（年額）';
 
   @override
-  String get aiTickets5Label => 'AI consultation tickets x5';
+  String get aiTickets5Label => 'AI相談チケット x5';
 
   @override
-  String get aiTickets15Label => 'AI consultation tickets x15';
+  String get aiTickets15Label => 'AI相談チケット x15';
 
   @override
   String get campaignCodeSectionTitle => 'プロモーションコードをお持ちですか？';
@@ -258,49 +257,48 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imageSourceGalleryOption => 'フォトライブラリから選択';
 
   @override
-  String get biometricGateAppBarTitle => 'Unlock wanote';
+  String get biometricGateAppBarTitle => 'wanoteのロックを解除';
 
   @override
-  String get biometricGateUnlockButton => 'Unlock';
+  String get biometricGateUnlockButton => 'ロック解除';
 
   @override
-  String get biometricGateMismatchMessage =>
-      'Biometric authentication did not match.';
+  String get biometricGateMismatchMessage => '生体認証が一致しませんでした。';
 
   @override
-  String get biometricGateRetryButton => 'Try again';
+  String get biometricGateRetryButton => 'もう一度試す';
 
   @override
-  String get biometricGatePasswordPrompt => 'Enter your password to continue.';
+  String get biometricGatePasswordPrompt => '続行するにはパスワードを入力してください。';
 
   @override
-  String get biometricGateContinueButton => 'Continue';
+  String get biometricGateContinueButton => '続ける';
 
   @override
   String get biometricGateIncorrectPasswordError =>
-      'Incorrect password. Try again.';
+      'パスワードが正しくありません。もう一度お試しください。';
 
   @override
-  String get biometricGateReauthPrompt => 'Please sign in again to continue.';
+  String get biometricGateReauthPrompt => '続行するにはもう一度サインインしてください。';
 
   @override
-  String get biometricGateReauthFailedError => 'Sign-in was not completed.';
+  String get biometricGateReauthFailedError => 'サインインを完了できませんでした。';
 
   @override
-  String get biometricSetupAppBarTitle => 'Biometric login';
+  String get biometricSetupAppBarTitle => '生体認証ログイン';
 
   @override
-  String get biometricSetupHeadline => 'Enable biometric login?';
+  String get biometricSetupHeadline => '生体認証ログインを有効にしますか？';
 
   @override
   String get biometricSetupDescription =>
-      'Use Face ID / Touch ID / fingerprint to unlock wanote next time instead of typing your password. Your biometric data itself never leaves this device.';
+      '次回からパスワードを入力する代わりに、Face ID／Touch ID／指紋認証でwanoteのロックを解除できます。生体認証データ自体がこの端末の外に送信されることはありません。';
 
   @override
-  String get biometricSetupEnableButton => 'Enable';
+  String get biometricSetupEnableButton => '有効にする';
 
   @override
-  String get biometricSetupSkipButton => 'Not now';
+  String get biometricSetupSkipButton => '今はしない';
 
   @override
   String get petProfileFormAddTitle => 'Add a pet';
@@ -312,52 +310,51 @@ class AppLocalizationsJa extends AppLocalizations {
   String get petProfileFormSavingInProgressMessage => '保存中です。しばらくお待ちください';
 
   @override
-  String get petProfileFormBirthdayRequiredMessage =>
-      'Please select a birthday';
+  String get petProfileFormBirthdayRequiredMessage => '誕生日を選択してください';
 
   @override
-  String get petProfileFormNameLabel => 'Name';
+  String get petProfileFormNameLabel => '名前';
 
   @override
-  String get petProfileFormNameRequiredError => 'Name is required';
+  String get petProfileFormNameRequiredError => '名前を入力してください';
 
   @override
-  String get petProfileFormBreedLabel => 'Breed';
+  String get petProfileFormBreedLabel => '犬種';
 
   @override
   String get petProfileFormBreedRequiredError => 'Breed is required';
 
   @override
-  String get petProfileFormSelectBirthdayLabel => 'Select birthday';
+  String get petProfileFormSelectBirthdayLabel => '誕生日を選択';
 
   @override
   String petProfileFormBirthdayLabel(String date) {
-    return 'Birthday: $date';
+    return '誕生日：$date';
   }
 
   @override
-  String get petProfileFormSexLabel => 'Sex';
+  String get petProfileFormSexLabel => '性別';
 
   @override
-  String get petSexOptionMale => 'male';
+  String get petSexOptionMale => 'オス';
 
   @override
-  String get petSexOptionFemale => 'female';
+  String get petSexOptionFemale => 'メス';
 
   @override
-  String get petProfileFormNeuteredLabel => 'Neutered / spayed';
+  String get petProfileFormNeuteredLabel => '去勢・避妊済み';
 
   @override
-  String get petProfileFormWeightLabel => 'Weight (kg) - optional';
+  String get petProfileFormWeightLabel => '体重（kg）- 任意';
 
   @override
-  String get petProfileFormWeightValidationError => 'Enter a valid number';
+  String get petProfileFormWeightValidationError => '有効な数値を入力してください';
 
   @override
   String get petProfileFormSaveButton => 'Save';
 
   @override
-  String get addPetButton => 'Add pet';
+  String get addPetButton => 'ペットを追加';
 
   @override
   String get petProfileFormIconSectionTitle => 'アイコン写真';
@@ -387,21 +384,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get yourPetsScreenTitle => 'Your pets';
 
   @override
-  String get noPetsYetMessage => 'No pets yet. Add your first pet below.';
+  String get noPetsYetMessage => 'まだペットが登録されていません。下から最初のペットを追加してください。';
 
   @override
-  String get removePetDialogTitle => 'Remove pet';
+  String get removePetDialogTitle => 'ペットを削除';
 
   @override
   String removePetDialogContent(String petName) {
-    return 'Remove $petName from this account?';
+    return '$petNameをこのアカウントから削除しますか？';
   }
 
   @override
-  String get removePetDialogCancelButton => 'Cancel';
+  String get removePetDialogCancelButton => 'キャンセル';
 
   @override
-  String get removePetDialogConfirmButton => 'Remove';
+  String get removePetDialogConfirmButton => '削除';
 
   @override
   String get saveButton => '保存';
@@ -989,8 +986,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get weightDuplicateDateDialogTitle => '同じ日の記録があります';
 
   @override
-  String get weightDuplicateDateDialogContent =>
-      '上書きしますか？それとも追加で記録しますか？（同日に複数回記録された場合の扱い、spec 3.4）';
+  String get weightDuplicateDateDialogContent => '上書きしますか？それとも追加の記録として保存しますか？';
 
   @override
   String get weightAddAsNewEntryButtonLabel => '追加する';
