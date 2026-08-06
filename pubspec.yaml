@@ -55,6 +55,9 @@ dependencies:
 
   # State management
   provider: ^6.1.2
+  # Direct dependency only because lib/shared/config/auth_emulator_seed_web.dart
+  # needs sessionStorage before Firebase.initializeApp(); see that file.
+  web: ^1.1.1
 
   # Media
   image_picker: ^1.1.2
