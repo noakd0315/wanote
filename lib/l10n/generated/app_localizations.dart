@@ -1100,6 +1100,30 @@ abstract class AppLocalizations {
   /// **'No prevention programs'**
   String get preventionProgramListEmptyMessage;
 
+  /// Name given to the rabies program seeded automatically the first time a pet's prevention list is opened. Stored as data on the document, so it keeps whatever language was active at that moment and is freely editable afterwards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rabies vaccine'**
+  String get preventionDefaultProgramRabies;
+
+  /// Name given to the core/combination vaccine program seeded automatically for a new pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Combination vaccine'**
+  String get preventionDefaultProgramCombinationVaccine;
+
+  /// Name given to the heartworm program seeded automatically for a new pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Heartworm prevention'**
+  String get preventionDefaultProgramHeartworm;
+
+  /// Name given to the flea/tick program seeded automatically for a new pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Flea & tick prevention'**
+  String get preventionDefaultProgramFleaTick;
+
   /// Short schedule-type badge text for ScheduleType.single on the prevention program list.
   ///
   /// In en, this message translates to:

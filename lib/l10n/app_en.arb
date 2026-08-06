@@ -709,6 +709,22 @@
   "@preventionProgramListEmptyMessage": {
     "description": "Empty-state message shown when the pet has no prevention programs."
   },
+  "preventionDefaultProgramRabies": "Rabies vaccine",
+  "@preventionDefaultProgramRabies": {
+    "description": "Name given to the rabies program seeded automatically the first time a pet's prevention list is opened. Stored as data on the document, so it keeps whatever language was active at that moment and is freely editable afterwards."
+  },
+  "preventionDefaultProgramCombinationVaccine": "Combination vaccine",
+  "@preventionDefaultProgramCombinationVaccine": {
+    "description": "Name given to the core/combination vaccine program seeded automatically for a new pet."
+  },
+  "preventionDefaultProgramHeartworm": "Heartworm prevention",
+  "@preventionDefaultProgramHeartworm": {
+    "description": "Name given to the heartworm program seeded automatically for a new pet."
+  },
+  "preventionDefaultProgramFleaTick": "Flea & tick prevention",
+  "@preventionDefaultProgramFleaTick": {
+    "description": "Name given to the flea/tick program seeded automatically for a new pet."
+  },
   "scheduleTypeSingleBadge": "One-time",
   "@scheduleTypeSingleBadge": {
     "description": "Short schedule-type badge text for ScheduleType.single on the prevention program list."

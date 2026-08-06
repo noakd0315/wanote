@@ -187,6 +187,10 @@
   "preventionProgramActiveSwitchLabel": "有効",
 
   "preventionProgramListTitle": "予防医療プログラム",
+  "preventionDefaultProgramRabies": "狂犬病ワクチン",
+  "preventionDefaultProgramCombinationVaccine": "混合ワクチン",
+  "preventionDefaultProgramHeartworm": "フィラリア予防",
+  "preventionDefaultProgramFleaTick": "ノミ・ダニ予防",
   "preventionProgramListEmptyMessage": "予防プログラムがありません",
   "scheduleTypeSingleBadge": "単発",
   "scheduleIntervalDaysLabel": "{days}日ごと",

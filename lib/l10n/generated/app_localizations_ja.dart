@@ -524,6 +524,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionProgramListEmptyMessage => '予防プログラムがありません';
 
   @override
+  String get preventionDefaultProgramRabies => '狂犬病ワクチン';
+
+  @override
+  String get preventionDefaultProgramCombinationVaccine => '混合ワクチン';
+
+  @override
+  String get preventionDefaultProgramHeartworm => 'フィラリア予防';
+
+  @override
+  String get preventionDefaultProgramFleaTick => 'ノミ・ダニ予防';
+
+  @override
   String get scheduleTypeSingleBadge => '単発';
 
   @override

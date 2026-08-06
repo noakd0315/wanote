@@ -47,19 +47,50 @@ class _PreventionProgramListScreenState
   /// ワクチン>フィラリア予防>ノミ・ダニ予防 -- which the list screen then
   /// preserves by showing programs oldest-created-first (see
   /// PreventionProgramRepository.watchPrograms's ordering).
-  static const _defaults = [
-    (PreventionType.vaccine, '狂犬病ワクチン', ScheduleType.annual),
-    (PreventionType.vaccine, '混合ワクチン', ScheduleType.annual),
-    (PreventionType.medication, 'フィラリア予防', ScheduleType.monthly),
-    (PreventionType.medication, 'ノミ・ダニ予防', ScheduleType.monthly),
+  ///
+  /// Localized at seed time rather than hardcoded in Japanese: these names
+  /// are written to Firestore as ordinary `product_name` data, so whatever
+  /// is stored here is what the user sees forever after. Seeding an English
+  /// user with Japanese names produced rows like "狂犬病ワクチン / Vaccine ・
+  /// Annually" -- half-translated and meaningless to them.
+  ///
+  /// Being data, an existing pet's names do NOT follow a later language
+  /// switch; only pets seeded after the switch pick up the new language.
+  /// They stay editable, which is the escape hatch for that.
+  List<(PreventionType, String, ScheduleType)> _defaults(
+    AppLocalizations l10n,
+  ) => [
+    (
+      PreventionType.vaccine,
+      l10n.preventionDefaultProgramRabies,
+      ScheduleType.annual,
+    ),
+    (
+      PreventionType.vaccine,
+      l10n.preventionDefaultProgramCombinationVaccine,
+      ScheduleType.annual,
+    ),
+    (
+      PreventionType.medication,
+      l10n.preventionDefaultProgramHeartworm,
+      ScheduleType.monthly,
+    ),
+    (
+      PreventionType.medication,
+      l10n.preventionDefaultProgramFleaTick,
+      ScheduleType.monthly,
+    ),
   ];
 
   bool _seedAttempted = false;
 
-  Future<void> _seedDefaultsIfEmpty(List<PreventionProgram> current) async {
+  Future<void> _seedDefaultsIfEmpty(
+    AppLocalizations l10n,
+    List<PreventionProgram> current,
+  ) async {
     if (_seedAttempted || current.isNotEmpty) return;
     _seedAttempted = true;
-    for (final (type, productName, scheduleType) in _defaults) {
+    for (final (type, productName, scheduleType) in _defaults(l10n)) {
       await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
@@ -104,7 +135,7 @@ class _PreventionProgramListScreenState
             // Fire-and-forget: the live stream above picks up the newly
             // created docs automatically once seeding completes, so this
             // build just shows the loading state in the meantime.
-            unawaited(_seedDefaultsIfEmpty(programs));
+            unawaited(_seedDefaultsIfEmpty(l10n, programs));
             return const Center(child: CircularProgressIndicator());
           }
           if (programs.isEmpty) {

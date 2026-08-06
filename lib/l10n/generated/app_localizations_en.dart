@@ -542,6 +542,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preventionProgramListEmptyMessage => 'No prevention programs';
 
   @override
+  String get preventionDefaultProgramRabies => 'Rabies vaccine';
+
+  @override
+  String get preventionDefaultProgramCombinationVaccine =>
+      'Combination vaccine';
+
+  @override
+  String get preventionDefaultProgramHeartworm => 'Heartworm prevention';
+
+  @override
+  String get preventionDefaultProgramFleaTick => 'Flea & tick prevention';
+
+  @override
   String get scheduleTypeSingleBadge => 'One-time';
 
   @override
