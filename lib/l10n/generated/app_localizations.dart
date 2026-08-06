@@ -1166,6 +1166,12 @@ abstract class AppLocalizations {
   /// **'A certificate is already registered'**
   String get certificateAlreadyRegisteredMessage;
 
+  /// Shown in place of the registered certificate when its image fails to load (offline, expired URL, etc.).
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the certificate image.'**
+  String get certificateImageLoadFailedMessage;
+
   /// Shown when the record has no certificate image at all.
   ///
   /// In en, this message translates to:

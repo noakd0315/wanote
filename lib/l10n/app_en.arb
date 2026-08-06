@@ -759,6 +759,10 @@
   "@certificateAlreadyRegisteredMessage": {
     "description": "Shown when editing a record that already has a certificate image but none has been newly picked."
   },
+  "certificateImageLoadFailedMessage": "Could not load the certificate image.",
+  "@certificateImageLoadFailedMessage": {
+    "description": "Shown in place of the registered certificate when its image fails to load (offline, expired URL, etc.)."
+  },
   "certificateNotRegisteredMessage": "No certificate registered",
   "@certificateNotRegisteredMessage": {
     "description": "Shown when the record has no certificate image at all."

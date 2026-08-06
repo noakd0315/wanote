@@ -559,6 +559,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get certificateAlreadyRegisteredMessage => '登録済みの証明書があります';
 
   @override
+  String get certificateImageLoadFailedMessage => '証明書の画像を読み込めませんでした。';
+
+  @override
   String get certificateNotRegisteredMessage => '証明書は未登録です';
 
   @override

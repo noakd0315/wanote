@@ -352,7 +352,34 @@ class _PreventionRecordFormScreenState
               if (_pickedImageBytes != null)
                 Image.memory(_pickedImageBytes!, height: 160)
               else if (_existingCertificateUrl != null)
-                Text(l10n.certificateAlreadyRegisteredMessage)
+                // PM report: an already-saved certificate was described in
+                // words but never actually drawn, so there was no way to
+                // check the registered image from this screen -- the whole
+                // point of spec 5.3's "証明書を即座に確認できるようにする".
+                // A newly picked image was rendered (above), which made the
+                // gap easy to miss during development.
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.certificateAlreadyRegisteredMessage),
+                    const SizedBox(height: 8),
+                    Image.network(
+                      _existingCertificateUrl!,
+                      height: 160,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Text(l10n.certificateImageLoadFailedMessage),
+                      loadingBuilder: (context, child, progress) =>
+                          progress == null
+                          ? child
+                          : const SizedBox(
+                              height: 160,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                    ),
+                  ],
+                )
               else
                 Text(l10n.certificateNotRegisteredMessage),
               const SizedBox(height: 8),

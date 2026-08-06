@@ -177,10 +177,30 @@ class _CertificateImage extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         final file = snapshot.data;
-        if (file == null) {
-          return const Center(child: Icon(Icons.broken_image));
+        if (file != null) {
+          return Image.file(file, fit: BoxFit.cover, width: double.infinity);
         }
-        return Image.file(file, fit: BoxFit.cover, width: double.infinity);
+        // The offline cache is filesystem-backed (path_provider), which has
+        // no web implementation -- getOrDownload() fails there, and every
+        // certificate rendered as a broken-image icon (PM report: 証明書の
+        // 画像が一覧、詳細ともに表示されていません). Falling back to the
+        // Storage URL keeps the list usable wherever the cache can't run;
+        // on mobile the cached file above is still preferred, so the
+        // offline counter-side use case in spec 5.3 is unaffected.
+        final remoteUrl = record.certificateFile;
+        if (remoteUrl != null) {
+          return Image.network(
+            remoteUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stackTrace) =>
+                const Center(child: Icon(Icons.broken_image)),
+            loadingBuilder: (context, child, progress) => progress == null
+                ? child
+                : const Center(child: CircularProgressIndicator()),
+          );
+        }
+        return const Center(child: Icon(Icons.broken_image));
       },
     );
   }

@@ -200,6 +200,7 @@
   "nextDueDateLabel": "次回予定日",
   "certificateImageSectionTitle": "証明書（画像）",
   "certificateAlreadyRegisteredMessage": "登録済みの証明書があります",
+  "certificateImageLoadFailedMessage": "証明書の画像を読み込めませんでした。",
   "certificateNotRegisteredMessage": "証明書は未登録です",
   "certificateCaptureManualLabel": "証明書を撮影／選択（自動読取は準備中）",
   "certificateCaptureAiLabel": "証明書を撮影／選択してAIで自動入力",

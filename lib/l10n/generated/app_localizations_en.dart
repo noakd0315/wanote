@@ -579,6 +579,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A certificate is already registered';
 
   @override
+  String get certificateImageLoadFailedMessage =>
+      'Could not load the certificate image.';
+
+  @override
   String get certificateNotRegisteredMessage => 'No certificate registered';
 
   @override
