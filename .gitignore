@@ -31,6 +31,9 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Gradle writes reports under android/build during an Android build;
+# the root-anchored /build/ above does not cover it.
+android/build/
 /coverage/
 
 # Symbolication related

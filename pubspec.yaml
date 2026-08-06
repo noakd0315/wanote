@@ -38,11 +38,11 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # Firebase
-  firebase_core: ^3.8.0
-  firebase_auth: ^5.3.3
-  cloud_firestore: ^5.5.0
-  firebase_storage: ^12.3.7
-  firebase_messaging: ^15.1.6
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  cloud_firestore: ^6.8.0
+  firebase_storage: ^13.4.6
+  firebase_messaging: ^16.5.0
 
   # Auth providers
   google_sign_in: ^6.2.2
@@ -69,7 +69,7 @@ dependencies:
 
   # Billing / ads
   purchases_flutter: ^8.4.5
-  google_mobile_ads: ^5.2.1
+  google_mobile_ads: ^9.0.0
 
   # Notifications
   flutter_local_notifications: ^18.0.1
@@ -92,8 +92,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
-  fake_cloud_firestore: ^3.1.0
-  firebase_auth_mocks: ^0.14.1
+  fake_cloud_firestore: ^4.2.0
+  firebase_auth_mocks: ^0.15.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
