@@ -55,6 +55,9 @@ class _ReportScreenState extends State<ReportScreen> {
   String? _summaryText;
 
   Future<void> _generateSummary() async {
+    // Captured before the first await: reading it from the
+    // BuildContext afterwards would be a use-after-dispose hazard.
+    final languageCode = Localizations.localeOf(context).languageCode;
     setState(() => _state = _SummaryState.loading);
     try {
       final status = await widget.usageRepository.getStatus(widget.uid);
@@ -65,6 +68,7 @@ class _ReportScreenState extends State<ReportScreen> {
       final summary = await widget.reportGenerator.generateSummary(
         petId: widget.petId,
         stats: widget.stats,
+        languageCode: languageCode,
       );
       await widget.reportRepository.save(
         uid: widget.uid,

@@ -3,6 +3,8 @@ import type { RateLimitEnv } from '../lib/rateLimiter';
 import { checkRateLimit } from '../lib/rateLimiter';
 import { verifyFirebaseToken } from '../lib/verifyFirebaseToken';
 import { callClaude } from '../lib/anthropicClient';
+import type { OutputLanguage } from '../lib/outputLanguage';
+import { outputLanguageInstruction, parseOutputLanguage } from '../lib/outputLanguage';
 
 /**
  * POST /ai/consultation — spec section 6 (AI相談).
@@ -16,14 +18,16 @@ import { callClaude } from '../lib/anthropicClient';
  * prompt still tells the model to recommend a vet visit whenever it is
  * unsure, as defense in depth.
  */
-const SYSTEM_PROMPT = `あなたは犬の飼い主向けのAI健康相談アシスタントです。以下のルールを厳守してください。
+export function buildSystemPrompt(language: OutputLanguage): string {
+  return `あなたは犬の飼い主向けのAI健康相談アシスタントです。以下のルールを厳守してください。
 
 - あなたは獣医ではなく、医療診断は行いません。回答は必ず「受診目安の参考情報」であることが伝わる書き方にしてください。
 - 症状から考えられる一般的な原因を1〜3個程度、簡潔に説明してください。
 - 「様子を見てよいレベルか」「なるべく早く動物病院を受診すべきレベルか」「今すぐ受診すべき緊急レベルか」の3段階のどれに近いか、受診目安を必ず明示してください。
 - 緊急性が高いと少しでも判断した場合は、様子見を勧めず、動物病院への受診を強く勧めてください。
-- 出力は日本語、200〜400文字程度を目安に簡潔にまとめてください。
+${outputLanguageInstruction(language)}
 - 最後に、これは診断ではなく参考情報である旨を一言添えてください。`;
+}
 
 export interface ReferencedRecordInput {
   recordId: string;
@@ -36,6 +40,9 @@ export interface ConsultationRequestBody {
   petId: string;
   questionText: string;
   referencedRecords: ReferencedRecordInput[];
+  /** Language the *answer* should be written in. Defaults to Japanese so a
+   * client that doesn't send it behaves exactly as before. */
+  language: OutputLanguage;
 }
 
 /** Pure JSON-shaping/validation, factored out so it's testable without any
@@ -68,6 +75,7 @@ export function parseConsultationRequestBody(json: unknown): ConsultationRequest
     petId: body.petId,
     questionText: body.questionText,
     referencedRecords,
+    language: parseOutputLanguage(body.language),
   };
 }
 
@@ -144,7 +152,7 @@ export async function handleConsultation(request: Request, env: ConsultationEnv)
   try {
     const result = await callClaude({
       env,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: buildSystemPrompt(body.language),
       userText: buildConsultationUserPrompt(body),
       maxTokens: 768,
     });

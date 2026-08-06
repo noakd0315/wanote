@@ -3,6 +3,8 @@ import type { RateLimitEnv } from '../lib/rateLimiter';
 import { checkRateLimit } from '../lib/rateLimiter';
 import { verifyFirebaseToken } from '../lib/verifyFirebaseToken';
 import { callClaude } from '../lib/anthropicClient';
+import type { OutputLanguage } from '../lib/outputLanguage';
+import { outputLanguageInstruction, parseOutputLanguage } from '../lib/outputLanguage';
 
 /**
  * POST /ai/report — spec section 7 (AI健康レポート・グラフ化).
@@ -20,13 +22,15 @@ import { callClaude } from '../lib/anthropicClient';
  * billing state itself, since Cloudflare Workers here has no direct
  * Firestore access; see the "open questions" section of that report).
  */
-const SYSTEM_PROMPT = `あなたは犬の健康記録から月次サマリーを作成するアシスタントです。以下のルールを厳守してください。
+export function buildSystemPrompt(language: OutputLanguage): string {
+  return `あなたは犬の健康記録から月次サマリーを作成するアシスタントです。以下のルールを厳守してください。
 
 - 入力される体重推移・トイレ回数の集計データのみを根拠に、事実ベースの要約を書いてください。憶測で診断や病名を挙げないでください。
 - 「今月は体重が◯kg増加/減少しました」「トイレの回数は先月と比べ◯回増加/減少しています」のような、具体的な数値を含む文章にしてください。
 - 気になる変化（体重の急な増減、トイレ回数の大きな変化）があれば、受診を検討する目安として触れてください。
 - これは医療診断ではなく参考情報である旨を最後に一言添えてください。
-- 出力は日本語、200〜400文字程度を目安に簡潔にまとめてください。`;
+${outputLanguageInstruction(language)}`;
+}
 
 export interface WeightSampleInput {
   date: string;
@@ -44,6 +48,8 @@ export interface ReportRequestBody {
   periodEnd: string;
   weightSamples: WeightSampleInput[];
   toiletCountsByDay: ToiletDayCountInput[];
+  /** Language the summary should be written in. Defaults to Japanese. */
+  language: OutputLanguage;
 }
 
 /** Pure JSON-shaping/validation — see functions/test/report.test.ts. */
@@ -66,6 +72,7 @@ export function parseReportRequestBody(json: unknown): ReportRequestBody {
     periodEnd: body.periodEnd,
     weightSamples: parseWeightSamples(body.weightSamples),
     toiletCountsByDay: parseToiletCounts(body.toiletCountsByDay),
+    language: parseOutputLanguage(body.language),
   };
 }
 
@@ -180,7 +187,7 @@ export async function handleReport(request: Request, env: ReportEnv): Promise<Re
   try {
     const result = await callClaude({
       env,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: buildSystemPrompt(body.language),
       userText: buildReportUserPrompt(body),
       maxTokens: 768,
     });

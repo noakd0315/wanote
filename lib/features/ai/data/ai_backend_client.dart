@@ -59,10 +59,15 @@ class AiBackendClient {
 
   /// Calls `POST /ai/consultation` (functions/src/routes/consultation.ts).
   /// Throws [AiBackendException] on any non-2xx response.
+  /// [languageCode] is the language the *answer* should come back in --
+  /// normally `Localizations.localeOf(context).languageCode`. The backend
+  /// falls back to Japanese for anything it doesn't recognize, so passing
+  /// nothing keeps the previous behaviour.
   Future<String> requestConsultation({
     required String petId,
     required String questionText,
     List<ConsultationReferenceRecord> referencedRecords = const [],
+    String? languageCode,
   }) async {
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/ai/consultation'),
@@ -70,6 +75,7 @@ class AiBackendClient {
       body: jsonEncode({
         'petId': petId,
         'questionText': questionText,
+        'language': ?languageCode,
         'referencedRecords': referencedRecords
             .map(
               (r) => {
@@ -89,12 +95,14 @@ class AiBackendClient {
   Future<String> requestMonthlyReport({
     required String petId,
     required MonthlyReportInputStats stats,
+    String? languageCode,
   }) async {
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/ai/report'),
       headers: await _headers(),
       body: jsonEncode({
         'petId': petId,
+        'language': ?languageCode,
         'periodStart': _dateOnly(stats.periodStart),
         'periodEnd': _dateOnly(stats.periodEnd),
         'weightSamples': stats.weightSamples

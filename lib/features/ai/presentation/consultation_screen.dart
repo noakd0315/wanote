@@ -74,6 +74,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   }
 
   Future<void> _submit() async {
+    // Captured before the first await: reading it from the
+    // BuildContext afterwards would be a use-after-dispose hazard.
+    final languageCode = Localizations.localeOf(context).languageCode;
     final questionText = _controller.text.trim();
     if (questionText.isEmpty || _submitting) return;
 
@@ -109,6 +112,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         petId: widget.petId,
         questionText: questionText,
         referencedRecords: _selectedReferences.toList(),
+        languageCode: languageCode,
       );
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);

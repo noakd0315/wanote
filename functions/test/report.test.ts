@@ -21,7 +21,14 @@ const validBody = {
 
 describe('parseReportRequestBody', () => {
   it('parses a fully valid body', () => {
-    expect(parseReportRequestBody(validBody)).toEqual(validBody);
+    // language defaults to Japanese when the client doesn't send one.
+    expect(parseReportRequestBody(validBody)).toEqual({ ...validBody, language: 'ja' });
+  });
+
+  it('honours an explicit English language, and falls back to ja otherwise', () => {
+    expect(parseReportRequestBody({ ...validBody, language: 'en' }).language).toBe('en');
+    expect(parseReportRequestBody({ ...validBody, language: 'fr' }).language).toBe('ja');
+    expect(parseReportRequestBody(validBody).language).toBe('ja');
   });
 
   it('defaults weightSamples/toiletCountsByDay to empty arrays when omitted', () => {

@@ -145,6 +145,9 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   }
 
   Future<void> _requestAdvice() async {
+    // Captured before the first await: reading it from the
+    // BuildContext afterwards would be a use-after-dispose hazard.
+    final languageCode = Localizations.localeOf(context).languageCode;
     final result = _result;
     if (result == null) return;
 
@@ -174,6 +177,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       final advice = await widget.backendClient.requestConsultation(
         petId: widget.petId,
         questionText: questionText,
+        languageCode: languageCode,
       );
       await widget.usageRepository.recordConsultationUsed(widget.uid);
       setState(() {

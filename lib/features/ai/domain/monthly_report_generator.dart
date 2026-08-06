@@ -6,9 +6,13 @@ import '../models/monthly_report_input_stats.dart';
 /// the full [AiBackendClient] surface, and so tests can substitute a fake
 /// without any HTTP/Firebase setup.
 abstract class MonthlyReportGenerator {
+  /// [languageCode] is the language the summary should be written in --
+  /// normally the display locale. Optional so existing fakes/tests keep
+  /// compiling; the backend defaults to Japanese when it is absent.
   Future<String> generateSummary({
     required String petId,
     required MonthlyReportInputStats stats,
+    String? languageCode,
   });
 }
 
@@ -23,7 +27,12 @@ class BackendMonthlyReportGenerator implements MonthlyReportGenerator {
   Future<String> generateSummary({
     required String petId,
     required MonthlyReportInputStats stats,
+    String? languageCode,
   }) {
-    return _client.requestMonthlyReport(petId: petId, stats: stats);
+    return _client.requestMonthlyReport(
+      petId: petId,
+      stats: stats,
+      languageCode: languageCode,
+    );
   }
 }

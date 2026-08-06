@@ -15,7 +15,16 @@ describe('parseConsultationRequestBody', () => {
       petId: 'pet-1',
       questionText: '今日はあまりご飯を食べません',
       referencedRecords: [],
+      // Answer language defaults to Japanese when the client omits it.
+      language: 'ja',
     });
+  });
+
+  it('honours an explicit English language, and falls back to ja otherwise', () => {
+    const base = { petId: 'pet-1', questionText: 'q' };
+    expect(parseConsultationRequestBody({ ...base, language: 'en' }).language).toBe('en');
+    expect(parseConsultationRequestBody({ ...base, language: 'fr' }).language).toBe('ja');
+    expect(parseConsultationRequestBody(base).language).toBe('ja');
   });
 
   it('parses referencedRecords, filtering out non-string tags', () => {
