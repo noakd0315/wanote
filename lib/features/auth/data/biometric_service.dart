@@ -50,15 +50,15 @@ class LocalAuthBiometricService implements BiometricService {
       return BiometricPromptResult.notAvailable;
     }
     try {
+      // local_auth 3 flattened AuthenticationOptions into named arguments,
+      // and renamed stickyAuth -> persistAcrossBackgrounding.
       final didAuthenticate = await _localAuth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          // Allows the OS to fall back to the device's own PIN/pattern/
-          // passcode when biometrics fail — this is the "パスワード／PIN
-          // 入力へのフォールバック" from spec 1.2, handled entirely by the OS.
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
+        // Allows the OS to fall back to the device's own PIN/pattern/
+        // passcode when biometrics fail — this is the "パスワード／PIN
+        // 入力へのフォールバック" from spec 1.2, handled entirely by the OS.
+        biometricOnly: false,
+        persistAcrossBackgrounding: true,
       );
       return didAuthenticate
           ? BiometricPromptResult.success

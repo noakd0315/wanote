@@ -60,10 +60,21 @@ class FirebaseAuthRepository implements AuthRepository {
     fb.FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   }) : _auth = firebaseAuth ?? fb.FirebaseAuth.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn();
+       // google_sign_in 7 removed the public constructor: there is now a
+       // single process-wide instance that must be initialize()d once before
+       // any sign-in attempt (see _ensureGoogleInitialized).
+       _googleSignIn = googleSignIn ?? GoogleSignIn.instance;
 
   final fb.FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+
+  Future<void>? _googleInitialization;
+
+  /// initialize() is idempotent per process but must complete before
+  /// authenticate(); caching the future keeps concurrent sign-in taps from
+  /// racing two initializations.
+  Future<void> _ensureGoogleInitialized() =>
+      _googleInitialization ??= _googleSignIn.initialize();
 
   AuthIdentity? _toIdentity(fb.User? user) {
     if (user == null) return null;
@@ -135,14 +146,16 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<AuthIdentity> signInWithGoogle() async {
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw StateError('Google sign-in was cancelled.');
-    }
-    final googleAuth = await googleUser.authentication;
+    await _ensureGoogleInitialized();
+    // authenticate() replaces signIn(). It throws on cancellation rather
+    // than returning null, so the old null-check is gone.
+    final googleUser = await _googleSignIn.authenticate();
+    // google_sign_in 7 split authentication from authorization: the account's
+    // authentication only carries an ID token now, and accessToken moved to
+    // the separate authorizationClient. Firebase only needs the ID token to
+    // mint a credential, so there is nothing to authorize here.
     final credential = fb.GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      idToken: googleUser.authentication.idToken,
     );
     final userCredential = await _auth.signInWithCredential(credential);
     return _toIdentity(userCredential.user)!;

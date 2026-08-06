@@ -38,7 +38,8 @@ class ReminderNotificationAdapter {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _plugin.initialize(settings);
+    // flutter_local_notifications 22 made every argument named.
+    await _plugin.initialize(settings: settings);
     _initialized = true;
   }
 
@@ -55,16 +56,16 @@ class ReminderNotificationAdapter {
 
     final nextIds = reminders.map((r) => r.notificationId).toSet();
     for (final staleId in previousIds.where((id) => !nextIds.contains(id))) {
-      await _plugin.cancel(staleId);
+      await _plugin.cancel(id: staleId);
     }
 
     for (final reminder in reminders) {
       await _plugin.zonedSchedule(
-        reminder.notificationId,
-        reminder.title,
-        reminder.body,
-        tz.TZDateTime.from(reminder.fireAt, tz.local),
-        const NotificationDetails(
+        id: reminder.notificationId,
+        title: reminder.title,
+        body: reminder.body,
+        scheduledDate: tz.TZDateTime.from(reminder.fireAt, tz.local),
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
             _channelName,
@@ -74,9 +75,10 @@ class ReminderNotificationAdapter {
           ),
           iOS: DarwinNotificationDetails(),
         ),
+        // uiLocalNotificationDateInterpretation is gone in 22: a TZDateTime
+        // is now always interpreted as absolute time, which is what we were
+        // asking for anyway.
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
       );
     }
   }
