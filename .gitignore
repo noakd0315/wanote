@@ -61,3 +61,11 @@ ios/Runner/GoogleService-Info.plist
 
 # Leftover subagent worktree scratch dirs (not part of the project)
 .claude/worktrees/
+
+# Firebase emulator state (docker-compose.yml's --export-on-exit target).
+# Deliberately untracked: the emulators rewrite this whole directory on
+# every shutdown, including binary Firestore/Storage dumps, so committing it
+# would churn the history with unreviewable diffs. It exists so local test
+# data survives `docker compose down`. To share a fixed dataset instead,
+# snapshot a copy under a different name and commit that.
+.emulator-data/

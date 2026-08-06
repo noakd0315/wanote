@@ -37,7 +37,30 @@ services:
       - ./.firebaserc:/workspace/.firebaserc:ro
       - ./firestore.rules:/workspace/firestore.rules:ro
       - ./storage.rules:/workspace/storage.rules:ro
-    command: ["firebase", "emulators:start", "--project=demo-wanote"]
+      # Read-WRITE, unlike the rules above: the emulators dump Auth users,
+      # Firestore documents and Storage objects here on shutdown and read
+      # them back on the next start. Without it every `docker compose
+      # up/down` starts from an empty database -- test accounts, pets and
+      # uploaded certificates all had to be recreated by hand each time.
+      - ./.emulator-data:/workspace/.emulator-data
+    # --import is passed only once an export actually exists: pointing it at
+    # an empty directory makes the CLI abort with "Could not find metadata
+    # file", which would break the very first `docker compose up` on a fresh
+    # clone. --export-on-exit always writes, so the directory populates
+    # itself after the first clean shutdown.
+    command:
+      - sh
+      - -c
+      - >-
+        if [ -f /workspace/.emulator-data/firebase-export-metadata.json ]; then
+          set -- --import=/workspace/.emulator-data;
+        fi;
+        exec firebase emulators:start --project=demo-wanote
+        --export-on-exit=/workspace/.emulator-data "$$@"
+    # The export runs during shutdown, so the container needs longer than
+    # Compose's 10s default to finish writing before it gets SIGKILLed --
+    # a killed container exports nothing and the data is lost.
+    stop_grace_period: 60s
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000"]
       interval: 5s
