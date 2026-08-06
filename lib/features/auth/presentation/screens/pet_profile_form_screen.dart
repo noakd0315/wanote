@@ -12,6 +12,7 @@ import '../../../../shared/models/pet_profile.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
 import '../auth_controller.dart';
+import 'icon_crop_screen.dart';
 
 /// Create or edit a single pet profile (spec 1.2 -
 /// ペットプロフィール登録：犬種、名前、生年月日、性別、体重（初期値）、
@@ -140,7 +141,48 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
         _pickedIconBytes = bytes;
         _iconWasDeleted = false;
       });
+      // Frame it straight away rather than dropping the user back on the
+      // form to fiddle with sliders (PM request: adjust inside the image
+      // like LINE/Facebook). Newly picked photos start centred at 1x.
+      unawaited(_openIconCrop(bytes, initial: null));
     });
+  }
+
+  /// Opens the pinch-to-frame screen and stores whatever framing comes back.
+  /// Cancelling leaves the current framing untouched.
+  Future<void> _openIconCrop(
+    Uint8List bytes, {
+    required IconCropResult? initial,
+  }) async {
+    final result = await Navigator.of(context).push<IconCropResult>(
+      MaterialPageRoute(
+        builder: (_) => IconCropScreen(imageBytes: bytes, initial: initial),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _iconAlignmentX = result.alignmentX;
+      _iconAlignmentY = result.alignmentY;
+      _iconZoom = result.zoom;
+    });
+  }
+
+  /// Re-frames the icon already on the form. Only offered for a
+  /// just-picked photo: a previously saved icon is a URL, and the crop
+  /// screen works on bytes.
+  void _adjustPickedIcon() {
+    final bytes = _pickedIconBytes;
+    if (bytes == null) return;
+    unawaited(
+      _openIconCrop(
+        bytes,
+        initial: IconCropResult(
+          alignmentX: _iconAlignmentX,
+          alignmentY: _iconAlignmentY,
+          zoom: _iconZoom,
+        ),
+      ),
+    );
   }
 
   void _deleteIconPhoto() {
@@ -468,65 +510,16 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
             icon: const Icon(Icons.delete_outline, size: 18),
             label: Text(l10n.petProfileFormDeleteIconButton),
           ),
-          // Reposition/zoom controls -- PM request: "出力するアイコンに
-          // ついて表示位置やサイズを設定できるようにしたい".
-          Row(
-            children: [
-              SizedBox(
-                width: 56,
-                child: Text(
-                  l10n.petProfileFormIconOffsetXLabel,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-              Expanded(
-                child: Slider(
-                  value: _iconAlignmentX,
-                  min: -1,
-                  max: 1,
-                  onChanged: (value) => setState(() => _iconAlignmentX = value),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 56,
-                child: Text(
-                  l10n.petProfileFormIconOffsetYLabel,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-              Expanded(
-                child: Slider(
-                  value: _iconAlignmentY,
-                  min: -1,
-                  max: 1,
-                  onChanged: (value) => setState(() => _iconAlignmentY = value),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: 56,
-                child: Text(
-                  l10n.petProfileFormIconZoomLabel,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ),
-              Expanded(
-                child: Slider(
-                  value: _iconZoom,
-                  min: 1,
-                  max: 3,
-                  onChanged: (value) => setState(() => _iconZoom = value),
-                ),
-              ),
-            ],
-          ),
+          // Framing happens on the crop screen now (PM request: pinch
+          // inside the image like LINE/Facebook) instead of three sliders
+          // under the preview. Only shown for a freshly picked photo --
+          // an already-saved icon is a URL, and the crop screen needs bytes.
+          if (_pickedIconBytes != null)
+            TextButton.icon(
+              onPressed: _adjustPickedIcon,
+              icon: const Icon(Icons.crop_rotate, size: 18),
+              label: Text(l10n.petProfileFormAdjustIconButton),
+            ),
         ],
       ],
     );

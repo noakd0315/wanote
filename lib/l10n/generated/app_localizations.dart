@@ -788,23 +788,29 @@ abstract class AppLocalizations {
   /// **'Delete icon photo'**
   String get petProfileFormDeleteIconButton;
 
-  /// Label for the slider that adjusts the icon photo's horizontal crop position.
+  /// Button on the pet profile form that reopens the pinch-to-frame screen for the icon photo already picked.
   ///
   /// In en, this message translates to:
-  /// **'Horizontal'**
-  String get petProfileFormIconOffsetXLabel;
+  /// **'Adjust framing'**
+  String get petProfileFormAdjustIconButton;
 
-  /// Label for the slider that adjusts the icon photo's vertical crop position.
+  /// AppBar title of the pinch-to-frame screen shown after picking a pet icon photo.
   ///
   /// In en, this message translates to:
-  /// **'Vertical'**
-  String get petProfileFormIconOffsetYLabel;
+  /// **'Adjust icon'**
+  String get iconCropTitle;
 
-  /// Label for the slider that adjusts the icon photo's zoom level.
+  /// Confirms the icon framing and returns to the pet profile form.
   ///
   /// In en, this message translates to:
-  /// **'Zoom'**
-  String get petProfileFormIconZoomLabel;
+  /// **'Done'**
+  String get iconCropConfirmButton;
+
+  /// Instruction shown under the crop circle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom and drag to position. The area inside the circle becomes the icon.'**
+  String get iconCropHint;
 
   /// Section header above the pet's background photo picker on the pet profile form.
   ///

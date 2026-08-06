@@ -380,13 +380,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get petProfileFormDeleteIconButton => 'Delete icon photo';
 
   @override
-  String get petProfileFormIconOffsetXLabel => 'Horizontal';
+  String get petProfileFormAdjustIconButton => 'Adjust framing';
 
   @override
-  String get petProfileFormIconOffsetYLabel => 'Vertical';
+  String get iconCropTitle => 'Adjust icon';
 
   @override
-  String get petProfileFormIconZoomLabel => 'Zoom';
+  String get iconCropConfirmButton => 'Done';
+
+  @override
+  String get iconCropHint =>
+      'Pinch to zoom and drag to position. The area inside the circle becomes the icon.';
 
   @override
   String get petProfileFormBackgroundSectionTitle =>

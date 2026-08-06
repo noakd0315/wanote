@@ -483,17 +483,21 @@
   "@petProfileFormDeleteIconButton": {
     "description": "Button that deletes the pet's icon/avatar photo on the pet profile form."
   },
-  "petProfileFormIconOffsetXLabel": "Horizontal",
-  "@petProfileFormIconOffsetXLabel": {
-    "description": "Label for the slider that adjusts the icon photo's horizontal crop position."
+  "petProfileFormAdjustIconButton": "Adjust framing",
+  "@petProfileFormAdjustIconButton": {
+    "description": "Button on the pet profile form that reopens the pinch-to-frame screen for the icon photo already picked."
   },
-  "petProfileFormIconOffsetYLabel": "Vertical",
-  "@petProfileFormIconOffsetYLabel": {
-    "description": "Label for the slider that adjusts the icon photo's vertical crop position."
+  "iconCropTitle": "Adjust icon",
+  "@iconCropTitle": {
+    "description": "AppBar title of the pinch-to-frame screen shown after picking a pet icon photo."
   },
-  "petProfileFormIconZoomLabel": "Zoom",
-  "@petProfileFormIconZoomLabel": {
-    "description": "Label for the slider that adjusts the icon photo's zoom level."
+  "iconCropConfirmButton": "Done",
+  "@iconCropConfirmButton": {
+    "description": "Confirms the icon framing and returns to the pet profile form."
+  },
+  "iconCropHint": "Pinch to zoom and drag to position. The area inside the circle becomes the icon.",
+  "@iconCropHint": {
+    "description": "Instruction shown under the crop circle."
   },
   "petProfileFormBackgroundSectionTitle": "Background photo (Home screen)",
   "@petProfileFormBackgroundSectionTitle": {

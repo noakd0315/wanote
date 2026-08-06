@@ -363,13 +363,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get petProfileFormDeleteIconButton => 'アイコン写真を削除';
 
   @override
-  String get petProfileFormIconOffsetXLabel => '左右';
+  String get petProfileFormAdjustIconButton => '位置・サイズを調整';
 
   @override
-  String get petProfileFormIconOffsetYLabel => '上下';
+  String get iconCropTitle => 'アイコンを調整';
 
   @override
-  String get petProfileFormIconZoomLabel => 'ズーム';
+  String get iconCropConfirmButton => '決定';
+
+  @override
+  String get iconCropHint => 'ピンチで拡大・ドラッグで位置を調整できます。円の中がアイコンになります。';
 
   @override
   String get petProfileFormBackgroundSectionTitle => '背景写真（ホーム画面）';
