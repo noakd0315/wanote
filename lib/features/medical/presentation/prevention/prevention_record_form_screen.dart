@@ -415,7 +415,12 @@ class _PreventionRecordFormScreenState
                     l10n.ocrConfidenceLabel(
                       (_ocrConfidence! * 100).toStringAsFixed(0),
                     ),
-                    style: Theme.of(context).textTheme.bodySmall,
+                    // Red (PM request): this asks the user to double-check
+                    // AI-extracted values before saving them as medical
+                    // history, so it must not read as a passive stat.
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
               const SizedBox(height: 24),

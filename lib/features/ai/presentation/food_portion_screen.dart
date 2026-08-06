@@ -271,7 +271,12 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             const SizedBox(height: 12),
             Text(
               l10n.foodPortionPuppyNoteText,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
+              // Red like the other cautions (PM request) -- grey made these
+              // read as decoration rather than something to act on.
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
             ),
           ],
           const SizedBox(height: 12),
@@ -314,7 +319,10 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             const SizedBox(height: 8),
             Text(
               l10n.foodPortionResultDisclaimerText,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
             ),
             const SizedBox(height: 16),
             _buildAdviceSection(l10n),

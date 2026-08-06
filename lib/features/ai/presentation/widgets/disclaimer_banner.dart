@@ -23,19 +23,15 @@ class DisclaimerBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 18,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          // Red, not the muted grey it used to be (PM request): this is the
+          // "医療診断ではない" notice spec 6.5 requires on every AI screen, and
+          // grey-on-grey read as boilerplate the eye skips over.
+          Icon(Icons.info_outline, size: 18, color: colorScheme.error),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               l10n.aiDisclaimerText,
-              style: TextStyle(
-                fontSize: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: TextStyle(fontSize: 12, color: colorScheme.error),
             ),
           ),
         ],
