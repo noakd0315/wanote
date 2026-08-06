@@ -161,13 +161,18 @@ class _HomeShellState extends State<HomeShell> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  /// Built on demand from inside the shell Navigator's route builder rather
+  /// than once per [build]: the route is generated a single time (see
+  /// onGenerateRoute below), so a list captured in `build`'s scope would
+  /// freeze at whichever pet was active when the shell first mounted. Every
+  /// section here is keyed off [HomeShellState.widget.activePet], so
+  /// switching pets has to re-read it -- PM report: after switching pets the
+  /// 医療 tab kept showing the previous pet's records until a full reload.
+  List<Widget> _buildSections(BuildContext context) {
     final uid = widget.uid;
     final petId = widget.activePet.petId;
 
-    final sections = <Widget>[
+    return <Widget>[
       HomeScreen(
         uid: uid,
         activePet: widget.activePet,
@@ -206,6 +211,11 @@ class _HomeShellState extends State<HomeShell> {
         billingRepository: _billingRepository,
       ),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       // Only shown on the ホーム tab (index 0) per the PM's request ("TOP画面
@@ -237,8 +247,10 @@ class _HomeShellState extends State<HomeShell> {
             key: _shellNavigatorKey,
             onGenerateRoute: (settings) => MaterialPageRoute(
               settings: settings,
-              builder: (_) =>
-                  IndexedStack(index: _selectedIndex, children: sections),
+              builder: (routeContext) => IndexedStack(
+                index: _selectedIndex,
+                children: _buildSections(routeContext),
+              ),
             ),
           ),
         ],
