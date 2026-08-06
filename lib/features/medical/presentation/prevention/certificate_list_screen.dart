@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/certificate_cache_service.dart';
+import '../../data/prevention_program_repository.dart';
 import '../../data/prevention_record_repository.dart';
+import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
 import 'prevention_program_list_screen.dart';
 
@@ -24,13 +26,22 @@ class CertificateListScreen extends StatelessWidget {
     required this.uid,
     required this.petId,
     PreventionRecordRepository? repository,
+    PreventionProgramRepository? programRepository,
     CertificateCacheService? cacheService,
   }) : repository = repository ?? FirestorePreventionRecordRepository(),
+       programRepository =
+           programRepository ?? FirestorePreventionProgramRepository(),
        cacheService = cacheService ?? FileSystemCertificateCacheService();
 
   final String uid;
   final String petId;
   final PreventionRecordRepository repository;
+
+  /// Only needed to resolve each record's `program_id` into the program name
+  /// shown on the tile -- PM request: a certificate thumbnail plus a date
+  /// alone doesn't say *which* vaccination it is, which is the first thing
+  /// you need when showing it at a counter.
+  final PreventionProgramRepository programRepository;
   final CertificateCacheService cacheService;
 
   @override
@@ -81,20 +92,37 @@ class CertificateListScreen extends StatelessWidget {
               ),
             );
           }
-          return GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.8,
-            ),
-            itemCount: records.length,
-            itemBuilder: (context, index) {
-              final record = records[index];
-              return _CertificateTile(
-                record: record,
-                cacheService: cacheService,
+          // Nested rather than combined: the program list only supplies a
+          // display name, so it must never gate the certificates themselves
+          // -- if it is still loading (or fails), the tiles still render and
+          // simply omit the name.
+          return StreamBuilder<List<PreventionProgram>>(
+            stream: programRepository.watchPrograms(uid, petId),
+            builder: (context, programSnapshot) {
+              final programNames = {
+                for (final program in programSnapshot.data ?? const [])
+                  program.programId: program.productName,
+              };
+              return GridView.builder(
+                padding: const EdgeInsets.all(12),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  // Taller than wide enough for the image plus two lines of
+                  // caption (program name + date) without squeezing the
+                  // thumbnail.
+                  childAspectRatio: 0.68,
+                ),
+                itemCount: records.length,
+                itemBuilder: (context, index) {
+                  final record = records[index];
+                  return _CertificateTile(
+                    record: record,
+                    programName: programNames[record.programId],
+                    cacheService: cacheService,
+                  );
+                },
               );
             },
           );
@@ -121,9 +149,18 @@ class CertificateListScreen extends StatelessWidget {
 }
 
 class _CertificateTile extends StatelessWidget {
-  const _CertificateTile({required this.record, required this.cacheService});
+  const _CertificateTile({
+    required this.record,
+    required this.programName,
+    required this.cacheService,
+  });
 
   final PreventionRecord record;
+
+  /// Null while the program list is still loading, or if the record points
+  /// at a program that has since been deleted -- the tile just drops the
+  /// line in that case rather than showing a placeholder.
+  final String? programName;
   final CertificateCacheService cacheService;
 
   @override
@@ -132,7 +169,14 @@ class _CertificateTile extends StatelessWidget {
       onTap: () => showDialog<void>(
         context: context,
         builder: (_) => Dialog(
-          child: _CertificateImage(record: record, cacheService: cacheService),
+          // Near-fullscreen: a certificate is dense small print, so the
+          // dialog needs the room for zooming to be useful at all.
+          insetPadding: const EdgeInsets.all(16),
+          child: _ZoomableCertificateView(
+            record: record,
+            programName: programName,
+            cacheService: cacheService,
+          ),
         ),
       ),
       child: Card(
@@ -146,15 +190,143 @@ class _CertificateTile extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(4),
-              child: Text(
-                record.administeredAt.toLocal().toString().split(' ').first,
-                style: Theme.of(context).textTheme.bodySmall,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (programName != null)
+                    Text(
+                      programName!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  Text(
+                    record.administeredAt.toLocal().toString().split(' ').first,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Full-screen-ish certificate viewer with pinch-to-zoom -- PM request:
+/// certificates are dense small print (hospital name, lot numbers, dates),
+/// and the previous dialog rendered the image at a fixed size with no way to
+/// magnify it.
+///
+/// [InteractiveViewer] handles pinch on touch devices and ctrl+scroll /
+/// trackpad pinch on desktop and web. Double-tap is wired up as well because
+/// pinch is awkward one-handed, which is the likely posture when showing
+/// this at a counter.
+class _ZoomableCertificateView extends StatefulWidget {
+  const _ZoomableCertificateView({
+    required this.record,
+    required this.programName,
+    required this.cacheService,
+  });
+
+  final PreventionRecord record;
+  final String? programName;
+  final CertificateCacheService cacheService;
+
+  @override
+  State<_ZoomableCertificateView> createState() =>
+      _ZoomableCertificateViewState();
+}
+
+class _ZoomableCertificateViewState extends State<_ZoomableCertificateView> {
+  final _controller = TransformationController();
+
+  static const _doubleTapScale = 2.5;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTap(TapDownDetails details) {
+    final isZoomedIn = _controller.value.getMaxScaleOnAxis() > 1.01;
+    if (isZoomedIn) {
+      _controller.value = Matrix4.identity();
+      return;
+    }
+    // Zoom centred on whatever was tapped, so double-tapping a specific
+    // field brings that field up rather than the middle of the page.
+    final position = details.localPosition;
+    _controller.value = Matrix4.identity()
+      ..translateByDouble(
+        -position.dx * (_doubleTapScale - 1),
+        -position.dy * (_doubleTapScale - 1),
+        0,
+        1,
+      )
+      ..scaleByDouble(_doubleTapScale, _doubleTapScale, _doubleTapScale, 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final caption = [
+      if (widget.programName != null) widget.programName!,
+      widget.record.administeredAt.toLocal().toString().split(' ').first,
+    ].join('  ·  ');
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  caption,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+        Flexible(
+          child: InteractiveViewer(
+            transformationController: _controller,
+            minScale: 1,
+            maxScale: 6,
+            // Nested INSIDE the viewer, not wrapped around it: the viewer
+            // claims the gesture arena for its own scale/pan recognizer, so
+            // an outer GestureDetector never sees the second tap and the
+            // double-tap silently does nothing.
+            child: GestureDetector(
+              onDoubleTapDown: _handleDoubleTap,
+              // The zoom itself is applied from the down event's position;
+              // this empty callback is what makes the double-tap gesture
+              // get recognized at all.
+              onDoubleTap: () {},
+              child: _CertificateImage(
+                record: widget.record,
+                cacheService: widget.cacheService,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
