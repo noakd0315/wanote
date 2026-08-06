@@ -117,8 +117,11 @@ class RevenueCatBillingRepository implements BillingRepository {
         'dashboard yet?',
       );
     }
-    final customerInfo = await Purchases.purchasePackage(package);
-    _onCustomerInfoUpdate(customerInfo);
+    // purchases_flutter 10 wraps the response: purchasePackage now returns a
+    // PurchaseResult (customerInfo + the store transaction) instead of the
+    // CustomerInfo directly.
+    final result = await Purchases.purchasePackage(package);
+    _onCustomerInfoUpdate(result.customerInfo);
 
     // Consumables (ai_tickets_5/15) aren't modeled as entitlements at all in
     // RevenueCat, so a CustomerInfo diff would never surface them — we know
