@@ -800,11 +800,29 @@ abstract class AppLocalizations {
   /// **'Adjust icon'**
   String get iconCropTitle;
 
-  /// Confirms the icon framing and returns to the pet profile form.
+  /// Confirms the framing on the pinch-to-frame screen (used for both the icon and the background photo).
   ///
   /// In en, this message translates to:
   /// **'Done'**
-  String get iconCropConfirmButton;
+  String get photoCropConfirmButton;
+
+  /// AppBar title of the pinch-to-frame screen shown after picking a Home background photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust background'**
+  String get backgroundCropTitle;
+
+  /// Instruction shown under the background crop frame.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom and drag to position. The area inside the frame is what the Home screen shows.'**
+  String get backgroundCropHint;
+
+  /// Button on the pet profile form that reopens the pinch-to-frame screen for the background photo already picked.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust framing'**
+  String get petProfileFormAdjustBackgroundButton;
 
   /// Instruction shown under the crop circle.
   ///

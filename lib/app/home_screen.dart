@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
@@ -14,6 +13,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../shared/models/consultation_reference_record.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
+import '../shared/widgets/pet_background_photo.dart';
 
 /// Whether [HomeScreen] should render the active pet's photo as its
 /// background, vs. falling back to the default illustration. Factored out
@@ -168,10 +168,9 @@ class HomeScreen extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           if (showPhoto)
-            CachedNetworkImage(
-              imageUrl: activePet.photoUrl!,
-              fit: BoxFit.cover,
-              errorWidget: (context, url, error) => const _DefaultBackground(),
+            PetBackgroundPhoto(
+              pet: activePet,
+              errorWidget: const _DefaultBackground(),
             )
           else
             const _DefaultBackground(),

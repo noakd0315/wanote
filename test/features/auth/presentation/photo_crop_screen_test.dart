@@ -3,11 +3,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wanote/features/auth/presentation/screens/icon_crop_screen.dart';
+import 'package:wanote/features/auth/presentation/screens/photo_crop_screen.dart';
 import 'package:wanote/l10n/generated/app_localizations.dart';
 
-/// PM request: frame the pet icon by pinching inside the photo (LINE /
-/// Facebook style) instead of dragging three sliders under it.
+/// PM request: frame the pet icon -- and now the Home background -- by
+/// pinching inside the photo (LINE / Facebook style) instead of dragging
+/// three sliders under it.
 ///
 /// What is worth pinning here is the *direction and bounds* of the mapping
 /// from gesture to the stored alignment/zoom triple, not exact pixel maths:
@@ -27,12 +28,14 @@ Future<Uint8List> _png(int width, int height) async {
   return data!.buffer.asUint8List();
 }
 
-/// Hosts the screen behind a button so the popped [IconCropResult] can be
+/// Hosts the screen behind a button so the popped [PhotoCropResult] can be
 /// captured the same way the pet profile form captures it.
 Widget _host(
   Uint8List bytes, {
-  IconCropResult? initial,
-  required void Function(IconCropResult?) onResult,
+  PhotoCropResult? initial,
+  required void Function(PhotoCropResult?) onResult,
+  double frameAspectRatio = 1,
+  bool circular = true,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -43,10 +46,17 @@ Widget _host(
         body: Center(
           child: ElevatedButton(
             onPressed: () async {
-              final result = await Navigator.of(context).push<IconCropResult>(
+              final result = await Navigator.of(context).push<PhotoCropResult>(
                 MaterialPageRoute(
-                  builder: (_) =>
-                      IconCropScreen(imageBytes: bytes, initial: initial),
+                  builder: (_) => PhotoCropScreen(
+                    imageBytes: bytes,
+                    initial: initial,
+                    title: 'title',
+                    confirmLabel: '決定',
+                    hint: 'hint',
+                    frameAspectRatio: frameAspectRatio,
+                    circular: circular,
+                  ),
                 ),
               );
               onResult(result);
@@ -80,7 +90,7 @@ void main() {
     tester,
   ) async {
     final bytes = await tester.runAsync(() => _png(800, 400));
-    IconCropResult? result;
+    PhotoCropResult? result;
     await tester.pumpWidget(_host(bytes!, onResult: (r) => result = r));
     await _open(tester);
 
@@ -100,7 +110,7 @@ void main() {
     // photo is pannable before any zoom -- exactly the case the sliders used
     // to handle and the one most likely to regress.
     final bytes = await tester.runAsync(() => _png(800, 400));
-    IconCropResult? result;
+    PhotoCropResult? result;
     await tester.pumpWidget(_host(bytes!, onResult: (r) => result = r));
     await _open(tester);
 
@@ -127,7 +137,7 @@ void main() {
     tester,
   ) async {
     final bytes = await tester.runAsync(() => _png(800, 400));
-    IconCropResult? result;
+    PhotoCropResult? result;
     await tester.pumpWidget(_host(bytes!, onResult: (r) => result = r));
     await _open(tester);
 
@@ -149,7 +159,7 @@ void main() {
     // Nothing is cropped away at 1x, so there is nothing to pan to; letting
     // it move would drag the photo off the circle and leave a blank wedge.
     final bytes = await tester.runAsync(() => _png(400, 400));
-    IconCropResult? result;
+    PhotoCropResult? result;
     await tester.pumpWidget(_host(bytes!, onResult: (r) => result = r));
     await _open(tester);
 
@@ -173,7 +183,7 @@ void main() {
     await tester.pumpWidget(
       _host(
         bytes!,
-        initial: const IconCropResult(
+        initial: const PhotoCropResult(
           alignmentX: -0.5,
           alignmentY: 0.25,
           zoom: 2.5,
@@ -188,5 +198,44 @@ void main() {
     final transform = _preview(tester);
     expect(transform.alignment, const Alignment(-0.5, 0.25));
     expect(transform.transform.getMaxScaleOnAxis(), closeTo(2.5, 0.001));
+  });
+  testWidgets('a tall photo in a wide background frame pans vertically', (
+    tester,
+  ) async {
+    // The Home background is cropped to the device's aspect ratio, not a
+    // square, so which part of a portrait photo survives cover-fit is decided
+    // by the vertical alignment -- the axis the icon's square frame barely
+    // exercises.
+    final bytes = await tester.runAsync(() => _png(400, 1200));
+    PhotoCropResult? result;
+    await tester.pumpWidget(
+      _host(
+        bytes!,
+        onResult: (r) => result = r,
+        frameAspectRatio: 16 / 9,
+        circular: false,
+      ),
+    );
+    await _open(tester);
+
+    await tester.dragFrom(
+      tester.getCenter(find.byType(Image)),
+      const Offset(0, -80),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('決定'));
+    await tester.pumpAndSettle();
+
+    expect(
+      result!.alignmentY,
+      greaterThan(0),
+      reason: 'Pushing the photo up should bring its lower part into frame.',
+    );
+    expect(
+      result!.alignmentX,
+      0,
+      reason: 'A vertical drag must not pan sideways.',
+    );
   });
 }

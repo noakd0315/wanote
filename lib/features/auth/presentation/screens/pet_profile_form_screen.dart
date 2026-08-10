@@ -12,7 +12,7 @@ import '../../../../shared/models/pet_profile.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
 import '../auth_controller.dart';
-import 'icon_crop_screen.dart';
+import 'photo_crop_screen.dart';
 
 /// Create or edit a single pet profile (spec 1.2 -
 /// ペットプロフィール登録：犬種、名前、生年月日、性別、体重（初期値）、
@@ -64,6 +64,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   late double _iconAlignmentX;
   late double _iconAlignmentY;
   late double _iconZoom;
+  late double _backgroundAlignmentX;
+  late double _backgroundAlignmentY;
+  late double _backgroundZoom;
 
   bool get _isEditing => widget.existingPet != null;
 
@@ -84,6 +87,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _iconAlignmentX = pet?.iconAlignmentX ?? 0.0;
     _iconAlignmentY = pet?.iconAlignmentY ?? 0.0;
     _iconZoom = pet?.iconZoom ?? 1.0;
+    _backgroundAlignmentX = pet?.backgroundAlignmentX ?? 0.0;
+    _backgroundAlignmentY = pet?.backgroundAlignmentY ?? 0.0;
+    _backgroundZoom = pet?.backgroundZoom ?? 1.0;
   }
 
   @override
@@ -124,7 +130,54 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
         _pickedBackgroundBytes = bytes;
         _backgroundWasDeleted = false;
       });
+      unawaited(_openBackgroundCrop(bytes, initial: null));
     });
+  }
+
+  /// Frames the Home background against the device's own aspect ratio, so
+  /// the preview matches what the Home screen will show.
+  Future<void> _openBackgroundCrop(
+    Uint8List bytes, {
+    required PhotoCropResult? initial,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final screen = MediaQuery.sizeOf(context);
+    final result = await Navigator.of(context).push<PhotoCropResult>(
+      MaterialPageRoute(
+        builder: (_) => PhotoCropScreen(
+          imageBytes: bytes,
+          initial: initial,
+          title: l10n.backgroundCropTitle,
+          confirmLabel: l10n.photoCropConfirmButton,
+          hint: l10n.backgroundCropHint,
+          frameAspectRatio: screen.width / screen.height,
+          circular: false,
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _backgroundAlignmentX = result.alignmentX;
+      _backgroundAlignmentY = result.alignmentY;
+      _backgroundZoom = result.zoom;
+    });
+  }
+
+  /// Re-frames the background already on the form. Only offered for a
+  /// just-picked photo, for the same reason as [_adjustPickedIcon].
+  void _adjustPickedBackground() {
+    final bytes = _pickedBackgroundBytes;
+    if (bytes == null) return;
+    unawaited(
+      _openBackgroundCrop(
+        bytes,
+        initial: PhotoCropResult(
+          alignmentX: _backgroundAlignmentX,
+          alignmentY: _backgroundAlignmentY,
+          zoom: _backgroundZoom,
+        ),
+      ),
+    );
   }
 
   void _deleteBackgroundPhoto() {
@@ -152,11 +205,18 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   /// Cancelling leaves the current framing untouched.
   Future<void> _openIconCrop(
     Uint8List bytes, {
-    required IconCropResult? initial,
+    required PhotoCropResult? initial,
   }) async {
-    final result = await Navigator.of(context).push<IconCropResult>(
+    final l10n = AppLocalizations.of(context)!;
+    final result = await Navigator.of(context).push<PhotoCropResult>(
       MaterialPageRoute(
-        builder: (_) => IconCropScreen(imageBytes: bytes, initial: initial),
+        builder: (_) => PhotoCropScreen(
+          imageBytes: bytes,
+          initial: initial,
+          title: l10n.iconCropTitle,
+          confirmLabel: l10n.photoCropConfirmButton,
+          hint: l10n.iconCropHint,
+        ),
       ),
     );
     if (result == null || !mounted) return;
@@ -176,7 +236,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     unawaited(
       _openIconCrop(
         bytes,
-        initial: IconCropResult(
+        initial: PhotoCropResult(
           alignmentX: _iconAlignmentX,
           alignmentY: _iconAlignmentY,
           zoom: _iconZoom,
@@ -233,9 +293,6 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
           sex: _sex,
           neutered: _neutered,
           weightKg: weightKg,
-          iconAlignmentX: _iconAlignmentX,
-          iconAlignmentY: _iconAlignmentY,
-          iconZoom: _iconZoom,
         );
       } else {
         // A new pet has no id until createPet() returns, so any photo
@@ -272,6 +329,18 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
         await controller.deletePetIconPhoto(pet.petId);
         pet = pet.copyWith(clearIconPhotoUrl: true);
       }
+
+      // Applied here rather than in the edit branch above so a brand-new
+      // pet keeps its framing too -- createPet() takes no framing arguments,
+      // so doing it there silently dropped it.
+      pet = pet.copyWith(
+        iconAlignmentX: _iconAlignmentX,
+        iconAlignmentY: _iconAlignmentY,
+        iconZoom: _iconZoom,
+        backgroundAlignmentX: _backgroundAlignmentX,
+        backgroundAlignmentY: _backgroundAlignmentY,
+        backgroundZoom: _backgroundZoom,
+      );
 
       await controller.updatePet(pet);
 
@@ -557,7 +626,21 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                     color: Color(0x1F000000),
                     child: Icon(Icons.image_outlined, size: 32),
                   )
-                : Image(image: backgroundImage, fit: BoxFit.cover),
+                : Transform.scale(
+                    scale: _backgroundZoom,
+                    alignment: Alignment(
+                      _backgroundAlignmentX,
+                      _backgroundAlignmentY,
+                    ),
+                    child: Image(
+                      image: backgroundImage,
+                      fit: BoxFit.cover,
+                      alignment: Alignment(
+                        _backgroundAlignmentX,
+                        _backgroundAlignmentY,
+                      ),
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 8),
@@ -569,6 +652,16 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
               icon: const Icon(Icons.camera_alt_outlined, size: 18),
               label: Text(l10n.petProfileFormChangeBackgroundButton),
             ),
+            // Only for a freshly picked photo -- an already-saved
+            // background is a URL, and the crop screen needs bytes.
+            if (_pickedBackgroundBytes != null) ...[
+              const SizedBox(width: 8),
+              TextButton.icon(
+                onPressed: _adjustPickedBackground,
+                icon: const Icon(Icons.crop_rotate, size: 18),
+                label: Text(l10n.petProfileFormAdjustBackgroundButton),
+              ),
+            ],
             if (backgroundImage != null) ...[
               const SizedBox(width: 8),
               TextButton.icon(

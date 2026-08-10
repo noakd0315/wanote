@@ -369,7 +369,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get iconCropTitle => 'アイコンを調整';
 
   @override
-  String get iconCropConfirmButton => '決定';
+  String get photoCropConfirmButton => '決定';
+
+  @override
+  String get backgroundCropTitle => '背景を調整';
+
+  @override
+  String get backgroundCropHint => 'ピンチで拡大・ドラッグで位置を調整できます。枠の中がホーム画面に表示されます。';
+
+  @override
+  String get petProfileFormAdjustBackgroundButton => '位置・サイズを調整';
 
   @override
   String get iconCropHint => 'ピンチで拡大・ドラッグで位置を調整できます。円の中がアイコンになります。';

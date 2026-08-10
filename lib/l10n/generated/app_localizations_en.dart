@@ -386,7 +386,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get iconCropTitle => 'Adjust icon';
 
   @override
-  String get iconCropConfirmButton => 'Done';
+  String get photoCropConfirmButton => 'Done';
+
+  @override
+  String get backgroundCropTitle => 'Adjust background';
+
+  @override
+  String get backgroundCropHint =>
+      'Pinch to zoom and drag to position. The area inside the frame is what the Home screen shows.';
+
+  @override
+  String get petProfileFormAdjustBackgroundButton => 'Adjust framing';
 
   @override
   String get iconCropHint =>

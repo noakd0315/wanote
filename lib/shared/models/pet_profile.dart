@@ -39,6 +39,9 @@ class PetProfile extends Equatable {
     this.iconAlignmentX = 0.0,
     this.iconAlignmentY = 0.0,
     this.iconZoom = 1.0,
+    this.backgroundAlignmentX = 0.0,
+    this.backgroundAlignmentY = 0.0,
+    this.backgroundZoom = 1.0,
   });
 
   final String petId;
@@ -76,6 +79,15 @@ class PetProfile extends Equatable {
   /// できるように").
   final double iconZoom;
 
+  /// The same framing triple as the icon's, for [photoUrl] on the Home
+  /// screen. Separate fields rather than shared ones because the two photos
+  /// are cropped to completely different shapes -- a circle and the
+  /// full-bleed Home background -- so a framing that suits one is wrong for
+  /// the other (PM request: adjust the background by pinching too).
+  final double backgroundAlignmentX;
+  final double backgroundAlignmentY;
+  final double backgroundZoom;
+
   PetProfile copyWith({
     String? name,
     String? breed,
@@ -88,6 +100,9 @@ class PetProfile extends Equatable {
     double? iconAlignmentX,
     double? iconAlignmentY,
     double? iconZoom,
+    double? backgroundAlignmentX,
+    double? backgroundAlignmentY,
+    double? backgroundZoom,
     bool clearPhotoUrl = false,
     bool clearIconPhotoUrl = false,
   }) {
@@ -107,6 +122,9 @@ class PetProfile extends Equatable {
       iconAlignmentX: iconAlignmentX ?? this.iconAlignmentX,
       iconAlignmentY: iconAlignmentY ?? this.iconAlignmentY,
       iconZoom: iconZoom ?? this.iconZoom,
+      backgroundAlignmentX: backgroundAlignmentX ?? this.backgroundAlignmentX,
+      backgroundAlignmentY: backgroundAlignmentY ?? this.backgroundAlignmentY,
+      backgroundZoom: backgroundZoom ?? this.backgroundZoom,
     );
   }
 
@@ -125,6 +143,9 @@ class PetProfile extends Equatable {
       'icon_alignment_x': iconAlignmentX,
       'icon_alignment_y': iconAlignmentY,
       'icon_zoom': iconZoom,
+      'background_alignment_x': backgroundAlignmentX,
+      'background_alignment_y': backgroundAlignmentY,
+      'background_zoom': backgroundZoom,
     };
   }
 
@@ -147,6 +168,11 @@ class PetProfile extends Equatable {
       iconAlignmentX: (map['icon_alignment_x'] as num?)?.toDouble() ?? 0.0,
       iconAlignmentY: (map['icon_alignment_y'] as num?)?.toDouble() ?? 0.0,
       iconZoom: (map['icon_zoom'] as num?)?.toDouble() ?? 1.0,
+      backgroundAlignmentX:
+          (map['background_alignment_x'] as num?)?.toDouble() ?? 0.0,
+      backgroundAlignmentY:
+          (map['background_alignment_y'] as num?)?.toDouble() ?? 0.0,
+      backgroundZoom: (map['background_zoom'] as num?)?.toDouble() ?? 1.0,
     );
   }
 
@@ -165,5 +191,8 @@ class PetProfile extends Equatable {
     iconAlignmentX,
     iconAlignmentY,
     iconZoom,
+    backgroundAlignmentX,
+    backgroundAlignmentY,
+    backgroundZoom,
   ];
 }

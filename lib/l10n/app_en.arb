@@ -491,9 +491,21 @@
   "@iconCropTitle": {
     "description": "AppBar title of the pinch-to-frame screen shown after picking a pet icon photo."
   },
-  "iconCropConfirmButton": "Done",
-  "@iconCropConfirmButton": {
-    "description": "Confirms the icon framing and returns to the pet profile form."
+  "photoCropConfirmButton": "Done",
+  "@photoCropConfirmButton": {
+    "description": "Confirms the framing on the pinch-to-frame screen (used for both the icon and the background photo)."
+  },
+  "backgroundCropTitle": "Adjust background",
+  "@backgroundCropTitle": {
+    "description": "AppBar title of the pinch-to-frame screen shown after picking a Home background photo."
+  },
+  "backgroundCropHint": "Pinch to zoom and drag to position. The area inside the frame is what the Home screen shows.",
+  "@backgroundCropHint": {
+    "description": "Instruction shown under the background crop frame."
+  },
+  "petProfileFormAdjustBackgroundButton": "Adjust framing",
+  "@petProfileFormAdjustBackgroundButton": {
+    "description": "Button on the pet profile form that reopens the pinch-to-frame screen for the background photo already picked."
   },
   "iconCropHint": "Pinch to zoom and drag to position. The area inside the circle becomes the icon.",
   "@iconCropHint": {
