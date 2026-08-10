@@ -26,24 +26,20 @@ import '../domain/biometric_fallback_resolver.dart';
 /// once; screens should only ever depend on this controller, never on the
 /// repositories directly, so the wiring stays in one testable place.
 class AuthController extends ChangeNotifier {
+  // The private initializing formals below are still passed by their public
+  // names at the call site (`authRepository:` and so on) -- Dart derives those
+  // automatically. `sharedPreferences` cannot join them because it is
+  // transformed rather than stored as given.
   AuthController({
-    required AuthRepository authRepository,
-    required UserAccountRepository userAccountRepository,
-    required PetProfileRepository petProfileRepository,
-    required BiometricService biometricService,
-    AuthGateResolver authGateResolver = const AuthGateResolver(),
-    BiometricFallbackResolver biometricFallbackResolver =
-        const BiometricFallbackResolver(),
-    ActivePetResolver activePetResolver = const ActivePetResolver(),
+    required this._authRepository,
+    required this._userAccountRepository,
+    required this._petProfileRepository,
+    required this._biometricService,
+    this._authGateResolver = const AuthGateResolver(),
+    this._biometricFallbackResolver = const BiometricFallbackResolver(),
+    this._activePetResolver = const ActivePetResolver(),
     Future<SharedPreferences>? sharedPreferences,
-  }) : _authRepository = authRepository,
-       _userAccountRepository = userAccountRepository,
-       _petProfileRepository = petProfileRepository,
-       _biometricService = biometricService,
-       _authGateResolver = authGateResolver,
-       _biometricFallbackResolver = biometricFallbackResolver,
-       _activePetResolver = activePetResolver,
-       _prefsFuture = sharedPreferences ?? SharedPreferences.getInstance();
+  }) : _prefsFuture = sharedPreferences ?? SharedPreferences.getInstance();
 
   static const _lastActivePetIdPrefsKey = 'auth.last_active_pet_id';
 
