@@ -31,8 +31,8 @@ Future<void> main() async {
   //       : DefaultFirebaseOptions.currentPlatform
   //
   // (with an `import 'firebase_options.dart';` added back above).
-  // Must straddle initializeApp: on web the Auth emulator can only be
-  // attached before it, the other emulators only after it.
+  // Must straddle initializeApp: on web, Auth requests can only be diverted
+  // to the emulator before it; Firestore and Storage only after it.
   prepareFirebaseEmulatorsIfEnabled();
   await Firebase.initializeApp(options: demoFirebaseOptions);
   await connectToFirebaseEmulatorsIfEnabled();
