@@ -44,17 +44,31 @@ void main() {
     });
   }
 
-  test('every platform gets a zero-duration transition', () {
+  test('every platform pushes with a zero duration', () {
     final theme = buildWanoteTheme().pageTransitionsTheme;
     for (final platform in TargetPlatform.values) {
       final builder = theme.builders[platform];
-      expect(builder, isNotNull, reason: '$platform has no builder');
-      expect(builder!.transitionDuration, Duration.zero, reason: '$platform');
-      expect(
-        builder.reverseTransitionDuration,
-        Duration.zero,
-        reason: 'Going back on $platform must be instant too.',
-      );
+      expect(builder, isNotNull, reason: '\$platform has no builder');
+      expect(builder!.transitionDuration, Duration.zero, reason: '\$platform');
     }
+  });
+
+  test('Android keeps the predictive back gesture', () {
+    // The app ships natively on Android, where the back gesture's preview is
+    // a platform behaviour users expect. It survives because
+    // PredictiveBackPageTransitionsBuilder drives the gesture from a
+    // *separate* duration than the forward push -- swapping this for the
+    // plain instant builder would silently take the gesture away, and nothing
+    // else here would fail.
+    final builder = buildWanoteTheme()
+        .pageTransitionsTheme
+        .builders[TargetPlatform.android];
+
+    expect(builder, isA<PredictiveBackPageTransitionsBuilder>());
+    expect(
+      builder!.reverseTransitionDuration,
+      greaterThan(Duration.zero),
+      reason: 'A zero reverse duration snaps the screen away mid-gesture.',
+    );
   });
 }

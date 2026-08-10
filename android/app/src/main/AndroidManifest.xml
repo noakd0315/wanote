@@ -1,8 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- enableOnBackInvokedCallback opts in to Android's predictive back
+         gesture. Without it the system never sends the back events, so
+         Flutter's PredictiveBackPageTransitionsBuilder silently falls back to
+         a plain animation no matter what the theme asks for. Needs Android
+         14+ at runtime; older versions ignore it. -->
     <application
         android:label="wanote"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
