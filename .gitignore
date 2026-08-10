@@ -49,6 +49,7 @@ app.*.map.json
 
 # Cloudflare Workers backend (functions/)
 functions/node_modules/
+security-rules-test/node_modules/
 functions/.wrangler/
 functions/dist/
 functions/.dev.vars

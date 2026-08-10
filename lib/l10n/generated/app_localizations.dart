@@ -563,7 +563,7 @@ abstract class AppLocalizations {
   /// Bottom navigation bar label for the settings & billing tab.
   ///
   /// In en, this message translates to:
-  /// **'Settings & billing'**
+  /// **'Settings'**
   String get navSettingsLabel;
 
   /// Snackbar shown when a pending referral code from sign-up is auto-redeemed on app shell startup.

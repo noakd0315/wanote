@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
@@ -157,7 +159,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final showPhoto = shouldShowPetPhotoBackground(activePet.photoUrl);
 
     // No AppBar here -- HomeShell's outer Scaffold already renders a
@@ -201,36 +202,12 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _ShortcutChip(
-                        icon: Icons.monitor_weight_outlined,
-                        label: l10n.homeShortcutWeightLabel,
-                        onTap: () => _openWeight(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.wc_outlined,
-                        label: l10n.homeShortcutToiletLabel,
-                        onTap: () => _openToilet(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.description_outlined,
-                        label: l10n.homeShortcutCertificatesLabel,
-                        onTap: () => _openCertificates(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.smart_toy_outlined,
-                        label: l10n.homeShortcutConsultationLabel,
-                        onTap: () => _openConsultation(context),
-                      ),
-                      _ShortcutChip(
-                        icon: Icons.restaurant_outlined,
-                        label: l10n.homeShortcutFoodPortionLabel,
-                        onTap: () => _openFoodPortion(context),
-                      ),
-                    ],
+                  child: HomeShortcutRow(
+                    onWeight: () => _openWeight(context),
+                    onToilet: () => _openToilet(context),
+                    onCertificates: () => _openCertificates(context),
+                    onConsultation: () => _openConsultation(context),
+                    onFoodPortion: () => unawaited(_openFoodPortion(context)),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -276,8 +253,88 @@ class _DefaultBackground extends StatelessWidget {
   }
 }
 
-class _ShortcutChip extends StatelessWidget {
-  const _ShortcutChip({
+/// The Home screen's row of shortcuts.
+///
+/// Public and free of repositories so its layout can be tested directly --
+/// equal sizing is the whole point of it and is invisible in a diff.
+///
+/// Equal-width [Expanded] tiles inside an [IntrinsicHeight], rather than a
+/// [Wrap] of self-sizing chips: that is what makes every shortcut the same
+/// size no matter how long its label is (PM request: "サイズを統一したい"),
+/// in both languages, without hardcoding a width.
+class HomeShortcutRow extends StatelessWidget {
+  const HomeShortcutRow({
+    super.key,
+    required this.onWeight,
+    required this.onToilet,
+    required this.onCertificates,
+    required this.onConsultation,
+    required this.onFoodPortion,
+  });
+
+  final VoidCallback onWeight;
+  final VoidCallback onToilet;
+  final VoidCallback onCertificates;
+  final VoidCallback onConsultation;
+  final VoidCallback onFoodPortion;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final shortcuts = <_ShortcutButton>[
+      _ShortcutButton(
+        icon: Icons.monitor_weight_outlined,
+        label: l10n.homeShortcutWeightLabel,
+        onTap: onWeight,
+      ),
+      _ShortcutButton(
+        icon: Icons.wc_outlined,
+        label: l10n.homeShortcutToiletLabel,
+        onTap: onToilet,
+      ),
+      _ShortcutButton(
+        icon: Icons.description_outlined,
+        label: l10n.homeShortcutCertificatesLabel,
+        onTap: onCertificates,
+      ),
+      _ShortcutButton(
+        icon: Icons.smart_toy_outlined,
+        label: l10n.homeShortcutConsultationLabel,
+        onTap: onConsultation,
+      ),
+      _ShortcutButton(
+        icon: Icons.restaurant_outlined,
+        label: l10n.homeShortcutFoodPortionLabel,
+        onTap: onFoodPortion,
+      ),
+    ];
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < shortcuts.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Expanded(child: shortcuts[i]),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// One Home shortcut: a card with a coloured icon badge and its label
+/// underneath.
+///
+/// Replaces a translucent-black `ActionChip`, which was hard to read and
+/// sized itself to its label so no two shortcuts matched (PM request: unify
+/// the size, and make them legible over any background photo).
+///
+/// Legibility here does not depend on the photo behind it. The card is a
+/// near-opaque theme surface with a shadow, so the label always sits on a
+/// known colour -- a translucent scrim only works until someone sets a
+/// background bright or busy enough to compete with it.
+class _ShortcutButton extends StatelessWidget {
+  const _ShortcutButton({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -289,11 +346,53 @@ class _ShortcutChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(icon, color: Colors.white, size: 18),
-      label: Text(label, style: const TextStyle(color: Colors.white)),
-      backgroundColor: Colors.black.withValues(alpha: 0.35),
-      onPressed: onTap,
+    final colorScheme = Theme.of(context).colorScheme;
+    final radius = BorderRadius.circular(16);
+    return Material(
+      // Not fully opaque, so a hint of the photo still reads through and the
+      // row doesn't look pasted on -- but far short of letting it interfere.
+      color: colorScheme.surface.withValues(alpha: 0.93),
+      borderRadius: radius,
+      elevation: 3,
+      shadowColor: Colors.black54,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  height: 1.15,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

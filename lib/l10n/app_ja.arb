@@ -72,7 +72,7 @@
   "aiSectionConsultationTab": "相談",
   "aiSectionReportTab": "レポート",
 
-  "dailyRecordHealthTab": "健康記録",
+  "dailyRecordHealthTab": "健康",
   "dailyRecordWeightTab": "体重",
   "dailyRecordToiletTab": "トイレ",
 
@@ -83,10 +83,10 @@
   "homeShortcutFoodPortionLabel": "餌の量",
 
   "navHomeLabel": "ホーム",
-  "navDailyRecordLabel": "日常記録",
+  "navDailyRecordLabel": "日々の記録",
   "navMedicalLabel": "医療",
   "navAiConsultationLabel": "AI相談",
-  "navSettingsLabel": "設定・課金",
+  "navSettingsLabel": "設定",
   "referralCodeAppliedMessage": "紹介コードを適用し、プレミアムを1ヶ月分付与しました。",
 
   "imageSourceCameraOption": "カメラで撮影",
@@ -156,7 +156,7 @@
 
   "medicalTabVisits": "通院",
   "medicalTabMedications": "薬",
-  "medicalTabPrevention": "予防医療",
+  "medicalTabPrevention": "予防",
   "medicalTabCertificates": "証明書",
 
   "medicationFormAddTitle": "薬の記録を追加",
@@ -190,7 +190,7 @@
   "numericValueValidationError": "数値を入力してください",
   "preventionProgramActiveSwitchLabel": "有効",
 
-  "preventionProgramListTitle": "予防医療プログラム",
+  "preventionProgramListTitle": "予防医療",
   "preventionDefaultProgramRabies": "狂犬病ワクチン",
   "preventionDefaultProgramCombinationVaccine": "混合ワクチン",
   "preventionDefaultProgramHeartworm": "フィラリア予防",
@@ -312,7 +312,7 @@
   "healthRecordPhotosSectionLabel": "写真",
   "healthRecordPhotoCount": "{count}/{max}枚",
   "healthRecordCommentLabel": "コメント",
-  "healthRecordTimelineTitle": "健康記録",
+  "healthRecordTimelineTitle": "健康の記録",
 
   "healthRecordTagSkin": "皮膚",
   "healthRecordTagAppetiteLoss": "食欲不振",
@@ -335,7 +335,7 @@
 
   "toiletShowChartTooltip": "グラフ表示",
   "toiletShowTimelineTooltip": "記録一覧を表示",
-  "toiletRecordTimelineTitle": "トイレ記録",
+  "toiletRecordTimelineTitle": "トイレの記録",
   "toiletConsultAiButtonLabel": "AI相談する",
   "toiletUrineColorSubtitle": "色: {color}",
   "toiletStoolConditionSubtitle": "硬さ: {hardness} / 色: {color}",
@@ -354,7 +354,7 @@
   "urineColorNormal": "正常（淡黄色）",
   "urineColorDark": "濃い（濃縮尿）",
 
-  "weightRecordTimelineTitle": "体重記録",
+  "weightRecordTimelineTitle": "体重の記録",
   "weightShowChartTooltip": "グラフ表示",
   "weightShowTableTooltip": "表形式で表示",
   "weightDuplicateDateDialogTitle": "同じ日の記録があります",

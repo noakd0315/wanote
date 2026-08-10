@@ -1,0 +1,14 @@
+{
+  "name": "wanote-security-rules-test",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Rules tests for firestore.rules / storage.rules, run against the Firebase emulators from docker-compose.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.1.0",
+    "vitest": "^2.1.8"
+  }
+}

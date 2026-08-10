@@ -258,7 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAiConsultationLabel => 'AI consultation';
 
   @override
-  String get navSettingsLabel => 'Settings & billing';
+  String get navSettingsLabel => 'Settings';
 
   @override
   String get referralCodeAppliedMessage =>

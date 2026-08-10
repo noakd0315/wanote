@@ -209,7 +209,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiSectionReportTab => 'レポート';
 
   @override
-  String get dailyRecordHealthTab => '健康記録';
+  String get dailyRecordHealthTab => '健康';
 
   @override
   String get dailyRecordWeightTab => '体重';
@@ -236,7 +236,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navHomeLabel => 'ホーム';
 
   @override
-  String get navDailyRecordLabel => '日常記録';
+  String get navDailyRecordLabel => '日々の記録';
 
   @override
   String get navMedicalLabel => '医療';
@@ -245,7 +245,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navAiConsultationLabel => 'AI相談';
 
   @override
-  String get navSettingsLabel => '設定・課金';
+  String get navSettingsLabel => '設定';
 
   @override
   String get referralCodeAppliedMessage => '紹介コードを適用し、プレミアムを1ヶ月分付与しました。';
@@ -440,7 +440,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get medicalTabMedications => '薬';
 
   @override
-  String get medicalTabPrevention => '予防医療';
+  String get medicalTabPrevention => '予防';
 
   @override
   String get medicalTabCertificates => '証明書';
@@ -530,7 +530,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionProgramActiveSwitchLabel => '有効';
 
   @override
-  String get preventionProgramListTitle => '予防医療プログラム';
+  String get preventionProgramListTitle => '予防医療';
 
   @override
   String get preventionProgramListEmptyMessage => '予防プログラムがありません';
@@ -893,7 +893,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthRecordCommentLabel => 'コメント';
 
   @override
-  String get healthRecordTimelineTitle => '健康記録';
+  String get healthRecordTimelineTitle => '健康の記録';
 
   @override
   String get healthRecordTagSkin => '皮膚';
@@ -952,7 +952,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toiletShowTimelineTooltip => '記録一覧を表示';
 
   @override
-  String get toiletRecordTimelineTitle => 'トイレ記録';
+  String get toiletRecordTimelineTitle => 'トイレの記録';
 
   @override
   String get toiletConsultAiButtonLabel => 'AI相談する';
@@ -1007,7 +1007,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
-  String get weightRecordTimelineTitle => '体重記録';
+  String get weightRecordTimelineTitle => '体重の記録';
 
   @override
   String get weightShowChartTooltip => 'グラフ表示';

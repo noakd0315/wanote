@@ -322,7 +322,7 @@
   "@navAiConsultationLabel": {
     "description": "Bottom navigation bar label for the AI consultation tab."
   },
-  "navSettingsLabel": "Settings & billing",
+  "navSettingsLabel": "Settings",
   "@navSettingsLabel": {
     "description": "Bottom navigation bar label for the settings & billing tab."
   },

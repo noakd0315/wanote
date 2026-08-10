@@ -1,20 +1,39 @@
 rules_version = '2';
 
-// =============================================================================
-// LOCAL EMULATOR USE ONLY -- DO NOT DEPLOY THIS FILE TO A REAL FIREBASE PROJECT.
+// Access control for Cloud Storage, the counterpart to firestore.rules.
 //
-// Same rationale as firestore.rules: wide open so the medical-certificate OCR
-// upload flow (and any other Storage usage) can be smoke-tested against the
-// Storage emulator without real auth wiring. Emulator storage is throwaway.
+// Every file the app uploads lives under `users/{uid}/pets/{petId}/...`
+// (pet photos, health-record photos, toilet-record photos, vaccination
+// certificate scans), so ownership is again the uid in the path. This file
+// replaced an `allow read, write: if true` placeholder.
 //
-// Production rules -- restricting each pet's uploaded files (certificate
-// photos, etc.) to that pet's owner, per CLAUDE.md's access-control
-// requirement -- are a SEPARATE, NOT-YET-DONE task. Do not deploy this file.
-// =============================================================================
+// Certificate scans in particular are photographs of medical documents, so
+// read access matters as much as write: these must never be world-readable,
+// and Storage download URLs are guessable enough that "nobody knows the path"
+// is not protection.
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if true;
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
+
+    match /users/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid);
+
+      // Uploads are additionally capped and typed. Everything the app writes
+      // here is a photo it compressed itself, so anything larger or of
+      // another type is either a bug or someone using the bucket as free
+      // storage.
+      allow create, update: if isOwner(uid)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+
+      // Split out from the write above because `request.resource` is null on
+      // a delete -- folding them together would make deleting impossible.
+      allow delete: if isOwner(uid);
+    }
+
+    // No other path is writable or readable.
   }
 }

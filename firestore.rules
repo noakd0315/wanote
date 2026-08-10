@@ -1,28 +1,88 @@
 rules_version = '2';
 
-// =============================================================================
-// LOCAL EMULATOR USE ONLY -- DO NOT DEPLOY THIS FILE TO A REAL FIREBASE PROJECT.
+// Access control for every Firestore document the app touches, per
+// CLAUDE.md's "ユーザー本人以外がアクセスできないようアクセス制御を必ず実装する".
 //
-// This ruleset intentionally allows any authenticated-or-not read/write so the
-// app's Firestore-backed features (daily records, medical records, pets, AI
-// usage counters, etc.) can be smoke-tested end-to-end against the Firebase
-// Local Emulator Suite (see docker-compose.yml / firebase.json) without first
-// wiring up per-collection rules. All data in the emulator is throwaway (reset
-// whenever the emulator container restarts unless you export it), so open
-// rules here carry no real-world risk.
+// These are the real rules and they are what the local emulator loads too
+// (firebase.json points here), so local development exercises exactly what
+// production enforces. This file replaced an `allow read, write: if true`
+// placeholder that was safe only because it never left the emulator.
 //
-// Writing real production rules -- restricting every pet's daily/medical
-// records so only that pet's owner can read/write them, per CLAUDE.md's
-// "アクセス制御を必ず実装する" requirement -- is a SEPARATE, NOT-YET-DONE task.
-// Whoever picks that up should replace the blanket `allow read, write: if
-// true;` below with per-collection rules keyed off `request.auth.uid`
-// matching an `ownerId`/`uid` field (or a subcollection path) on each
-// document. Do not copy this file as-is into anything that gets deployed.
-// =============================================================================
+// The shape of the data makes this simple: every document about a user or
+// their pets lives under `users/{uid}` (see lib/shared/firestore_paths.dart),
+// so ownership is the uid in the path and needs no lookups.
+//
+// Note that grants are OR-ed across matching rules -- a later, stricter
+// `match` cannot take away what an earlier one allowed. That is why the
+// subcollections are listed individually instead of one
+// `users/{uid}/{document=**}`: the blanket form would silently re-grant the
+// deletes that `redeemed_codes` below is specifically there to prevent.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+
+    function signedIn() {
+      return request.auth != null;
     }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // The account document: profile fields plus `active_session_id`, which
+    // AuthController writes to claim the single active session.
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Everything about a pet: health / weight / toilet records, visits,
+    // medications, prevention programs and records, consultations, reports.
+    // All of it is medical information about one owner's animal, so the whole
+    // subtree carries the same rule.
+    match /users/{uid}/pets/{petId}/{document=**} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // AI usage counters. Owner-writable because the client maintains them.
+    //
+    // KNOWN LIMIT: an owner can therefore reset their own counter and get
+    // more AI calls than their plan allows. Rules cannot fix this -- the
+    // document is theirs by construction. What it does not do is run up an
+    // unbounded Anthropic bill: functions/src/lib/rateLimiter.ts enforces a
+    // per-uid limit server-side, where the client cannot reach it. Moving the
+    // quota itself server-side is the proper fix and is not done yet.
+    match /users/{uid}/usage_counters/{counterId} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Markers recording which campaign codes this user has already redeemed.
+    // Create-only on purpose: deleting a marker would let the same account
+    // redeem a one-per-user code again, so the owner may add and read them
+    // but never remove or rewrite one.
+    match /users/{uid}/redeemed_codes/{code} {
+      allow read, create: if isOwner(uid);
+      allow update, delete: if false;
+    }
+
+    // Campaign codes are shared, not owned by anyone. Any signed-in user may
+    // look one up (they have to, to check it before redeeming), and may bump
+    // its redemption count by exactly one as part of the redemption
+    // transaction -- nothing else.
+    //
+    // KNOWN LIMIT: a determined client can still inflate the count and
+    // exhaust a campaign's cap. It cannot grant itself anything: the
+    // entitlement comes from the Worker, which verifies the caller's Firebase
+    // ID token. Codes themselves are created and removed out-of-band only.
+    match /campaign_codes/{code} {
+      allow read: if signedIn();
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data)
+             .affectedKeys().hasOnly(['redemptionCount'])
+        && request.resource.data.redemptionCount
+             == resource.data.redemptionCount + 1;
+      allow create, delete: if false;
+    }
+
+    // Everything else is denied: there is no catch-all match, so any path the
+    // app grows into has to be added here deliberately.
   }
 }
