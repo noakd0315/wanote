@@ -4,7 +4,15 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 
 // Access-control tests for firestore.rules, run against the Firestore
@@ -98,6 +106,36 @@ describe("a pet's medical data", () => {
   });
 });
 
+describe('the pet profile document itself', () => {
+  // Not just its subcollections. This one relies on rules_version '2' making
+  // a recursive wildcard match ZERO or more segments -- in v1 it matched one
+  // or more, so `pets/{petId}/{document=**}` would not have covered
+  // `pets/{petId}`. That is the single most load-bearing assumption in the
+  // file, and nothing else here proves it.
+  const path = `users/${OWNER}/pets/pet-1`;
+
+  it('is readable and writable by its owner', async () => {
+    await assertSucceeds(setDoc(doc(asOwner(), path), { pet_name: 'ポチ' }));
+    await assertSucceeds(getDoc(doc(asOwner(), path)));
+  });
+
+  it('is not readable by another signed-in user', async () => {
+    await seed(path, { pet_name: 'ポチ' });
+    await assertFails(getDoc(doc(asOther(), path)));
+  });
+
+  it('cannot be written by another signed-in user', async () => {
+    await assertFails(setDoc(doc(asOther(), path), { pet_name: 'injected' }));
+  });
+
+  it('lists only for its owner', async () => {
+    // watchPets() runs a collection query, not a document get.
+    await seed(path, { pet_name: 'ポチ' });
+    await assertSucceeds(getDocs(collection(asOwner(), `users/${OWNER}/pets`)));
+    await assertFails(getDocs(collection(asOther(), `users/${OWNER}/pets`)));
+  });
+});
+
 describe('the account document', () => {
   const path = `users/${OWNER}`;
 
@@ -131,6 +169,25 @@ describe('AI usage counters', () => {
     await seed(path, { consultations: 1 });
     await assertFails(getDoc(doc(asOther(), path)));
   });
+});
+
+describe('cross-user writes to owner-scoped documents', () => {
+  // Read isolation is covered above; these pin the write side, which is what
+  // an attacker would use to plant or destroy data rather than read it.
+  const cases = {
+    'usage counter': `users/${OWNER}/usage_counters/current`,
+    // Planting this would permanently block the victim from redeeming that
+    // code -- the marker is create-only, so they could never clear it.
+    'redemption marker': `users/${OWNER}/redeemed_codes/CODE1`,
+    'health record': `users/${OWNER}/pets/pet-1/health_records/r1`,
+    'certificate record': `users/${OWNER}/pets/pet-1/prevention_records/r1`,
+  };
+
+  for (const [name, path] of Object.entries(cases)) {
+    it(`another user cannot create a ${name}`, async () => {
+      await assertFails(setDoc(doc(asOther(), path), { planted: true }));
+    });
+  }
 });
 
 describe('campaign-code redemption markers', () => {
@@ -195,10 +252,82 @@ describe('campaign codes', () => {
     await assertFails(updateDoc(doc(asOwner(), path), { active: true }));
   });
 
-  it('cannot be created or deleted from a client', async () => {
-    await assertFails(setDoc(doc(asOwner(), 'campaign_codes/NEW'), code));
+  it('cannot be listed', async () => {
+    // `allow read` covers get AND list. Without splitting them, any account
+    // can dump every promo code, its remaining capacity, and the referrerUid
+    // of every user who has one -- a user-enumeration list, since referral
+    // code ids are derived from the uid.
+    await seed(path, code);
+    await assertFails(getDocs(collection(asOwner(), 'campaign_codes')));
+  });
+
+  it('cannot be deleted from a client', async () => {
     await seed(path, code);
     await assertFails(deleteDoc(doc(asOwner(), path)));
+  });
+
+  it('cannot be created under an arbitrary id', async () => {
+    // Otherwise a user could squat a promo code name the marketing side
+    // plans to use, with themselves as the referrer.
+    await assertFails(
+      setDoc(doc(asOwner(), 'campaign_codes/FREEMONTH'), {
+        ...code,
+        referrerUid: OWNER,
+      }),
+    );
+  });
+});
+
+describe("a user's own referral code", () => {
+  // CampaignCodeRepository.getOrCreateReferralCode creates this document
+  // from the client the first time the user opens their referral screen.
+  const refCode = (uid) => `campaign_codes/REF-${uid.slice(0, 8).toUpperCase()}`;
+  const refData = (uid) => ({
+    active: true,
+    maxRedemptions: 1000,
+    redemptionCount: 0,
+    referrerUid: uid,
+  });
+
+  it('can be created by that user', async () => {
+    await assertSucceeds(
+      setDoc(doc(asOwner(), refCode(OWNER)), refData(OWNER)),
+    );
+  });
+
+  it('cannot be created pointing at somebody else', async () => {
+    // Crediting your referrals to another account, or minting a code on
+    // their behalf.
+    await assertFails(
+      setDoc(doc(asOwner(), refCode(OTHER)), refData(OTHER)),
+    );
+  });
+
+  it('cannot be created pre-loaded with a redemption count', async () => {
+    await assertFails(
+      setDoc(doc(asOwner(), refCode(OWNER)), {
+        ...refData(OWNER),
+        redemptionCount: 999,
+      }),
+    );
+  });
+
+  it('cannot be created with an inflated cap', async () => {
+    await assertFails(
+      setDoc(doc(asOwner(), refCode(OWNER)), {
+        ...refData(OWNER),
+        maxRedemptions: 1000000,
+      }),
+    );
+  });
+
+  it('cannot be created with extra fields', async () => {
+    await assertFails(
+      setDoc(doc(asOwner(), refCode(OWNER)), {
+        ...refData(OWNER),
+        grantsPremium: true,
+      }),
+    );
   });
 });
 

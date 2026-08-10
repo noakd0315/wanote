@@ -31,7 +31,6 @@ void main() {
               onWeight: () {},
               onToilet: () {},
               onCertificates: () {},
-              onConsultation: () {},
               onFoodPortion: () {},
             ),
           ),
@@ -39,11 +38,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Four, not five: the AI consultation shortcut was removed as a
+      // duplicate of the bottom nav bar's own tab.
       final tiles = find.byType(InkWell);
-      expect(tiles, findsNWidgets(5));
+      expect(tiles, findsNWidgets(4));
 
       final sizes = <Size>[
-        for (var i = 0; i < 5; i++) tester.getSize(tiles.at(i)),
+        for (var i = 0; i < 4; i++) tester.getSize(tiles.at(i)),
       ];
       for (final size in sizes) {
         expect(

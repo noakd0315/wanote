@@ -55,6 +55,30 @@ class _HomeShellState extends State<HomeShell> {
   /// it, a pushed route would cover the whole [Scaffold], footer included.
   final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+  /// Lets the Home shortcuts put a section on a particular inner tab.
+  ///
+  /// The sections live in an IndexedStack and keep their own TabControllers,
+  /// so they cannot simply be rebuilt with a different starting tab -- a
+  /// notifier is how a request reaches one that is already alive.
+  final ValueNotifier<int> _dailyRecordTabRequest = ValueNotifier<int>(0);
+  final ValueNotifier<int> _medicalTabRequest = ValueNotifier<int>(0);
+
+  /// Jumps to [sectionIndex] with its inner tab set, exactly as if the user
+  /// had used the bottom nav bar and then the tab strip.
+  ///
+  /// PM report: shortcuts used to push the destination screen bare, so it
+  /// arrived without the tab strip its section normally shows -- the same
+  /// screen looked different depending on how you got to it.
+  void _openSectionTab(
+    int sectionIndex,
+    ValueNotifier<int> tabRequest,
+    int tabIndex,
+  ) {
+    tabRequest.value = tabIndex;
+    _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    setState(() => _selectedIndex = sectionIndex);
+  }
+
   late final HealthRecordRepository _healthRecordRepository;
   late final WeightRecordRepository _weightRecordRepository;
   late final ToiletRecordRepository _toiletRecordRepository;
@@ -131,6 +155,8 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void dispose() {
     _billingRepository.dispose();
+    _dailyRecordTabRequest.dispose();
+    _medicalTabRequest.dispose();
     super.dispose();
   }
 
@@ -180,19 +206,22 @@ class _HomeShellState extends State<HomeShell> {
         toiletRecordRepository: _toiletRecordRepository,
         usageRepository: _aiUsageRepository,
         backendClient: _aiBackendClient,
-        consultationRepository: _consultationRepository,
         onRequestUpgrade: () => _openPaywall(context),
+        onOpenWeight: () => _openSectionTab(1, _dailyRecordTabRequest, 1),
+        onOpenToilet: () => _openSectionTab(1, _dailyRecordTabRequest, 2),
+        onOpenCertificates: () => _openSectionTab(2, _medicalTabRequest, 3),
       ),
       DailyRecordSection(
         uid: uid,
         petId: petId,
+        tabRequest: _dailyRecordTabRequest,
         healthRecordRepository: _healthRecordRepository,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
         onConsultationSuggested: (suggestion) =>
             _openConsultation(context, prefillRecords: [suggestion.reference]),
       ),
-      MedicalHomeScreen(uid: uid, petId: petId),
+      MedicalHomeScreen(uid: uid, petId: petId, tabRequest: _medicalTabRequest),
       AiSection(
         uid: uid,
         petId: petId,
@@ -255,6 +284,13 @@ class _HomeShellState extends State<HomeShell> {
           ),
         ],
       ),
+      // Labels must fit on ONE line in every language. NavigationDestination
+      // renders its label as a bare Text with no maxLines, and the icon is
+      // laid out relative to it, so a label that wraps pushes just that
+      // destination's icon upward and the row of icons stops lining up
+      // (PM report, seen in English where "AI consultation" wrapped). The
+      // widget exposes no hook for this, so the only lever is keeping the
+      // strings short -- test/app/navigation_bar_layout_test.dart pins it.
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {

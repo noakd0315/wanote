@@ -557,7 +557,7 @@ abstract class AppLocalizations {
   /// Bottom navigation bar label for the AI consultation tab.
   ///
   /// In en, this message translates to:
-  /// **'AI consultation'**
+  /// **'AI chat'**
   String get navAiConsultationLabel;
 
   /// Bottom navigation bar label for the settings & billing tab.

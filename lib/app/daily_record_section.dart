@@ -29,7 +29,12 @@ class DailyRecordSection extends StatefulWidget {
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
     this.onConsultationSuggested,
+    this.tabRequest,
   });
+
+  /// Set by HomeShell when a Home shortcut asks for a specific tab.
+  /// Null when the section is used on its own.
+  final ValueNotifier<int>? tabRequest;
 
   final String uid;
   final String petId;
@@ -65,10 +70,23 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
       ..addListener(() {
         if (!_tabController.indexIsChanging) setState(() {});
       });
+    widget.tabRequest?.addListener(_applyTabRequest);
+    _applyTabRequest();
+  }
+
+  /// Honours a tab a Home shortcut asked for. Applied on init as well as on
+  /// change, because the first request can land before this section has ever
+  /// been built.
+  void _applyTabRequest() {
+    final requested = widget.tabRequest?.value;
+    if (requested == null || requested == _tabController.index) return;
+    if (requested < 0 || requested >= _tabController.length) return;
+    _tabController.index = requested;
   }
 
   @override
   void dispose() {
+    widget.tabRequest?.removeListener(_applyTabRequest);
     _tabController.dispose();
     super.dispose();
   }

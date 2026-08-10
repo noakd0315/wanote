@@ -73,13 +73,38 @@ service cloud.firestore {
     // entitlement comes from the Worker, which verifies the caller's Firebase
     // ID token. Codes themselves are created and removed out-of-band only.
     match /campaign_codes/{code} {
-      allow read: if signedIn();
+      // `get`, not `read`: `read` would also grant `list`, letting any
+      // account dump every promo code with its remaining capacity, plus the
+      // referrerUid of every user who has a referral code -- which is a user
+      // enumeration list, since referral ids are derived from the uid.
+      // Redemption only ever looks a code up by exact id.
+      allow get: if signedIn();
+      allow list: if false;
+
+      // A user may create exactly one document here: their own referral
+      // code, whose id CampaignCodeRepository derives from their uid. Every
+      // field is pinned, so this cannot be used to mint a code that grants
+      // more than a referral does, and the id check stops anyone squatting a
+      // promotional code name the business side plans to use.
+      //
+      // maxRedemptions mirrors FirestoreCampaignCodeRepository
+      // .referralMaxRedemptions; the two have to change together.
+      allow create: if signedIn()
+        && code == 'REF-' + request.auth.uid[0:8].upper()
+        && request.resource.data.keys()
+             .hasOnly(['active', 'maxRedemptions', 'redemptionCount',
+                       'referrerUid'])
+        && request.resource.data.referrerUid == request.auth.uid
+        && request.resource.data.redemptionCount == 0
+        && request.resource.data.active == true
+        && request.resource.data.maxRedemptions == 1000;
+
       allow update: if signedIn()
         && request.resource.data.diff(resource.data)
              .affectedKeys().hasOnly(['redemptionCount'])
         && request.resource.data.redemptionCount
              == resource.data.redemptionCount + 1;
-      allow create, delete: if false;
+      allow delete: if false;
     }
 
     // Everything else is denied: there is no catch-all match, so any path the

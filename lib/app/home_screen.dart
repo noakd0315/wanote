@@ -3,16 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
-import '../features/ai/data/consultation_repository.dart';
-import '../features/ai/presentation/consultation_screen.dart';
 import '../features/ai/presentation/food_portion_screen.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
-import '../features/daily_record/presentation/toilet_record_timeline_screen.dart';
-import '../features/daily_record/presentation/weight_record_chart_screen.dart';
-import '../features/medical/presentation/prevention/certificate_list_screen.dart';
 import '../l10n/generated/app_localizations.dart';
-import '../shared/models/consultation_reference_record.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/widgets/pet_background_photo.dart';
@@ -55,8 +49,10 @@ class HomeScreen extends StatelessWidget {
     required this.toiletRecordRepository,
     required this.usageRepository,
     required this.backendClient,
-    required this.consultationRepository,
     required this.onRequestUpgrade,
+    required this.onOpenWeight,
+    required this.onOpenToilet,
+    required this.onOpenCertificates,
   });
 
   final String uid;
@@ -65,47 +61,22 @@ class HomeScreen extends StatelessWidget {
   final ToiletRecordRepository toiletRecordRepository;
   final AiUsageRepository usageRepository;
   final AiBackendClient backendClient;
-  final ConsultationRepository consultationRepository;
 
   /// Forwarded straight through to [ConsultationScreen], mirroring
   /// HomeShell's `_openPaywall` hook.
   final VoidCallback onRequestUpgrade;
 
-  void _openWeight(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => WeightRecordChartScreen(
-          uid: uid,
-          petId: activePet.petId,
-          repository: weightRecordRepository,
-        ),
-      ),
-    );
-  }
-
-  void _openToilet(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ToiletRecordTimelineScreen(
-          uid: uid,
-          petId: activePet.petId,
-          repository: toiletRecordRepository,
-          onConsultationSuggested: (suggestion) => _openConsultation(
-            context,
-            prefillRecords: [suggestion.reference],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openCertificates(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CertificateListScreen(uid: uid, petId: activePet.petId),
-      ),
-    );
-  }
+  /// Shortcuts hand these back to HomeShell, which switches to the section
+  /// and inner tab that owns the screen.
+  ///
+  /// They used to push the destination directly from here, which arrived
+  /// without the tab strip its section normally shows -- the same screen
+  /// looked different depending on whether you reached it from a shortcut or
+  /// from the bottom nav bar (PM report). Only the shell can switch sections,
+  /// so the decision has to live there.
+  final VoidCallback onOpenWeight;
+  final VoidCallback onOpenToilet;
+  final VoidCallback onOpenCertificates;
 
   Future<void> _openFoodPortion(BuildContext context) async {
     // Resolve the latest known weight before navigating so
@@ -133,25 +104,6 @@ class HomeScreen extends StatelessWidget {
           usageRepository: usageRepository,
           backendClient: backendClient,
           onRequestUpgrade: onRequestUpgrade,
-        ),
-      ),
-    );
-  }
-
-  void _openConsultation(
-    BuildContext context, {
-    List<ConsultationReferenceRecord>? prefillRecords,
-  }) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ConsultationScreen(
-          uid: uid,
-          petId: activePet.petId,
-          usageRepository: usageRepository,
-          backendClient: backendClient,
-          consultationRepository: consultationRepository,
-          onRequestUpgrade: onRequestUpgrade,
-          prefillRecords: prefillRecords,
         ),
       ),
     );
@@ -203,10 +155,9 @@ class HomeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: HomeShortcutRow(
-                    onWeight: () => _openWeight(context),
-                    onToilet: () => _openToilet(context),
-                    onCertificates: () => _openCertificates(context),
-                    onConsultation: () => _openConsultation(context),
+                    onWeight: onOpenWeight,
+                    onToilet: onOpenToilet,
+                    onCertificates: onOpenCertificates,
                     onFoodPortion: () => unawaited(_openFoodPortion(context)),
                   ),
                 ),
@@ -268,14 +219,12 @@ class HomeShortcutRow extends StatelessWidget {
     required this.onWeight,
     required this.onToilet,
     required this.onCertificates,
-    required this.onConsultation,
     required this.onFoodPortion,
   });
 
   final VoidCallback onWeight;
   final VoidCallback onToilet;
   final VoidCallback onCertificates;
-  final VoidCallback onConsultation;
   final VoidCallback onFoodPortion;
 
   @override
@@ -296,11 +245,6 @@ class HomeShortcutRow extends StatelessWidget {
         icon: Icons.description_outlined,
         label: l10n.homeShortcutCertificatesLabel,
         onTap: onCertificates,
-      ),
-      _ShortcutButton(
-        icon: Icons.smart_toy_outlined,
-        label: l10n.homeShortcutConsultationLabel,
-        onTap: onConsultation,
       ),
       _ShortcutButton(
         icon: Icons.restaurant_outlined,

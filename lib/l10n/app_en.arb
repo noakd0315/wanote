@@ -318,7 +318,7 @@
   "@navMedicalLabel": {
     "description": "Bottom navigation bar label for the medical tab."
   },
-  "navAiConsultationLabel": "AI consultation",
+  "navAiConsultationLabel": "AI chat",
   "@navAiConsultationLabel": {
     "description": "Bottom navigation bar label for the AI consultation tab."
   },

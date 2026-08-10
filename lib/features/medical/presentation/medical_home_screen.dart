@@ -15,10 +15,19 @@ import 'visits/visit_list_screen.dart';
 /// exactly (the app-shell's outer AppBar already covers every section, per
 /// the PM's request to unify these three sections' design on AI相談's).
 class MedicalHomeScreen extends StatefulWidget {
-  const MedicalHomeScreen({super.key, required this.uid, required this.petId});
+  const MedicalHomeScreen({
+    super.key,
+    required this.uid,
+    required this.petId,
+    this.tabRequest,
+  });
 
   final String uid;
   final String petId;
+
+  /// Set by HomeShell when a Home shortcut asks for a specific tab.
+  /// Null when the screen is used on its own.
+  final ValueNotifier<int>? tabRequest;
 
   @override
   State<MedicalHomeScreen> createState() => _MedicalHomeScreenState();
@@ -44,10 +53,23 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
       ..addListener(() {
         if (!_tabController.indexIsChanging) setState(() {});
       });
+    widget.tabRequest?.addListener(_applyTabRequest);
+    _applyTabRequest();
+  }
+
+  /// Honours a tab a Home shortcut asked for. Applied on init as well as on
+  /// change, because the first request can land before this section has ever
+  /// been built.
+  void _applyTabRequest() {
+    final requested = widget.tabRequest?.value;
+    if (requested == null || requested == _tabController.index) return;
+    if (requested < 0 || requested >= _tabController.length) return;
+    _tabController.index = requested;
   }
 
   @override
   void dispose() {
+    widget.tabRequest?.removeListener(_applyTabRequest);
     _tabController.dispose();
     super.dispose();
   }
