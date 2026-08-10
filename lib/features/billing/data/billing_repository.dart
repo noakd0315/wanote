@@ -38,7 +38,7 @@ abstract class BillingRepository {
   /// [Package.identifier] from [getOfferings], e.g. `$rc_monthly` or a
   /// custom identifier configured in the dashboard). Throws if the package
   /// can't be found in the current offerings, or whatever
-  /// [Purchases.purchasePackage] throws (including user cancellation).
+  /// [Purchases.purchase] throws (including user cancellation).
   Future<void> purchase(String packageIdentifier);
 
   Future<void> restorePurchases();
@@ -117,10 +117,11 @@ class RevenueCatBillingRepository implements BillingRepository {
         'dashboard yet?',
       );
     }
-    // purchases_flutter 10 wraps the response: purchasePackage now returns a
-    // PurchaseResult (customerInfo + the store transaction) instead of the
-    // CustomerInfo directly.
-    final result = await Purchases.purchasePackage(package);
+    // purchases_flutter 10 replaced purchasePackage() with purchase() taking
+    // a PurchaseParams, and wraps the response: a PurchaseResult
+    // (customerInfo + the store transaction) instead of the CustomerInfo
+    // directly.
+    final result = await Purchases.purchase(PurchaseParams.package(package));
     _onCustomerInfoUpdate(result.customerInfo);
 
     // Consumables (ai_tickets_5/15) aren't modeled as entitlements at all in

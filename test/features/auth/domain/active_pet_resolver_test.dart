@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:wanote/features/auth/domain/active_pet_resolver.dart';
 
 void main() {
@@ -18,10 +18,7 @@ void main() {
 
     test('previous active id still present -> keep it', () {
       expect(
-        resolver.resolve(
-          petIds: const ['a', 'b', 'c'],
-          previousActiveId: 'b',
-        ),
+        resolver.resolve(petIds: const ['a', 'b', 'c'], previousActiveId: 'b'),
         'b',
       );
     });
@@ -42,7 +39,10 @@ void main() {
         'only-pet',
       );
       expect(
-        resolver.resolve(petIds: const ['first', 'second'], previousActiveId: null),
+        resolver.resolve(
+          petIds: const ['first', 'second'],
+          previousActiveId: null,
+        ),
         'first',
       );
     });

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../shared/config/backend_config.dart';
 import '../../../shared/models/consultation_reference_record.dart';
 import '../models/monthly_report_input_stats.dart';
 
@@ -34,16 +35,20 @@ class AiBackendClient {
   }
 
   /// Reads the base URL from a `--dart-define=AI_BACKEND_BASE_URL=...`
-  /// build-time constant, falling back to [fallbackBaseUrl] (useful for
-  /// local `wrangler dev`) when it isn't set.
+  /// build-time constant. Without it, falls back to [fallbackBaseUrl] or --
+  /// when that is null too -- to `wrangler dev` on whichever host served the
+  /// page (see [defaultLocalBackendBaseUrl]; a phone on the LAN must not be
+  /// sent to its own localhost).
   factory AiBackendClient.fromEnvironment({
-    String fallbackBaseUrl = 'http://localhost:8787',
+    String? fallbackBaseUrl,
     http.Client? httpClient,
     Future<String?> Function()? idTokenProvider,
   }) {
-    const configured = String.fromEnvironment('AI_BACKEND_BASE_URL');
+    const configured = configuredBackendBaseUrl;
     return AiBackendClient(
-      baseUrl: configured.isEmpty ? fallbackBaseUrl : configured,
+      baseUrl: configured.isEmpty
+          ? (fallbackBaseUrl ?? defaultLocalBackendBaseUrl())
+          : configured,
       httpClient: httpClient,
       idTokenProvider: idTokenProvider,
     );

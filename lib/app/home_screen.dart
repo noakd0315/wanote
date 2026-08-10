@@ -13,6 +13,7 @@ import '../features/medical/presentation/prevention/certificate_list_screen.dart
 import '../l10n/generated/app_localizations.dart';
 import '../shared/models/consultation_reference_record.dart';
 import '../shared/models/pet_profile.dart';
+import '../shared/navigation/instant_page_route.dart';
 import '../shared/services/ai_usage_repository.dart';
 
 /// Whether [HomeScreen] should render the active pet's photo as its
@@ -71,7 +72,7 @@ class HomeScreen extends StatelessWidget {
 
   void _openWeight(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      InstantPageRoute(
         builder: (_) => WeightRecordChartScreen(
           uid: uid,
           petId: activePet.petId,
@@ -83,7 +84,7 @@ class HomeScreen extends StatelessWidget {
 
   void _openToilet(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      InstantPageRoute(
         builder: (_) => ToiletRecordTimelineScreen(
           uid: uid,
           petId: activePet.petId,
@@ -99,7 +100,7 @@ class HomeScreen extends StatelessWidget {
 
   void _openCertificates(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      InstantPageRoute(
         builder: (_) => CertificateListScreen(uid: uid, petId: activePet.petId),
       ),
     );
@@ -121,7 +122,7 @@ class HomeScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      InstantPageRoute(
         builder: (_) => FoodPortionScreen(
           uid: uid,
           petId: activePet.petId,
@@ -141,7 +142,7 @@ class HomeScreen extends StatelessWidget {
     List<ConsultationReferenceRecord>? prefillRecords,
   }) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      InstantPageRoute(
         builder: (_) => ConsultationScreen(
           uid: uid,
           petId: activePet.petId,

@@ -48,11 +48,12 @@ import 'dart:convert';
 
 import 'package:web/web.dart' as web;
 
-/// Emulators live on whatever host served the page, so opening the app from a
-/// phone at `http://192.168.x.x:5000` reaches the emulators on that machine
-/// rather than on the phone itself. `--dart-define=EMULATOR_HOST=...` still
-/// wins when set (the Android emulator needs `10.0.2.2`).
-String defaultEmulatorHost() {
+/// Local dev services live on whatever host served the page, so opening the
+/// app from a phone at `http://192.168.x.x:5000` reaches the emulators (and
+/// `wrangler dev`) on that machine rather than on the phone itself. The
+/// matching `--dart-define` still wins when set -- the Android emulator needs
+/// `EMULATOR_HOST=10.0.2.2`.
+String localDevHost() {
   final hostname = web.window.location.hostname;
   return hostname.isEmpty ? 'localhost' : hostname;
 }

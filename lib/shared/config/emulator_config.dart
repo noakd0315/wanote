@@ -21,9 +21,8 @@ const String _emulatorHostOverride = String.fromEnvironment('EMULATOR_HOST');
 /// machine, not on the phone) and to localhost everywhere else. Override with
 /// `--dart-define=EMULATOR_HOST=10.0.2.2` on the Android emulator, which
 /// cannot see the host machine as "localhost".
-String get emulatorHost => _emulatorHostOverride.isNotEmpty
-    ? _emulatorHostOverride
-    : defaultEmulatorHost();
+String get emulatorHost =>
+    _emulatorHostOverride.isNotEmpty ? _emulatorHostOverride : localDevHost();
 
 /// Must be called once, *before* `Firebase.initializeApp()`, whenever
 /// [useFirebaseEmulator] is true.

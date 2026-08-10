@@ -257,17 +257,26 @@ class AuthController extends ChangeNotifier {
   /// [signInWithGoogle]/[signInWithApple] via [_runAuthAction]) -- but not
   /// on an ordinary app restart resuming an already-persisted session,
   /// since that's the same device continuing, not a new one taking over.
+  ///
+  /// The remote copy is written *before* the local one, and the order
+  /// matters: these are two separate writes and the app can die between them
+  /// (a browser tab killed for memory is the case that prompted this). Remote
+  /// first means a crash in the gap leaves the account already claimed, so the
+  /// previously signed-in device still gets kicked out and this one merely has
+  /// to sign in again. Local first would leave the remote copy pointing at the
+  /// *old* device -- the takeover would silently fail and the old device would
+  /// stay signed in, which is the one outcome this feature exists to prevent.
   Future<void> _claimSession(String uid) async {
     // Invalidates every session subscription created before this point --
     // see _subscribeToSession.
     _sessionGeneration++;
     final sessionId = _uuid.v4();
     final prefs = await _prefsFuture;
-    await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
     await _userAccountRepository.setActiveSession(
       uid: uid,
       sessionId: sessionId,
     );
+    await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
   }
 
   void _subscribeToPets(String uid) {

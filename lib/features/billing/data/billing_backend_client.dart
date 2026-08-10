@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../shared/config/backend_config.dart';
 import 'package:http/http.dart' as http;
 
 /// Thin HTTP client for the billing-related routes on the Cloudflare
@@ -36,16 +37,18 @@ class BillingBackendClient {
 
   /// Reads the base URL from the same `--dart-define=AI_BACKEND_BASE_URL`
   /// build-time constant AiBackendClient uses (it's the same Worker),
-  /// falling back to [fallbackBaseUrl] (useful for local `wrangler dev`)
-  /// when it isn't set.
+  /// falling back to [fallbackBaseUrl], or to local `wrangler dev` on the
+  /// host that served the page (see [defaultLocalBackendBaseUrl]).
   factory BillingBackendClient.fromEnvironment({
-    String fallbackBaseUrl = 'http://localhost:8787',
+    String? fallbackBaseUrl,
     http.Client? httpClient,
     Future<String?> Function()? idTokenProvider,
   }) {
-    const configured = String.fromEnvironment('AI_BACKEND_BASE_URL');
+    const configured = configuredBackendBaseUrl;
     return BillingBackendClient(
-      baseUrl: configured.isEmpty ? fallbackBaseUrl : configured,
+      baseUrl: configured.isEmpty
+          ? (fallbackBaseUrl ?? defaultLocalBackendBaseUrl())
+          : configured,
       httpClient: httpClient,
       idTokenProvider: idTokenProvider,
     );

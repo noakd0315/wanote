@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:wanote/features/auth/domain/auth_gate_resolver.dart';
 
 void main() {
@@ -52,16 +52,19 @@ void main() {
       },
     );
 
-    test('active session, biometric disabled, device available -> enterApp', () {
-      expect(
-        resolver.resolve(
-          hasActiveSession: true,
-          biometricEnabled: false,
-          biometricAvailable: true,
-        ),
-        AuthGateAction.enterApp,
-      );
-    });
+    test(
+      'active session, biometric disabled, device available -> enterApp',
+      () {
+        expect(
+          resolver.resolve(
+            hasActiveSession: true,
+            biometricEnabled: false,
+            biometricAvailable: true,
+          ),
+          AuthGateAction.enterApp,
+        );
+      },
+    );
 
     test(
       'active session, biometric disabled and device unavailable -> enterApp',

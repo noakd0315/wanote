@@ -17,7 +17,10 @@ void main() {
 
   setUp(() {
     firestore = FakeFirebaseFirestore();
-    repository = FirestoreWeightRecordRepository(firestore: firestore, uuid: const Uuid());
+    repository = FirestoreWeightRecordRepository(
+      firestore: firestore,
+      uuid: const Uuid(),
+    );
   });
 
   test('create() writes a doc with the spec field names', () async {
@@ -28,7 +31,10 @@ void main() {
       weightKg: 12.4,
     );
 
-    final snap = await firestore.collection('users/$uid/pets/$petId/weight_records').doc(record.weightId).get();
+    final snap = await firestore
+        .collection('users/$uid/pets/$petId/weight_records')
+        .doc(record.weightId)
+        .get();
     final data = snap.data()!;
     expect(data['weight_id'], record.weightId);
     expect(data['pet_id'], petId);
@@ -37,18 +43,42 @@ void main() {
   });
 
   test('watchAll streams records ordered by measured_at', () async {
-    await repository.create(uid: uid, petId: petId, measuredAt: DateTime(2026, 7, 10), weightKg: 12.0);
-    await repository.create(uid: uid, petId: petId, measuredAt: DateTime(2026, 7, 1), weightKg: 11.5);
+    await repository.create(
+      uid: uid,
+      petId: petId,
+      measuredAt: DateTime(2026, 7, 10),
+      weightKg: 12.0,
+    );
+    await repository.create(
+      uid: uid,
+      petId: petId,
+      measuredAt: DateTime(2026, 7, 1),
+      weightKg: 11.5,
+    );
 
     final records = await repository.watchAll(uid, petId).first;
     expect(records.map((r) => r.weightKg), [11.5, 12.0]);
   });
 
   test('findForDate only returns records on that exact calendar day', () async {
-    await repository.create(uid: uid, petId: petId, measuredAt: DateTime(2026, 7, 10, 8, 0), weightKg: 12.0);
-    await repository.create(uid: uid, petId: petId, measuredAt: DateTime(2026, 7, 11), weightKg: 12.1);
+    await repository.create(
+      uid: uid,
+      petId: petId,
+      measuredAt: DateTime(2026, 7, 10, 8, 0),
+      weightKg: 12.0,
+    );
+    await repository.create(
+      uid: uid,
+      petId: petId,
+      measuredAt: DateTime(2026, 7, 11),
+      weightKg: 12.1,
+    );
 
-    final found = await repository.findForDate(uid, petId, DateTime(2026, 7, 10, 20, 0));
+    final found = await repository.findForDate(
+      uid,
+      petId,
+      DateTime(2026, 7, 10, 20, 0),
+    );
     expect(found, hasLength(1));
     expect(found.first.weightKg, 12.0);
   });
@@ -61,7 +91,10 @@ void main() {
       weightKg: 12.4,
     );
     await repository.delete(uid, record);
-    final snap = await firestore.collection('users/$uid/pets/$petId/weight_records').doc(record.weightId).get();
+    final snap = await firestore
+        .collection('users/$uid/pets/$petId/weight_records')
+        .doc(record.weightId)
+        .get();
     expect(snap.exists, isFalse);
   });
 }

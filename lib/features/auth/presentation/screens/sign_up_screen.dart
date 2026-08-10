@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -165,7 +166,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       case 'account-exists-with-different-credential':
         return l10n.authErrorAccountExistsWithDifferentCredential;
       default:
-        return l10n.authErrorGeneric;
+        // Unrecognized codes used to show nothing but "問題が発生しました",
+        // which is also what a forced sign-out looks like -- during the
+        // emulator-connection bug that cost a whole debugging session: the
+        // real cause was an "API key not valid" rejection, and the screen
+        // gave no way to tell it apart from single-session enforcement.
+        // Debug builds only, so nothing leaks to users; and only for codes
+        // that aren't mapped, so the deliberate merging of
+        // wrong-password/user-not-found above is left intact.
+        return kDebugMode
+            ? '${l10n.authErrorGeneric} [$code]'
+            : l10n.authErrorGeneric;
     }
   }
 

@@ -6,8 +6,9 @@
 /// web build has to do instead, and why.
 library;
 
-/// Host to reach the emulators at when no `EMULATOR_HOST` is given.
-String defaultEmulatorHost() => 'localhost';
+/// Host that local dev services (the Firebase emulators, `wrangler dev`)
+/// are reached at. Off the web there is no page to take a hint from.
+String localDevHost() => 'localhost';
 
 /// No-op off the web.
 void routeAuthRequestsToEmulator(String origin) {}

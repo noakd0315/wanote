@@ -23,7 +23,12 @@ void main() {
   group('blood-in-stool detection', () {
     test('a single blood-suspected record triggers the suggestion', () {
       final records = [
-        stool('a', DateTime(2026, 7, 14), hardness: StoolHardness.normal, color: StoolColor.bloodSuspected),
+        stool(
+          'a',
+          DateTime(2026, 7, 14),
+          hardness: StoolHardness.normal,
+          color: StoolColor.bloodSuspected,
+        ),
       ];
       final suggestions = detector.detect(records: records, now: now);
       expect(
@@ -41,18 +46,24 @@ void main() {
       );
     });
 
-    test('the suggestion carries a ConsultationReferenceRecord pointing at the triggering record', () {
-      final records = [
-        stool('a', DateTime(2026, 7, 14), color: StoolColor.bloodSuspected),
-      ];
-      final suggestions = detector.detect(records: records, now: now);
-      final suggestion = suggestions.firstWhere(
-        (s) => s.reason == ConsultationSuggestionReason.bloodInStoolSuspected,
-      );
-      expect(suggestion.reference.recordId, 'a');
-      expect(suggestion.reference.recordType, ConsultationRecordType.toiletRecord);
-      expect(suggestion.reference.petId, 'pet-1');
-    });
+    test(
+      'the suggestion carries a ConsultationReferenceRecord pointing at the triggering record',
+      () {
+        final records = [
+          stool('a', DateTime(2026, 7, 14), color: StoolColor.bloodSuspected),
+        ];
+        final suggestions = detector.detect(records: records, now: now);
+        final suggestion = suggestions.firstWhere(
+          (s) => s.reason == ConsultationSuggestionReason.bloodInStoolSuspected,
+        );
+        expect(suggestion.reference.recordId, 'a');
+        expect(
+          suggestion.reference.recordType,
+          ConsultationRecordType.toiletRecord,
+        );
+        expect(suggestion.reference.petId, 'pet-1');
+      },
+    );
   });
 
   group('prolonged diarrhea detection', () {
@@ -96,18 +107,21 @@ void main() {
       );
     });
 
-    test('non-consecutive diarrhea days do not trigger even if there are 3+ of them', () {
-      final records = [
-        stool('a', DateTime(2026, 7, 1), hardness: StoolHardness.diarrhea),
-        stool('b', DateTime(2026, 7, 5), hardness: StoolHardness.diarrhea),
-        stool('c', DateTime(2026, 7, 10), hardness: StoolHardness.diarrhea),
-      ];
-      final suggestions = detector.detect(records: records, now: now);
-      expect(
-        suggestions.map((s) => s.reason),
-        isNot(contains(ConsultationSuggestionReason.prolongedDiarrhea)),
-      );
-    });
+    test(
+      'non-consecutive diarrhea days do not trigger even if there are 3+ of them',
+      () {
+        final records = [
+          stool('a', DateTime(2026, 7, 1), hardness: StoolHardness.diarrhea),
+          stool('b', DateTime(2026, 7, 5), hardness: StoolHardness.diarrhea),
+          stool('c', DateTime(2026, 7, 10), hardness: StoolHardness.diarrhea),
+        ];
+        final suggestions = detector.detect(records: records, now: now);
+        expect(
+          suggestions.map((s) => s.reason),
+          isNot(contains(ConsultationSuggestionReason.prolongedDiarrhea)),
+        );
+      },
+    );
 
     test('the threshold is configurable via the constructor', () {
       const strict = AnomalyDetector(diarrheaStreakThresholdDays: 5);
@@ -133,7 +147,13 @@ void main() {
         records: records,
         now: now,
         lastSuggestedAt: {
-          ConsultationSuggestionReason.bloodInStoolSuspected: DateTime(2026, 7, 15, 6, 0),
+          ConsultationSuggestionReason.bloodInStoolSuspected: DateTime(
+            2026,
+            7,
+            15,
+            6,
+            0,
+          ),
         },
       );
       expect(
@@ -150,7 +170,13 @@ void main() {
         records: records,
         now: now,
         lastSuggestedAt: {
-          ConsultationSuggestionReason.bloodInStoolSuspected: DateTime(2026, 7, 14, 23, 59),
+          ConsultationSuggestionReason.bloodInStoolSuspected: DateTime(
+            2026,
+            7,
+            14,
+            23,
+            59,
+          ),
         },
       );
       expect(

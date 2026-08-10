@@ -176,6 +176,7 @@ void main() {
       await tester.tapAt(centre);
       await tester.pumpAndSettle();
     }
+
     await doubleTap();
     expect(controller.value.getMaxScaleOnAxis(), greaterThan(1.0));
 

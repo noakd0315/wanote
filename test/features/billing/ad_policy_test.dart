@@ -20,32 +20,20 @@ void main() {
       expect(policy.shouldShowInterstitial, isTrue);
     });
 
-    test(
-      'premium status unknown/loading: ads are hidden until non-premium is '
-      'confirmed (never flash an ad at a premium user during the loading '
-      'window)',
-      () {
-        const policy = AdPolicy(EntitlementState.unknown);
+    test('premium status unknown/loading: ads are hidden until non-premium is '
+        'confirmed (never flash an ad at a premium user during the loading '
+        'window)', () {
+      const policy = AdPolicy(EntitlementState.unknown);
 
-        expect(policy.shouldShowAds, isFalse);
-        expect(policy.shouldShowBanner, isFalse);
-        expect(policy.shouldShowInterstitial, isFalse);
-      },
-    );
+      expect(policy.shouldShowAds, isFalse);
+      expect(policy.shouldShowBanner, isFalse);
+      expect(policy.shouldShowInterstitial, isFalse);
+    });
 
     test('fromStatus maps PremiumStatus into the same decision', () {
-      expect(
-        AdPolicy.fromStatus(PremiumStatus.active).shouldShowAds,
-        isFalse,
-      );
-      expect(
-        AdPolicy.fromStatus(PremiumStatus.inactive).shouldShowAds,
-        isTrue,
-      );
-      expect(
-        AdPolicy.fromStatus(PremiumStatus.unknown).shouldShowAds,
-        isFalse,
-      );
+      expect(AdPolicy.fromStatus(PremiumStatus.active).shouldShowAds, isFalse);
+      expect(AdPolicy.fromStatus(PremiumStatus.inactive).shouldShowAds, isTrue);
+      expect(AdPolicy.fromStatus(PremiumStatus.unknown).shouldShowAds, isFalse);
     });
   });
 }

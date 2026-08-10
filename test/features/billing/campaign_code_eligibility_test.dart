@@ -57,77 +57,99 @@ void main() {
       );
     });
 
-    test('active code, under the redemption cap, not yet redeemed by this user: eligible', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(maxRedemptions: 100, redemptionCount: 50),
-        alreadyRedeemedByUser: false,
-      );
+    test(
+      'active code, under the redemption cap, not yet redeemed by this user: eligible',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(maxRedemptions: 100, redemptionCount: 50),
+          alreadyRedeemedByUser: false,
+        );
 
-      expect(result, isA<RedemptionEligible>());
-    });
+        expect(result, isA<RedemptionEligible>());
+      },
+    );
 
-    test('active code exactly at the redemption cap: ineligible (cap reached)', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(maxRedemptions: 100, redemptionCount: 100),
-        alreadyRedeemedByUser: false,
-      );
+    test(
+      'active code exactly at the redemption cap: ineligible (cap reached)',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(maxRedemptions: 100, redemptionCount: 100),
+          alreadyRedeemedByUser: false,
+        );
 
-      expect(result, isA<RedemptionIneligible>());
-      expect(
-        (result as RedemptionIneligible).reason,
-        RedemptionIneligibleReason.redemptionCapReached,
-      );
-    });
+        expect(result, isA<RedemptionIneligible>());
+        expect(
+          (result as RedemptionIneligible).reason,
+          RedemptionIneligibleReason.redemptionCapReached,
+        );
+      },
+    );
 
-    test('active code over the redemption cap (redemptionCount > maxRedemptions): ineligible', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(maxRedemptions: 100, redemptionCount: 101),
-        alreadyRedeemedByUser: false,
-      );
+    test(
+      'active code over the redemption cap (redemptionCount > maxRedemptions): ineligible',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(maxRedemptions: 100, redemptionCount: 101),
+          alreadyRedeemedByUser: false,
+        );
 
-      expect(result, isA<RedemptionIneligible>());
-      expect(
-        (result as RedemptionIneligible).reason,
-        RedemptionIneligibleReason.redemptionCapReached,
-      );
-    });
+        expect(result, isA<RedemptionIneligible>());
+        expect(
+          (result as RedemptionIneligible).reason,
+          RedemptionIneligibleReason.redemptionCapReached,
+        );
+      },
+    );
 
-    test('active code, one redemption remaining (under cap by exactly 1): eligible', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(maxRedemptions: 100, redemptionCount: 99),
-        alreadyRedeemedByUser: false,
-      );
+    test(
+      'active code, one redemption remaining (under cap by exactly 1): eligible',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(maxRedemptions: 100, redemptionCount: 99),
+          alreadyRedeemedByUser: false,
+        );
 
-      expect(result, isA<RedemptionEligible>());
-    });
+        expect(result, isA<RedemptionEligible>());
+      },
+    );
 
-    test('referral code redeemed by its own referrer: ineligible (self-referral)', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(referrerUid: 'user-1'),
-        alreadyRedeemedByUser: false,
-        uid: 'user-1',
-      );
+    test(
+      'referral code redeemed by its own referrer: ineligible (self-referral)',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(referrerUid: 'user-1'),
+          alreadyRedeemedByUser: false,
+          uid: 'user-1',
+        );
 
-      expect(result, isA<RedemptionIneligible>());
-      expect(
-        (result as RedemptionIneligible).reason,
-        RedemptionIneligibleReason.selfReferral,
-      );
-    });
+        expect(result, isA<RedemptionIneligible>());
+        expect(
+          (result as RedemptionIneligible).reason,
+          RedemptionIneligibleReason.selfReferral,
+        );
+      },
+    );
 
-    test('referral code redeemed by someone other than its referrer: eligible', () {
-      final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(referrerUid: 'user-1'),
-        alreadyRedeemedByUser: false,
-        uid: 'user-2',
-      );
+    test(
+      'referral code redeemed by someone other than its referrer: eligible',
+      () {
+        final result = CampaignCodeEligibility.evaluate(
+          campaignCode: _code(referrerUid: 'user-1'),
+          alreadyRedeemedByUser: false,
+          uid: 'user-2',
+        );
 
-      expect(result, isA<RedemptionEligible>());
-    });
+        expect(result, isA<RedemptionEligible>());
+      },
+    );
 
     test('inactive takes priority over redemption cap when both apply', () {
       final result = CampaignCodeEligibility.evaluate(
-        campaignCode: _code(active: false, maxRedemptions: 1, redemptionCount: 1),
+        campaignCode: _code(
+          active: false,
+          maxRedemptions: 1,
+          redemptionCount: 1,
+        ),
         alreadyRedeemedByUser: false,
       );
 
@@ -140,15 +162,24 @@ void main() {
 
   group('CampaignCode.hasRedemptionsRemaining', () {
     test('true when under the cap', () {
-      expect(_code(maxRedemptions: 10, redemptionCount: 9).hasRedemptionsRemaining, isTrue);
+      expect(
+        _code(maxRedemptions: 10, redemptionCount: 9).hasRedemptionsRemaining,
+        isTrue,
+      );
     });
 
     test('false when exactly at the cap', () {
-      expect(_code(maxRedemptions: 10, redemptionCount: 10).hasRedemptionsRemaining, isFalse);
+      expect(
+        _code(maxRedemptions: 10, redemptionCount: 10).hasRedemptionsRemaining,
+        isFalse,
+      );
     });
 
     test('false when over the cap', () {
-      expect(_code(maxRedemptions: 10, redemptionCount: 11).hasRedemptionsRemaining, isFalse);
+      expect(
+        _code(maxRedemptions: 10, redemptionCount: 11).hasRedemptionsRemaining,
+        isFalse,
+      );
     });
   });
 

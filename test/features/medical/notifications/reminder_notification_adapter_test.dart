@@ -61,9 +61,7 @@ void main() {
         androidScheduleMode: any(named: 'androidScheduleMode'),
       ),
     ).thenAnswer((_) async {});
-    when(
-      () => plugin.cancel(id: any(named: 'id')),
-    ).thenAnswer((_) async {});
+    when(() => plugin.cancel(id: any(named: 'id'))).thenAnswer((_) async {});
   });
 
   test('schedules each reminder with its own id, title and body', () async {
@@ -101,16 +99,18 @@ void main() {
       _reminder(id: 1, fireAt: DateTime(2026, 9, 1, 9)),
     ]);
 
-    final scheduled = verify(
-      () => plugin.zonedSchedule(
-        id: any(named: 'id'),
-        title: any(named: 'title'),
-        body: any(named: 'body'),
-        scheduledDate: captureAny(named: 'scheduledDate'),
-        notificationDetails: any(named: 'notificationDetails'),
-        androidScheduleMode: any(named: 'androidScheduleMode'),
-      ),
-    ).captured.single as tz.TZDateTime;
+    final scheduled =
+        verify(
+              () => plugin.zonedSchedule(
+                id: any(named: 'id'),
+                title: any(named: 'title'),
+                body: any(named: 'body'),
+                scheduledDate: captureAny(named: 'scheduledDate'),
+                notificationDetails: any(named: 'notificationDetails'),
+                androidScheduleMode: any(named: 'androidScheduleMode'),
+              ),
+            ).captured.single
+            as tz.TZDateTime;
 
     // Asserting the instant, not the wall clock: tz.local is UTC under test,
     // so a 09:00 local DateTime legitimately renders as a different hour.
@@ -135,8 +135,12 @@ void main() {
   });
 
   test('initializes once, not per applySchedule call', () async {
-    await adapter.applySchedule([_reminder(id: 1, fireAt: DateTime(2026, 9, 1))]);
-    await adapter.applySchedule([_reminder(id: 1, fireAt: DateTime(2026, 9, 2))]);
+    await adapter.applySchedule([
+      _reminder(id: 1, fireAt: DateTime(2026, 9, 1)),
+    ]);
+    await adapter.applySchedule([
+      _reminder(id: 1, fireAt: DateTime(2026, 9, 2)),
+    ]);
 
     verify(() => plugin.initialize(settings: any(named: 'settings'))).called(1);
   });

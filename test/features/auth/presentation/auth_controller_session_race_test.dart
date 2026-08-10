@@ -137,9 +137,7 @@ void main() {
         sessionId: any(named: 'sessionId'),
       ),
     ).thenAnswer((invocation) async {
-      await sessionStore.set(
-        invocation.namedArguments[#sessionId] as String,
-      );
+      await sessionStore.set(invocation.namedArguments[#sessionId] as String);
     });
   }
 
@@ -159,89 +157,74 @@ void main() {
     );
   }
 
-  test(
-    'signing in again on the same device does not force-sign-out '
-    '(account already has an active session from this device)',
-    () async {
-      // This device signed in earlier: both Firestore and this device's
-      // local prefs already hold session-1. Then the user ends up back on
-      // the sign-in screen (browser back) and signs in again.
-      SharedPreferences.setMockInitialValues({
-        _localSessionKey: 'session-1',
-      });
-      setUpWith(existingRemoteSession: 'session-1');
+  test('signing in again on the same device does not force-sign-out '
+      '(account already has an active session from this device)', () async {
+    // This device signed in earlier: both Firestore and this device's
+    // local prefs already hold session-1. Then the user ends up back on
+    // the sign-in screen (browser back) and signs in again.
+    SharedPreferences.setMockInitialValues({_localSessionKey: 'session-1'});
+    setUpWith(existingRemoteSession: 'session-1');
 
-      final controller = buildController();
-      await controller.initialize();
-      await controller.signInWithEmail(email: _email, password: 'password1');
-      await _settle();
+    final controller = buildController();
+    await controller.initialize();
+    await controller.signInWithEmail(email: _email, password: 'password1');
+    await _settle();
 
-      expect(
-        controller.wasForcedSignedOut,
-        isFalse,
-        reason:
-            'Re-signing in on the SAME device must not be mistaken for a '
-            'different device taking over the account.',
-      );
-      verifyNever(() => authRepository.signOut());
-    },
-  );
+    expect(
+      controller.wasForcedSignedOut,
+      isFalse,
+      reason:
+          'Re-signing in on the SAME device must not be mistaken for a '
+          'different device taking over the account.',
+    );
+    verifyNever(() => authRepository.signOut());
+  });
 
-  test(
-    'first-ever sign-in on a fresh account is unaffected '
-    '(explains why only the SECOND sign-in fails)',
-    () async {
-      // No prior session anywhere: Firestore has no active_session_id yet.
-      SharedPreferences.setMockInitialValues({});
-      setUpWith(existingRemoteSession: null);
+  test('first-ever sign-in on a fresh account is unaffected '
+      '(explains why only the SECOND sign-in fails)', () async {
+    // No prior session anywhere: Firestore has no active_session_id yet.
+    SharedPreferences.setMockInitialValues({});
+    setUpWith(existingRemoteSession: null);
 
-      final controller = buildController();
-      await controller.initialize();
-      await controller.signInWithEmail(email: _email, password: 'password1');
-      await _settle();
+    final controller = buildController();
+    await controller.initialize();
+    await controller.signInWithEmail(email: _email, password: 'password1');
+    await _settle();
 
-      expect(controller.wasForcedSignedOut, isFalse);
-      verifyNever(() => authRepository.signOut());
-    },
-  );
+    expect(controller.wasForcedSignedOut, isFalse);
+    verifyNever(() => authRepository.signOut());
+  });
 
-  test(
-    'auth stream replaying the same sign-in concurrently does not '
-    'trigger a false takeover',
-    () async {
-      // Real Firebase Auth fires authStateChanges() as part of a successful
-      // signInWithEmail, so _onAuthChanged runs twice for one sign-in: once
-      // from the stream and once from _runAuthAction. Model that here.
-      SharedPreferences.setMockInitialValues({
-        _localSessionKey: 'session-1',
-      });
-      setUpWith(existingRemoteSession: 'session-1');
-      when(
-        () => authRepository.signInWithEmail(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        ),
-      ).thenAnswer((_) async {
-        authStateController.add(_identity);
-        return _identity;
-      });
+  test('auth stream replaying the same sign-in concurrently does not '
+      'trigger a false takeover', () async {
+    // Real Firebase Auth fires authStateChanges() as part of a successful
+    // signInWithEmail, so _onAuthChanged runs twice for one sign-in: once
+    // from the stream and once from _runAuthAction. Model that here.
+    SharedPreferences.setMockInitialValues({_localSessionKey: 'session-1'});
+    setUpWith(existingRemoteSession: 'session-1');
+    when(
+      () => authRepository.signInWithEmail(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenAnswer((_) async {
+      authStateController.add(_identity);
+      return _identity;
+    });
 
-      final controller = buildController();
-      await controller.initialize();
-      await controller.signInWithEmail(email: _email, password: 'password1');
-      await _settle();
+    final controller = buildController();
+    await controller.initialize();
+    await controller.signInWithEmail(email: _email, password: 'password1');
+    await _settle();
 
-      expect(controller.wasForcedSignedOut, isFalse);
-      verifyNever(() => authRepository.signOut());
-    },
-  );
+    expect(controller.wasForcedSignedOut, isFalse);
+    verifyNever(() => authRepository.signOut());
+  });
 
   test(
     'a genuinely different device claiming the session still signs this one out',
     () async {
-      SharedPreferences.setMockInitialValues({
-        _localSessionKey: 'session-1',
-      });
+      SharedPreferences.setMockInitialValues({_localSessionKey: 'session-1'});
       setUpWith(existingRemoteSession: 'session-1');
 
       final controller = buildController();
@@ -255,6 +238,50 @@ void main() {
 
       expect(controller.wasForcedSignedOut, isTrue);
       verify(() => authRepository.signOut()).called(1);
+    },
+  );
+  test(
+    'claims the account remotely before recording the session locally',
+    () async {
+      // The two writes are not atomic and the app can die between them -- a
+      // browser tab killed for memory is the case that prompted this. If the
+      // local copy went first, a crash in the gap would leave Firestore
+      // pointing at the *previous* device, which would therefore stay signed
+      // in: the exact outcome single-session enforcement exists to prevent.
+      SharedPreferences.setMockInitialValues({_localSessionKey: 'session-old'});
+      setUpWith(existingRemoteSession: 'session-old');
+
+      String? localSessionWhenRemoteWasWritten;
+      when(
+        () => userAccountRepository.setActiveSession(
+          uid: any(named: 'uid'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((invocation) async {
+        final prefs = await SharedPreferences.getInstance();
+        localSessionWhenRemoteWasWritten = prefs.getString(_localSessionKey);
+        await sessionStore.set(invocation.namedArguments[#sessionId] as String);
+      });
+
+      final controller = buildController();
+      await controller.initialize();
+      await controller.signInWithEmail(email: _email, password: 'password1');
+      await _settle();
+
+      expect(
+        localSessionWhenRemoteWasWritten,
+        'session-old',
+        reason:
+            'The local copy must still be the old one at the moment the '
+            'account is claimed remotely.',
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getString(_localSessionKey),
+        isNot('session-old'),
+        reason: 'Both writes must still happen -- only their order changed.',
+      );
+      expect(prefs.getString(_localSessionKey), sessionStore.value);
     },
   );
 }

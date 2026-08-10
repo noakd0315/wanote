@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../../shared/config/backend_config.dart';
+
 /// Parsed response from the `/ocr/certificate` Cloudflare Worker route
 /// (functions/src/routes/ocr.ts). Field names mirror
 /// `prevention_records.ocr_extracted_data`'s contents (spec 5.4) so the
@@ -87,14 +89,17 @@ class HttpCertificateOcrService implements CertificateOcrService {
   /// Reads the base URL from the same `--dart-define=AI_BACKEND_BASE_URL=...`
   /// build-time constant the ai feature's AiBackendClient uses (both hit the
   /// same Cloudflare Worker, just different routes), falling back to
-  /// [fallbackBaseUrl] for local `wrangler dev`.
+  /// [fallbackBaseUrl], or to local `wrangler dev` on the host that served
+  /// the page (see [defaultLocalBackendBaseUrl]).
   factory HttpCertificateOcrService.fromEnvironment({
-    String fallbackBaseUrl = 'http://localhost:8787',
+    String? fallbackBaseUrl,
     http.Client? httpClient,
   }) {
-    const configured = String.fromEnvironment('AI_BACKEND_BASE_URL');
+    const configured = configuredBackendBaseUrl;
     return HttpCertificateOcrService(
-      baseUrl: configured.isEmpty ? fallbackBaseUrl : configured,
+      baseUrl: configured.isEmpty
+          ? (fallbackBaseUrl ?? defaultLocalBackendBaseUrl())
+          : configured,
       httpClient: httpClient,
     );
   }

@@ -37,15 +37,18 @@ void main() {
       expect(result, DateTime(2026, 4, 15));
     });
 
-    test('monthly schedule clamps day-of-month overflow (Jan 31 -> Feb 28)', () {
-      final result = calculator.calculateNextDueDate(
-        scheduleType: ScheduleType.monthly,
-        administeredAt: DateTime(2026, 1, 31),
-      );
+    test(
+      'monthly schedule clamps day-of-month overflow (Jan 31 -> Feb 28)',
+      () {
+        final result = calculator.calculateNextDueDate(
+          scheduleType: ScheduleType.monthly,
+          administeredAt: DateTime(2026, 1, 31),
+        );
 
-      // 2026 is not a leap year.
-      expect(result, DateTime(2026, 2, 28));
-    });
+        // 2026 is not a leap year.
+        expect(result, DateTime(2026, 2, 28));
+      },
+    );
 
     test('monthly schedule handles year rollover (Dec -> Jan)', () {
       final result = calculator.calculateNextDueDate(

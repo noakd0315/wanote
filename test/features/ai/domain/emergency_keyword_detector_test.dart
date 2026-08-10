@@ -41,9 +41,12 @@ void main() {
     expect(latinDetector.isEmergency('possible SeIzUrE observed'), isTrue);
   });
 
-  test('supports a fully custom keyword list without the built-in defaults', () {
-    const customDetector = EmergencyKeywordDetector(keywords: ['痙攣']);
-    expect(customDetector.isEmergency('痙攣しています'), isTrue);
-    expect(customDetector.isEmergency('けいれんしています'), isFalse);
-  });
+  test(
+    'supports a fully custom keyword list without the built-in defaults',
+    () {
+      const customDetector = EmergencyKeywordDetector(keywords: ['痙攣']);
+      expect(customDetector.isEmergency('痙攣しています'), isTrue);
+      expect(customDetector.isEmergency('けいれんしています'), isFalse);
+    },
+  );
 }

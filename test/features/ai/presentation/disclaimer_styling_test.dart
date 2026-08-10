@@ -20,25 +20,26 @@ Widget _host(Widget child) => MaterialApp(
 );
 
 void main() {
-  testWidgets('the AI disclaimer text and icon are rendered in the error colour', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_host(const DisclaimerBanner()));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'the AI disclaimer text and icon are rendered in the error colour',
+    (tester) async {
+      await tester.pumpWidget(_host(const DisclaimerBanner()));
+      await tester.pumpAndSettle();
 
-    final context = tester.element(find.byType(DisclaimerBanner));
-    final expected = Theme.of(context).colorScheme.error;
+      final context = tester.element(find.byType(DisclaimerBanner));
+      final expected = Theme.of(context).colorScheme.error;
 
-    final text = tester.widget<Text>(find.byType(Text));
-    expect(
-      text.style?.color,
-      expected,
-      reason: 'The 医療診断ではない notice must stand out as a caution.',
-    );
+      final text = tester.widget<Text>(find.byType(Text));
+      expect(
+        text.style?.color,
+        expected,
+        reason: 'The 医療診断ではない notice must stand out as a caution.',
+      );
 
-    final icon = tester.widget<Icon>(find.byType(Icon));
-    expect(icon.color, expected, reason: 'The icon must match the text.');
-  });
+      final icon = tester.widget<Icon>(find.byType(Icon));
+      expect(icon.color, expected, reason: 'The icon must match the text.');
+    },
+  );
 
   testWidgets('the disclaimer follows the theme in dark mode too', (
     tester,
