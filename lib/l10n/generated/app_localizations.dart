@@ -1862,6 +1862,18 @@ abstract class AppLocalizations {
   /// **'Location: {location}'**
   String toiletLocationSubtitle(String location);
 
+  /// Tooltip on the button that swaps the toilet record list for the frequency chart, in place.
+  ///
+  /// In en, this message translates to:
+  /// **'Show chart'**
+  String get toiletShowChartTooltip;
+
+  /// Tooltip on the button that swaps the toilet frequency chart back for the record list.
+  ///
+  /// In en, this message translates to:
+  /// **'Show records'**
+  String get toiletShowTimelineTooltip;
+
   /// AppBar title of the toilet record timeline screen.
   ///
   /// In en, this message translates to:
@@ -2006,11 +2018,11 @@ abstract class AppLocalizations {
   /// **'Overwrite'**
   String get weightOverwriteButtonLabel;
 
-  /// Segmented button label for the one-month trend period.
+  /// Label of the 6-month option in the weight chart period toggle.
   ///
   /// In en, this message translates to:
-  /// **'1 month'**
-  String get weightPeriodOneMonth;
+  /// **'6 months'**
+  String get weightPeriodSixMonths;
 
   /// Segmented button label for the three-month trend period.
   ///

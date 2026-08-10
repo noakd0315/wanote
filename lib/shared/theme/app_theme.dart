@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../navigation/instant_page_transitions.dart';
+
 /// Warm brand seed color sampled from the wanote logo/mascot artwork (the
 /// wordmark's dark cocoa-brown fill). Material 3's `ColorScheme.fromSeed`
 /// derives the entire palette (primary/secondary/tertiary, and critically
@@ -10,5 +12,12 @@ import 'package:flutter/material.dart';
 const Color wanoteBrandSeed = Color(0xFF603820);
 
 ThemeData buildWanoteTheme() {
-  return ThemeData(colorSchemeSeed: wanoteBrandSeed, useMaterial3: true);
+  return ThemeData(
+    colorSchemeSeed: wanoteBrandSeed,
+    useMaterial3: true,
+    // PM request: screens must switch instantly, the way the bottom
+    // nav bar already does. See instantPageTransitionsTheme for what
+    // the animated defaults looked like on a phone.
+    pageTransitionsTheme: instantPageTransitionsTheme,
+  );
 }

@@ -6,7 +6,7 @@ import '../../../shared/models/consultation_reference_record.dart';
 import '../data/toilet_record_repository.dart';
 import '../domain/anomaly_detector.dart';
 import '../models/toilet_record.dart';
-import 'toilet_frequency_chart_screen.dart';
+import 'toilet_frequency_chart_view.dart';
 import 'toilet_record_form_screen.dart';
 import 'widgets/toilet_labels.dart';
 
@@ -48,6 +48,11 @@ class _ToiletRecordTimelineScreenState
   /// suppression survives app restarts. See AnomalyDetector.detect's doc.
   final Map<ConsultationSuggestionReason, DateTime> _lastSuggestedAt = {};
 
+  /// Whether the frequency chart is showing instead of the record list. Not
+  /// persisted: unlike the weight screen's chart/table choice, this is a
+  /// glance at a summary rather than a preferred way of reading the data.
+  bool _showChart = false;
+
   Future<void> _recordUrine() async {
     final result = await showDialog<_UrineRecordDialogResult>(
       context: context,
@@ -87,151 +92,163 @@ class _ToiletRecordTimelineScreenState
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(l10n.toiletRecordTimelineTitle),
+        title: Text(
+          _showChart
+              ? l10n.toiletFrequencyChartTitle
+              : l10n.toiletRecordTimelineTitle,
+        ),
         actions: [
+          // Swaps the body in place instead of pushing the chart as its own
+          // screen. Pushing replaced this AppBar with one that had no
+          // actions, so the button that got you there disappeared (PM
+          // report: "グラフ表示をすると、ヘッダー部のメニューが消えて
+          // しまいます") -- the weight screen has always toggled in place.
           IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ToiletFrequencyChartScreen(
-                    uid: widget.uid,
-                    petId: widget.petId,
-                    repository: widget.repository,
-                  ),
-                ),
-              );
-            },
+            tooltip: _showChart
+                ? l10n.toiletShowTimelineTooltip
+                : l10n.toiletShowChartTooltip,
+            icon: Icon(_showChart ? Icons.list_alt : Icons.bar_chart),
+            onPressed: () => setState(() => _showChart = !_showChart),
           ),
         ],
       ),
-      body: StreamBuilder<List<ToiletRecord>>(
-        stream: widget.repository.watchTimeline(widget.uid, widget.petId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final records = snapshot.data ?? const <ToiletRecord>[];
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _handleSuggestions(records),
-          );
+      body: _showChart
+          ? ToiletFrequencyChartView(
+              uid: widget.uid,
+              petId: widget.petId,
+              repository: widget.repository,
+            )
+          : StreamBuilder<List<ToiletRecord>>(
+              stream: widget.repository.watchTimeline(widget.uid, widget.petId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final records = snapshot.data ?? const <ToiletRecord>[];
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _handleSuggestions(records),
+                );
 
-          final now = DateTime.now();
-          final currentSuggestions = widget.anomalyDetector.detect(
-            records: records,
-            now: now,
-            lastSuggestedAt: const {},
-          );
+                final now = DateTime.now();
+                final currentSuggestions = widget.anomalyDetector.detect(
+                  records: records,
+                  now: now,
+                  lastSuggestedAt: const {},
+                );
 
-          return Column(
-            children: [
-              if (currentSuggestions.isNotEmpty)
-                MaterialBanner(
-                  content: Text(currentSuggestions.first.message),
-                  leading: const Icon(
-                    Icons.warning_amber,
-                    color: Colors.orange,
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => widget.onConsultationSuggested?.call(
-                        currentSuggestions.first,
-                      ),
-                      child: Text(l10n.toiletConsultAiButtonLabel),
-                    ),
-                  ],
-                ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
+                return Column(
                   children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _recordUrine,
-                        icon: const Icon(Icons.water_drop),
-                        label: Text(l10n.toiletUrineLabel),
+                    if (currentSuggestions.isNotEmpty)
+                      MaterialBanner(
+                        content: Text(currentSuggestions.first.message),
+                        leading: const Icon(
+                          Icons.warning_amber,
+                          color: Colors.orange,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => widget.onConsultationSuggested
+                                ?.call(currentSuggestions.first),
+                            child: Text(l10n.toiletConsultAiButtonLabel),
+                          ),
+                        ],
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: _recordUrine,
+                              icon: const Icon(Icons.water_drop),
+                              label: Text(l10n.toiletUrineLabel),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ToiletRecordFormScreen(
+                                      uid: widget.uid,
+                                      petId: widget.petId,
+                                      repository: widget.repository,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.circle),
+                              label: Text(l10n.toiletStoolLabel),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ToiletRecordFormScreen(
-                                uid: widget.uid,
-                                petId: widget.petId,
-                                repository: widget.repository,
-                              ),
+                      child: records.isEmpty
+                          ? Center(child: Text(l10n.commonNoRecordsYet))
+                          : ListView.builder(
+                              itemCount: records.length,
+                              itemBuilder: (context, index) {
+                                final record = records[index];
+                                final isUrine = record.type == ToiletType.urine;
+                                final subtitleParts = [
+                                  if (isUrine)
+                                    if (record.urineColor != null)
+                                      l10n.toiletUrineColorSubtitle(
+                                        urineColorLabel(
+                                          context,
+                                          record.urineColor!,
+                                        ),
+                                      ),
+                                  if (!isUrine)
+                                    l10n.toiletStoolConditionSubtitle(
+                                      record.stoolCondition != null
+                                          ? stoolHardnessLabel(
+                                              context,
+                                              record.stoolCondition!.hardness,
+                                            )
+                                          : '-',
+                                      record.stoolCondition != null
+                                          ? stoolColorLabel(
+                                              context,
+                                              record.stoolCondition!.color,
+                                            )
+                                          : '-',
+                                    ),
+                                  if (record.location != null)
+                                    l10n.toiletLocationSubtitle(
+                                      record.location!,
+                                    ),
+                                ];
+                                return ListTile(
+                                  leading: Icon(
+                                    isUrine ? Icons.water_drop : Icons.circle,
+                                  ),
+                                  title: Text(
+                                    DateFormat(
+                                      'yyyy/MM/dd HH:mm',
+                                    ).format(record.recordedAt),
+                                  ),
+                                  subtitle: subtitleParts.isEmpty
+                                      ? null
+                                      : Text(subtitleParts.join(' ・ ')),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => widget.repository.delete(
+                                      uid: widget.uid,
+                                      record: record,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.circle),
-                        label: Text(l10n.toiletStoolLabel),
-                      ),
                     ),
                   ],
-                ),
-              ),
-              Expanded(
-                child: records.isEmpty
-                    ? Center(child: Text(l10n.commonNoRecordsYet))
-                    : ListView.builder(
-                        itemCount: records.length,
-                        itemBuilder: (context, index) {
-                          final record = records[index];
-                          final isUrine = record.type == ToiletType.urine;
-                          final subtitleParts = [
-                            if (isUrine)
-                              if (record.urineColor != null)
-                                l10n.toiletUrineColorSubtitle(
-                                  urineColorLabel(context, record.urineColor!),
-                                ),
-                            if (!isUrine)
-                              l10n.toiletStoolConditionSubtitle(
-                                record.stoolCondition != null
-                                    ? stoolHardnessLabel(
-                                        context,
-                                        record.stoolCondition!.hardness,
-                                      )
-                                    : '-',
-                                record.stoolCondition != null
-                                    ? stoolColorLabel(
-                                        context,
-                                        record.stoolCondition!.color,
-                                      )
-                                    : '-',
-                              ),
-                            if (record.location != null)
-                              l10n.toiletLocationSubtitle(record.location!),
-                          ];
-                          return ListTile(
-                            leading: Icon(
-                              isUrine ? Icons.water_drop : Icons.circle,
-                            ),
-                            title: Text(
-                              DateFormat(
-                                'yyyy/MM/dd HH:mm',
-                              ).format(record.recordedAt),
-                            ),
-                            subtitle: subtitleParts.isEmpty
-                                ? null
-                                : Text(subtitleParts.join(' ・ ')),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => widget.repository.delete(
-                                uid: widget.uid,
-                                record: record,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
+                );
+              },
+            ),
     );
   }
 }

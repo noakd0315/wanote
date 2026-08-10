@@ -330,6 +330,8 @@
   "toiletLocationOptionalLabel": "場所（任意）",
   "toiletLocationSubtitle": "場所: {location}",
 
+  "toiletShowChartTooltip": "グラフ表示",
+  "toiletShowTimelineTooltip": "記録一覧を表示",
   "toiletRecordTimelineTitle": "トイレ記録",
   "toiletConsultAiButtonLabel": "AI相談する",
   "toiletUrineColorSubtitle": "色: {color}",
@@ -356,7 +358,7 @@
   "weightDuplicateDateDialogContent": "上書きしますか？それとも追加の記録として保存しますか？",
   "weightAddAsNewEntryButtonLabel": "追加する",
   "weightOverwriteButtonLabel": "上書きする",
-  "weightPeriodOneMonth": "1ヶ月",
+  "weightPeriodSixMonths": "6ヶ月",
   "weightPeriodThreeMonths": "3ヶ月",
   "weightPeriodOneYear": "1年",
   "weightDeltaVsPreviousLabel": "前回比",

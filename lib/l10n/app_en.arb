@@ -1297,6 +1297,14 @@
     }
   },
 
+  "toiletShowChartTooltip": "Show chart",
+  "@toiletShowChartTooltip": {
+    "description": "Tooltip on the button that swaps the toilet record list for the frequency chart, in place."
+  },
+  "toiletShowTimelineTooltip": "Show records",
+  "@toiletShowTimelineTooltip": {
+    "description": "Tooltip on the button that swaps the toilet frequency chart back for the record list."
+  },
   "toiletRecordTimelineTitle": "Toilet records",
   "@toiletRecordTimelineTitle": {
     "description": "AppBar title of the toilet record timeline screen."
@@ -1402,9 +1410,9 @@
   "@weightOverwriteButtonLabel": {
     "description": "Button label to overwrite the existing same-day weight entry."
   },
-  "weightPeriodOneMonth": "1 month",
-  "@weightPeriodOneMonth": {
-    "description": "Segmented button label for the one-month trend period."
+  "weightPeriodSixMonths": "6 months",
+  "@weightPeriodSixMonths": {
+    "description": "Label of the 6-month option in the weight chart period toggle."
   },
   "weightPeriodThreeMonths": "3 months",
   "@weightPeriodThreeMonths": {

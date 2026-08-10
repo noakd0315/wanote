@@ -1,9 +1,11 @@
 import '../../../shared/utils/calendar_period.dart';
 import '../models/weight_record.dart';
 
-/// Chart period toggle from spec 3.2 ("折れ線グラフ表示（期間切り替え：1ヶ月
-/// ／3ヶ月／1年）").
-enum WeightTrendPeriod { oneMonth, threeMonths, oneYear }
+/// Chart period toggle. Spec 3.2 asked for 1ヶ月／3ヶ月／1年, but the PM
+/// widened the shortest window: unlike people, dogs are not weighed daily, so
+/// a one-month view was usually two or three points and read as noise
+/// ("人間と違い毎日図らないと思うので、３か月、6カ月、１年としてください").
+enum WeightTrendPeriod { threeMonths, sixMonths, oneYear }
 
 /// Result of [WeightTrendCalculator.calculate]: the series to plot for the
 /// selected period, plus the two deltas spec 3.4 asks for as the MVP
@@ -24,7 +26,7 @@ class WeightTrendResult {
   /// The exact start/end of the selected window -- `periodEnd` is always
   /// the `now` passed to [WeightTrendCalculator.calculate] and `periodStart`
   /// is `periodEnd` minus the period's calendar months (e.g. for `now` =
-  /// 2026-08-02 and [WeightTrendPeriod.oneMonth], periodStart is 2026-07-02).
+  /// 2026-08-02 and [WeightTrendPeriod.threeMonths], periodStart is 2026-05-02).
   /// Exposed so the screen can display the range explicitly rather than the
   /// user having to infer it from which points happen to be plotted.
   final DateTime periodStart;
@@ -113,8 +115,8 @@ class WeightTrendCalculator {
   /// means.
   DateTime _periodStart(DateTime now, WeightTrendPeriod period) {
     final months = switch (period) {
-      WeightTrendPeriod.oneMonth => 1,
       WeightTrendPeriod.threeMonths => 3,
+      WeightTrendPeriod.sixMonths => 6,
       WeightTrendPeriod.oneYear => 12,
     };
     return trailingCalendarMonthsStart(now, months);

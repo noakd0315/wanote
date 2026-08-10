@@ -937,6 +937,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get toiletShowChartTooltip => 'グラフ表示';
+
+  @override
+  String get toiletShowTimelineTooltip => '記録一覧を表示';
+
+  @override
   String get toiletRecordTimelineTitle => 'トイレ記録';
 
   @override
@@ -1013,7 +1019,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get weightOverwriteButtonLabel => '上書きする';
 
   @override
-  String get weightPeriodOneMonth => '1ヶ月';
+  String get weightPeriodSixMonths => '6ヶ月';
 
   @override
   String get weightPeriodThreeMonths => '3ヶ月';

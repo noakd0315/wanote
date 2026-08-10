@@ -8,7 +8,7 @@ import '../data/weight_record_repository.dart';
 import '../domain/weight_trend_calculator.dart';
 import '../models/weight_record.dart';
 
-/// Spec 3.2: line chart with a 1 month / 3 months / 1 year period toggle,
+/// Spec 3.2: line chart with a 3 months / 6 months / 1 year period toggle,
 /// plus the "前回比" / "1ヶ月前比" delta display from spec 3.4. The actual
 /// filtering/delta math lives in [WeightTrendCalculator] (pure, unit
 /// tested) — this widget only renders its result.
@@ -38,7 +38,7 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   /// list view (per the PM's request) until the stored preference loads.
   static const _showTablePrefsKey = 'weight_chart.show_table';
 
-  WeightTrendPeriod _period = WeightTrendPeriod.oneMonth;
+  WeightTrendPeriod _period = WeightTrendPeriod.threeMonths;
   bool _showTable = true;
   static const _calculator = WeightTrendCalculator();
 
@@ -161,12 +161,12 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                 child: SegmentedButton<WeightTrendPeriod>(
                   segments: [
                     ButtonSegment(
-                      value: WeightTrendPeriod.oneMonth,
-                      label: Text(l10n.weightPeriodOneMonth),
-                    ),
-                    ButtonSegment(
                       value: WeightTrendPeriod.threeMonths,
                       label: Text(l10n.weightPeriodThreeMonths),
+                    ),
+                    ButtonSegment(
+                      value: WeightTrendPeriod.sixMonths,
+                      label: Text(l10n.weightPeriodSixMonths),
                     ),
                     ButtonSegment(
                       value: WeightTrendPeriod.oneYear,

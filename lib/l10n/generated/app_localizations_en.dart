@@ -969,6 +969,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get toiletShowChartTooltip => 'Show chart';
+
+  @override
+  String get toiletShowTimelineTooltip => 'Show records';
+
+  @override
   String get toiletRecordTimelineTitle => 'Toilet records';
 
   @override
@@ -1047,7 +1053,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightOverwriteButtonLabel => 'Overwrite';
 
   @override
-  String get weightPeriodOneMonth => '1 month';
+  String get weightPeriodSixMonths => '6 months';
 
   @override
   String get weightPeriodThreeMonths => '3 months';

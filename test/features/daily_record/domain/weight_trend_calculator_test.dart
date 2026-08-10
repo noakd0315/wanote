@@ -20,26 +20,35 @@ void main() {
       'r6',
       DateTime(2026, 4, 10),
       8.8,
-    ); // before 3mo cutoff, within 1yr
+    ); // before 6mo cutoff, within 1yr
     final r5 = record('r5', DateTime(2026, 5, 1), 9.0); // within 3mo
     final r4 = record(
       'r4',
       DateTime(2026, 6, 10),
       9.3,
-    ); // before 1mo cutoff, within 3mo
-    final r3 = record('r3', DateTime(2026, 6, 16), 9.5); // within 1mo
-    final r2 = record('r2', DateTime(2026, 7, 1), 9.8); // within 1mo
+    ); // within 3mo
+    final r3 = record('r3', DateTime(2026, 6, 16), 9.5); // within 3mo
+    final r2 = record('r2', DateTime(2026, 7, 1), 9.8); // within 3mo
     final r1 = record('r1', DateTime(2026, 7, 15), 10.0); // == now
 
     final all = [r8, r7, r6, r5, r4, r3, r2, r1];
 
-    test('1 month keeps only records on/after now-1mo', () {
+    // PM: dogs are not weighed daily, so the shortest window is now 3
+    // months and 6 months replaces the old 1 month.
+    test('6 months keeps only records on/after now-6mo', () {
       final result = calculator.calculate(
         records: all,
         now: now,
-        period: WeightTrendPeriod.oneMonth,
+        period: WeightTrendPeriod.sixMonths,
       );
-      expect(result.series.map((r) => r.weightId), ['r3', 'r2', 'r1']);
+      expect(result.series.map((r) => r.weightId), [
+        'r6',
+        'r5',
+        'r4',
+        'r3',
+        'r2',
+        'r1',
+      ]);
     });
 
     test('3 months keeps only records on/after now-3mo', () {
@@ -104,7 +113,7 @@ void main() {
         final result = calculator.calculate(
           records: [...all, boundary],
           now: now,
-          period: WeightTrendPeriod.oneMonth,
+          period: WeightTrendPeriod.threeMonths,
         );
         expect(result.series.map((r) => r.weightId), contains('boundary'));
       },
@@ -123,7 +132,7 @@ void main() {
         final result = calculator.calculate(
           records: records,
           now: now,
-          period: WeightTrendPeriod.oneMonth,
+          period: WeightTrendPeriod.threeMonths,
         );
         expect(result.deltaVsPrevious, closeTo(0.2, 1e-9));
       },
@@ -176,7 +185,7 @@ void main() {
       final result = calculator.calculate(
         records: const [],
         now: now,
-        period: WeightTrendPeriod.oneMonth,
+        period: WeightTrendPeriod.threeMonths,
       );
       expect(result.series, isEmpty);
       expect(result.deltaVsPrevious, isNull);
@@ -188,7 +197,7 @@ void main() {
       final result = calculator.calculate(
         records: [only],
         now: now,
-        period: WeightTrendPeriod.oneMonth,
+        period: WeightTrendPeriod.threeMonths,
       );
       expect(result.series, [only]);
       expect(result.deltaVsPrevious, isNull);
@@ -201,13 +210,13 @@ void main() {
     () {
       final displayDate = DateTime(2026, 8, 2);
 
-      test('1 month -> 2026-07-02 to 2026-08-02', () {
+      test('6 months -> 2026-02-02 to 2026-08-02', () {
         final result = calculator.calculate(
           records: const [],
           now: displayDate,
-          period: WeightTrendPeriod.oneMonth,
+          period: WeightTrendPeriod.sixMonths,
         );
-        expect(result.periodStart, DateTime(2026, 7, 2));
+        expect(result.periodStart, DateTime(2026, 2, 2));
         expect(result.periodEnd, DateTime(2026, 8, 2));
       });
 
@@ -268,13 +277,13 @@ void main() {
     );
 
     test(
-      'a record at midnight exactly 1 month before now is included in the 1-month period',
+      'a record at midnight exactly 6 months before now is included in the 6-month period',
       () {
-        final boundaryRecord = record('boundary', DateTime(2026, 7, 2), 1.0);
+        final boundaryRecord = record('boundary', DateTime(2026, 2, 2), 1.0);
         final result = calculator.calculate(
           records: [boundaryRecord],
           now: nowInTheAfternoon,
-          period: WeightTrendPeriod.oneMonth,
+          period: WeightTrendPeriod.sixMonths,
         );
         expect(result.series, [boundaryRecord]);
       },
