@@ -188,6 +188,19 @@ class _PreventionRecordFormScreenState
           _ocrFallbackMessage = l10n.ocrReadFailedMessage;
         });
       }
+    } on CertificateOcrException catch (e) {
+      // Distinguish the reasons the user can act on from the ones they
+      // cannot. "Couldn't read it" and "you have used today's ten scans" ask
+      // for completely different responses, and showing the same sentence
+      // for both leaves someone retrying a limit that will not lift until
+      // tomorrow -- the same problem the sign-in screen had.
+      setState(() {
+        _ocrFallbackMessage = switch (e.statusCode) {
+          429 => l10n.ocrRateLimitedMessage,
+          413 => l10n.ocrImageTooLargeMessage,
+          _ => l10n.ocrReadFailedMessage,
+        };
+      });
     } catch (_) {
       setState(() {
         _ocrFallbackMessage = l10n.ocrReadFailedMessage;
@@ -373,9 +386,7 @@ class _PreventionRecordFormScreenState
                           ? child
                           : const SizedBox(
                               height: 160,
-                              child: Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              child: Center(child: CircularProgressIndicator()),
                             ),
                     ),
                   ],

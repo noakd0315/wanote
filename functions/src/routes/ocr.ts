@@ -21,11 +21,19 @@ import { OCR_SYSTEM_PROMPT, parseOcrModelOutput } from '../lib/ocrParsing';
  * and have it forwarded verbatim to the Anthropic API.
  */
 
-/** Largest base64 payload accepted, ~5MB decoded -- Anthropic's own
- * per-image limit. base64 inflates by 4/3, so the encoded string is capped a
- * little above that. Without this the only bound was the Worker's 100MB
- * request limit, ten times a day, all of it billed. */
-const MAX_IMAGE_BASE64_LENGTH = 7_000_000;
+/** Largest image accepted, matching storage.rules' cap on uploads so "too
+ * large" means the same thing everywhere -- and comfortably under Anthropic's
+ * own per-image limit.
+ *
+ * The app compresses every photo before sending (1280-1600px long edge, JPEG
+ * quality 80), which lands well under a megabyte, so this is a backstop
+ * against a caller bypassing the app rather than a limit real use meets.
+ * Without it the only bound was the Worker's 100MB request limit, ten times a
+ * day, every byte of it billed. */
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/** base64 inflates by 4/3, so the encoded string is that much longer. */
+const MAX_IMAGE_BASE64_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3);
 export async function handleOcrCertificate(
   request: Request,
   env: Env & RateLimitEnv,

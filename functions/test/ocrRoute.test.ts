@@ -87,7 +87,7 @@ describe('handleOcrCertificate', () => {
 
     const response = await handleOcrCertificate(
       makeRequest({
-        image_base64: 'A'.repeat(7_000_001),
+        image_base64: 'A'.repeat(7_400_000),
         media_type: 'image/jpeg',
       }),
       makeEnv(),

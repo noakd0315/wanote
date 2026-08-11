@@ -807,6 +807,14 @@
   "@certificateCaptureAiLabel": {
     "description": "Button label shown when an OCR backend is configured."
   },
+  "ocrRateLimitedMessage": "You have used all of today's automatic scans. Please enter the details manually.",
+  "@ocrRateLimitedMessage": {
+    "description": "Shown when the certificate OCR backend returns 429 -- the per-day scan limit is spent. Distinct from a read failure because retrying will not help until tomorrow."
+  },
+  "ocrImageTooLargeMessage": "This photo is too large to scan. Please retake or crop it, or enter the details manually.",
+  "@ocrImageTooLargeMessage": {
+    "description": "Shown when the certificate OCR backend returns 413. Unlike a read failure, the user can fix this by retaking the photo."
+  },
   "ocrReadFailedMessage": "Couldn't read it automatically. Please enter the details manually",
   "@ocrReadFailedMessage": {
     "description": "Shown when the AI-OCR certificate read fails or returns low-confidence results."

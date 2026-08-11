@@ -21,12 +21,16 @@ service firebase.storage {
     match /users/{uid}/{allPaths=**} {
       allow read: if isOwner(uid);
 
-      // Uploads are additionally capped and typed. Everything the app writes
-      // here is a photo it compressed itself, so anything larger or of
-      // another type is either a bug or someone using the bucket as free
-      // storage.
+      // Uploads are capped and typed. Every image the app writes here has
+      // been through FlutterImagePhotoCompressor (1280px long edge, JPEG
+      // quality 80) or the certificate screen's equivalent at 1600px, which
+      // lands well under a megabyte in practice -- so 5MB is a backstop
+      // against something bypassing the app, not a working limit anyone
+      // should meet. Kept in step with the OCR route's own cap
+      // (functions/src/routes/ocr.ts) so "too large" means one thing across
+      // the app.
       allow create, update: if isOwner(uid)
-        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
 
       // Split out from the write above because `request.resource` is null on

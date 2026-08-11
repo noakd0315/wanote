@@ -595,6 +595,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get certificateCaptureAiLabel => '証明書を撮影／選択してAIで自動入力';
 
   @override
+  String get ocrRateLimitedMessage => '本日の自動読み取り回数の上限に達しました。手動で入力してください';
+
+  @override
+  String get ocrImageTooLargeMessage => '画像が大きすぎて読み取れません。撮り直すか、手動で入力してください';
+
+  @override
   String get ocrReadFailedMessage => '読み取れませんでした。手動で入力してください';
 
   @override

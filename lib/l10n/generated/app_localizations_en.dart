@@ -621,6 +621,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Photograph or choose a certificate for AI auto-fill';
 
   @override
+  String get ocrRateLimitedMessage =>
+      'You have used all of today\'s automatic scans. Please enter the details manually.';
+
+  @override
+  String get ocrImageTooLargeMessage =>
+      'This photo is too large to scan. Please retake or crop it, or enter the details manually.';
+
+  @override
   String get ocrReadFailedMessage =>
       'Couldn\'t read it automatically. Please enter the details manually';
 

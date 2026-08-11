@@ -212,6 +212,8 @@
   "certificateNotRegisteredMessage": "証明書は未登録です",
   "certificateCaptureManualLabel": "証明書を撮影／選択（自動読取は準備中）",
   "certificateCaptureAiLabel": "証明書を撮影／選択してAIで自動入力",
+  "ocrRateLimitedMessage": "本日の自動読み取り回数の上限に達しました。手動で入力してください",
+  "ocrImageTooLargeMessage": "画像が大きすぎて読み取れません。撮り直すか、手動で入力してください",
   "ocrReadFailedMessage": "読み取れませんでした。手動で入力してください",
   "ocrConfidenceLabel": "AI読み取り信頼度: {percent}%（内容は必ずご確認ください）",
 

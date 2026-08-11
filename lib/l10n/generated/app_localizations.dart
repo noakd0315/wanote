@@ -1238,6 +1238,18 @@ abstract class AppLocalizations {
   /// **'Photograph or choose a certificate for AI auto-fill'**
   String get certificateCaptureAiLabel;
 
+  /// Shown when the certificate OCR backend returns 429 -- the per-day scan limit is spent. Distinct from a read failure because retrying will not help until tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used all of today\'s automatic scans. Please enter the details manually.'**
+  String get ocrRateLimitedMessage;
+
+  /// Shown when the certificate OCR backend returns 413. Unlike a read failure, the user can fix this by retaking the photo.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo is too large to scan. Please retake or crop it, or enter the details manually.'**
+  String get ocrImageTooLargeMessage;
+
   /// Shown when the AI-OCR certificate read fails or returns low-confidence results.
   ///
   /// In en, this message translates to:

@@ -123,8 +123,10 @@ describe('the other upload paths', () => {
 });
 
 describe('upload constraints', () => {
-  it('reject a file over the 10MB cap', async () => {
-    const tooBig = new Uint8Array(10 * 1024 * 1024 + 1);
+  it('reject a file over the 5MB cap', async () => {
+    // Every photo the app uploads is compressed to well under a megabyte, so
+    // this is a backstop against something bypassing the app.
+    const tooBig = new Uint8Array(5 * 1024 * 1024 + 1);
     await assertFails(uploadBytes(ref(asOwner(), CERT), tooBig, JPEG));
   });
 

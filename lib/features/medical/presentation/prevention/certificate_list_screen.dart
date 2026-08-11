@@ -190,10 +190,7 @@ class _CertificateTile extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,

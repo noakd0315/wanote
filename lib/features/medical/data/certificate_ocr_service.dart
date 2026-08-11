@@ -125,6 +125,12 @@ class HttpCertificateOcrService implements CertificateOcrService {
         statusCode: 429,
       );
     }
+    if (response.statusCode == 413) {
+      throw CertificateOcrException(
+        'The image is too large for the OCR backend.',
+        statusCode: 413,
+      );
+    }
     if (response.statusCode != 200) {
       throw CertificateOcrException(
         'OCR request failed: HTTP ${response.statusCode}',
