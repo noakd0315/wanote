@@ -13,11 +13,19 @@ import { OCR_SYSTEM_PROMPT, parseOcrModelOutput } from '../lib/ocrParsing';
  *
  * Response body: { extracted: OcrExtractedFields, confidence: number | null }
  *
- * The client (lib/features/medical/data/certificate_ocr_service.dart) has
- * already resized/compressed the image before it ever reaches this route
- * (spec 5.4 step 2) -- this route does not re-validate image dimensions,
- * only that a body was sent at all.
+ * The client (lib/features/medical/data/certificate_ocr_service.dart)
+ * resizes/compresses the image before sending (spec 5.4 step 2), but that is
+ * a courtesy, not a control: anyone can call this route directly. Dimensions
+ * are still not re-validated here -- the size cap below is what bounds the
+ * cost, since a caller could otherwise post megabytes of base64 per request
+ * and have it forwarded verbatim to the Anthropic API.
  */
+
+/** Largest base64 payload accepted, ~5MB decoded -- Anthropic's own
+ * per-image limit. base64 inflates by 4/3, so the encoded string is capped a
+ * little above that. Without this the only bound was the Worker's 100MB
+ * request limit, ten times a day, all of it billed. */
+const MAX_IMAGE_BASE64_LENGTH = 7_000_000;
 export async function handleOcrCertificate(
   request: Request,
   env: Env & RateLimitEnv,
@@ -56,6 +64,12 @@ export async function handleOcrCertificate(
   if (typeof imageBase64 !== 'string' || imageBase64.length === 0) {
     return jsonResponse({ error: 'image_base64 is required' }, 400);
   }
+  if (imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
+    return jsonResponse(
+      { error: 'The image is too large. Please retake or crop the photo.' },
+      413,
+    );
+  }
   if (!isSupportedMediaType(mediaType)) {
     return jsonResponse(
       { error: 'media_type must be image/jpeg, image/png, or image/webp' },
@@ -80,8 +94,14 @@ export async function handleOcrCertificate(
     });
     claudeText = result.text;
   } catch (error) {
+    // Generic message on purpose: callClaude throws with the upstream
+    // response body attached, which carries Anthropic's request ids, model
+    // names and quota/billing state. The other three routes already return a
+    // fixed string and log the detail; this one was relaying it to the
+    // client.
+    console.error('[ocr] certificate extraction failed', error);
     return jsonResponse(
-      { error: `OCR extraction failed: ${(error as Error).message}` },
+      { error: 'OCR extraction failed. Please try again later.' },
       502,
     );
   }

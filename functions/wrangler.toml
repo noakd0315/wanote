@@ -8,17 +8,20 @@ compatibility_date = "2026-01-01"
 # Non-secret config only. Secrets (ANTHROPIC_API_KEY, FIREBASE_PROJECT_ID)
 # must be set via `wrangler secret put` — never committed here.
 
-# Used by src/lib/rateLimiter.ts (Agent D's /ai/consultation and /ai/report
-# routes; Agent C's /ocr/certificate route binds the same namespace).
+# Per-user rate limiting (src/lib/rateLimiter.ts), used by every route that
+# spends money: the AI consultation/report routes, OCR, and the billing
+# routes' abuse ceilings.
 #
-# Local dev (this is what `wrangler dev` / functions-dev in docker-compose.yml
-# runs by default -- no `--remote` flag) never talks to real Cloudflare KV at
-# all: wrangler simulates the binding entirely in-process under
-# functions/.wrangler/ (gitignored), so the id below does not need to
-# correspond to a real, provisioned namespace for local dev/smoke-testing to
-# work. It only needs to be a real id -- from
-# `wrangler kv namespace create RATE_LIMIT_KV` -- before running
-# `wrangler dev --remote` or `wrangler deploy` against real Cloudflare.
-[[kv_namespaces]]
-binding = "RATE_LIMIT_KV"
-id = "local-dev-rate-limit-kv"
+# A Durable Object rather than KV: the limit has to be a hard ceiling, and a
+# KV read-compare-write is neither atomic nor read-your-writes consistent, so
+# concurrent or multi-region traffic sailed past it. `wrangler dev` simulates
+# Durable Objects locally, so no Cloudflare resource is needed for local dev.
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+# Required for Cloudflare to create the class on first deploy. Do not renumber
+# an applied tag -- add a new one instead.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter"]

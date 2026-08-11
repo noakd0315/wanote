@@ -26,10 +26,20 @@ export async function verifyFirebaseToken(
   // it sees FIREBASE_AUTH_EMULATOR_HOST set, it skips signature verification
   // for emulator-issued tokens. See
   // https://firebase.google.com/docs/emulator-suite/connect_auth#id_tokens.
-  // This env var is only ever set via functions/.dev.vars (gitignored, see
-  // functions/.dev.vars.example) and is never present in a real deployment's
-  // `wrangler secret` config, so this branch cannot run in production.
-  if (env.FIREBASE_AUTH_EMULATOR_HOST) {
+  //
+  // Guarded by the project id as well as the env var. On its own the env var
+  // is one misconfiguration away from catastrophe: anything that carried it
+  // into a real deployment -- `wrangler dev --remote`, pasting .dev.vars into
+  // `wrangler secret put`, promoting a staging config -- would silently
+  // disable signature checking for every request, letting anyone forge an
+  // `alg: none` token for any uid and impersonate them on every route,
+  // including granting themselves premium.
+  //
+  // Emulator project ids are always `demo-` prefixed (that prefix is what
+  // tells the Firebase tooling a project is fake and must never reach real
+  // Google infrastructure), so requiring both makes the unsafe combination
+  // structurally impossible rather than merely unlikely.
+  if (env.FIREBASE_AUTH_EMULATOR_HOST && isEmulatorProject(env)) {
     return verifyEmulatorToken(token, env);
   }
 
@@ -44,6 +54,13 @@ export async function verifyFirebaseToken(
     throw new Error('Token payload missing sub claim.');
   }
   return { uid: payload.sub };
+}
+
+/** Whether FIREBASE_PROJECT_ID names a Firebase emulator project rather than
+ * a real one. `demo-` is Firebase's own reserved prefix for projects that
+ * exist only in the Local Emulator Suite. */
+function isEmulatorProject(env: Env): boolean {
+  return env.FIREBASE_PROJECT_ID.startsWith('demo-');
 }
 
 /** Decodes (without verifying the signature) a Firebase Auth Emulator ID

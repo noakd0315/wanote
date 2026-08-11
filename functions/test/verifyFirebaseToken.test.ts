@@ -80,3 +80,82 @@ describe('verifyFirebaseToken', () => {
     });
   });
 });
+
+describe('the emulator escape hatch', () => {
+  // The branch that skips signature verification. If it ever runs against a
+  // real project, anyone can forge an `alg: none` token for any uid and be
+  // that user on every route -- so what matters is that it stays shut unless
+  // BOTH the emulator host and a demo- project id are present.
+  const realProject = 'wanote-prod';
+
+  function unsignedTokenFor(projectId: string, uid: string): string {
+    const b64 = (v: string) => Buffer.from(v, 'utf8').toString('base64url');
+    const header = b64(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+    const body = b64(
+      JSON.stringify({
+        iss: `https://securetoken.google.com/${projectId}`,
+        aud: projectId,
+        sub: uid,
+      }),
+    );
+    return `${header}.${body}.`;
+  }
+
+  it('rejects an unsigned token when the project is real, even with the emulator host set', async () => {
+    // The misconfiguration the guard exists for: a stray
+    // FIREBASE_AUTH_EMULATOR_HOST on a production deployment.
+    const env = {
+      ANTHROPIC_API_KEY: '',
+      FIREBASE_PROJECT_ID: realProject,
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    };
+    await expect(
+      verifyFirebaseToken(
+        `Bearer ${unsignedTokenFor(realProject, 'victim-uid')}`,
+        env,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rejects an unsigned token for a real project with no emulator host', async () => {
+    const env = {
+      ANTHROPIC_API_KEY: '',
+      FIREBASE_PROJECT_ID: realProject,
+    };
+    await expect(
+      verifyFirebaseToken(
+        `Bearer ${unsignedTokenFor(realProject, 'victim-uid')}`,
+        env,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('still accepts an emulator token for a demo- project', async () => {
+    // Local development has to keep working.
+    const env = {
+      ANTHROPIC_API_KEY: '',
+      FIREBASE_PROJECT_ID: 'demo-wanote',
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    };
+    await expect(
+      verifyFirebaseToken(
+        `Bearer ${unsignedTokenFor('demo-wanote', 'owner-uid')}`,
+        env,
+      ),
+    ).resolves.toEqual({ uid: 'owner-uid' });
+  });
+
+  it('rejects an emulator token for a different demo project', async () => {
+    const env = {
+      ANTHROPIC_API_KEY: '',
+      FIREBASE_PROJECT_ID: 'demo-wanote',
+      FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
+    };
+    await expect(
+      verifyFirebaseToken(
+        `Bearer ${unsignedTokenFor('demo-someone-else', 'owner-uid')}`,
+        env,
+      ),
+    ).rejects.toThrow();
+  });
+});

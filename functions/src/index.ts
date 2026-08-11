@@ -1,6 +1,10 @@
 import type { Env } from './lib/env';
 import type { RateLimitEnv } from './lib/rateLimiter';
 
+// Cloudflare looks for Durable Object classes on the Worker's entrypoint
+// module, so the binding in wrangler.toml resolves through this re-export.
+export { RateLimiter } from './lib/rateLimiter';
+
 /**
  * Route registry. Each feature agent owns one file under src/routes/ and
  * registers its path here:
@@ -17,14 +21,9 @@ import type { RateLimitEnv } from './lib/rateLimiter';
  * likely merge-conflict point between the medical and ai worktrees, so the
  * less logic that lives here, the easier that merge is.
  *
- * NOTE (Agent C / medical): the Worker's `Env` type (lib/env.ts) doesn't
- * declare the `RATE_LIMIT_KV` binding that routes/ocr.ts needs via
- * checkRateLimit(); rather than edit the shared lib/env.ts (out of scope
- * for this file's "keep it minimal" goal, and a likely second conflict
- * point with Agent D who needs the same binding for /ai/consultation), we
- * widen the type at the call site instead. Whoever wires up wrangler.toml's
- * `[[kv_namespaces]]` binding should also fold `RateLimitEnv` into `Env`
- * directly at that point.
+ * NOTE: the Worker's `Env` type (lib/env.ts) doesn't declare the
+ * `RATE_LIMITER` Durable Object binding that checkRateLimit() needs, so
+ * route handlers widen the type at the call site with `Env & RateLimitEnv`.
  */
 // The Flutter web target calls this Worker cross-origin (localhost:5000 ->
 // localhost:8787 locally; the deployed app's own origin -> the Worker's

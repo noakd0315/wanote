@@ -36,14 +36,25 @@ function makeToken(uid: string): string {
   return `${header}.${body}.`;
 }
 
-function makeFakeRateLimitKv(): RateLimitEnv['RATE_LIMIT_KV'] {
-  const store = new Map<string, string>();
+/** In-memory stand-in for the RATE_LIMITER Durable Object namespace: one
+ * counter per key, incremented in the same call that checks it -- which is
+ * the property the real Durable Object provides and KV did not. */
+function makeFakeRateLimiter(): RateLimitEnv['RATE_LIMITER'] {
+  const counts = new Map<string, number>();
   return {
-    get: async (key: string) => store.get(key) ?? null,
-    put: async (key: string, value: string) => {
-      store.set(key, value);
-    },
-  } as unknown as RateLimitEnv['RATE_LIMIT_KV'];
+    idFromName: (name: string) => name,
+    get: (name: string) => ({
+      fetch: async (_url: string, init: RequestInit) => {
+        const { maxCalls } = JSON.parse(init.body as string) as { maxCalls: number };
+        const used = counts.get(name) ?? 0;
+        if (used >= maxCalls) {
+          return Response.json({ allowed: false, remaining: 0 });
+        }
+        counts.set(name, used + 1);
+        return Response.json({ allowed: true, remaining: maxCalls - used - 1 });
+      },
+    }),
+  } as unknown as RateLimitEnv['RATE_LIMITER'];
 }
 
 function makeEnv(overrides: Partial<FirestoreEnv> = {}): FirestoreEnv & RateLimitEnv {
@@ -53,7 +64,7 @@ function makeEnv(overrides: Partial<FirestoreEnv> = {}): FirestoreEnv & RateLimi
     FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099',
     FIRESTORE_EMULATOR_HOST: EMULATOR,
     REVENUECAT_SECRET_KEY: '',
-    RATE_LIMIT_KV: makeFakeRateLimitKv(),
+    RATE_LIMITER: makeFakeRateLimiter(),
     ...overrides,
   };
 }
