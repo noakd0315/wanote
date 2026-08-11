@@ -49,9 +49,6 @@ class _LazyFirestoreCampaignCodeRepository implements CampaignCodeRepository {
   const _LazyFirestoreCampaignCodeRepository();
 
   @override
-  Future<CampaignCode?> checkValid(String code) => _delegate.checkValid(code);
-
-  @override
   Future<CampaignCodeRedemptionResult> redeem({
     required String code,
     required String uid,

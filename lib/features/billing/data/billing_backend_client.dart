@@ -62,16 +62,27 @@ class BillingBackendClient {
     };
   }
 
-  /// Calls `POST /billing/grant-promotional-entitlement`
-  /// (functions/src/routes/grantPromotionalEntitlement.ts). No request body
-  /// is needed -- the backend derives the uid from the Firebase ID token
-  /// and both the entitlement and the reward duration are fixed
-  /// server-side. Returns true iff the backend reports the entitlement was
-  /// granted. Throws [BillingBackendException] on a non-2xx response.
-  Future<bool> grantPromotionalEntitlement() async {
+  /// Redeems [code] via `POST /billing/grant-promotional-entitlement`
+  /// (functions/src/routes/grantPromotionalEntitlement.ts).
+  ///
+  /// The backend owns the whole decision: it looks the code up, checks it is
+  /// active, within its cap, not the caller's own referral code and not
+  /// already redeemed by them, and records the redemption -- all in one
+  /// Firestore transaction -- before granting anything. This used to take no
+  /// body at all and grant unconditionally, so any account could call it
+  /// directly for free premium.
+  ///
+  /// Returns [BackendRedemptionResult.granted] true on success, or a
+  /// machine-readable [BackendRedemptionResult.reason] the UI maps to a
+  /// localized message. Throws [BillingBackendException] on a non-2xx
+  /// response.
+  Future<BackendRedemptionResult> grantPromotionalEntitlement(
+    String code,
+  ) async {
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/billing/grant-promotional-entitlement'),
       headers: await _headers(),
+      body: jsonEncode({'code': code}),
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? message;
@@ -89,8 +100,43 @@ class BillingBackendClient {
       );
     }
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-    return decoded['granted'] as bool? ?? false;
+    return BackendRedemptionResult(
+      granted: decoded['granted'] as bool? ?? false,
+      reason: decoded['reason'] as String?,
+    );
   }
+
+  /// Calls `POST /billing/referral-code`, which returns the caller's own
+  /// referral code and creates its `campaign_codes/{code}` document the
+  /// first time.
+  ///
+  /// Also server-side now: `campaign_codes` is shared rather than owned, so
+  /// clients are no longer allowed to write there at all.
+  Future<String> fetchReferralCode() async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/billing/referral-code'),
+      headers: await _headers(),
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw BillingBackendException(
+        statusCode: response.statusCode,
+        message: 'Could not load your referral code.',
+      );
+    }
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    return decoded['code'] as String;
+  }
+}
+
+/// What the backend decided about a redemption. [reason] is one of
+/// RedemptionIneligibleReason's names (see
+/// functions/src/lib/campaignCodeEligibility.ts, which mirrors the Dart
+/// enum) and is null when [granted] is true.
+class BackendRedemptionResult {
+  const BackendRedemptionResult({required this.granted, this.reason});
+
+  final bool granted;
+  final String? reason;
 }
 
 class BillingBackendException implements Exception {

@@ -1,23 +1,44 @@
-import type { Env } from '../lib/env';
 import type { RateLimitEnv } from '../lib/rateLimiter';
 import { checkRateLimit } from '../lib/rateLimiter';
 import { verifyFirebaseToken } from '../lib/verifyFirebaseToken';
 import { grantPromotionalEntitlement } from '../lib/revenueCatClient';
+import {
+  beginTransaction,
+  commit,
+  FirestoreError,
+  getDocuments,
+  readBool,
+  readInt,
+  readString,
+  rollback,
+  type FirestoreEnv,
+} from '../lib/firestoreClient';
+import { evaluateEligibility, type CampaignCode } from '../lib/campaignCodeEligibility';
 
 /**
  * POST /billing/grant-promotional-entitlement -- campaign-code / referral-code
- * redemption backend (Agent E / billing).
+ * redemption.
  *
- * The Flutter client (lib/features/billing/data/campaign_code_repository.dart)
- * owns all code-validity/redemption-tracking logic directly against
- * Firestore (campaign_codes/{code}, users/{uid}/redeemed_codes/{code}) --
- * this route's only job, once the client has decided a redemption is
- * eligible, is to actually grant the reward via RevenueCat's Promotional
- * Entitlements API, which requires a secret key that must never reach the
- * client. No request body is needed: the uid comes from the verified
- * Firebase ID token, and both the entitlement and the reward duration are
- * fixed (see constants below) -- there is nothing else for the caller to
- * configure.
+ * Body: `{ "code": "SUMMER2026" }`
+ *
+ * This route used to take no body at all: it verified the caller's Firebase
+ * ID token and then granted a month of premium, trusting the client to have
+ * checked that a code was actually redeemed. Anyone with a free account could
+ * therefore call it directly and grant themselves premium, repeatedly, with
+ * no code -- the redemption records and caps in Firestore were never
+ * consulted, because the Worker could not see Firestore.
+ *
+ * Now the whole decision happens here: the code is looked up, eligibility is
+ * evaluated server-side, and the redemption is recorded in the same Firestore
+ * transaction that reads it, so two concurrent redemptions cannot both take
+ * the last slot of a capped code.
+ *
+ * Ordering note: the redemption is committed BEFORE RevenueCat is called. If
+ * the grant then fails the user is told to try again while their marker is
+ * already written, which costs them one redemption of that code -- annoying,
+ * and reported honestly. The other order is worse: granting first means a
+ * crash in between hands out premium with nothing recorded, which is exactly
+ * the unbounded-grant hole being closed.
  */
 
 /** lib/features/billing/domain/product_ids.dart's EntitlementIds.premium.
@@ -30,14 +51,16 @@ const PREMIUM_ENTITLEMENT_ID = 'premium';
  * this feature. */
 const REDEMPTION_DURATION = 'monthly';
 
-/** Abuse-protection ceiling: this endpoint is only ever called once per
- * successful code redemption (and redemption is itself capped client-side
- * by Firestore's "already redeemed" marker), so a generous 5/day/uid only
- * bites actual abuse -- e.g. someone hammering the endpoint directly rather
- * than through the normal redemption flow. */
-const RATE_LIMIT = { maxCalls: 5, windowSeconds: 60 * 60 * 24 };
+/** Abuse ceiling on top of the per-code rules. Redemption is now genuinely
+ * gated by the code's own cap and the per-user marker, so this only limits
+ * how fast someone can probe codes they do not have. */
+const RATE_LIMIT = { maxCalls: 20, windowSeconds: 60 * 60 * 24 };
 
-type GrantPromotionalEntitlementEnv = Env & RateLimitEnv;
+/** Matches the client's own input constraints; anything longer is not a code
+ * anyone typed. */
+const MAX_CODE_LENGTH = 64;
+
+type GrantPromotionalEntitlementEnv = FirestoreEnv & RateLimitEnv;
 
 function jsonResponse(data: unknown, status: number): Response {
   return new Response(JSON.stringify(data), {
@@ -57,9 +80,88 @@ export async function handleGrantPromotionalEntitlement(
     return jsonResponse({ error: 'Unauthorized.' }, 401);
   }
 
+  let code: string;
+  try {
+    const body = (await request.json()) as { code?: unknown };
+    if (typeof body.code !== 'string') {
+      return jsonResponse({ error: 'A code is required.' }, 400);
+    }
+    code = body.code.trim().toUpperCase();
+    if (code.length === 0 || code.length > MAX_CODE_LENGTH) {
+      return jsonResponse({ error: 'A code is required.' }, 400);
+    }
+    // Document ids cannot contain a slash, and letting one through would
+    // address a different collection entirely.
+    if (code.includes('/')) {
+      return jsonResponse({ error: 'A code is required.' }, 400);
+    }
+  } catch {
+    return jsonResponse({ error: 'A code is required.' }, 400);
+  }
+
   const rateLimit = await checkRateLimit(env, `grant-promotional-entitlement:${uid}`, RATE_LIMIT);
   if (!rateLimit.allowed) {
     return jsonResponse({ error: 'Too many redemption requests. Please try again later.' }, 429);
+  }
+
+  const codePath = `campaign_codes/${code}`;
+  const markerPath = `users/${uid}/redeemed_codes/${code}`;
+
+  let transaction: string;
+  try {
+    transaction = await beginTransaction(env);
+  } catch {
+    return jsonResponse({ error: 'Could not reach the redemption service.' }, 502);
+  }
+
+  try {
+    const [codeDoc, markerDoc] = await getDocuments(env, [codePath, markerPath], transaction);
+
+    const campaignCode: CampaignCode | null =
+      codeDoc === null
+        ? null
+        : {
+            active: readBool(codeDoc, 'active') ?? false,
+            maxRedemptions: readInt(codeDoc, 'maxRedemptions') ?? 0,
+            redemptionCount: readInt(codeDoc, 'redemptionCount') ?? 0,
+            referrerUid: readString(codeDoc, 'referrerUid'),
+          };
+
+    const eligibility = evaluateEligibility({
+      code: campaignCode,
+      alreadyRedeemedByUser: markerDoc !== null,
+      uid,
+    });
+    if (!eligibility.eligible) {
+      await rollback(env, transaction);
+      return jsonResponse({ granted: false, reason: eligibility.reason }, 200);
+    }
+
+    await commit(env, transaction, [
+      {
+        path: codePath,
+        // updateMask keeps this to the counter -- a whole-document write
+        // would silently drop referrerUid and the cap.
+        fields: {
+          redemptionCount: { integerValue: String(campaignCode!.redemptionCount + 1) },
+        },
+        updateMask: ['redemptionCount'],
+        mustExist: true,
+      },
+      {
+        path: markerPath,
+        fields: { redeemedAt: { timestampValue: new Date().toISOString() } },
+        mustExist: false,
+      },
+    ]);
+  } catch (error) {
+    // A lost race reads as "someone else took the slot", which is a normal
+    // outcome for a capped code rather than a server fault.
+    if (error instanceof FirestoreError && error.isAborted) {
+      return jsonResponse({ granted: false, reason: 'redemptionCapReached' }, 200);
+    }
+    console.error('[grantPromotionalEntitlement] redemption failed', error);
+    return jsonResponse({ error: 'Could not complete the redemption. Please try again.' }, 502);
   }
 
   try {
@@ -70,7 +172,8 @@ export async function handleGrantPromotionalEntitlement(
       duration: REDEMPTION_DURATION,
     });
     return jsonResponse({ granted: result.granted }, 200);
-  } catch {
+  } catch (error) {
+    console.error('[grantPromotionalEntitlement] entitlement grant failed', error);
     return jsonResponse(
       { error: 'Failed to grant promotional entitlement. Please try again later.' },
       502,

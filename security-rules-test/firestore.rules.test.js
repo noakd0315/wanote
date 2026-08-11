@@ -176,8 +176,8 @@ describe('cross-user writes to owner-scoped documents', () => {
   // an attacker would use to plant or destroy data rather than read it.
   const cases = {
     'usage counter': `users/${OWNER}/usage_counters/current`,
-    // Planting this would permanently block the victim from redeeming that
-    // code -- the marker is create-only, so they could never clear it.
+    // Nobody may write these at all now, owner included -- covered in its
+    // own suite below; kept here so the cross-user case is explicit too.
     'redemption marker': `users/${OWNER}/redeemed_codes/CODE1`,
     'health record': `users/${OWNER}/pets/pet-1/health_records/r1`,
     'certificate record': `users/${OWNER}/pets/pet-1/prevention_records/r1`,
@@ -190,142 +190,66 @@ describe('cross-user writes to owner-scoped documents', () => {
   }
 });
 
-describe('campaign-code redemption markers', () => {
-  const path = `users/${OWNER}/redeemed_codes/CODE1`;
+describe('campaign codes and redemption markers', () => {
+  // Both are written only by the Worker, which uses admin credentials and
+  // bypasses rules. Clients get nothing -- a client that can record its own
+  // redemption can equally skip recording one, which is why this could not
+  // be secured by narrowing the rules instead of closing them.
+  const marker = `users/${OWNER}/redeemed_codes/CODE1`;
+  const code = 'campaign_codes/CODE1';
 
-  it('can be created by their owner', async () => {
-    await assertSucceeds(setDoc(doc(asOwner(), path), { redeemedAt: 1 }));
+  it('a user cannot read their own redemption markers', async () => {
+    await seed(marker, { redeemedAt: 1 });
+    await assertFails(getDoc(doc(asOwner(), marker)));
   });
 
-  it('cannot be deleted, even by their owner', async () => {
-    // Deleting the marker would let the same account redeem a one-per-user
-    // code again.
-    await seed(path, { redeemedAt: 1 });
-    await assertFails(deleteDoc(doc(asOwner(), path)));
+  it('a user cannot create a redemption marker', async () => {
+    // Otherwise they could forge one for someone else, or skip their own.
+    await assertFails(setDoc(doc(asOwner(), marker), { redeemedAt: 1 }));
   });
 
-  it('cannot be overwritten, even by their owner', async () => {
-    await seed(path, { redeemedAt: 1 });
-    await assertFails(setDoc(doc(asOwner(), path), { redeemedAt: 2 }));
+  it('a user cannot delete a redemption marker', async () => {
+    // Deleting one would let the same account redeem a one-per-user code
+    // again.
+    await seed(marker, { redeemedAt: 1 });
+    await assertFails(deleteDoc(doc(asOwner(), marker)));
   });
 
-  it("are not visible to another user", async () => {
-    await seed(path, { redeemedAt: 1 });
-    await assertFails(getDoc(doc(asOther(), path)));
-  });
-});
-
-describe('campaign codes', () => {
-  const path = 'campaign_codes/CODE1';
-  const code = { active: true, maxRedemptions: 10, redemptionCount: 0 };
-
-  it('are readable by any signed-in user', async () => {
-    await seed(path, code);
-    await assertSucceeds(getDoc(doc(asOwner(), path)));
+  it('campaign codes cannot be read by a client', async () => {
+    await seed(code, { active: true, maxRedemptions: 10, redemptionCount: 0 });
+    await assertFails(getDoc(doc(asOwner(), code)));
   });
 
-  it('are not readable by a signed-out client', async () => {
-    await seed(path, code);
-    await assertFails(getDoc(doc(asAnon(), path)));
-  });
-
-  it('accept a redemption count incremented by exactly one', async () => {
-    await seed(path, code);
-    await assertSucceeds(
-      updateDoc(doc(asOwner(), path), { redemptionCount: 1 }),
-    );
-  });
-
-  it('reject a redemption count moved by anything else', async () => {
-    // Decrementing would hand out unlimited redemptions of a capped code.
-    await seed(path, { ...code, redemptionCount: 5 });
-    await assertFails(updateDoc(doc(asOwner(), path), { redemptionCount: 4 }));
-    await assertFails(updateDoc(doc(asOwner(), path), { redemptionCount: 99 }));
-  });
-
-  it('reject edits to any other field', async () => {
-    // Raising maxRedemptions or reactivating a spent code from the client.
-    await seed(path, code);
-    await assertFails(
-      updateDoc(doc(asOwner(), path), { maxRedemptions: 1000000 }),
-    );
-    await assertFails(updateDoc(doc(asOwner(), path), { active: true }));
-  });
-
-  it('cannot be listed', async () => {
-    // `allow read` covers get AND list. Without splitting them, any account
-    // can dump every promo code, its remaining capacity, and the referrerUid
-    // of every user who has one -- a user-enumeration list, since referral
-    // code ids are derived from the uid.
-    await seed(path, code);
+  it('campaign codes cannot be listed by a client', async () => {
+    await seed(code, { active: true, maxRedemptions: 10, redemptionCount: 0 });
     await assertFails(getDocs(collection(asOwner(), 'campaign_codes')));
   });
 
-  it('cannot be deleted from a client', async () => {
-    await seed(path, code);
-    await assertFails(deleteDoc(doc(asOwner(), path)));
+  it('a client cannot bump a redemption count', async () => {
+    await seed(code, { active: true, maxRedemptions: 10, redemptionCount: 0 });
+    await assertFails(updateDoc(doc(asOwner(), code), { redemptionCount: 1 }));
   });
 
-  it('cannot be created under an arbitrary id', async () => {
-    // Otherwise a user could squat a promo code name the marketing side
-    // plans to use, with themselves as the referrer.
+  it('a client cannot mint a code', async () => {
     await assertFails(
       setDoc(doc(asOwner(), 'campaign_codes/FREEMONTH'), {
-        ...code,
+        active: true,
+        maxRedemptions: 1000,
+        redemptionCount: 0,
         referrerUid: OWNER,
       }),
     );
   });
-});
 
-describe("a user's own referral code", () => {
-  // CampaignCodeRepository.getOrCreateReferralCode creates this document
-  // from the client the first time the user opens their referral screen.
-  const refCode = (uid) => `campaign_codes/REF-${uid.slice(0, 8).toUpperCase()}`;
-  const refData = (uid) => ({
-    active: true,
-    maxRedemptions: 1000,
-    redemptionCount: 0,
-    referrerUid: uid,
-  });
-
-  it('can be created by that user', async () => {
-    await assertSucceeds(
-      setDoc(doc(asOwner(), refCode(OWNER)), refData(OWNER)),
-    );
-  });
-
-  it('cannot be created pointing at somebody else', async () => {
-    // Crediting your referrals to another account, or minting a code on
-    // their behalf.
+  it('a client cannot create even its own referral code', async () => {
+    // It is created by POST /billing/referral-code now.
+    const own = `campaign_codes/REF-${OWNER.slice(0, 8).toUpperCase()}`;
     await assertFails(
-      setDoc(doc(asOwner(), refCode(OTHER)), refData(OTHER)),
-    );
-  });
-
-  it('cannot be created pre-loaded with a redemption count', async () => {
-    await assertFails(
-      setDoc(doc(asOwner(), refCode(OWNER)), {
-        ...refData(OWNER),
-        redemptionCount: 999,
-      }),
-    );
-  });
-
-  it('cannot be created with an inflated cap', async () => {
-    await assertFails(
-      setDoc(doc(asOwner(), refCode(OWNER)), {
-        ...refData(OWNER),
-        maxRedemptions: 1000000,
-      }),
-    );
-  });
-
-  it('cannot be created with extra fields', async () => {
-    await assertFails(
-      setDoc(doc(asOwner(), refCode(OWNER)), {
-        ...refData(OWNER),
-        grantsPremium: true,
+      setDoc(doc(asOwner(), own), {
+        active: true,
+        maxRedemptions: 1000,
+        redemptionCount: 0,
+        referrerUid: OWNER,
       }),
     );
   });

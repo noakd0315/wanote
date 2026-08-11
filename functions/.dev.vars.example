@@ -36,3 +36,23 @@ FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 # RevenueCat API, so the campaign-code redemption flow still works
 # end-to-end with zero cost and without a RevenueCat account.
 REVENUECAT_SECRET_KEY=
+# Host:port of the Firestore emulator, dialled directly by
+# functions/src/lib/firestoreClient.ts so the Worker can authorize campaign
+# code redemption itself (routes/grantPromotionalEntitlement.ts). Unlike
+# FIREBASE_AUTH_EMULATOR_HOST above -- which is only checked for presence --
+# this one is actually connected to, so it must be reachable FROM THE
+# CONTAINER: `firebase-emulators:8080` is the compose service name and the
+# emulator's in-container port (the host publishes it as 8081). Leave UNSET
+# when pointing at a real Firebase project; the service-account pair below
+# is used instead.
+FIRESTORE_EMULATOR_HOST=firebase-emulators:8080
+
+# Service-account credentials for a REAL Firebase project, used only when
+# FIRESTORE_EMULATOR_HOST is unset. Download a service-account JSON from the
+# Firebase console (Project settings -> Service accounts) and copy the two
+# fields across; keep the private key on one line with literal 
+ escapes,
+# exactly as it appears in the JSON. Never commit real values -- in
+# production set them with `wrangler secret put`.
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=

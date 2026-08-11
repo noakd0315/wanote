@@ -21,4 +21,18 @@ export interface Env {
    * `wrangler secret put REVENUECAT_SECRET_KEY` once the PM has a real key;
    * never commit a real value. */
   REVENUECAT_SECRET_KEY?: string;
+  /** Host:port of the Firestore emulator (local dev only). Its presence is
+   * what makes lib/firestoreClient.ts talk to the emulator without
+   * credentials; unset in a real deployment, where the service-account pair
+   * below is required instead. */
+  FIRESTORE_EMULATOR_HOST?: string;
+  /** Service-account client email, for lib/firestoreClient.ts. The Worker
+   * needs Firestore access to authorize campaign-code redemption itself --
+   * see routes/grantPromotionalEntitlement.ts for why that cannot live in
+   * the client. Set with `wrangler secret put`; never commit a real value. */
+  FIREBASE_CLIENT_EMAIL?: string;
+  /** The service account's PEM private key, newlines escaped as `
+`
+   * (wrangler secrets are single-line). Never commit a real value. */
+  FIREBASE_PRIVATE_KEY?: string;
 }
