@@ -38,7 +38,14 @@ void main() {
   late AuthController controller;
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    // Session-expiry window: these tests exercise the *gate*, not the
+    // expiry, so give them a session authenticated just now. Without a
+    // recorded authentication SessionExpiryPolicy treats the session as
+    // of unknown age and requires signing in again -- see
+    // test/features/auth/presentation/session_expiry_controller_test.dart.
+    SharedPreferences.setMockInitialValues({
+      'auth.last_authenticated_at.uid-1': DateTime.now().toIso8601String(),
+    });
     authRepository = MockAuthRepository();
     userAccountRepository = MockUserAccountRepository();
     petProfileRepository = MockPetProfileRepository();
@@ -132,7 +139,11 @@ void main() {
       ).thenAnswer((_) => Stream.value(const <PetProfile>[]));
 
       await pumpLaunchGate(tester);
-      await controller.initialize();
+      // runAsync, not a bare await: initialize() now reads SharedPreferences
+      // for the session-expiry timestamp, and a platform-channel reply is
+      // only delivered while the tester is pumping -- awaiting it directly
+      // deadlocks the test.
+      await tester.runAsync(() => controller.initialize());
       await tester.pumpAndSettle();
 
       // No pets yet -> LaunchGateScreen must show the forced first-pet form

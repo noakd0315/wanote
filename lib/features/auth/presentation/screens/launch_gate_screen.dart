@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
@@ -23,16 +25,45 @@ import 'sign_up_screen.dart';
 ///    (biometric setup, if available, then the forced first pet profile)
 ///    driven by [AuthController.justRegistered] and the live pet list.
 ///
-/// [homeBuilder] lets a caller outside features/auth supply the real app
+/// [LaunchGateScreen.homeBuilder] lets a caller outside features/auth supply the real app
 /// shell once onboarding is done; it defaults to [PetProfileSwitchScreen]
 /// so this feature is usable stand-alone before other features are wired
 /// in (main.dart is intentionally left untouched by this feature; wiring
 /// main.dart -> LaunchGateScreen is a follow-up step for whoever owns app
 /// startup).
-class LaunchGateScreen extends StatelessWidget {
+class LaunchGateScreen extends StatefulWidget {
   const LaunchGateScreen({super.key, this.homeBuilder});
 
   final WidgetBuilder? homeBuilder;
+
+  @override
+  State<LaunchGateScreen> createState() => _LaunchGateScreenState();
+}
+
+class _LaunchGateScreenState extends State<LaunchGateScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // A cold start already re-evaluates the gate. This catches the other
+    // case: an app left in the background for longer than the session
+    // window, which would otherwise come back straight into the content it
+    // was showing days ago (see SessionExpiryPolicy).
+    if (state == AppLifecycleState.resumed) {
+      unawaited(context.read<AuthController>().refreshSessionGate());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +93,8 @@ class LaunchGateScreen extends StatelessWidget {
         if (controller.pets.isEmpty) {
           return const PetProfileFormScreen();
         }
-        return homeBuilder?.call(context) ?? const PetProfileSwitchScreen();
+        return widget.homeBuilder?.call(context) ??
+            const PetProfileSwitchScreen();
     }
   }
 }

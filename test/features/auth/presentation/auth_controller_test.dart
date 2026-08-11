@@ -52,7 +52,14 @@ void main() {
   late StreamController<List<PetProfile>> petsController;
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    // Session-expiry window: these tests exercise the *gate*, not the
+    // expiry, so give them a session authenticated just now. Without a
+    // recorded authentication SessionExpiryPolicy treats the session as
+    // of unknown age and requires signing in again -- see
+    // test/features/auth/presentation/session_expiry_controller_test.dart.
+    SharedPreferences.setMockInitialValues({
+      'auth.last_authenticated_at.$_uid': DateTime.now().toIso8601String(),
+    });
     authRepository = MockAuthRepository();
     userAccountRepository = MockUserAccountRepository();
     petProfileRepository = MockPetProfileRepository();

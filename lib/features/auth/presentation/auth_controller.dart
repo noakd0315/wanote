@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -16,6 +16,7 @@ import '../data/user_account_repository.dart';
 import '../domain/active_pet_resolver.dart';
 import '../domain/auth_gate_resolver.dart';
 import '../domain/biometric_fallback_resolver.dart';
+import '../domain/session_expiry_policy.dart';
 
 /// Wires AuthRepository + UserAccountRepository + PetProfileRepository +
 /// BiometricService together with the pure domain resolvers
@@ -36,10 +37,13 @@ class AuthController extends ChangeNotifier {
     required this._petProfileRepository,
     required this._biometricService,
     this._authGateResolver = const AuthGateResolver(),
+    this._sessionExpiryPolicy = const SessionExpiryPolicy(),
+    DateTime Function()? now,
     this._biometricFallbackResolver = const BiometricFallbackResolver(),
     this._activePetResolver = const ActivePetResolver(),
     Future<SharedPreferences>? sharedPreferences,
-  }) : _prefsFuture = sharedPreferences ?? SharedPreferences.getInstance();
+  }) : _prefsFuture = sharedPreferences ?? SharedPreferences.getInstance(),
+       _now = now ?? DateTime.now;
 
   static const _lastActivePetIdPrefsKey = 'auth.last_active_pet_id';
 
@@ -49,6 +53,14 @@ class AuthController extends ChangeNotifier {
   /// device/browser doesn't confuse one account's session for another's.
   static const _localSessionIdPrefsKeyPrefix = 'auth.local_session_id.';
 
+  /// When this device last saw the user prove who they are -- an explicit
+  /// sign-in or a successful biometric unlock. Per-uid so switching accounts
+  /// on one device doesn't inherit the other's freshness. See
+  /// [SessionExpiryPolicy]; deliberately NOT updated by merely resuming a
+  /// persisted session.
+  static const _lastAuthenticatedAtPrefsKeyPrefix =
+      'auth.last_authenticated_at.';
+
   final Uuid _uuid = const Uuid();
 
   final AuthRepository _authRepository;
@@ -56,6 +68,10 @@ class AuthController extends ChangeNotifier {
   final PetProfileRepository _petProfileRepository;
   final BiometricService _biometricService;
   final AuthGateResolver _authGateResolver;
+  final SessionExpiryPolicy _sessionExpiryPolicy;
+
+  /// Injectable clock, so session expiry can be tested without waiting a day.
+  final DateTime Function() _now;
   final BiometricFallbackResolver _biometricFallbackResolver;
   final ActivePetResolver _activePetResolver;
   final Future<SharedPreferences> _prefsFuture;
@@ -185,6 +201,7 @@ class AuthController extends ChangeNotifier {
       hasActiveSession: true,
       biometricEnabled: user.biometricEnabled,
       biometricAvailable: _biometricAvailable,
+      sessionExpired: await _isSessionExpired(identity.uid),
     );
     _pendingBiometricFallback = null;
     _subscribeToPets(identity.uid);
@@ -262,6 +279,54 @@ class AuthController extends ChangeNotifier {
   /// to sign in again. Local first would leave the remote copy pointing at the
   /// *old* device -- the takeover would silently fail and the old device would
   /// stay signed in, which is the one outcome this feature exists to prevent.
+  /// Whether this device has gone longer than [SessionExpiryPolicy.maxAge]
+  /// without the user proving who they are.
+  Future<bool> _isSessionExpired(String uid) async {
+    final prefs = await _prefsFuture;
+    final stored = prefs.getString('$_lastAuthenticatedAtPrefsKeyPrefix$uid');
+    final lastAuthenticatedAt = stored == null
+        ? null
+        : DateTime.tryParse(stored);
+    return _sessionExpiryPolicy.hasExpired(
+      lastAuthenticatedAt: lastAuthenticatedAt,
+      now: _now(),
+    );
+  }
+
+  /// Records that the user just proved who they are, restarting the window.
+  ///
+  /// Called on explicit sign-in and on a successful biometric unlock -- both
+  /// are real proof. Never called when a persisted session is merely
+  /// resumed, or opening the app daily would keep the window open forever.
+  Future<void> _recordAuthentication(String uid) async {
+    final prefs = await _prefsFuture;
+    await prefs.setString(
+      '$_lastAuthenticatedAtPrefsKeyPrefix$uid',
+      _now().toIso8601String(),
+    );
+  }
+
+  /// Re-evaluates the gate for an already-signed-in user, so a session that
+  /// ages out while the app sits in the background is caught on resume
+  /// rather than only at a cold start.
+  Future<void> refreshSessionGate() async {
+    final user = _currentUser;
+    if (user == null || _gateAction != AuthGateAction.enterApp) return;
+    final expired = await _isSessionExpired(user.uid);
+    if (!expired) return;
+    _gateAction = _authGateResolver.resolve(
+      hasActiveSession: true,
+      biometricEnabled: user.biometricEnabled,
+      biometricAvailable: _biometricAvailable,
+      sessionExpired: true,
+    );
+    if (_gateAction == AuthGateAction.requireSignIn) {
+      await signOut();
+      return;
+    }
+    notifyListeners();
+  }
+
   Future<void> _claimSession(String uid) async {
     // Invalidates every session subscription created before this point --
     // see _subscribeToSession.
@@ -311,6 +376,7 @@ class AuthController extends ChangeNotifier {
       // already exists) but before the session watcher is attached (so the
       // watcher never replays a stale session id); doing it out here on
       // either side of this call reintroduces one bug or the other.
+      await _recordAuthentication(identity.uid);
       await _onAuthChanged(identity, claimSession: true);
     } catch (e, stackTrace) {
       // Full exception -> developer-facing log only (PM report: raw SDK
@@ -372,6 +438,11 @@ class AuthController extends ChangeNotifier {
     final result = await _biometricService.authenticate(reason: reason);
     if (result == BiometricPromptResult.success) {
       _pendingBiometricFallback = null;
+      // The biometric prompt IS the re-authentication for this window, so
+      // passing it restarts the clock (PM: biometric may pass instead of a
+      // full sign-out).
+      final uid = _currentUser?.uid;
+      if (uid != null) await _recordAuthentication(uid);
       _gateAction = AuthGateAction.enterApp;
       notifyListeners();
       return;
@@ -389,6 +460,8 @@ class AuthController extends ChangeNotifier {
   Future<void> completeReenterPassword(String password) async {
     await _authRepository.reauthenticateWithPassword(password);
     _pendingBiometricFallback = null;
+    final uid = _currentUser?.uid;
+    if (uid != null) await _recordAuthentication(uid);
     _gateAction = AuthGateAction.enterApp;
     notifyListeners();
   }
