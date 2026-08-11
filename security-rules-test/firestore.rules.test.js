@@ -255,6 +255,57 @@ describe('campaign codes and redemption markers', () => {
   });
 });
 
+describe('referral rewards and pending grants', () => {
+  // Both are written only by the Worker. A client that could write either
+  // could mint itself premium: the counter is the five-reward cap, and a
+  // pending grant is a promise of a free month waiting to be redeemed.
+  const counter = `users/${OWNER}/rewards/referral`;
+  const grant = `users/${OWNER}/pending_grants/g1`;
+
+  it('the owner can read their reward counter', async () => {
+    // The app shows "referrals 3/5" from this.
+    await seed(counter, { rewardedCount: 3 });
+    await assertSucceeds(getDoc(doc(asOwner(), counter)));
+  });
+
+  it('the owner cannot write their reward counter', async () => {
+    // Otherwise the five-reward cap is whatever the client says it is.
+    await seed(counter, { rewardedCount: 3 });
+    await assertFails(setDoc(doc(asOwner(), counter), { rewardedCount: 0 }));
+  });
+
+  it('another user cannot read the counter', async () => {
+    await seed(counter, { rewardedCount: 3 });
+    await assertFails(getDoc(doc(asOther(), counter)));
+  });
+
+  it('the owner can read their pending grants', async () => {
+    await seed(grant, { reason: 'referral', months: 1 });
+    await assertSucceeds(getDoc(doc(asOwner(), grant)));
+  });
+
+  it('the owner cannot create a pending grant', async () => {
+    // A pending grant is a free month waiting to be applied.
+    await assertFails(
+      setDoc(doc(asOwner(), grant), { reason: 'referral', months: 1 }),
+    );
+  });
+
+  it('the owner cannot un-apply a pending grant', async () => {
+    // Clearing appliedAt would let the same month be claimed again.
+    await seed(grant, { reason: 'referral', appliedAt: 'x' });
+    await assertFails(deleteDoc(doc(asOwner(), grant)));
+    await assertFails(
+      updateDoc(doc(asOwner(), grant), { appliedAt: null }),
+    );
+  });
+
+  it('another user cannot read a pending grant', async () => {
+    await seed(grant, { reason: 'referral', months: 1 });
+    await assertFails(getDoc(doc(asOther(), grant)));
+  });
+});
+
 describe('paths the app does not use', () => {
   it('are denied by default rather than silently open', async () => {
     // There is no catch-all match, so a collection someone adds later fails

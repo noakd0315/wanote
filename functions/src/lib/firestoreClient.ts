@@ -48,6 +48,15 @@ export function readInt(doc: FirestoreDocument | null, field: string): number | 
   return null;
 }
 
+/** Reads a timestamp field as its ISO-8601 string. Separate from
+ * [readString] because Firestore stores these as `timestampValue`, and
+ * reading one with readString silently yields null -- which for a field like
+ * `appliedAt` reads as "not yet applied". */
+export function readTimestamp(doc: FirestoreDocument | null, field: string): string | null {
+  const value = doc?.fields?.[field];
+  return value && 'timestampValue' in value ? value.timestampValue : null;
+}
+
 export function readBool(doc: FirestoreDocument | null, field: string): boolean | null {
   const value = doc?.fields?.[field];
   return value && 'booleanValue' in value ? value.booleanValue : null;
@@ -261,4 +270,22 @@ export async function rollback(env: FirestoreEnv, transaction: string): Promise<
     method: 'POST',
     body: JSON.stringify({ transaction }),
   });
+}
+
+/**
+ * Lists every document in [collectionPath]. Used for a user's pending
+ * grants, which is a handful of documents at most -- deliberately not
+ * paginated, and not suitable for a collection that could grow large.
+ */
+export async function listDocuments(
+  env: FirestoreEnv,
+  collectionPath: string,
+): Promise<{ id: string; doc: FirestoreDocument }[]> {
+  const result = (await firestoreFetch(env, `/documents/${collectionPath}?pageSize=100`, {
+    method: 'GET',
+  })) as { documents?: FirestoreDocument[] };
+  return (result.documents ?? []).map((doc) => ({
+    id: (doc.name ?? '').split('/').pop() ?? '',
+    doc,
+  }));
 }

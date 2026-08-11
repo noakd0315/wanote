@@ -1,7 +1,7 @@
 import type { RateLimitEnv } from '../lib/rateLimiter';
 import { checkRateLimit } from '../lib/rateLimiter';
 import { verifyFirebaseToken } from '../lib/verifyFirebaseToken';
-import { grantPromotionalEntitlement } from '../lib/revenueCatClient';
+import { grantOrDefer } from '../lib/grantOrDefer';
 import {
   beginTransaction,
   commit,
@@ -12,6 +12,7 @@ import {
   readString,
   rollback,
   type FirestoreEnv,
+  type FirestoreWrite,
 } from '../lib/firestoreClient';
 import { evaluateEligibility, type CampaignCode } from '../lib/campaignCodeEligibility';
 
@@ -41,15 +42,14 @@ import { evaluateEligibility, type CampaignCode } from '../lib/campaignCodeEligi
  * the unbounded-grant hole being closed.
  */
 
-/** lib/features/billing/domain/product_ids.dart's EntitlementIds.premium.
- * Kept as a plain string here (rather than importing across the Dart/TS
- * boundary) -- update both together if the RevenueCat dashboard's
- * entitlement identifier ever changes. */
-const PREMIUM_ENTITLEMENT_ID = 'premium';
-
-/** "1ヶ月無料" (1 month of premium access), per the PM's explicit spec for
- * this feature. */
-const REDEMPTION_DURATION = 'monthly';
+/** How many referrals one user can be rewarded for, ever. PM decision.
+ *
+ * Counted per USER rather than per code: a cap on the code would become
+ * 5-per-code the moment anyone holds more than one, which is a change we
+ * should be able to make without reopening the abuse ceiling. It is also
+ * what bounds the damage from someone referring themselves with throwaway
+ * accounts -- five months, not unlimited. */
+const MAX_REFERRAL_REWARDS = 5;
 
 /** Abuse ceiling on top of the per-code rules. Redemption is now genuinely
  * gated by the code's own cap and the per-user marker, so this only limits
@@ -107,6 +107,9 @@ export async function handleGrantPromotionalEntitlement(
   const codePath = `campaign_codes/${code}`;
   const markerPath = `users/${uid}/redeemed_codes/${code}`;
 
+  const referrerWrites: FirestoreWrite[] = [];
+  let rewardedReferrerUid: string | null = null;
+
   let transaction: string;
   try {
     transaction = await beginTransaction(env);
@@ -137,6 +140,43 @@ export async function handleGrantPromotionalEntitlement(
       return jsonResponse({ granted: false, reason: eligibility.reason }, 200);
     }
 
+    // The referrer's reward is decided in the SAME transaction that records
+    // the redemption, so their counter cannot be advanced twice by two
+    // redemptions racing, and the code cannot be deactivated without the
+    // redemption that triggered it also landing.
+    const referrerUid = campaignCode!.referrerUid;
+    let rewardReferrer = false;
+    if (referrerUid !== null && referrerUid !== uid) {
+      const [rewardsDoc] = await getDocuments(
+        env,
+        [`users/${referrerUid}/rewards/referral`],
+        transaction,
+      );
+      const rewardedCount = readInt(rewardsDoc, 'rewardedCount') ?? 0;
+      rewardReferrer = rewardedCount < MAX_REFERRAL_REWARDS;
+      if (rewardReferrer) {
+        referrerWrites.push({
+          path: `users/${referrerUid}/rewards/referral`,
+          fields: {
+            rewardedCount: { integerValue: String(rewardedCount + 1) },
+            updatedAt: { timestampValue: new Date().toISOString() },
+          },
+          updateMask: ['rewardedCount', 'updatedAt'],
+        });
+        // Retiring the code at the cap is what stops a referral link living
+        // on as a free-month generator once its owner stops earning from it
+        // (PM: 不正リスクの軽減).
+        if (rewardedCount + 1 >= MAX_REFERRAL_REWARDS) {
+          referrerWrites.push({
+            path: codePath,
+            fields: { active: { booleanValue: false } },
+            updateMask: ['active'],
+            mustExist: true,
+          });
+        }
+      }
+    }
+
     await commit(env, transaction, [
       {
         path: codePath,
@@ -153,7 +193,9 @@ export async function handleGrantPromotionalEntitlement(
         fields: { redeemedAt: { timestampValue: new Date().toISOString() } },
         mustExist: false,
       },
+      ...referrerWrites,
     ]);
+    rewardedReferrerUid = rewardReferrer ? referrerUid : null;
   } catch (error) {
     // A lost race reads as "someone else took the slot", which is a normal
     // outcome for a capped code rather than a server fault.
@@ -164,14 +206,14 @@ export async function handleGrantPromotionalEntitlement(
     return jsonResponse({ error: 'Could not complete the redemption. Please try again.' }, 502);
   }
 
+  let outcome: 'granted' | 'deferred';
   try {
-    const result = await grantPromotionalEntitlement({
+    outcome = await grantOrDefer({
       env,
-      appUserId: uid,
-      entitlementIdentifier: PREMIUM_ENTITLEMENT_ID,
-      duration: REDEMPTION_DURATION,
+      uid,
+      reason: 'redemption',
+      idempotencyKey: `redemption-${code}`,
     });
-    return jsonResponse({ granted: result.granted }, 200);
   } catch (error) {
     console.error('[grantPromotionalEntitlement] entitlement grant failed', error);
     return jsonResponse(
@@ -179,4 +221,28 @@ export async function handleGrantPromotionalEntitlement(
       502,
     );
   }
+
+  // The referrer's reward is best-effort on purpose: the person waiting on
+  // this response is the redeemer, and failing their redemption because
+  // somebody else's reward could not be delivered would be the wrong trade.
+  // The counter is already committed, so a failure here is a reward owed --
+  // logged for the operator to make good (PM decision).
+  if (rewardedReferrerUid !== null) {
+    try {
+      await grantOrDefer({
+        env,
+        uid: rewardedReferrerUid,
+        reason: 'referral',
+        idempotencyKey: `referral-${code}-${uid}`,
+      });
+    } catch (error) {
+      console.error(
+        `[grantPromotionalEntitlement] REFERRAL REWARD FAILED referrerUid=${rewardedReferrerUid} ` +
+          `code=${code} redeemedBy=${uid} at=${new Date().toISOString()}`,
+        error,
+      );
+    }
+  }
+
+  return jsonResponse({ granted: true, deferred: outcome === 'deferred' }, 200);
 }

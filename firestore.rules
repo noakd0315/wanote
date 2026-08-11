@@ -54,6 +54,23 @@ service cloud.firestore {
       allow read, write: if isOwner(uid);
     }
 
+    // Referral reward counter and rewards earned while premium was already
+    // active. Both are written only by the Worker: the counter is what caps
+    // referral rewards at five, and a pending grant is a promise of a free
+    // month, so a client able to write either could mint premium for itself.
+    //
+    // Readable by their owner so the app can show "referrals 3/5" and how
+    // many rewards are waiting, without another round trip to the backend.
+    match /users/{uid}/rewards/{document} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
+    match /users/{uid}/pending_grants/{grantId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
     // Campaign codes and redemption markers are written only by the Worker
     // (functions/src/routes/grantPromotionalEntitlement.ts and
     // referralCode.ts), which reaches Firestore with admin credentials and

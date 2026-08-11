@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../domain/billing_models.dart';
 import '../domain/product_ids.dart';
+import 'billing_backend_client.dart';
 import 'billing_config.dart';
 
 /// Wraps `purchases_flutter` (RevenueCat) so the rest of the app never talks
@@ -60,7 +62,10 @@ abstract class BillingRepository {
 }
 
 class RevenueCatBillingRepository implements BillingRepository {
-  RevenueCatBillingRepository();
+  RevenueCatBillingRepository({BillingBackendClient? backendClient})
+    : _backendClient = backendClient ?? BillingBackendClient.fromEnvironment();
+
+  final BillingBackendClient _backendClient;
 
   final StreamController<PremiumStatus> _premiumStatusController =
       StreamController<PremiumStatus>.broadcast();
@@ -157,6 +162,22 @@ class RevenueCatBillingRepository implements BillingRepository {
   @override
   Stream<PurchaseEvent> purchaseEvents() => _purchaseEventController.stream;
 
+  Future<void> _applyPendingGrants() async {
+    try {
+      await _backendClient.applyPendingGrants();
+    } catch (e, stackTrace) {
+      // Best-effort: the rewards stay pending and are retried the next time
+      // the app sees premium inactive, so failing quietly here costs nothing
+      // but a delay.
+      developer.log(
+        'Could not apply pending grants',
+        name: 'BillingRepository',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   void _onCustomerInfoUpdate(CustomerInfo customerInfo) {
     final entitlement = customerInfo.entitlements.all[EntitlementIds.premium];
     final isActive = entitlement?.isActive ?? false;
@@ -164,6 +185,16 @@ class RevenueCatBillingRepository implements BillingRepository {
     final changed = newStatus != _lastPremiumStatus;
     _lastPremiumStatus = newStatus;
     _premiumStatusController.add(newStatus);
+    if (!isActive) {
+      // A reward earned while premium was already active was recorded rather
+      // than granted (it would have expired underneath the paid plan). Now
+      // that the plan has lapsed it can actually be delivered.
+      //
+      // Fire-and-forget, and only a hint: the backend re-checks the
+      // subscription with RevenueCat before granting anything, so this being
+      // wrong -- or being called by a modified client -- changes nothing.
+      unawaited(_applyPendingGrants());
+    }
     if (changed) {
       _purchaseEventController.add(
         EntitlementStateChanged(

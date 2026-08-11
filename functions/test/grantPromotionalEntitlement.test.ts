@@ -67,6 +67,8 @@ function makeRequest(body: unknown, token = makeToken(UID)): Request {
 }
 
 interface FakeState {
+  /** Reward counters, keyed by uid. */
+  rewards: Map<string, number>;
   /** campaign_codes/{id} -> its fields, or absent for "no such code". */
   codes: Map<string, Record<string, unknown>>;
   /** Redemption markers that already exist, as `${uid}/${code}`. */
@@ -99,7 +101,14 @@ function installFetchFake(): void {
           const fields = state.codes.get(id);
           return fields ? { found: { name, fields } } : { missing: name };
         }
-        const [, uid, , code] = path.split('/');
+        const segments = path.split('/');
+        if (segments[2] === 'rewards') {
+          const count = state.rewards.get(segments[1]);
+          return count === undefined
+            ? { missing: name }
+            : { found: { name, fields: { rewardedCount: { integerValue: String(count) } } } };
+        }
+        const [, uid, , code] = segments;
         return state.markers.has(`${uid}/${code}`)
           ? { found: { name, fields: {} } }
           : { missing: name };
@@ -130,6 +139,7 @@ describe('handleGrantPromotionalEntitlement', () => {
   beforeEach(() => {
     state = {
       codes: new Map(),
+      rewards: new Map(),
       markers: new Set(),
       commits: [],
       revenueCatCalled: false,
@@ -228,7 +238,7 @@ describe('handleGrantPromotionalEntitlement', () => {
       makeEnv(),
     );
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ granted: true });
+    expect(await response.json()).toEqual({ granted: true, deferred: false });
   });
 
   it('records the redemption before granting anything', async () => {
@@ -269,6 +279,84 @@ describe('handleGrantPromotionalEntitlement', () => {
     expect(marker.currentDocument).toEqual({ exists: false });
   });
 
+  describe('the referrer reward', () => {
+    const REFERRER = 'referrer-uid';
+
+    /** Writes committed against a given document path. */
+    function writesFor(path: string): Record<string, unknown>[] {
+      return state.commits
+        .flat()
+        .map((w) => w as { update: { name: string; fields: Record<string, unknown> } })
+        .filter((w) => w.update.name.includes(path))
+        .map((w) => w.update.fields);
+    }
+
+    it('credits the referrer in the same commit as the redemption', async () => {
+      seedCode('REF-X', { referrerUid: REFERRER });
+      state.rewards.set(REFERRER, 0);
+
+      await handleGrantPromotionalEntitlement(makeRequest({ code: 'REF-X' }), makeEnv());
+
+      // One commit, not two: the counter cannot advance without the
+      // redemption that earned it also landing.
+      expect(state.commits).toHaveLength(1);
+      expect(writesFor(`users/${REFERRER}/rewards/referral`)[0].rewardedCount).toEqual({
+        integerValue: '1',
+      });
+    });
+
+    it('deactivates the code once the referrer hits five rewards', async () => {
+      // PM: retire the code at the cap, so a referral link cannot live on as
+      // a free-month generator once its owner stops earning from it.
+      seedCode('REF-X', { referrerUid: REFERRER });
+      state.rewards.set(REFERRER, 4);
+
+      await handleGrantPromotionalEntitlement(makeRequest({ code: 'REF-X' }), makeEnv());
+
+      const codeWrites = writesFor('campaign_codes/REF-X');
+      expect(codeWrites).toContainEqual({ active: { booleanValue: false } });
+    });
+
+    it('does not deactivate the code before the cap', async () => {
+      seedCode('REF-X', { referrerUid: REFERRER });
+      state.rewards.set(REFERRER, 2);
+
+      await handleGrantPromotionalEntitlement(makeRequest({ code: 'REF-X' }), makeEnv());
+
+      expect(writesFor('campaign_codes/REF-X')).not.toContainEqual({
+        active: { booleanValue: false },
+      });
+    });
+
+    it('stops crediting a referrer already at the cap', async () => {
+      // Reaching the cap deactivates the code, so this should be
+      // unreachable -- but a stale counter must not hand out a sixth month.
+      seedCode('REF-X', { referrerUid: REFERRER });
+      state.rewards.set(REFERRER, 5);
+
+      await handleGrantPromotionalEntitlement(makeRequest({ code: 'REF-X' }), makeEnv());
+
+      expect(writesFor(`users/${REFERRER}/rewards/referral`)).toHaveLength(0);
+    });
+
+    it('still redeems for the redeemer when the referrer is capped', async () => {
+      seedCode('REF-X', { referrerUid: REFERRER });
+      state.rewards.set(REFERRER, 5);
+
+      const response = await handleGrantPromotionalEntitlement(
+        makeRequest({ code: 'REF-X' }),
+        makeEnv(),
+      );
+      expect(await response.json()).toEqual({ granted: true, deferred: false });
+    });
+
+    it('credits nobody for a plain campaign code', async () => {
+      seedCode('SUMMER');
+      await handleGrantPromotionalEntitlement(makeRequest({ code: 'SUMMER' }), makeEnv());
+      expect(writesFor('/rewards/referral')).toHaveLength(0);
+    });
+  });
+
   it('normalises the code to upper case', async () => {
     // The UI lets people type in either case; the document id is upper.
     seedCode('SUMMER');
@@ -276,6 +364,6 @@ describe('handleGrantPromotionalEntitlement', () => {
       makeRequest({ code: ' summer ' }),
       makeEnv(),
     );
-    expect(await response.json()).toEqual({ granted: true });
+    expect(await response.json()).toEqual({ granted: true, deferred: false });
   });
 });

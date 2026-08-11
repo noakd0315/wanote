@@ -126,6 +126,27 @@ class BillingBackendClient {
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     return decoded['code'] as String;
   }
+
+  /// Calls `POST /billing/apply-pending-grants`, which delivers any reward
+  /// the user earned while they already had premium.
+  ///
+  /// A hint, not an instruction: the backend re-checks the subscription with
+  /// RevenueCat before granting anything, so calling this while still
+  /// subscribed does nothing. Returns how many months were applied.
+  Future<int> applyPendingGrants() async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/billing/apply-pending-grants'),
+      headers: await _headers(),
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw BillingBackendException(
+        statusCode: response.statusCode,
+        message: 'Could not apply pending rewards.',
+      );
+    }
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    return decoded['applied'] as int? ?? 0;
+  }
 }
 
 /// What the backend decided about a redemption. [reason] is one of

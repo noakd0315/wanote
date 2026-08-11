@@ -23,10 +23,11 @@ import { commit, FirestoreError, type FirestoreEnv } from '../lib/firestoreClien
  * same code on both sides. */
 const SHORT_ID_LENGTH = 8;
 
-/** Mirrors FirestoreCampaignCodeRepository.referralMaxRedemptions. Referral
- * codes are not meant to be scarce; they just need *a* cap so the same
- * eligibility rules apply uniformly. */
-const REFERRAL_MAX_REDEMPTIONS = 1000;
+/** Matches the referral reward cap in
+ * routes/grantPromotionalEntitlement.ts: the owner earns at most five
+ * rewards, and the code is deactivated when they do, so a higher redemption
+ * cap would only leave a code alive that can no longer pay its owner. */
+const REFERRAL_MAX_REDEMPTIONS = 5;
 
 const RATE_LIMIT = { maxCalls: 60, windowSeconds: 60 * 60 * 24 };
 

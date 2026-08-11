@@ -10,6 +10,8 @@ import type { RateLimitEnv } from './lib/rateLimiter';
  *   - Agent E (billing):  POST /billing/grant-promotional-entitlement
  *                                                     -> routes/grantPromotionalEntitlement.ts
  *   - Agent E (billing):  POST /billing/referral-code  -> routes/referralCode.ts
+ *   - Agent E (billing):  POST /billing/apply-pending-grants
+ *                                                     -> routes/applyPendingGrants.ts
  *
  * Keep this switch flat and route-file logic self-contained; this file is a
  * likely merge-conflict point between the medical and ai worktrees, so the
@@ -83,6 +85,10 @@ export default {
       case '/billing/referral-code': {
         const { handleReferralCode } = await import('./routes/referralCode');
         return withCors(await handleReferralCode(request, env));
+      }
+      case '/billing/apply-pending-grants': {
+        const { handleApplyPendingGrants } = await import('./routes/applyPendingGrants');
+        return withCors(await handleApplyPendingGrants(request, env));
       }
       default:
         return withCors(new Response('Not found', { status: 404 }));

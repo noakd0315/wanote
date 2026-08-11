@@ -92,3 +92,49 @@ export async function grantPromotionalEntitlement({
 
   return { granted: true, mock: false };
 }
+
+/**
+ * Whether [appUserId] currently has [entitlementIdentifier] from a real
+ * purchase, used to decide between granting a reward now and deferring it.
+ *
+ * Granting a promotional entitlement to someone who already has the same
+ * entitlement is wasted: it overlaps the paid one and expires underneath it,
+ * so an annual subscriber would receive nothing. See routes/grantOrDefer.ts.
+ *
+ * Local-dev fallback: with no secret key configured this reports "not
+ * subscribed", which keeps the redemption flow granting immediately so it
+ * stays demoable end-to-end -- same spirit as the mock grant above.
+ */
+export async function hasActiveEntitlement({
+  env,
+  appUserId,
+  entitlementIdentifier,
+}: {
+  env: Env;
+  appUserId: string;
+  entitlementIdentifier: string;
+}): Promise<boolean> {
+  if (!env.REVENUECAT_SECRET_KEY || env.REVENUECAT_SECRET_KEY.trim().length === 0) {
+    return false;
+  }
+
+  const url = `${REVENUECAT_API_URL}/subscribers/${encodeURIComponent(appUserId)}`;
+  const response = await fetch(url, {
+    headers: { authorization: `Bearer ${env.REVENUECAT_SECRET_KEY}` },
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`RevenueCat API error ${response.status}: ${body}`);
+  }
+
+  const payload = (await response.json()) as {
+    subscriber?: {
+      entitlements?: Record<string, { expires_date?: string | null }>;
+    };
+  };
+  const entitlement = payload.subscriber?.entitlements?.[entitlementIdentifier];
+  if (!entitlement) return false;
+  // A null expiry is a lifetime grant, which is active by definition.
+  if (!entitlement.expires_date) return true;
+  return new Date(entitlement.expires_date).getTime() > Date.now();
+}
