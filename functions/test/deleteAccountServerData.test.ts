@@ -72,28 +72,34 @@ const docPrefix = `projects/${PROJECT_ID}/databases/(default)/documents`;
 
 /** Contents of the server-owned collections, keyed by collection name. */
 let collections: Record<string, string[]>;
-/** The `referrerUid` on `campaign_codes/{OWN_CODE}`, or null if absent. */
-let campaignCodeOwner: string | null;
+/** `referrerUid` per existing `campaign_codes/{code}` document. */
+let campaignCodeOwners: Record<string, string>;
 /** Document paths (relative to the database root) the route deleted. */
 let deleted: string[];
+/** RevenueCat app_user_ids the route asked to delete. */
+let revenueCatDeletes: string[];
+/** What RevenueCat's DELETE responds with. */
+let revenueCatStatus: number;
 
 function installFetchFake(): void {
   vi.stubGlobal('fetch', async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : ((input as Request).url ?? String(input));
 
+    if (url.includes('api.revenuecat.com')) {
+      revenueCatDeletes.push(decodeURIComponent(url.split('/subscribers/')[1]));
+      return new Response('{}', { status: revenueCatStatus });
+    }
+
     if (url.includes(':batchGet')) {
       const { documents } = JSON.parse(init!.body as string) as { documents: string[] };
       return Response.json(
-        documents.map((name) =>
-          campaignCodeOwner === null
+        documents.map((name) => {
+          const code = name.split('/').pop()!;
+          const owner = campaignCodeOwners[code];
+          return owner === undefined
             ? { missing: name }
-            : {
-                found: {
-                  name,
-                  fields: { referrerUid: { stringValue: campaignCodeOwner } },
-                },
-              },
-        ),
+            : { found: { name, fields: { referrerUid: { stringValue: owner } } } };
+        }),
       );
     }
 
@@ -125,8 +131,10 @@ function installFetchFake(): void {
 describe('handleDeleteAccountServerData', () => {
   beforeEach(() => {
     collections = {};
-    campaignCodeOwner = null;
+    campaignCodeOwners = {};
     deleted = [];
+    revenueCatDeletes = [];
+    revenueCatStatus = 200;
     installFetchFake();
   });
 
@@ -141,7 +149,7 @@ describe('handleDeleteAccountServerData', () => {
       pending_grants: ['grant-1', 'grant-2'],
       redeemed_codes: ['SUMMER2026'],
     };
-    campaignCodeOwner = UID;
+    campaignCodeOwners = { [OWN_CODE]: UID };
 
     const response = await handleDeleteAccountServerData(makeRequest(), makeEnv());
 
@@ -161,12 +169,57 @@ describe('handleDeleteAccountServerData', () => {
     // so two accounts can derive the same code and the first one to ask owns
     // the document. Deleting it unconditionally would let the second account
     // destroy the first one's referral code just by deleting itself.
-    campaignCodeOwner = 'a-different-uid';
+    campaignCodeOwners = { [OWN_CODE]: 'a-different-uid' };
 
     const response = await handleDeleteAccountServerData(makeRequest(), makeEnv());
 
     expect(response.status).toBe(200);
     expect(deleted).toEqual([]);
+  });
+
+  it('deletes the fallback code of a user who lost the race for the first', async () => {
+    // The other half of the collision: this user's own code is the `-2` one,
+    // and sweeping only the primary candidate would leave it behind with
+    // their uid in it.
+    campaignCodeOwners = {
+      [OWN_CODE]: 'a-different-uid',
+      [`${OWN_CODE}-2`]: UID,
+    };
+
+    const response = await handleDeleteAccountServerData(makeRequest(), makeEnv());
+
+    expect(deleted).toEqual([`campaign_codes/${OWN_CODE}-2`]);
+    expect(response.status).toBe(200);
+  });
+
+  it('deletes the RevenueCat subscriber record too', async () => {
+    // RevenueCat is keyed by the same uid and holds the purchase history.
+    // The privacy policy names it as a processor, so leaving the record
+    // there would make "everything is deleted" untrue.
+    await handleDeleteAccountServerData(makeRequest(), makeEnv());
+
+    expect(revenueCatDeletes).toEqual([UID]);
+  });
+
+  it('deletes nothing at all when RevenueCat fails', async () => {
+    // Deletion is retryable by design; a half-done sweep that reported
+    // success would not be.
+    collections = { rewards: ['referral_counter'] };
+    revenueCatStatus = 500;
+
+    const response = await handleDeleteAccountServerData(makeRequest(), makeEnv());
+
+    expect(response.status).toBe(502);
+    expect(deleted).toEqual([]);
+  });
+
+  it('treats an already-deleted RevenueCat subscriber as done', async () => {
+    // What a retry after a partial failure looks like from RevenueCat's side.
+    revenueCatStatus = 404;
+
+    const response = await handleDeleteAccountServerData(makeRequest(), makeEnv());
+
+    expect(response.status).toBe(200);
   });
 
   it('succeeds on an account that has nothing stored server-side', async () => {

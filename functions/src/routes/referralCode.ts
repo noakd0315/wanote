@@ -1,7 +1,13 @@
 import type { RateLimitEnv } from '../lib/rateLimiter';
 import { checkRateLimit } from '../lib/rateLimiter';
 import { verifyFirebaseToken } from '../lib/verifyFirebaseToken';
-import { commit, FirestoreError, type FirestoreEnv } from '../lib/firestoreClient';
+import {
+  commit,
+  FirestoreError,
+  getDocuments,
+  readString,
+  type FirestoreEnv,
+} from '../lib/firestoreClient';
 
 /**
  * POST /billing/referral-code -- returns the caller's own referral code,
@@ -18,10 +24,12 @@ import { commit, FirestoreError, type FirestoreEnv } from '../lib/firestoreClien
  * nothing for the caller to choose.
  */
 
-/** Mirrors lib/features/billing/domain/campaign_code_models.dart's
- * ReferralCodeGenerator.deriveFrom -- the same uid must always produce the
- * same code on both sides. */
 const SHORT_ID_LENGTH = 8;
+
+/** How many codes to try before giving up. Only a collision consumes one, and
+ * collisions are already vanishingly rare (see [referralCodeCandidates]), so
+ * this exists to bound the loop rather than because it will be reached. */
+const MAX_CODE_CANDIDATES = 5;
 
 /** Matches the referral reward cap in
  * routes/grantPromotionalEntitlement.ts: the owner earns at most five
@@ -36,6 +44,27 @@ type ReferralCodeEnv = FirestoreEnv & RateLimitEnv;
 export function deriveReferralCode(uid: string): string {
   const shortId = uid.length <= SHORT_ID_LENGTH ? uid : uid.slice(0, SHORT_ID_LENGTH);
   return `REF-${shortId.toUpperCase()}`;
+}
+
+/**
+ * The codes [uid] may own, in the order they are tried.
+ *
+ * [deriveReferralCode] takes the first eight characters of the uid and
+ * upper-cases them, so two uids can derive the same code -- Firebase uids are
+ * case-sensitive, which means `abcdefgh…` and `ABCDEFGH…` collide outright.
+ * It is rare (36^8 combinations), but the old code handled it by treating
+ * "this document already exists" as "then it's yours": the second user's
+ * referral code was really the first user's, so every friend they invited
+ * credited a stranger, and their own counter never moved. Silently.
+ *
+ * The fix is that ownership is *checked* rather than assumed, and a taken
+ * code falls through to the next candidate here.
+ */
+export function referralCodeCandidates(uid: string): string[] {
+  const base = deriveReferralCode(uid);
+  return Array.from({ length: MAX_CODE_CANDIDATES }, (_, i) =>
+    i === 0 ? base : `${base}-${i + 1}`,
+  );
 }
 
 function jsonResponse(data: unknown, status: number): Response {
@@ -61,31 +90,46 @@ export async function handleReferralCode(
     return jsonResponse({ error: 'Too many requests. Please try again later.' }, 429);
   }
 
-  const code = deriveReferralCode(uid);
-
   try {
-    // Create-if-absent, with no prior read: the precondition does the work,
-    // so a second caller racing the first simply gets the existing document
-    // rather than resetting its redemption count to zero.
-    await commit(env, null, [
-      {
-        path: `campaign_codes/${code}`,
-        fields: {
-          active: { booleanValue: true },
-          maxRedemptions: { integerValue: String(REFERRAL_MAX_REDEMPTIONS) },
-          redemptionCount: { integerValue: '0' },
-          referrerUid: { stringValue: uid },
-        },
-        mustExist: false,
-      },
-    ]);
-  } catch (error) {
-    if (!(error instanceof FirestoreError) || !error.isFailedPrecondition) {
-      console.error('[referralCode] could not ensure the referral code exists', error);
-      return jsonResponse({ error: 'Could not load your referral code.' }, 502);
-    }
-    // Already exists, which is the normal case after the first call.
-  }
+    for (const code of referralCodeCandidates(uid)) {
+      try {
+        // Create-if-absent, with no prior read: the precondition does the
+        // work, so a second caller racing the first simply gets the existing
+        // document rather than resetting its redemption count to zero.
+        await commit(env, null, [
+          {
+            path: `campaign_codes/${code}`,
+            fields: {
+              active: { booleanValue: true },
+              maxRedemptions: { integerValue: String(REFERRAL_MAX_REDEMPTIONS) },
+              redemptionCount: { integerValue: '0' },
+              referrerUid: { stringValue: uid },
+            },
+            mustExist: false,
+          },
+        ]);
+        return jsonResponse({ code }, 200);
+      } catch (error) {
+        if (!(error instanceof FirestoreError) || !error.isFailedPrecondition) throw error;
+      }
 
-  return jsonResponse({ code }, 200);
+      // The document already exists. Usually because this same user asked
+      // before, which is the normal case after the first call -- but not
+      // necessarily, so ask whose it is instead of assuming.
+      const [existing] = await getDocuments(env, [`campaign_codes/${code}`]);
+      if (readString(existing, 'referrerUid') === uid) {
+        return jsonResponse({ code }, 200);
+      }
+      // Somebody else's. Try the next candidate.
+    }
+
+    console.error(
+      `[referralCode] every candidate code is taken for uid=${uid}; ` +
+        'this should be statistically impossible -- check deriveReferralCode.',
+    );
+    return jsonResponse({ error: 'Could not load your referral code.' }, 502);
+  } catch (error) {
+    console.error('[referralCode] could not ensure the referral code exists', error);
+    return jsonResponse({ error: 'Could not load your referral code.' }, 502);
+  }
 }

@@ -138,3 +138,54 @@ export async function hasActiveEntitlement({
   if (!entitlement.expires_date) return true;
   return new Date(entitlement.expires_date).getTime() > Date.now();
 }
+
+/**
+ * Permanently deletes [appUserId]'s RevenueCat subscriber record, as part of
+ * in-app account deletion.
+ *
+ * RevenueCat is identified by the same Firebase uid the app signs in with
+ * (billing_repository.dart's `Purchases.logIn(uid)`), and it holds that uid
+ * alongside the purchase history. Deleting the Firebase account without this
+ * would leave that record behind at a third party the privacy policy names
+ * -- the app would say "everything is deleted" while it was not.
+ *
+ * A 404 counts as success: the subscriber is already gone, which is what a
+ * retry after a partial failure looks like.
+ *
+ * Note this does *not* cancel the store subscription -- that lives with
+ * Apple/Google and only the user can cancel it, which is why the deletion
+ * screen says so explicitly.
+ *
+ * Local-dev fallback matches the rest of this file: with no secret key
+ * configured it reports a mock success rather than failing, so account
+ * deletion stays exercisable without a RevenueCat account.
+ */
+export async function deleteSubscriber({
+  env,
+  appUserId,
+}: {
+  env: Env;
+  appUserId: string;
+}): Promise<{ deleted: boolean; mock: boolean }> {
+  if (!env.REVENUECAT_SECRET_KEY || env.REVENUECAT_SECRET_KEY.trim().length === 0) {
+    console.warn(
+      '[revenueCatClient] REVENUECAT_SECRET_KEY is not set — skipping the subscriber ' +
+        'deletion and reporting mock success. A real deployment MUST have this key, or ' +
+        'account deletion silently leaves the RevenueCat record behind.',
+    );
+    return { deleted: false, mock: true };
+  }
+
+  const url = `${REVENUECAT_API_URL}/subscribers/${encodeURIComponent(appUserId)}`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: { authorization: `Bearer ${env.REVENUECAT_SECRET_KEY}` },
+  });
+
+  if (response.status === 404) return { deleted: false, mock: false };
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`RevenueCat API error ${response.status}: ${body}`);
+  }
+  return { deleted: true, mock: false };
+}

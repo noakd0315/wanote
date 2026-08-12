@@ -135,19 +135,3 @@ class CampaignCodeRedemptionFailed extends CampaignCodeRedemptionResult {
 
   final String message;
 }
-
-/// Pure derivation of a short, human-typeable referral code from a uid.
-/// Deterministic so calling it twice for the same uid always yields the
-/// same code (no need to persist a separately-generated random code).
-class ReferralCodeGenerator {
-  const ReferralCodeGenerator._();
-
-  static const int _shortIdLength = 8;
-
-  static String deriveFrom(String uid) {
-    final shortId = uid.length <= _shortIdLength
-        ? uid
-        : uid.substring(0, _shortIdLength);
-    return 'REF-${shortId.toUpperCase()}';
-  }
-}

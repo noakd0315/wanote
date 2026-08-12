@@ -8,7 +8,8 @@ import {
   readString,
   type FirestoreEnv,
 } from '../lib/firestoreClient';
-import { deriveReferralCode } from './referralCode';
+import { deleteSubscriber } from '../lib/revenueCatClient';
+import { referralCodeCandidates } from './referralCode';
 
 /**
  * POST /account/delete-server-data -- erases the parts of an account that
@@ -63,6 +64,17 @@ export async function handleDeleteAccountServerData(
   }
 
   try {
+    // RevenueCat first, so a failure here aborts before anything is touched
+    // and leaves the account entirely intact for the retry.
+    //
+    // It holds the same uid the app signs in with, next to the purchase
+    // history (billing_repository.dart calls `Purchases.logIn(uid)`), and the
+    // privacy policy names RevenueCat as a processor -- so an account
+    // deletion that skipped it would be telling the user something untrue.
+    // Deleting a subscriber does NOT cancel their store subscription; only
+    // the user can do that, which is what the deletion screen says.
+    await deleteSubscriber({ env, appUserId: uid });
+
     const paths: string[] = [];
 
     for (const collection of SERVER_OWNED_COLLECTIONS) {
@@ -74,16 +86,22 @@ export async function handleDeleteAccountServerData(
 
     // The user's own referral code, which stores their uid as `referrerUid`.
     //
-    // Checked rather than assumed, because deriveReferralCode() only uses the
-    // first eight characters of the uid: two accounts sharing that prefix
-    // derive the same code, and whoever created it first owns the document.
-    // Deleting it unconditionally would let the second account destroy the
-    // first one's referral code by deleting itself.
-    const code = deriveReferralCode(uid);
-    const [campaignCode] = await getDocuments(env, [`campaign_codes/${code}`]);
-    if (campaignCode !== null && readString(campaignCode, 'referrerUid') === uid) {
-      paths.push(`campaign_codes/${code}`);
-    }
+    // Every candidate is checked rather than just the first, and ownership is
+    // verified rather than assumed: deriveReferralCode() uses only the first
+    // eight characters of the uid, so a user who lost the race for their
+    // primary code owns a `-2` one instead (see referralCodeCandidates).
+    // Deleting unconditionally would let one account destroy another's
+    // referral code simply by deleting itself.
+    const candidates = referralCodeCandidates(uid);
+    const codeDocs = await getDocuments(
+      env,
+      candidates.map((code) => `campaign_codes/${code}`),
+    );
+    candidates.forEach((code, i) => {
+      if (readString(codeDocs[i], 'referrerUid') === uid) {
+        paths.push(`campaign_codes/${code}`);
+      }
+    });
 
     await deleteDocuments(env, paths);
 

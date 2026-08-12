@@ -183,21 +183,4 @@ void main() {
     });
   });
 
-  group('ReferralCodeGenerator.deriveFrom', () {
-    test('is deterministic for the same uid', () {
-      final a = ReferralCodeGenerator.deriveFrom('abcdef1234567890');
-      final b = ReferralCodeGenerator.deriveFrom('abcdef1234567890');
-      expect(a, b);
-    });
-
-    test('differs for different uids', () {
-      final a = ReferralCodeGenerator.deriveFrom('userAAAAAAAA');
-      final b = ReferralCodeGenerator.deriveFrom('userBBBBBBBB');
-      expect(a, isNot(b));
-    });
-
-    test('handles a uid shorter than the short-id length without throwing', () {
-      expect(() => ReferralCodeGenerator.deriveFrom('abc'), returnsNormally);
-    });
-  });
 }
