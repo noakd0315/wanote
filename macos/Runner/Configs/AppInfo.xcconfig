@@ -8,7 +8,7 @@
 PRODUCT_NAME = wanote
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.wanote
+PRODUCT_BUNDLE_IDENTIFIER = jp.wanote.app
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 wanote. All rights reserved.

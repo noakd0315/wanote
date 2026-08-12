@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Wanote</string>
+	<string>wanote</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -66,5 +66,18 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- 権限の説明文。iOSでは説明文なしにカメラ等へアクセスした時点でアプリが
+	     クラッシュし、App Review も通らない。文言は許可ダイアログにそのまま
+	     表示されるので、「なぜ必要か」が利用者に伝わる形にしてある。
+	     多言語化するには ja.lproj / en.lproj に InfoPlist.strings を置き
+	     Xcode プロジェクトへ登録する必要がある（CLOUD_PHASE_TASKS.md E-1）。 -->
+	<key>NSCameraUsageDescription</key>
+	<string>ワクチン証明書や愛犬の写真を撮影するためにカメラを使用します。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>愛犬の写真や証明書の画像を選ぶために写真ライブラリを使用します。</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>アプリのロック解除にFace IDを使用します。生体情報が端末外へ送信されることはありません。</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>無料版で表示される広告をあなたに合った内容にするために使用します。許可しなくてもアプリのすべての機能をご利用いただけます。</string>
 </dict>
 </plist>

@@ -1,4 +1,4 @@
-package com.example.wanote
+package jp.wanote.app
 
 import io.flutter.embedding.android.FlutterActivity
 
