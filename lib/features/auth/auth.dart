@@ -12,6 +12,10 @@ export '../../shared/models/models.dart';
 // Data layer (exposed mainly so main.dart can construct concrete
 // repositories to inject into AuthController; screens should not need
 // these directly).
+export 'data/account_backend_client.dart';
+export 'data/account_deletion_service.dart';
+export 'data/account_document_eraser.dart';
+export 'data/account_file_eraser.dart';
 export 'data/auth_repository.dart';
 export 'data/biometric_service.dart';
 export 'data/pet_profile_repository.dart';
@@ -24,6 +28,7 @@ export 'domain/biometric_fallback_resolver.dart';
 
 // Presentation layer.
 export 'presentation/auth_controller.dart';
+export 'presentation/screens/account_deletion_screen.dart';
 export 'presentation/screens/biometric_setup_screen.dart';
 export 'presentation/screens/launch_gate_screen.dart';
 export 'presentation/screens/pet_profile_form_screen.dart';

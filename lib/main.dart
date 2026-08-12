@@ -53,12 +53,21 @@ class WanoteApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthController>(
-          create: (_) => AuthController(
-            authRepository: FirebaseAuthRepository(),
-            userAccountRepository: FirestoreUserAccountRepository(),
-            petProfileRepository: FirestorePetProfileRepository(),
-            biometricService: LocalAuthBiometricService(),
-          )..initialize(),
+          create: (_) {
+            final authRepository = FirebaseAuthRepository();
+            return AuthController(
+              authRepository: authRepository,
+              userAccountRepository: FirestoreUserAccountRepository(),
+              petProfileRepository: FirestorePetProfileRepository(),
+              biometricService: LocalAuthBiometricService(),
+              accountDeletionService: DefaultAccountDeletionService(
+                authRepository: authRepository,
+                fileEraser: StorageAccountFileEraser(),
+                documentEraser: FirestoreAccountDocumentEraser(),
+                backendClient: AccountBackendClient.fromEnvironment(),
+              ),
+            )..initialize();
+          },
         ),
         ChangeNotifierProvider<LocaleController>(
           create: (_) => LocaleController(),

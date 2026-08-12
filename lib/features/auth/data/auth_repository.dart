@@ -53,6 +53,18 @@ abstract class AuthRepository {
   Future<AuthIdentity> signInWithApple();
 
   Future<void> signOut();
+
+  /// Permanently deletes the signed-in Firebase Auth user.
+  ///
+  /// Firebase rejects this with `requires-recent-login` unless the user
+  /// authenticated recently, which is why the deletion flow reauthenticates
+  /// first (see [AuthController.deleteAccount]).
+  ///
+  /// This must be the *last* step of account deletion. Both firestore.rules
+  /// and storage.rules key off `request.auth.uid`, so once the identity is
+  /// gone nothing can reach that account's documents or files again -- any
+  /// data still behind would be stranded with no way to delete it.
+  Future<void> deleteCurrentUser();
 }
 
 class FirebaseAuthRepository implements AuthRepository {
@@ -180,5 +192,18 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+  }
+
+  @override
+  Future<void> deleteCurrentUser() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw StateError('No signed-in user to delete.');
+    }
+    await user.delete();
+    // Google keeps its own cached session next to Firebase's; without this a
+    // subsequent "sign in with Google" silently reuses the account that was
+    // just deleted instead of showing the account chooser.
+    await _googleSignIn.signOut();
   }
 }

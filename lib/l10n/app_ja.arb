@@ -370,5 +370,27 @@
   "weightDeltaVsOneMonthAgoLabel": "1ヶ月前比",
   "weightNoRecordsForPeriod": "この期間の記録がありません",
   "weightEntryDialogTitle": "体重を記録",
-  "weightKgFieldLabel": "体重 (kg)"
+  "weightKgFieldLabel": "体重 (kg)",
+
+  "deleteAccountMenuTitle": "アカウントを削除",
+  "deleteAccountWarningTitle": "この操作は取り消せません",
+  "deleteAccountWarningBody": "アカウントを削除すると、以下がすべて完全に削除されます。復元はできません。",
+  "deleteAccountWarningItemPets": "登録したすべてのペットの情報",
+  "deleteAccountWarningItemRecords": "健康・体重・トイレ・通院・投薬・予防の記録",
+  "deleteAccountWarningItemPhotos": "アップロードしたすべての写真と証明書の画像",
+  "deleteAccountWarningItemAi": "AI相談・AIレポートの履歴",
+  "deleteAccountSubscriptionNoticeTitle": "サブスクリプションは自動では解約されません",
+  "deleteAccountSubscriptionNoticeBody": "プレミアムをご利用中の場合は、App Store または Google Play からご自身で解約してください。アカウントを削除しても課金は止まりません。",
+  "deleteAccountPasswordFieldLabel": "パスワード",
+  "deleteAccountPasswordHelperText": "本人確認のため、パスワードを入力してください。",
+  "deleteAccountProviderReauthNotice": "本人確認のため、削除の前にもう一度サインインします。",
+  "deleteAccountButtonLabel": "アカウントを削除する",
+  "deleteAccountConfirmDialogTitle": "アカウントを削除しますか？",
+  "deleteAccountConfirmDialogContent": "すべてのデータが完全に削除され、元に戻すことはできません。",
+  "deleteAccountConfirmButtonLabel": "削除する",
+  "deleteAccountCancelButtonLabel": "キャンセル",
+  "deleteAccountProgressMessage": "削除しています。アプリを閉じないでください。",
+  "deleteAccountCompletedMessage": "アカウントを削除しました。",
+  "deleteAccountFailedMessage": "削除に失敗しました。通信環境をご確認の上、もう一度お試しください。",
+  "deleteAccountRequiresRecentLoginMessage": "確認のため、もう一度サインインしてからお試しください。"
 }

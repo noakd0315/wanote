@@ -2095,6 +2095,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weight (kg)'**
   String get weightKgFieldLabel;
+
+  /// Settings menu item that opens the account deletion screen. Required in-app by App Store Review Guideline 5.1.1(v) and Google Play's data deletion policy.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountMenuTitle;
+
+  /// Heading of the warning panel on the account deletion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone'**
+  String get deleteAccountWarningTitle;
+
+  /// Lead-in above the list of what account deletion removes.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account permanently removes all of the following. None of it can be recovered.'**
+  String get deleteAccountWarningBody;
+
+  /// Bullet in the account deletion warning list.
+  ///
+  /// In en, this message translates to:
+  /// **'Every pet profile you have registered'**
+  String get deleteAccountWarningItemPets;
+
+  /// Bullet in the account deletion warning list.
+  ///
+  /// In en, this message translates to:
+  /// **'Health, weight, toilet, vet visit, medication and prevention records'**
+  String get deleteAccountWarningItemRecords;
+
+  /// Bullet in the account deletion warning list.
+  ///
+  /// In en, this message translates to:
+  /// **'Every photo and certificate scan you have uploaded'**
+  String get deleteAccountWarningItemPhotos;
+
+  /// Bullet in the account deletion warning list.
+  ///
+  /// In en, this message translates to:
+  /// **'Your AI consultation and AI report history'**
+  String get deleteAccountWarningItemAi;
+
+  /// Heading of the subscription warning on the account deletion screen. Subscriptions are held by the App Store / Google Play, not by this app, so deleting the account does not stop the billing -- users must be told this before they delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription is not cancelled automatically'**
+  String get deleteAccountSubscriptionNoticeTitle;
+
+  /// Body of the subscription warning on the account deletion screen.
+  ///
+  /// In en, this message translates to:
+  /// **'If you have a premium plan, cancel it yourself in the App Store or Google Play. Deleting your account here does not stop the billing.'**
+  String get deleteAccountSubscriptionNoticeBody;
+
+  /// Label of the password field shown to email/password accounts before deletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get deleteAccountPasswordFieldLabel;
+
+  /// Helper text under the reauthentication password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password to confirm it is you.'**
+  String get deleteAccountPasswordHelperText;
+
+  /// Shown instead of the password field for Google/Apple accounts, which reauthenticate by redoing their provider sign-in.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be asked to sign in again before your account is deleted.'**
+  String get deleteAccountProviderReauthNotice;
+
+  /// Destructive button that opens the final confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccountButtonLabel;
+
+  /// Title of the final confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountConfirmDialogTitle;
+
+  /// Body of the final confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'All of your data will be permanently deleted and cannot be restored.'**
+  String get deleteAccountConfirmDialogContent;
+
+  /// Confirming action in the final confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAccountConfirmButtonLabel;
+
+  /// Dismissing action in the final confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get deleteAccountCancelButtonLabel;
+
+  /// Shown while deletion runs. Deletion is several sequential steps, so closing the app part-way leaves data behind -- the user has to be asked to wait.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account. Please keep the app open.'**
+  String get deleteAccountProgressMessage;
+
+  /// Snackbar shown after deletion succeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted.'**
+  String get deleteAccountCompletedMessage;
+
+  /// Generic failure message. Deletion is idempotent, so retrying is always the right advice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion failed. Check your connection and try again.'**
+  String get deleteAccountFailedMessage;
+
+  /// Message for Firebase Auth's 'requires-recent-login' error code during deletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again, then retry.'**
+  String get deleteAccountRequiresRecentLoginMessage;
 }
 
 class _AppLocalizationsDelegate

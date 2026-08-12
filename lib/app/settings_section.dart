@@ -83,6 +83,22 @@ class SettingsSection extends StatelessWidget {
           title: Text(l10n.signOutMenuTitle),
           onTap: () => controller.signOut(),
         ),
+        // Sits below sign-out and is styled as destructive so it can't be
+        // mistaken for it. It has to be reachable from inside the app --
+        // App Store Review Guideline 5.1.1(v).
+        ListTile(
+          leading: Icon(
+            Icons.delete_forever_outlined,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          title: Text(
+            l10n.deleteAccountMenuTitle,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AccountDeletionScreen()),
+          ),
+        ),
       ],
     );
   }

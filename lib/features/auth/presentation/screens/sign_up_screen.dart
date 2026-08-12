@@ -9,13 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/language_picker.dart';
+import '../../data/auth_prefs_keys.dart';
 import '../auth_controller.dart';
 
 /// Key the referral code typed at sign-up is stashed under until the app
-/// shell is ready to redeem it (see lib/app/home_shell.dart). Kept here
-/// (not in shared/) since it's purely an auth<->app-shell handoff detail,
-/// not a cross-feature contract other features need.
-const String pendingReferralCodePrefsKey = 'auth.pending_referral_code';
+/// shell is ready to redeem it (see lib/app/home_shell.dart).
+const String pendingReferralCodePrefsKey = AuthPrefsKeys.pendingReferralCode;
 
 /// Last-used email, remembered so returning users don't have to retype it
 /// (PM request). Deliberately email-only: the *password* is intentionally
@@ -26,7 +25,7 @@ const String pendingReferralCodePrefsKey = 'auth.pending_referral_code';
 /// *browser's own* password manager can securely offer to save/autofill
 /// it -- same end result (not retyping it) via the mechanism actually
 /// built for this.
-const String _rememberedEmailPrefsKey = 'auth.remembered_email';
+const String rememberedEmailPrefsKey = AuthPrefsKeys.rememberedEmail;
 
 /// Initial registration / sign-in screen (spec 1.2 - 初回登録画面).
 ///
@@ -65,7 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _loadRememberedEmail() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString(_rememberedEmailPrefsKey);
+    final email = prefs.getString(rememberedEmailPrefsKey);
     if (email != null && mounted) {
       setState(() => _emailController.text = email);
     }
@@ -73,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _rememberEmail(String email) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_rememberedEmailPrefsKey, email);
+    await prefs.setString(rememberedEmailPrefsKey, email);
   }
 
   Future<void> _forgotPassword() async {
@@ -220,7 +219,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await _rememberEmail(email);
       // Prompts the browser's own password manager to offer saving the
       // credentials just used -- this (not app-side storage) is how the
-      // password itself gets "remembered" (see _rememberedEmailPrefsKey's
+      // password itself gets "remembered" (see rememberedEmailPrefsKey's
       // doc comment for why).
       TextInput.finishAutofillContext();
     }
@@ -273,7 +272,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 24),
                         // AutofillGroup + autofillHints let the *browser's*
                         // password manager offer to save/fill these fields
-                        // securely -- see _rememberedEmailPrefsKey's doc
+                        // securely -- see rememberedEmailPrefsKey's doc
                         // comment for why the app itself only remembers the
                         // email, never the password.
                         AutofillGroup(

@@ -264,6 +264,26 @@ export async function commit(
   });
 }
 
+/**
+ * Deletes [paths] in one commit. Deleting a document that isn't there is not
+ * an error, which is what makes account deletion safe to retry.
+ *
+ * Firestore caps a commit at 500 writes. The only caller (account deletion)
+ * works from [listDocuments], which itself returns at most 100 per
+ * collection, so the cap is unreachable here -- a caller that could exceed it
+ * would need to chunk.
+ */
+export async function deleteDocuments(env: FirestoreEnv, paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  const prefix = `${databaseName(env)}/documents/`;
+  await firestoreFetch(env, '/documents:commit', {
+    method: 'POST',
+    body: JSON.stringify({
+      writes: paths.map((path) => ({ delete: `${prefix}${path}` })),
+    }),
+  });
+}
+
 /** Abandons a transaction opened by [beginTransaction]. */
 export async function rollback(env: FirestoreEnv, transaction: string): Promise<void> {
   await firestoreFetch(env, '/documents:rollback', {

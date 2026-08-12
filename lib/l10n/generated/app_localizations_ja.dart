@@ -1056,4 +1056,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get weightKgFieldLabel => '体重 (kg)';
+
+  @override
+  String get deleteAccountMenuTitle => 'アカウントを削除';
+
+  @override
+  String get deleteAccountWarningTitle => 'この操作は取り消せません';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'アカウントを削除すると、以下がすべて完全に削除されます。復元はできません。';
+
+  @override
+  String get deleteAccountWarningItemPets => '登録したすべてのペットの情報';
+
+  @override
+  String get deleteAccountWarningItemRecords => '健康・体重・トイレ・通院・投薬・予防の記録';
+
+  @override
+  String get deleteAccountWarningItemPhotos => 'アップロードしたすべての写真と証明書の画像';
+
+  @override
+  String get deleteAccountWarningItemAi => 'AI相談・AIレポートの履歴';
+
+  @override
+  String get deleteAccountSubscriptionNoticeTitle => 'サブスクリプションは自動では解約されません';
+
+  @override
+  String get deleteAccountSubscriptionNoticeBody =>
+      'プレミアムをご利用中の場合は、App Store または Google Play からご自身で解約してください。アカウントを削除しても課金は止まりません。';
+
+  @override
+  String get deleteAccountPasswordFieldLabel => 'パスワード';
+
+  @override
+  String get deleteAccountPasswordHelperText => '本人確認のため、パスワードを入力してください。';
+
+  @override
+  String get deleteAccountProviderReauthNotice => '本人確認のため、削除の前にもう一度サインインします。';
+
+  @override
+  String get deleteAccountButtonLabel => 'アカウントを削除する';
+
+  @override
+  String get deleteAccountConfirmDialogTitle => 'アカウントを削除しますか？';
+
+  @override
+  String get deleteAccountConfirmDialogContent =>
+      'すべてのデータが完全に削除され、元に戻すことはできません。';
+
+  @override
+  String get deleteAccountConfirmButtonLabel => '削除する';
+
+  @override
+  String get deleteAccountCancelButtonLabel => 'キャンセル';
+
+  @override
+  String get deleteAccountProgressMessage => '削除しています。アプリを閉じないでください。';
+
+  @override
+  String get deleteAccountCompletedMessage => 'アカウントを削除しました。';
+
+  @override
+  String get deleteAccountFailedMessage => '削除に失敗しました。通信環境をご確認の上、もう一度お試しください。';
+
+  @override
+  String get deleteAccountRequiresRecentLoginMessage =>
+      '確認のため、もう一度サインインしてからお試しください。';
 }

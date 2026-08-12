@@ -1461,5 +1461,90 @@
   "weightKgFieldLabel": "Weight (kg)",
   "@weightKgFieldLabel": {
     "description": "Label for the numeric weight input field in the weight entry dialog."
+  },
+
+  "deleteAccountMenuTitle": "Delete account",
+  "@deleteAccountMenuTitle": {
+    "description": "Settings menu item that opens the account deletion screen. Required in-app by App Store Review Guideline 5.1.1(v) and Google Play's data deletion policy."
+  },
+  "deleteAccountWarningTitle": "This cannot be undone",
+  "@deleteAccountWarningTitle": {
+    "description": "Heading of the warning panel on the account deletion screen."
+  },
+  "deleteAccountWarningBody": "Deleting your account permanently removes all of the following. None of it can be recovered.",
+  "@deleteAccountWarningBody": {
+    "description": "Lead-in above the list of what account deletion removes."
+  },
+  "deleteAccountWarningItemPets": "Every pet profile you have registered",
+  "@deleteAccountWarningItemPets": {
+    "description": "Bullet in the account deletion warning list."
+  },
+  "deleteAccountWarningItemRecords": "Health, weight, toilet, vet visit, medication and prevention records",
+  "@deleteAccountWarningItemRecords": {
+    "description": "Bullet in the account deletion warning list."
+  },
+  "deleteAccountWarningItemPhotos": "Every photo and certificate scan you have uploaded",
+  "@deleteAccountWarningItemPhotos": {
+    "description": "Bullet in the account deletion warning list."
+  },
+  "deleteAccountWarningItemAi": "Your AI consultation and AI report history",
+  "@deleteAccountWarningItemAi": {
+    "description": "Bullet in the account deletion warning list."
+  },
+  "deleteAccountSubscriptionNoticeTitle": "Your subscription is not cancelled automatically",
+  "@deleteAccountSubscriptionNoticeTitle": {
+    "description": "Heading of the subscription warning on the account deletion screen. Subscriptions are held by the App Store / Google Play, not by this app, so deleting the account does not stop the billing -- users must be told this before they delete."
+  },
+  "deleteAccountSubscriptionNoticeBody": "If you have a premium plan, cancel it yourself in the App Store or Google Play. Deleting your account here does not stop the billing.",
+  "@deleteAccountSubscriptionNoticeBody": {
+    "description": "Body of the subscription warning on the account deletion screen."
+  },
+  "deleteAccountPasswordFieldLabel": "Password",
+  "@deleteAccountPasswordFieldLabel": {
+    "description": "Label of the password field shown to email/password accounts before deletion."
+  },
+  "deleteAccountPasswordHelperText": "Enter your password to confirm it is you.",
+  "@deleteAccountPasswordHelperText": {
+    "description": "Helper text under the reauthentication password field."
+  },
+  "deleteAccountProviderReauthNotice": "You will be asked to sign in again before your account is deleted.",
+  "@deleteAccountProviderReauthNotice": {
+    "description": "Shown instead of the password field for Google/Apple accounts, which reauthenticate by redoing their provider sign-in."
+  },
+  "deleteAccountButtonLabel": "Delete my account",
+  "@deleteAccountButtonLabel": {
+    "description": "Destructive button that opens the final confirmation dialog."
+  },
+  "deleteAccountConfirmDialogTitle": "Delete your account?",
+  "@deleteAccountConfirmDialogTitle": {
+    "description": "Title of the final confirmation dialog."
+  },
+  "deleteAccountConfirmDialogContent": "All of your data will be permanently deleted and cannot be restored.",
+  "@deleteAccountConfirmDialogContent": {
+    "description": "Body of the final confirmation dialog."
+  },
+  "deleteAccountConfirmButtonLabel": "Delete",
+  "@deleteAccountConfirmButtonLabel": {
+    "description": "Confirming action in the final confirmation dialog."
+  },
+  "deleteAccountCancelButtonLabel": "Cancel",
+  "@deleteAccountCancelButtonLabel": {
+    "description": "Dismissing action in the final confirmation dialog."
+  },
+  "deleteAccountProgressMessage": "Deleting your account. Please keep the app open.",
+  "@deleteAccountProgressMessage": {
+    "description": "Shown while deletion runs. Deletion is several sequential steps, so closing the app part-way leaves data behind -- the user has to be asked to wait."
+  },
+  "deleteAccountCompletedMessage": "Your account has been deleted.",
+  "@deleteAccountCompletedMessage": {
+    "description": "Snackbar shown after deletion succeeds."
+  },
+  "deleteAccountFailedMessage": "Deletion failed. Check your connection and try again.",
+  "@deleteAccountFailedMessage": {
+    "description": "Generic failure message. Deletion is idempotent, so retrying is always the right advice."
+  },
+  "deleteAccountRequiresRecentLoginMessage": "Please sign in again, then retry.",
+  "@deleteAccountRequiresRecentLoginMessage": {
+    "description": "Message for Firebase Auth's 'requires-recent-login' error code during deletion."
   }
 }

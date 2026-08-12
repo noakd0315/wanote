@@ -9,6 +9,8 @@ import 'package:uuid/uuid.dart';
 import '../../../shared/models/app_user.dart';
 import '../../../shared/models/auth_provider_type.dart';
 import '../../../shared/models/pet_profile.dart';
+import '../data/account_deletion_service.dart';
+import '../data/auth_prefs_keys.dart';
 import '../data/auth_repository.dart';
 import '../data/biometric_service.dart';
 import '../data/pet_profile_repository.dart';
@@ -41,17 +43,19 @@ class AuthController extends ChangeNotifier {
     DateTime Function()? now,
     this._biometricFallbackResolver = const BiometricFallbackResolver(),
     this._activePetResolver = const ActivePetResolver(),
+    this._accountDeletionService,
     Future<SharedPreferences>? sharedPreferences,
   }) : _prefsFuture = sharedPreferences ?? SharedPreferences.getInstance(),
        _now = now ?? DateTime.now;
 
-  static const _lastActivePetIdPrefsKey = 'auth.last_active_pet_id';
+  static const _lastActivePetIdPrefsKey = AuthPrefsKeys.lastActivePetId;
 
   /// Prefix for the per-uid key this device's own claimed session id is
   /// stored under (see [_subscribeToSession]'s doc comment). Keyed by uid
   /// rather than a single global key so switching accounts on the same
   /// device/browser doesn't confuse one account's session for another's.
-  static const _localSessionIdPrefsKeyPrefix = 'auth.local_session_id.';
+  static const _localSessionIdPrefsKeyPrefix =
+      AuthPrefsKeys.localSessionIdPrefix;
 
   /// When this device last saw the user prove who they are -- an explicit
   /// sign-in or a successful biometric unlock. Per-uid so switching accounts
@@ -59,7 +63,7 @@ class AuthController extends ChangeNotifier {
   /// [SessionExpiryPolicy]; deliberately NOT updated by merely resuming a
   /// persisted session.
   static const _lastAuthenticatedAtPrefsKeyPrefix =
-      'auth.last_authenticated_at.';
+      AuthPrefsKeys.lastAuthenticatedAtPrefix;
 
   final Uuid _uuid = const Uuid();
 
@@ -74,6 +78,11 @@ class AuthController extends ChangeNotifier {
   final DateTime Function() _now;
   final BiometricFallbackResolver _biometricFallbackResolver;
   final ActivePetResolver _activePetResolver;
+
+  /// Null in tests that never exercise [deleteAccount]; main.dart always
+  /// supplies one. [deleteAccount] fails loudly rather than silently doing
+  /// half the job if it is missing.
+  final AccountDeletionService? _accountDeletionService;
   final Future<SharedPreferences> _prefsFuture;
 
   /// Bumped by [_claimSession]; captured by [_subscribeToSession] so a
@@ -427,6 +436,65 @@ class AuthController extends ChangeNotifier {
     await _authRepository.signOut();
     // The authStateChanges listener fires with null and clears state via
     // _onAuthChanged; no need to duplicate that logic here.
+  }
+
+  /// Permanently deletes this account and everything in it.
+  ///
+  /// Required by App Store Review Guideline 5.1.1(v): an app offering account
+  /// creation has to offer account deletion in-app.
+  ///
+  /// Reauthentication comes first, for two reasons. Firebase refuses to
+  /// delete a user whose credential is stale (`requires-recent-login`), and
+  /// this is irreversible -- a phone left unlocked on a table shouldn't be
+  /// enough to wipe someone's records. [password] is required for email
+  /// accounts and ignored for Google/Apple ones, which redo their provider
+  /// sign-in instead.
+  ///
+  /// Throws whatever the underlying step threw (a `FirebaseAuthException`
+  /// for a wrong password, [AccountBackendException] if the backend sweep
+  /// fails) so the screen can tell the user which part went wrong. Nothing
+  /// here is left in a half-state by a failure: every step is idempotent and
+  /// the identity is deleted last, so the recovery is simply to try again.
+  Future<void> deleteAccount({String? password}) async {
+    final user = _currentUser;
+    if (user == null) {
+      throw StateError('No signed-in user to delete.');
+    }
+    final service = _accountDeletionService;
+    if (service == null) {
+      throw StateError(
+        'AuthController was built without an AccountDeletionService; '
+        'account deletion is unavailable.',
+      );
+    }
+
+    switch (user.authProvider) {
+      case AuthProviderType.email:
+        if (password == null) {
+          throw ArgumentError.notNull('password');
+        }
+        await _authRepository.reauthenticateWithPassword(password);
+      case AuthProviderType.google:
+        await _authRepository.signInWithGoogle();
+      case AuthProviderType.apple:
+        await _authRepository.signInWithApple();
+    }
+
+    await service.deleteAccount(user.uid);
+    await _clearLocalAccountState(user.uid);
+    // The authStateChanges listener fires with null once the identity is
+    // gone, which clears the in-memory state through _onAuthChanged.
+  }
+
+  /// Removes what this device remembers about [uid]. Runs after the account
+  /// is gone, so a failure here can't strand a live account -- but leaving
+  /// these behind would have the sign-in screen still offering the deleted
+  /// address.
+  Future<void> _clearLocalAccountState(String uid) async {
+    final prefs = await _prefsFuture;
+    for (final key in AuthPrefsKeys.forAccount(uid)) {
+      await prefs.remove(key);
+    }
   }
 
   /// Runs a single biometric prompt attempt and resolves what should happen

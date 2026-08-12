@@ -16,6 +16,8 @@ export { RateLimiter } from './lib/rateLimiter';
  *   - Agent E (billing):  POST /billing/referral-code  -> routes/referralCode.ts
  *   - Agent E (billing):  POST /billing/apply-pending-grants
  *                                                     -> routes/applyPendingGrants.ts
+ *   - Agent A (auth):     POST /account/delete-server-data
+ *                                                     -> routes/deleteAccountServerData.ts
  *
  * Keep this switch flat and route-file logic self-contained; this file is a
  * likely merge-conflict point between the medical and ai worktrees, so the
@@ -84,6 +86,12 @@ export default {
       case '/billing/referral-code': {
         const { handleReferralCode } = await import('./routes/referralCode');
         return withCors(await handleReferralCode(request, env));
+      }
+      case '/account/delete-server-data': {
+        const { handleDeleteAccountServerData } = await import(
+          './routes/deleteAccountServerData'
+        );
+        return withCors(await handleDeleteAccountServerData(request, env));
       }
       case '/billing/apply-pending-grants': {
         const { handleApplyPendingGrants } = await import('./routes/applyPendingGrants');

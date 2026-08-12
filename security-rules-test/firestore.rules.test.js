@@ -306,6 +306,100 @@ describe('referral rewards and pending grants', () => {
   });
 });
 
+describe('the account deletion sweep', () => {
+  // FirestoreAccountDocumentEraser walks the account from the client, so the
+  // rules have to permit every step of that walk. A delete the rules refuse
+  // is not a silent failure -- but it is a *user-visible* one, mid-way
+  // through an irreversible operation, on a screen that has already told the
+  // user their data is going away.
+  const petId = 'pet-1';
+
+  it('the owner can delete each pet subcollection document', async () => {
+    const paths = [
+      `users/${OWNER}/pets/${petId}/health_records/r1`,
+      `users/${OWNER}/pets/${petId}/weight_records/w1`,
+      `users/${OWNER}/pets/${petId}/toilet_records/t1`,
+      `users/${OWNER}/pets/${petId}/visits/v1`,
+      `users/${OWNER}/pets/${petId}/medications/m1`,
+      `users/${OWNER}/pets/${petId}/prevention_programs/p1`,
+      `users/${OWNER}/pets/${petId}/prevention_records/pr1`,
+      `users/${OWNER}/pets/${petId}/consultations/c1`,
+      `users/${OWNER}/pets/${petId}/reports/rep1`,
+    ];
+    for (const path of paths) {
+      await seed(path, { a: 1 });
+      await assertSucceeds(deleteDoc(doc(asOwner(), path)));
+    }
+  });
+
+  it('the owner can enumerate their pets, counters and subcollections', async () => {
+    // The sweep is a *list* before it is a delete: it has to read the pet
+    // ids to know which subcollections exist. `allow read` covers both get
+    // and list, which is what makes this work.
+    await seed(`users/${OWNER}/pets/${petId}`, { pet_name: 'Pochi' });
+    await seed(`users/${OWNER}/pets/${petId}/health_records/r1`, { a: 1 });
+    await seed(`users/${OWNER}/usage_counters/2026-08`, { count: 3 });
+
+    await assertSucceeds(getDocs(collection(asOwner(), `users/${OWNER}/pets`)));
+    await assertSucceeds(
+      getDocs(
+        collection(asOwner(), `users/${OWNER}/pets/${petId}/health_records`),
+      ),
+    );
+    await assertSucceeds(
+      getDocs(collection(asOwner(), `users/${OWNER}/usage_counters`)),
+    );
+  });
+
+  it('the owner can delete their pet, counters and account document', async () => {
+    await seed(`users/${OWNER}/pets/${petId}`, { pet_name: 'Pochi' });
+    await seed(`users/${OWNER}/usage_counters/2026-08`, { count: 3 });
+    await seed(`users/${OWNER}`, { email: 'a@b.test' });
+
+    await assertSucceeds(
+      deleteDoc(doc(asOwner(), `users/${OWNER}/pets/${petId}`)),
+    );
+    await assertSucceeds(
+      deleteDoc(doc(asOwner(), `users/${OWNER}/usage_counters/2026-08`)),
+    );
+    await assertSucceeds(deleteDoc(doc(asOwner(), `users/${OWNER}`)));
+  });
+
+  it('another user cannot delete this account', async () => {
+    // The obvious catastrophe if ownership were ever keyed off anything but
+    // the uid in the path.
+    await seed(`users/${OWNER}`, { email: 'a@b.test' });
+    await seed(`users/${OWNER}/pets/${petId}/health_records/r1`, { a: 1 });
+
+    await assertFails(deleteDoc(doc(asOther(), `users/${OWNER}`)));
+    await assertFails(
+      deleteDoc(
+        doc(asOther(), `users/${OWNER}/pets/${petId}/health_records/r1`),
+      ),
+    );
+  });
+
+  it('nobody can delete the server-owned collections from a client', async () => {
+    // Which is exactly why account deletion has to call the Worker for
+    // these -- see functions/src/routes/deleteAccountServerData.ts. A rule
+    // relaxed to let the client sweep them would also let it erase its own
+    // redemption marker and redeem the same code twice.
+    await seed(`users/${OWNER}/redeemed_codes/SUMMER`, { at: 1 });
+    await seed(`users/${OWNER}/rewards/referral_counter`, { count: 2 });
+    await seed(`users/${OWNER}/pending_grants/g1`, { months: 1 });
+
+    await assertFails(
+      deleteDoc(doc(asOwner(), `users/${OWNER}/redeemed_codes/SUMMER`)),
+    );
+    await assertFails(
+      deleteDoc(doc(asOwner(), `users/${OWNER}/rewards/referral_counter`)),
+    );
+    await assertFails(
+      deleteDoc(doc(asOwner(), `users/${OWNER}/pending_grants/g1`)),
+    );
+  });
+});
+
 describe('paths the app does not use', () => {
   it('are denied by default rather than silently open', async () => {
     // There is no catch-all match, so a collection someone adds later fails

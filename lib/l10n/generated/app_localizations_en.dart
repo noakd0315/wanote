@@ -1093,4 +1093,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightKgFieldLabel => 'Weight (kg)';
+
+  @override
+  String get deleteAccountMenuTitle => 'Delete account';
+
+  @override
+  String get deleteAccountWarningTitle => 'This cannot be undone';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Deleting your account permanently removes all of the following. None of it can be recovered.';
+
+  @override
+  String get deleteAccountWarningItemPets =>
+      'Every pet profile you have registered';
+
+  @override
+  String get deleteAccountWarningItemRecords =>
+      'Health, weight, toilet, vet visit, medication and prevention records';
+
+  @override
+  String get deleteAccountWarningItemPhotos =>
+      'Every photo and certificate scan you have uploaded';
+
+  @override
+  String get deleteAccountWarningItemAi =>
+      'Your AI consultation and AI report history';
+
+  @override
+  String get deleteAccountSubscriptionNoticeTitle =>
+      'Your subscription is not cancelled automatically';
+
+  @override
+  String get deleteAccountSubscriptionNoticeBody =>
+      'If you have a premium plan, cancel it yourself in the App Store or Google Play. Deleting your account here does not stop the billing.';
+
+  @override
+  String get deleteAccountPasswordFieldLabel => 'Password';
+
+  @override
+  String get deleteAccountPasswordHelperText =>
+      'Enter your password to confirm it is you.';
+
+  @override
+  String get deleteAccountProviderReauthNotice =>
+      'You will be asked to sign in again before your account is deleted.';
+
+  @override
+  String get deleteAccountButtonLabel => 'Delete my account';
+
+  @override
+  String get deleteAccountConfirmDialogTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountConfirmDialogContent =>
+      'All of your data will be permanently deleted and cannot be restored.';
+
+  @override
+  String get deleteAccountConfirmButtonLabel => 'Delete';
+
+  @override
+  String get deleteAccountCancelButtonLabel => 'Cancel';
+
+  @override
+  String get deleteAccountProgressMessage =>
+      'Deleting your account. Please keep the app open.';
+
+  @override
+  String get deleteAccountCompletedMessage => 'Your account has been deleted.';
+
+  @override
+  String get deleteAccountFailedMessage =>
+      'Deletion failed. Check your connection and try again.';
+
+  @override
+  String get deleteAccountRequiresRecentLoginMessage =>
+      'Please sign in again, then retry.';
 }
