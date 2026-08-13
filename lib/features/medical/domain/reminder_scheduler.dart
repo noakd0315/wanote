@@ -38,6 +38,7 @@ class ScheduledReminder extends Equatable {
     required this.fireAt,
     required this.title,
     required this.body,
+    this.repeatsDaily = false,
   });
 
   final int notificationId;
@@ -46,8 +47,24 @@ class ScheduledReminder extends Equatable {
   final String title;
   final String body;
 
+  /// True for medication doses (spec 5.2), which repeat at the same time
+  /// every day for the length of the course. Prevention reminders are
+  /// one-off, so they leave this false.
+  ///
+  /// A daily repeat has no end date at the platform level -- see
+  /// [MedicationReminderScheduler] and ReminderSyncService for how a
+  /// finished course stops reminding.
+  final bool repeatsDaily;
+
   @override
-  List<Object?> get props => [notificationId, recordId, fireAt, title, body];
+  List<Object?> get props => [
+    notificationId,
+    recordId,
+    fireAt,
+    title,
+    body,
+    repeatsDaily,
+  ];
 }
 
 /// Pure computation of "which local notifications should exist right now"
@@ -161,15 +178,23 @@ class ReminderScheduler {
     }
   }
 
-  /// FNV-1a 32-bit hash of [recordId], masked to a positive 31-bit int so it
-  /// always fits flutter_local_notifications' platform notification id
-  /// range and is stable across recomputations.
-  static int _stableNotificationId(String recordId) {
-    var hash = 0x811c9dc5;
-    for (final codeUnit in recordId.codeUnits) {
-      hash ^= codeUnit;
-      hash = (hash * 0x01000193) & 0xffffffff;
-    }
-    return hash & 0x7fffffff;
+  static int _stableNotificationId(String recordId) =>
+      stableNotificationId(recordId);
+}
+
+/// FNV-1a 32-bit hash of [key], masked to a positive 31-bit int so it always
+/// fits flutter_local_notifications' platform notification id range and is
+/// stable across recomputations (making reschedule = cancel + re-add
+/// idempotent).
+///
+/// Shared with [MedicationReminderScheduler], which namespaces its keys
+/// (`medication:{id}`) so a medication and a prevention record can never
+/// derive the same id and silently overwrite each other's notification.
+int stableNotificationId(String key) {
+  var hash = 0x811c9dc5;
+  for (final codeUnit in key.codeUnits) {
+    hash ^= codeUnit;
+    hash = (hash * 0x01000193) & 0xffffffff;
   }
+  return hash & 0x7fffffff;
 }

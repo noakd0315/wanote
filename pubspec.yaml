@@ -83,6 +83,7 @@ dependencies:
   http: ^1.2.2
   intl: ^0.20.2
   equatable: ^2.0.5
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
@@ -16,6 +17,11 @@ import '../features/billing/presentation/paywall_screen.dart';
 import '../features/daily_record/data/health_record_repository.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
+import '../features/medical/data/medication_repository.dart';
+import '../features/medical/data/prevention_program_repository.dart';
+import '../features/medical/data/prevention_record_repository.dart';
+import '../features/medical/data/reminder_sync_service.dart';
+import '../features/medical/notifications/reminder_notification_adapter.dart';
 import '../features/medical/presentation/medical_home_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
@@ -89,6 +95,12 @@ class _HomeShellState extends State<HomeShell> {
   late final MonthlyReportGenerator _reportGenerator;
   late final BillingRepository _billingRepository;
   late final CampaignCodeRepository _campaignCodeRepository;
+  late final ReminderSyncService _reminderSyncService;
+
+  /// Watched so the reminder schedule follows the household: adding or
+  /// removing a pet has to add or remove its reminders.
+  AuthController? _authController;
+  List<String> _trackedPetIds = const [];
 
   @override
   void initState() {
@@ -103,8 +115,40 @@ class _HomeShellState extends State<HomeShell> {
     _reportGenerator = BackendMonthlyReportGenerator(_aiBackendClient);
     _billingRepository = RevenueCatBillingRepository();
     _campaignCodeRepository = FirestoreCampaignCodeRepository();
+    _reminderSyncService = ReminderSyncService(
+      medicationRepository: FirestoreMedicationRepository(),
+      preventionProgramRepository: FirestorePreventionProgramRepository(),
+      preventionRecordRepository: FirestorePreventionRecordRepository(),
+      adapter: ReminderNotificationAdapter(),
+    );
     unawaited(_initializeBilling());
     unawaited(_redeemPendingReferralCodeIfAny());
+
+    // read, not watch: this is a one-time hook-up, not a rebuild dependency.
+    _authController = context.read<AuthController>()
+      ..addListener(_onPetsChanged);
+    _onPetsChanged();
+  }
+
+  /// Restarts reminder tracking whenever the set of pets changes.
+  ///
+  /// The whole household, not just the active pet: a reminder for the dog
+  /// you are not currently looking at still has to fire.
+  void _onPetsChanged() {
+    final petIds = (_authController?.pets ?? const <PetProfile>[])
+        .map((pet) => pet.petId)
+        .toList();
+    if (_listEquals(petIds, _trackedPetIds)) return;
+    _trackedPetIds = petIds;
+    unawaited(_reminderSyncService.start(uid: widget.uid, petIds: petIds));
+  }
+
+  static bool _listEquals(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   Future<void> _initializeBilling() async {
@@ -154,6 +198,8 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   void dispose() {
+    _authController?.removeListener(_onPetsChanged);
+    unawaited(_reminderSyncService.stop());
     _billingRepository.dispose();
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();

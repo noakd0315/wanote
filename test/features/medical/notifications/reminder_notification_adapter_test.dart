@@ -25,12 +25,14 @@ ScheduledReminder _reminder({
   required DateTime fireAt,
   String title = 'ワクチン',
   String body = '接種の予定です',
+  bool repeatsDaily = false,
 }) => ScheduledReminder(
   notificationId: id,
   recordId: 'rec-$id',
   fireAt: fireAt,
   title: title,
   body: body,
+  repeatsDaily: repeatsDaily,
 );
 
 void main() {
@@ -46,7 +48,9 @@ void main() {
 
   setUp(() {
     plugin = _MockPlugin();
-    adapter = ReminderNotificationAdapter(plugin: plugin);
+    // Tests run on the host platform, where the adapter would otherwise
+    // take its no-op path and assert nothing.
+    adapter = ReminderNotificationAdapter(plugin: plugin, supported: true);
 
     when(
       () => plugin.initialize(settings: any(named: 'settings')),
@@ -59,9 +63,11 @@ void main() {
         scheduledDate: any(named: 'scheduledDate'),
         notificationDetails: any(named: 'notificationDetails'),
         androidScheduleMode: any(named: 'androidScheduleMode'),
+        matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
       ),
     ).thenAnswer((_) async {});
     when(() => plugin.cancel(id: any(named: 'id'))).thenAnswer((_) async {});
+    when(plugin.cancelAll).thenAnswer((_) async {});
   });
 
   test('schedules each reminder with its own id, title and body', () async {
@@ -78,6 +84,7 @@ void main() {
         scheduledDate: captureAny(named: 'scheduledDate'),
         notificationDetails: any(named: 'notificationDetails'),
         androidScheduleMode: captureAny(named: 'androidScheduleMode'),
+        matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
       ),
     ).captured;
 
@@ -89,9 +96,6 @@ void main() {
     expect(captured[3], '狂犬病');
     expect(captured[4], 22);
     expect(captured[7], '混合');
-    // Reminders must be exact: an inexact alarm can slip by hours, which for
-    // a "接種予定日です" notification means the wrong day.
-    expect(captured[2], AndroidScheduleMode.exactAllowWhileIdle);
   });
 
   test('converts the fire time into the local timezone', () async {
@@ -108,6 +112,7 @@ void main() {
                 scheduledDate: captureAny(named: 'scheduledDate'),
                 notificationDetails: any(named: 'notificationDetails'),
                 androidScheduleMode: any(named: 'androidScheduleMode'),
+                matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
               ),
             ).captured.single
             as tz.TZDateTime;
@@ -121,18 +126,80 @@ void main() {
     );
   });
 
-  test('cancels reminders that are no longer scheduled', () async {
-    await adapter.applySchedule(
-      [_reminder(id: 2, fireAt: DateTime(2026, 9, 1))],
-      previousIds: [1, 2, 3],
-    );
+  test('clears the old schedule before writing the new one', () async {
+    // Reminders are recomputed in full on every sync, so the adapter drops
+    // everything first rather than diffing. A stale reminder surviving here
+    // would tell someone to give a dose they already finished.
+    await adapter.applySchedule([
+      _reminder(id: 2, fireAt: DateTime(2026, 9, 1)),
+    ]);
 
-    // 2 survives; only the dropped ids are cancelled.
-    final cancelled = verify(
-      () => plugin.cancel(id: captureAny(named: 'id')),
-    ).captured;
-    expect(cancelled, unorderedEquals([1, 3]));
+    verifyInOrder([
+      () => plugin.cancelAll(),
+      () => plugin.zonedSchedule(
+        id: 2,
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        scheduledDate: any(named: 'scheduledDate'),
+        notificationDetails: any(named: 'notificationDetails'),
+        androidScheduleMode: any(named: 'androidScheduleMode'),
+        matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+      ),
+    ]);
   });
+
+  test(
+    'repeats a medication dose daily, and a prevention reminder once',
+    () async {
+      // The difference is the whole reason ScheduledReminder carries the flag:
+      // a dose is taken every day of the course, a vaccine is due once.
+      await adapter.applySchedule([
+        _reminder(id: 1, fireAt: DateTime(2026, 9, 1, 8), repeatsDaily: true),
+        _reminder(id: 2, fireAt: DateTime(2026, 9, 1, 9)),
+      ]);
+
+      final captured = verify(
+        () => plugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          matchDateTimeComponents: captureAny(named: 'matchDateTimeComponents'),
+        ),
+      ).captured;
+
+      expect(captured, [DateTimeComponents.time, null]);
+    },
+  );
+
+  test(
+    'asks for an inexact alarm, which needs no restricted permission',
+    () async {
+      // exactAllowWhileIdle would need SCHEDULE_EXACT_ALARM/USE_EXACT_ALARM.
+      // Play restricts those to alarm and calendar apps, and on Android 14 the
+      // user must grant it by hand -- a denial there means reminders silently
+      // never fire, which is worse than one landing a few minutes late.
+      await adapter.applySchedule([
+        _reminder(id: 1, fireAt: DateTime(2026, 9, 1)),
+      ]);
+
+      final mode = verify(
+        () => plugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: captureAny(named: 'androidScheduleMode'),
+          matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+        ),
+      ).captured.single;
+
+      expect(mode, AndroidScheduleMode.inexactAllowWhileIdle);
+    },
+  );
 
   test('initializes once, not per applySchedule call', () async {
     await adapter.applySchedule([

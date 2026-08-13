@@ -1,4 +1,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Medication and prevention reminders (spec 5.2 / 5.3), scheduled
+         locally by flutter_local_notifications.
+
+         POST_NOTIFICATIONS is required from Android 13; the app asks for it
+         at the moment the first reminder is actually scheduled, not at
+         launch.
+
+         RECEIVE_BOOT_COMPLETED lets the plugin re-register pending
+         reminders after a reboot. Without it, restarting the phone silently
+         cancels every scheduled dose reminder.
+
+         Deliberately NOT declared: SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM.
+         Google Play restricts those to apps whose core purpose is alarms or
+         calendars, and on Android 14 the user has to grant them by hand --
+         a denial would mean reminders that never fire at all. See
+         ReminderNotificationAdapter for the inexact-alarm tradeoff. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- enableOnBackInvokedCallback opts in to Android's predictive back
          gesture. Without it the system never sends the back events, so
          Flutter's PredictiveBackPageTransitionsBuilder silently falls back to
@@ -36,6 +54,24 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- flutter_local_notifications' own receivers. The scheduled-notification
+             one is what actually posts a reminder when its alarm fires; the boot
+             one re-registers pending alarms after a restart, which Android
+             otherwise drops. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
