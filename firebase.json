@@ -24,5 +24,25 @@
       "port": 4000
     },
     "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "wanote-7dca0",
+          "appId": "1:715210245467:android:c93de079d628e3181b067e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "wanote-7dca0",
+          "configurations": {
+            "android": "1:715210245467:android:c93de079d628e3181b067e",
+            "ios": "1:715210245467:ios:43311e742f5dd2081b067e"
+          }
+        }
+      }
+    }
   }
 }
