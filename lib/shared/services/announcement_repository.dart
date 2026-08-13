@@ -17,7 +17,9 @@ class FirestoreAnnouncementRepository implements AnnouncementRepository {
   /// widget tests where no Firebase app exists -- constructing it must not
   /// be what throws.
   FirestoreAnnouncementRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore;
+    : this._(firestore);
+
+  const FirestoreAnnouncementRepository._(this._firestore);
 
   final FirebaseFirestore? _firestore;
   FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
