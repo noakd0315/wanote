@@ -81,6 +81,16 @@ class RevenueCatBillingRepository implements BillingRepository {
       // RevenueCat API key not supplied yet — leave the SDK unconfigured.
       // Every other method below already no-ops or is simply never called
       // by app-shell code guarded on BillingConfig.isConfigured.
+      //
+      // Report "not premium" rather than "unknown". Unknown means an answer
+      // is still coming; here there is no question outstanding, because with
+      // no billing system nobody can hold an entitlement at all. Leaving it
+      // unknown is not merely imprecise -- AdPolicy withholds ads until
+      // premium status is *confirmed* inactive, so an app built without a
+      // RevenueCat key would show no ads ever, and there would be no way to
+      // check the ad wiring on a device before billing exists.
+      _lastPremiumStatus = PremiumStatus.inactive;
+      _premiumStatusController.add(PremiumStatus.inactive);
       return;
     }
     await Purchases.setLogLevel(LogLevel.warn);
