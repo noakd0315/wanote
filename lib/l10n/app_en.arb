@@ -1546,5 +1546,26 @@
   "deleteAccountRequiresRecentLoginMessage": "Please sign in again, then retry.",
   "@deleteAccountRequiresRecentLoginMessage": {
     "description": "Message for Firebase Auth's 'requires-recent-login' error code during deletion."
+  },
+
+  "announcementsMenuTitle": "Announcements",
+  "@announcementsMenuTitle": {
+    "description": "Settings menu item, and AppBar title, for the list of in-app notices."
+  },
+  "announcementDismissTooltip": "Dismiss",
+  "@announcementDismissTooltip": {
+    "description": "Tooltip on the close button of the announcement banner."
+  },
+  "announcementSeeAllButton": "All announcements",
+  "@announcementSeeAllButton": {
+    "description": "Action on the announcement banner that opens the full list."
+  },
+  "announcementsEmpty": "There are no announcements right now.",
+  "@announcementsEmpty": {
+    "description": "Shown when no notice is currently published."
+  },
+  "announcementsLoadFailed": "Announcements could not be loaded.",
+  "@announcementsLoadFailed": {
+    "description": "Shown when the announcements query fails. Deliberately not shown on the home banner, which stays silent rather than nagging about its own failure."
   }
 }

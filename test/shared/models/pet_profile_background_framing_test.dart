@@ -6,22 +6,19 @@ import 'package:wanote/shared/models/pet_profile.dart';
 /// The framing is only useful if it survives the Firestore round trip, and
 /// existing pets were saved before these fields existed -- a missing field
 /// must read back as "unframed", not crash or come back null.
-PetProfile _pet({
-  double bgX = 0,
-  double bgY = 0,
-  double bgZoom = 1,
-}) => PetProfile(
-  petId: 'pet-1',
-  ownerId: 'owner-1',
-  name: 'ポチ',
-  breed: '柴犬',
-  birthday: DateTime(2024, 1, 1),
-  sex: PetSex.male,
-  neutered: false,
-  backgroundAlignmentX: bgX,
-  backgroundAlignmentY: bgY,
-  backgroundZoom: bgZoom,
-);
+PetProfile _pet({double bgX = 0, double bgY = 0, double bgZoom = 1}) =>
+    PetProfile(
+      petId: 'pet-1',
+      ownerId: 'owner-1',
+      name: 'ポチ',
+      breed: '柴犬',
+      birthday: DateTime(2024, 1, 1),
+      sex: PetSex.male,
+      neutered: false,
+      backgroundAlignmentX: bgX,
+      backgroundAlignmentY: bgY,
+      backgroundZoom: bgZoom,
+    );
 
 void main() {
   test('background framing survives a toMap/fromMap round trip', () {

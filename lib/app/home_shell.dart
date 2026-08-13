@@ -25,8 +25,11 @@ import '../features/medical/notifications/reminder_notification_adapter.dart';
 import '../features/medical/presentation/medical_home_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
+import '../shared/services/announcement_repository.dart';
+import '../shared/widgets/announcement_banner.dart';
 import '../shared/widgets/dog_silhouette_background.dart';
 import 'ai_section.dart';
+import 'announcements_screen.dart';
 import 'daily_record_section.dart';
 import 'home_screen.dart';
 import 'settings_section.dart';
@@ -96,6 +99,8 @@ class _HomeShellState extends State<HomeShell> {
   late final BillingRepository _billingRepository;
   late final CampaignCodeRepository _campaignCodeRepository;
   late final ReminderSyncService _reminderSyncService;
+  final AnnouncementRepository _announcementRepository =
+      FirestoreAnnouncementRepository();
 
   /// Watched so the reminder schedule follows the household: adding or
   /// removing a pet has to add or remove its reminders.
@@ -318,15 +323,35 @@ class _HomeShellState extends State<HomeShell> {
       body: Stack(
         children: [
           const Positioned.fill(child: DogSilhouetteBackground()),
-          Navigator(
-            key: _shellNavigatorKey,
-            onGenerateRoute: (settings) => MaterialPageRoute(
-              settings: settings,
-              builder: (routeContext) => IndexedStack(
-                index: _selectedIndex,
-                children: _buildSections(routeContext),
+          Column(
+            children: [
+              // Above every section rather than only Home: a notice about
+              // support being away, or the app being down, is not something
+              // to hide behind a particular tab. It collapses to nothing
+              // when there is no notice or the owner dismissed it.
+              AnnouncementBanner(
+                repository: _announcementRepository,
+                onSeeAll: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => AnnouncementsScreen(
+                      repository: _announcementRepository,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              Expanded(
+                child: Navigator(
+                  key: _shellNavigatorKey,
+                  onGenerateRoute: (settings) => MaterialPageRoute(
+                    settings: settings,
+                    builder: (routeContext) => IndexedStack(
+                      index: _selectedIndex,
+                      children: _buildSections(routeContext),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

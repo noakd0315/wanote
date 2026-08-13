@@ -5,9 +5,11 @@ import '../features/auth/auth.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/presentation/paywall_screen.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../shared/services/announcement_repository.dart';
 import '../shared/services/locale_controller.dart';
 import '../shared/widgets/language_picker.dart';
 import '../shared/widgets/pet_icon_avatar.dart';
+import 'announcements_screen.dart';
 
 /// 設定・課金 section of the app shell.
 ///
@@ -64,6 +66,17 @@ class SettingsSection extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) =>
                   PaywallScreen(billingRepository: billingRepository),
+            ),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.campaign_outlined),
+          title: Text(l10n.announcementsMenuTitle),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AnnouncementsScreen(
+                repository: FirestoreAnnouncementRepository(),
+              ),
             ),
           ),
         ),

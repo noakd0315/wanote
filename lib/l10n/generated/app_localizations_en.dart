@@ -1169,4 +1169,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountRequiresRecentLoginMessage =>
       'Please sign in again, then retry.';
+
+  @override
+  String get announcementsMenuTitle => 'Announcements';
+
+  @override
+  String get announcementDismissTooltip => 'Dismiss';
+
+  @override
+  String get announcementSeeAllButton => 'All announcements';
+
+  @override
+  String get announcementsEmpty => 'There are no announcements right now.';
+
+  @override
+  String get announcementsLoadFailed => 'Announcements could not be loaded.';
 }

@@ -90,6 +90,22 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // In-app notices: maintenance, policy changes, and the case the feature
+    // was actually asked for -- periods when support cannot answer enquiries.
+    //
+    // Readable by everyone, including signed-out clients. That is deliberate
+    // and is most of the point: the notice people most need is the one about
+    // an outage they cannot sign in to read. The content is public
+    // announcements, so there is nothing here to protect.
+    //
+    // Written only from the Firebase console. No client, signed in or not,
+    // may write -- an app that can post its own notices is an app whose
+    // notices cannot be trusted.
+    match /announcements/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Everything else is denied: there is no catch-all match, so any path the
     // app grows into has to be added here deliberately.
   }

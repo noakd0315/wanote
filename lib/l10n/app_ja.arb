@@ -392,5 +392,11 @@
   "deleteAccountProgressMessage": "削除しています。アプリを閉じないでください。",
   "deleteAccountCompletedMessage": "アカウントを削除しました。",
   "deleteAccountFailedMessage": "削除に失敗しました。通信環境をご確認の上、もう一度お試しください。",
-  "deleteAccountRequiresRecentLoginMessage": "確認のため、もう一度サインインしてからお試しください。"
+  "deleteAccountRequiresRecentLoginMessage": "確認のため、もう一度サインインしてからお試しください。",
+
+  "announcementsMenuTitle": "お知らせ",
+  "announcementDismissTooltip": "閉じる",
+  "announcementSeeAllButton": "お知らせ一覧",
+  "announcementsEmpty": "現在お知らせはありません。",
+  "announcementsLoadFailed": "お知らせを読み込めませんでした。"
 }

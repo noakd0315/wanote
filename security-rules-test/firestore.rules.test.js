@@ -400,6 +400,41 @@ describe('the account deletion sweep', () => {
   });
 });
 
+describe('in-app announcements', () => {
+  const notice = 'announcements/support-away';
+
+  it('are readable by a signed-OUT client', async () => {
+    // The load-bearing one. The notice people most need is the one telling
+    // them why they cannot sign in, so this collection is deliberately the
+    // single readable-by-anyone path in the database.
+    await seed(notice, { title_ja: '障害のお知らせ', important: true });
+    await assertSucceeds(getDoc(doc(asAnon(), notice)));
+  });
+
+  it('are readable by a signed-in client', async () => {
+    await seed(notice, { title_ja: 'サポート休止のお知らせ' });
+    await assertSucceeds(getDoc(doc(asOwner(), notice)));
+  });
+
+  it('can be listed, which is how the banner finds the newest', async () => {
+    await seed(notice, { title_ja: 'お知らせ' });
+    await assertSucceeds(getDocs(collection(asAnon(), 'announcements')));
+  });
+
+  it('cannot be written by anyone, signed in or not', async () => {
+    // An app that can post its own notices is an app whose notices cannot be
+    // trusted. These are authored in the Firebase console only.
+    await assertFails(setDoc(doc(asOwner(), notice), { title_ja: 'fake' }));
+    await assertFails(setDoc(doc(asAnon(), notice), { title_ja: 'fake' }));
+  });
+
+  it('cannot be edited or deleted by a client', async () => {
+    await seed(notice, { title_ja: 'お知らせ' });
+    await assertFails(updateDoc(doc(asOwner(), notice), { title_ja: '改ざん' }));
+    await assertFails(deleteDoc(doc(asOwner(), notice)));
+  });
+});
+
 describe('paths the app does not use', () => {
   it('are denied by default rather than silently open', async () => {
     // There is no catch-all match, so a collection someone adds later fails

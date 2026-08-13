@@ -2221,6 +2221,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please sign in again, then retry.'**
   String get deleteAccountRequiresRecentLoginMessage;
+
+  /// Settings menu item, and AppBar title, for the list of in-app notices.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get announcementsMenuTitle;
+
+  /// Tooltip on the close button of the announcement banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get announcementDismissTooltip;
+
+  /// Action on the announcement banner that opens the full list.
+  ///
+  /// In en, this message translates to:
+  /// **'All announcements'**
+  String get announcementSeeAllButton;
+
+  /// Shown when no notice is currently published.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no announcements right now.'**
+  String get announcementsEmpty;
+
+  /// Shown when the announcements query fails. Deliberately not shown on the home banner, which stays silent rather than nagging about its own failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements could not be loaded.'**
+  String get announcementsLoadFailed;
 }
 
 class _AppLocalizationsDelegate

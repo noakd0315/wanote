@@ -1123,4 +1123,19 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get deleteAccountRequiresRecentLoginMessage =>
       '確認のため、もう一度サインインしてからお試しください。';
+
+  @override
+  String get announcementsMenuTitle => 'お知らせ';
+
+  @override
+  String get announcementDismissTooltip => '閉じる';
+
+  @override
+  String get announcementSeeAllButton => 'お知らせ一覧';
+
+  @override
+  String get announcementsEmpty => '現在お知らせはありません。';
+
+  @override
+  String get announcementsLoadFailed => 'お知らせを読み込めませんでした。';
 }

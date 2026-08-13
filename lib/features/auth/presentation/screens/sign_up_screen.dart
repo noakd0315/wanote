@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../shared/services/announcement_repository.dart';
+import '../../../../shared/widgets/announcement_banner.dart';
 import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/language_picker.dart';
 import '../../data/auth_prefs_keys.dart';
@@ -55,6 +57,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// PM request: let the user reveal what they typed to confirm it's
   /// correct before submitting, instead of only ever seeing dots.
   bool _obscurePassword = true;
+
+  final AnnouncementRepository _announcementRepository =
+      FirestoreAnnouncementRepository();
 
   @override
   void initState() {
@@ -262,6 +267,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        // Important notices only, and this is the reason
+                        // announcements are readable without signing in: the
+                        // notice people most need is the one about an outage
+                        // they cannot get past this screen to read.
+                        AnnouncementBanner(
+                          repository: _announcementRepository,
+                          importantOnly: true,
+                        ),
                         Text(
                           _isSignUpMode
                               ? l10n.createAccountTitle
