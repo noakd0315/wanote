@@ -2,6 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../firestore_paths.dart';
 
+/// Which of an account's three sources would pay for the next AI call.
+enum AiUsageSource {
+  /// An active premium subscription. Nothing is decremented.
+  subscription,
+
+  /// This month's free allowance (spec 6.4: 3/month).
+  freeQuota,
+
+  /// A consumable bought from the ticket packs.
+  ticket,
+
+  /// Nothing left to pay with.
+  none,
+}
+
 /// Snapshot of one account's AI-consultation entitlement, per spec 6.4:
 /// free plan = 3/month, consumable ticket packs, or unlimited subscription.
 class AiUsageStatus {
@@ -15,10 +30,24 @@ class AiUsageStatus {
   final int ticketsRemaining;
   final bool hasUnlimitedSubscription;
 
-  bool get canStartConsultation =>
-      hasUnlimitedSubscription ||
-      freeConsultationsRemainingThisMonth > 0 ||
-      ticketsRemaining > 0;
+  /// Which source the next AI call would draw on. Free allowance is spent
+  /// before tickets, so nobody burns something they paid for while a free
+  /// call is still available.
+  ///
+  /// This is the single source of truth for that order:
+  /// [AiUsageRepository.recordConsultationUsed] decrements whatever this
+  /// names, and the ad layer asks the same question to decide whether the
+  /// call was paid for. If the two ever disagreed, someone who bought a
+  /// ticket would watch an ad for the call they paid for -- which is exactly
+  /// what this enum exists to prevent.
+  AiUsageSource get nextSource {
+    if (hasUnlimitedSubscription) return AiUsageSource.subscription;
+    if (freeConsultationsRemainingThisMonth > 0) return AiUsageSource.freeQuota;
+    if (ticketsRemaining > 0) return AiUsageSource.ticket;
+    return AiUsageSource.none;
+  }
+
+  bool get canStartConsultation => nextSource != AiUsageSource.none;
 }
 
 /// Shared contract between features/ai (which gates and decrements usage on
@@ -86,22 +115,24 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
   @override
   Future<void> recordConsultationUsed(String uid) async {
     final status = await getStatus(uid);
-    if (!status.canStartConsultation) {
-      throw StateError('AI usage limit reached for $uid.');
-    }
-    if (status.hasUnlimitedSubscription) return;
-
-    if (status.freeConsultationsRemainingThisMonth > 0) {
-      final usedThisMonth =
-          freeMonthlyQuota - status.freeConsultationsRemainingThisMonth + 1;
-      await _doc(uid).set({
-        'period': _currentPeriodKey(),
-        'free_used': usedThisMonth,
-      }, SetOptions(merge: true));
-    } else {
-      await _doc(uid).set({
-        'tickets_remaining': status.ticketsRemaining - 1,
-      }, SetOptions(merge: true));
+    // Switches on the same [AiUsageStatus.nextSource] the ad layer reads, so
+    // "which wallet paid for this call" has exactly one answer.
+    switch (status.nextSource) {
+      case AiUsageSource.none:
+        throw StateError('AI usage limit reached for $uid.');
+      case AiUsageSource.subscription:
+        return;
+      case AiUsageSource.freeQuota:
+        final usedThisMonth =
+            freeMonthlyQuota - status.freeConsultationsRemainingThisMonth + 1;
+        await _doc(uid).set({
+          'period': _currentPeriodKey(),
+          'free_used': usedThisMonth,
+        }, SetOptions(merge: true));
+      case AiUsageSource.ticket:
+        await _doc(uid).set({
+          'tickets_remaining': status.ticketsRemaining - 1,
+        }, SetOptions(merge: true));
     }
   }
 
