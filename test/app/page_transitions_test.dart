@@ -17,8 +17,9 @@ import 'package:wanote/shared/theme/app_theme.dart';
 /// which is what this test is here to say.
 void main() {
   test('Android keeps the predictive back transition', () {
-    final builder =
-        buildWanoteTheme().pageTransitionsTheme.builders[TargetPlatform.android];
+    final builder = buildWanoteTheme()
+        .pageTransitionsTheme
+        .builders[TargetPlatform.android];
 
     expect(
       builder,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../billing/ads/ad_gate.dart';
+import '../../billing/domain/ad_trigger.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
@@ -148,6 +150,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     // Captured before the first await: reading it from the
     // BuildContext afterwards would be a use-after-dispose hazard.
     final languageCode = Localizations.localeOf(context).languageCode;
+    // Same reason: read from the context before the first await.
+    final adGate = adGateOf(context);
     final result = _result;
     if (result == null) return;
 
@@ -174,11 +178,24 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           '1日あたり${result.dailyFoodGrams.round()}g程度と算出しました。'
           '給餌回数の分け方や注意点があれば簡潔に教えてください。';
 
-      final advice = await widget.backendClient.requestConsultation(
+      // Read before recording the use -- see consultation_screen.dart.
+      final usageSource = (await widget.usageRepository.getStatus(
+        widget.uid,
+      )).nextSource;
+
+      final adviceFuture = widget.backendClient.requestConsultation(
         petId: widget.petId,
         questionText: questionText,
         languageCode: languageCode,
       );
+      final adFuture = adGate?.maybeShow(
+        AdTrigger.aiFoodPortion,
+        aiUsageSource: usageSource,
+      );
+
+      final advice = await adviceFuture;
+      await adFuture;
+
       await widget.usageRepository.recordConsultationUsed(widget.uid);
       setState(() {
         _adviceText = advice;

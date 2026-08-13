@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../billing/ads/ad_gate.dart';
+import '../../billing/domain/ad_trigger.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/models/consultation_reference_record.dart';
 import '../../../shared/services/ai_usage_repository.dart';
@@ -77,6 +79,8 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     // Captured before the first await: reading it from the
     // BuildContext afterwards would be a use-after-dispose hazard.
     final languageCode = Localizations.localeOf(context).languageCode;
+    // Same reason: read from the context before the first await.
+    final adGate = adGateOf(context);
     final questionText = _controller.text.trim();
     if (questionText.isEmpty || _submitting) return;
 
@@ -97,23 +101,38 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     });
 
     try {
-      final decision = await widget.usageLimitPolicy.decideForUser(
-        widget.usageRepository,
-        widget.uid,
-      );
-      if (decision == UsageLimitDecision.requireUpgrade) {
+      // getStatus directly rather than decideForUser: the same snapshot has
+      // to answer both "may they ask?" and "which wallet pays?", and the
+      // second question must be asked BEFORE the call is recorded -- after
+      // that the balance has moved and a ticket just spent looks like no
+      // ticket at all.
+      final status = await widget.usageRepository.getStatus(widget.uid);
+      if (widget.usageLimitPolicy.decide(status) ==
+          UsageLimitDecision.requireUpgrade) {
         setState(() {
           _resultKind = _ResultKind.needsUpgrade;
         });
         return;
       }
+      final usageSource = status.nextSource;
 
-      final responseText = await widget.backendClient.requestConsultation(
+      final responseFuture = widget.backendClient.requestConsultation(
         petId: widget.petId,
         questionText: questionText,
         referencedRecords: _selectedReferences.toList(),
         languageCode: languageCode,
       );
+      // Started after the request, and awaited after it: the ad plays while
+      // the answer is being generated, so it costs no extra waiting. Asking
+      // before sending would mean showing an ad for a request that then
+      // failed.
+      final adFuture = adGate?.maybeShow(
+        AdTrigger.aiConsultation,
+        aiUsageSource: usageSource,
+      );
+
+      final responseText = await responseFuture;
+      await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
       await widget.consultationRepository.save(

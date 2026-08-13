@@ -4,6 +4,9 @@ import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../../../billing/ads/ad_gate.dart';
+import '../../../billing/domain/ad_trigger.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -125,6 +128,8 @@ class _PreventionRecordFormScreenState
 
   Future<void> _captureAndAnalyze(ImageSource source) async {
     final l10n = AppLocalizations.of(context)!;
+    // Read before the first await, like l10n above.
+    final adGate = adGateOf(context);
     final picked = await widget.imagePicker.pickImage(source: source);
     if (picked == null) return;
 
@@ -208,6 +213,16 @@ class _PreventionRecordFormScreenState
     } finally {
       if (mounted) setState(() => _ocrRunning = false);
     }
+
+    // One ad for the capture and the reading together: to the owner that was
+    // a single action (PLAN_ads decision 3). After the OCR, not before --
+    // an ad in front of a scan that then failed would have taken their
+    // attention for nothing.
+    //
+    // Not exempted by an AI ticket balance: the scan does not consume one
+    // (tickets are sold as AI相談チケット and the OCR route is bounded
+    // server-side instead) -- PM decision, 2026-08-12.
+    await adGate?.maybeShow(AdTrigger.certificateCapture);
   }
 
   Future<void> _save() async {

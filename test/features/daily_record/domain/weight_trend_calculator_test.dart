@@ -22,11 +22,7 @@ void main() {
       8.8,
     ); // before 6mo cutoff, within 1yr
     final r5 = record('r5', DateTime(2026, 5, 1), 9.0); // within 3mo
-    final r4 = record(
-      'r4',
-      DateTime(2026, 6, 10),
-      9.3,
-    ); // within 3mo
+    final r4 = record('r4', DateTime(2026, 6, 10), 9.3); // within 3mo
     final r3 = record('r3', DateTime(2026, 6, 16), 9.5); // within 3mo
     final r2 = record('r2', DateTime(2026, 7, 1), 9.8); // within 3mo
     final r1 = record('r1', DateTime(2026, 7, 15), 10.0); // == now

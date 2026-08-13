@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
+import '../../billing/ads/ad_gate.dart';
+import '../../billing/domain/ad_trigger.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -23,11 +26,18 @@ class ToiletRecordFormScreen extends StatefulWidget {
     required this.uid,
     required this.petId,
     required this.repository,
+    this.imagePicker,
   });
 
   final String uid;
   final String petId;
   final ToiletRecordRepository repository;
+
+  /// Injectable so a test can drive the photo path, the way
+  /// PreventionRecordFormScreen already allows. Without it the
+  /// photo-and-ad ordering is untestable: the picker is the only way a
+  /// photo ever gets attached.
+  final ImagePicker? imagePicker;
 
   @override
   State<ToiletRecordFormScreen> createState() => _ToiletRecordFormScreenState();
@@ -47,7 +57,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   // PM request: 排尿、排便とも任意項目で場所の入力欄が欲しい.
   final _locationController = TextEditingController();
 
-  final _imagePicker = ImagePicker();
+  late final ImagePicker _imagePicker = widget.imagePicker ?? ImagePicker();
 
   @override
   void dispose() {
@@ -109,6 +119,9 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
 
   Future<void> _save() async {
     setState(() => _saving = true);
+    // Read before the first await; used after the save completes.
+    final adGate = adGateOf(context);
+    final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
       await widget.repository.create(
@@ -120,6 +133,12 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
         recordedAt: _recordedAt,
         location: location.isEmpty ? null : location,
       );
+      // After the write, never before -- see health_record_form_screen.dart
+      // for why the ad impression is the thing that may be lost here and the
+      // record is not. Photos only, same reason.
+      if (hasPhoto) {
+        await adGate?.maybeShow(AdTrigger.toiletRecordUpload);
+      }
       if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);

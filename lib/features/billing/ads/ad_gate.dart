@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:developer' as developer;
+
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 import '../../../shared/services/ai_usage_repository.dart';
 import '../domain/ad_policy.dart';
@@ -47,10 +51,39 @@ class AdGate {
     )) {
       return;
     }
-    await _manager.maybeShowInterstitial();
+    try {
+      await _manager.maybeShowInterstitial();
+    } catch (error, stackTrace) {
+      // Every call site sits next to something the owner actually wanted --
+      // a saved record, an AI answer. An ad network having a bad day must
+      // never turn into that action appearing to fail.
+      developer.log(
+        'Could not show an interstitial',
+        name: 'AdGate',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Fetches an ad in the background so one is ready when a trigger fires.
   /// Called on sign-in and when a screen that can trigger one opens.
   Future<void> preload() => _manager.preloadInterstitial();
+}
+
+/// The [AdGate] for the surrounding app shell, or null when there isn't one.
+///
+/// Nullable on purpose. Screens are also built directly in widget tests and
+/// reachable from the launch gate, neither of which sits under HomeShell's
+/// provider -- and a missing ad gate should mean "no ads here", never a
+/// crash on a screen the owner is trying to use.
+///
+/// Call it before the first `await`: reading a BuildContext afterwards is a
+/// use-after-dispose hazard.
+AdGate? adGateOf(BuildContext context) {
+  try {
+    return Provider.of<AdGate>(context, listen: false);
+  } on ProviderNotFoundException {
+    return null;
+  }
 }

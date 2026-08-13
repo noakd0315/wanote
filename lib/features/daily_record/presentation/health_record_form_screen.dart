@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
+import '../../billing/ads/ad_gate.dart';
+import '../../billing/domain/ad_trigger.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -95,6 +98,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
 
   Future<void> _save() async {
     setState(() => _saving = true);
+    // Read before the first await; used after the save completes.
+    final adGate = adGateOf(context);
+    final hasNewPhotos = _newPhotoBytes.isNotEmpty;
     try {
       final existing = widget.existingRecord;
       if (existing == null) {
@@ -120,6 +126,18 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
           retainedPhotoUrls: _retainedPhotoUrls,
           newPhotoBytes: _newPhotoBytes,
         );
+      }
+      // Only after the write has returned. An ad shown between the tap and
+      // the write landing would, if the app died behind it, lose the record
+      // the owner just entered -- and losing someone's data to show them an
+      // ad is not a trade this app makes. What can be lost here is the ad
+      // impression, which is the right thing to risk.
+      //
+      // Photos only: a text-only record is the everyday act this app exists
+      // for, and putting an ad in front of it daily would make the core
+      // feature unpleasant (PLAN_ads decision 2).
+      if (hasNewPhotos) {
+        await adGate?.maybeShow(AdTrigger.healthRecordUpload);
       }
       if (mounted) Navigator.of(context).pop();
     } finally {
