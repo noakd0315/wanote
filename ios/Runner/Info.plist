@@ -71,6 +71,15 @@
 	     表示されるので、「なぜ必要か」が利用者に伝わる形にしてある。
 	     多言語化するには ja.lproj / en.lproj に InfoPlist.strings を置き
 	     Xcode プロジェクトへ登録する必要がある（CLOUD_PHASE_TASKS.md E-1）。 -->
+	<!-- AdMob application id. Read natively by the Google Mobile Ads SDK
+	     before any Dart runs, so it cannot come from the --dart-define
+	     config file the way the ad *unit* ids do.
+
+	     Google's published sample id, pairing with the sample ad units in
+	     AppConfig. Replace both together with the values from the PM's own
+	     AdMob account before release; do not guess one. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>NSCameraUsageDescription</key>
 	<string>ワクチン証明書や愛犬の写真を撮影するためにカメラを使用します。</string>
 	<key>NSPhotoLibraryUsageDescription</key>

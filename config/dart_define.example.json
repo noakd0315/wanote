@@ -1,0 +1,41 @@
+{
+  "//": "Copy to config/dev.json or config/prod.json and fill in. Use with:",
+  "//  ": "flutter run   --dart-define-from-file=config/dev.json",
+  "//   ": "flutter build appbundle --dart-define-from-file=config/prod.json",
+
+  "//1": "=== NOT SECRETS ===",
+  "//2": "Everything here is compiled into the app and can be read back out",
+  "//3": "of the binary. That is fine: these values are all client-side by",
+  "//4": "design. Real secrets (ANTHROPIC_API_KEY, REVENUECAT_SECRET_KEY,",
+  "//5": "FIREBASE_PRIVATE_KEY) belong ONLY in the Worker, set with",
+  "//6": "`wrangler secret put`. Never put one in this file.",
+
+  "//7": "--- Backend (Cloudflare Worker) ---",
+  "AI_BACKEND_BASE_URL": "https://api.wanote.jp",
+
+  "//8": "--- RevenueCat public SDK keys: one PER PLATFORM ---",
+  "//9": "iOS starts with appl_, Android with goog_. Using one for both",
+  "//10": "fails on the other platform only, which is easy to miss.",
+  "REVENUECAT_API_KEY_IOS": "appl_xxxxxxxxxxxxxxxx",
+  "REVENUECAT_API_KEY_ANDROID": "goog_xxxxxxxxxxxxxxxx",
+  "REVENUECAT_PREMIUM_ENTITLEMENT": "premium",
+
+  "//11": "--- Store product ids (must match App Store Connect / Play) ---",
+  "PRODUCT_PREMIUM_MONTHLY": "premium_monthly",
+  "PRODUCT_PREMIUM_YEARLY": "premium_yearly",
+  "PRODUCT_AI_TICKETS_5": "ai_tickets_5",
+  "PRODUCT_AI_TICKETS_15": "ai_tickets_15",
+
+  "//12": "--- AdMob ad UNIT ids (from your own AdMob account) ---",
+  "//13": "Leave these out to keep Google's test units. Shipping with the",
+  "//14": "test units earns nothing, and the app gives no sign of it.",
+  "//15": "The AdMob APPLICATION id is NOT here -- it must be literal in",
+  "//16": "AndroidManifest.xml and Info.plist, see those files.",
+  "ADMOB_INTERSTITIAL_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "ADMOB_INTERSTITIAL_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "ADMOB_BANNER_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "ADMOB_BANNER_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+
+  "//17": "--- Local development only ---",
+  "//18": "USE_FIREBASE_EMULATOR: true  (do NOT set in a release build)"
+}

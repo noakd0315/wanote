@@ -1,12 +1,11 @@
+import 'app_config.dart';
 import 'emulator_web_support_stub.dart'
     if (dart.library.js_interop) 'emulator_web_support_web.dart';
 
 /// Base URL of the serverless backend (the Cloudflare Worker under
-/// `functions/`), set at build time with
-/// `--dart-define=AI_BACKEND_BASE_URL=https://...`. Empty in local dev.
-const String configuredBackendBaseUrl = String.fromEnvironment(
-  'AI_BACKEND_BASE_URL',
-);
+/// `functions/`). Declared in [AppConfig] with every other build-time
+/// value; empty in local dev.
+const String configuredBackendBaseUrl = AppConfig.backendBaseUrl;
 
 /// Where to reach `wrangler dev` when no base URL was configured.
 ///

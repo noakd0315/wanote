@@ -1,3 +1,5 @@
+import '../../../shared/config/app_config.dart';
+
 /// Runtime configuration for the billing feature.
 ///
 /// Per wanote/.claude/CLAUDE.md ("APIキー・シークレットはコードに直書きせず
@@ -18,10 +20,10 @@
 class BillingConfig {
   const BillingConfig._();
 
-  static const String revenueCatApiKey = String.fromEnvironment(
-    'REVENUECAT_API_KEY',
-    defaultValue: '',
-  );
+  /// Delegates to [AppConfig], which holds every build-time value and
+  /// picks the right key for the platform -- RevenueCat issues a separate
+  /// public key for iOS and Android.
+  static String get revenueCatApiKey => AppConfig.revenueCatApiKey;
 
   static bool get isConfigured => revenueCatApiKey.isNotEmpty;
 }

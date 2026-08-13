@@ -49,6 +49,20 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- AdMob application id. NOT the same thing as an ad *unit* id, and
+             it cannot come from the Dart config file: the Google Mobile Ads
+             SDK reads it natively at process start, before any Dart runs.
+             Android CRASHES on startup if google_mobile_ads is initialized
+             and this is missing.
+
+             This is Google's published sample application id, which pairs
+             with the sample ad units in AppConfig. Replace both together
+             with the values from the PM's own AdMob account before release
+             -- see config/dart_define.example.json. Do not guess an id. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

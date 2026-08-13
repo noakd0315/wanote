@@ -10,8 +10,12 @@ import '../features/ai/data/report_repository.dart';
 import '../features/ai/domain/monthly_report_generator.dart';
 import '../features/ai/presentation/consultation_screen.dart';
 import '../features/auth/auth.dart';
+import '../features/billing/ads/ad_gate.dart';
+import '../features/billing/ads/ad_manager.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/data/campaign_code_repository.dart';
+import '../features/billing/domain/ad_policy.dart';
+import '../features/billing/domain/billing_models.dart';
 import '../features/billing/domain/campaign_code_models.dart';
 import '../features/billing/presentation/paywall_screen.dart';
 import '../features/daily_record/data/health_record_repository.dart';
@@ -99,6 +103,8 @@ class _HomeShellState extends State<HomeShell> {
   late final BillingRepository _billingRepository;
   late final CampaignCodeRepository _campaignCodeRepository;
   late final ReminderSyncService _reminderSyncService;
+  late final AdManager _adManager;
+  late final AdGate _adGate;
   final AnnouncementRepository _announcementRepository =
       FirestoreAnnouncementRepository();
 
@@ -120,6 +126,18 @@ class _HomeShellState extends State<HomeShell> {
     _reportGenerator = BackendMonthlyReportGenerator(_aiBackendClient);
     _billingRepository = RevenueCatBillingRepository();
     _campaignCodeRepository = FirestoreCampaignCodeRepository();
+    // Reads the billing repository's *current* status on every check rather
+    // than capturing it: the answer changes the moment RevenueCat replies,
+    // and a captured "unknown" would keep ads off forever.
+    _adManager = AdManager(
+      currentPolicy: () =>
+          AdPolicy.fromStatus(_billingRepository.currentPremiumStatus),
+    );
+    _adGate = AdGate(
+      manager: _adManager,
+      premiumStatus: () => _billingRepository.currentPremiumStatus,
+    );
+    unawaited(_prepareAds());
     _reminderSyncService = ReminderSyncService(
       medicationRepository: FirestoreMedicationRepository(),
       preventionProgramRepository: FirestorePreventionProgramRepository(),
@@ -154,6 +172,23 @@ class _HomeShellState extends State<HomeShell> {
       if (a[i] != b[i]) return false;
     }
     return true;
+  }
+
+  /// Ads are best-effort from the first line: a failure here must never be
+  /// visible to someone using the app.
+  Future<void> _prepareAds() async {
+    try {
+      await AdManager.initialize();
+      // Only fetches once RevenueCat has confirmed the account is not
+      // premium, so a subscriber never has an ad loaded to flash at them.
+      await _billingRepository
+          .premiumStatusChanges()
+          .firstWhere((status) => status.state != EntitlementState.unknown)
+          .timeout(const Duration(seconds: 10));
+      await _adGate.preload();
+    } catch (_) {
+      // No ads this session. Nothing else changes.
+    }
   }
 
   Future<void> _initializeBilling() async {
@@ -203,6 +238,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   void dispose() {
+    _adManager.dispose();
     _authController?.removeListener(_onPetsChanged);
     unawaited(_reminderSyncService.stop());
     _billingRepository.dispose();
@@ -297,6 +333,17 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Provided rather than passed down: the five triggers live in form
+    // screens three levels below this one, and threading a callback through
+    // every section to reach them would mean each of those sections knowing
+    // about ads.
+    return Provider<AdGate>.value(
+      value: _adGate,
+      child: _buildScaffold(context, l10n),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       // Only shown on the ホーム tab (index 0) per the PM's request ("TOP画面
       // 以外ヘッダーをなくしたい") -- every other tab/pushed screen now has no

@@ -1,34 +1,31 @@
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 
-/// Ad unit IDs for `google_mobile_ads`.
+import '../../../shared/config/app_config.dart';
+
+/// Ad unit IDs for `google_mobile_ads`, resolved per platform.
 ///
-/// These are Google's official *test* ad unit IDs
-/// (https://developers.google.com/admob/flutter/test-ads) — they always
-/// serve test creatives and are safe to ship in debug builds, but they are
-/// NOT real inventory. Real ad unit IDs must come from the PM's own AdMob
-/// account (one app + one ad unit per placement, per platform) and be
-/// swapped in here before this feature goes live. Do not replace these with
-/// guessed/fabricated production IDs.
+/// The values themselves live in [AppConfig] so every configurable id sits
+/// in one file (see `config/dart_define.example.json`). With nothing
+/// configured they are Google's official *test* units, which always serve
+/// test creatives -- safe, and better than a wrong production id, which
+/// silently serves nothing at all.
+///
+/// **Shipping with the test units earns no revenue and the running app
+/// gives no sign of it.** [AppConfig.isUsingTestAdUnits] is there to be
+/// checked before a release.
+///
+/// Deliberately not `dart:io`: importing it breaks the web build, and the
+/// app is developed on web.
 class AdUnitIds {
   const AdUnitIds._();
 
-  static String get banner => Platform.isAndroid
-      ? _androidTestBanner
-      : Platform.isIOS
-      ? _iosTestBanner
-      : _androidTestBanner;
+  static bool get _isIos => defaultTargetPlatform == TargetPlatform.iOS;
 
-  static String get interstitial => Platform.isAndroid
-      ? _androidTestInterstitial
-      : Platform.isIOS
-      ? _iosTestInterstitial
-      : _androidTestInterstitial;
+  static String get banner =>
+      _isIos ? AppConfig.iosBannerAdUnitId : AppConfig.androidBannerAdUnitId;
 
-  static const String _androidTestBanner =
-      'ca-app-pub-3940256099942544/6300978111';
-  static const String _iosTestBanner = 'ca-app-pub-3940256099942544/2934735716';
-  static const String _androidTestInterstitial =
-      'ca-app-pub-3940256099942544/1033173712';
-  static const String _iosTestInterstitial =
-      'ca-app-pub-3940256099942544/4411468910';
+  static String get interstitial => _isIos
+      ? AppConfig.iosInterstitialAdUnitId
+      : AppConfig.androidInterstitialAdUnitId;
 }

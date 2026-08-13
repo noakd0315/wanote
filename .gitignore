@@ -73,3 +73,7 @@ ios/Runner/GoogleService-Info.plist
 # data survives `docker compose down`. To share a fixed dataset instead,
 # snapshot a copy under a different name and commit that.
 .emulator-data/
+
+# Build-time configuration. The example is tracked; filled-in copies are not.
+config/*.json
+!config/dart_define.example.json

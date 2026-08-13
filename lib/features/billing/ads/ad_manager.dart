@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../domain/ad_policy.dart';
@@ -13,21 +15,38 @@ import 'ad_unit_ids.dart';
 /// after saving a health record) — it silently does nothing for premium
 /// users or while an ad is already loading/showing.
 class AdManager {
-  AdManager({required AdPolicy Function() currentPolicy})
+  AdManager({required AdPolicy Function() currentPolicy, bool? supported})
     // ignore: prefer_initializing_formals
-    : _currentPolicy = currentPolicy;
+    : _currentPolicy = currentPolicy,
+      _supported = supported ?? platformSupported;
 
   final AdPolicy Function() _currentPolicy;
+
+  /// Injected only by tests, which run on the host platform.
+  final bool _supported;
 
   InterstitialAd? _loadedInterstitial;
   bool _isLoadingInterstitial = false;
 
-  static Future<void> initialize() => MobileAds.instance.initialize();
+  /// google_mobile_ads ships no web implementation, so every call here is a
+  /// no-op on web -- which is where the app is developed. Without this,
+  /// initializing ads at startup would throw on every local run.
+  static bool get platformSupported =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
+  /// Safe to call anywhere: does nothing on a platform without ads.
+  static Future<void> initialize() async {
+    if (!platformSupported) return;
+    await MobileAds.instance.initialize();
+  }
 
   /// Pre-loads an interstitial so it's ready by the time
   /// [maybeShowInterstitial] is called. No-ops if ads shouldn't show right
   /// now, or one is already loaded/loading.
   Future<void> preloadInterstitial() async {
+    if (!_supported) return;
     if (!_currentPolicy().shouldShowInterstitial) return;
     if (_loadedInterstitial != null || _isLoadingInterstitial) return;
 
@@ -52,6 +71,7 @@ class AdManager {
   /// true and one is ready; otherwise does nothing (never blocks the caller
   /// waiting on an ad to load).
   Future<void> maybeShowInterstitial() async {
+    if (!_supported) return;
     if (!_currentPolicy().shouldShowInterstitial) return;
     final ad = _loadedInterstitial;
     if (ad == null) return;
