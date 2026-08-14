@@ -26,7 +26,11 @@ workflows:
 
   verify:
     name: Analyze, test and build Android
-    instance_type: linux_x2
+    # No instance_type on purpose. Naming one (linux_x2) was rejected with
+    # "The selected instance type is not available with the current billing
+    # plan" -- the free plan does not offer every machine. Leaving it out
+    # lets Codemagic pick whatever the plan allows, and nothing here needs a
+    # particular one: analyze, tests and an Android build run anywhere.
     max_build_duration: 30
     environment:
       flutter: *flutter_version
@@ -109,6 +113,9 @@ workflows:
 
   ios:
     name: iOS build to TestFlight
+    # macOS is not a preference here, it is a requirement: only a Mac can
+    # run Xcode. If the plan rejects this one, the fix is a different macOS
+    # instance, never a Linux one.
     instance_type: mac_mini_m2
     max_build_duration: 60
     # No triggering section: this runs only when started by hand. Every run
