@@ -24,7 +24,7 @@
 | [CLOUD_SETUP_CHECKLIST.md](CLOUD_SETUP_CHECKLIST.md) | クラウド各社の登録一覧 | AdMob のみ残 |
 | [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) | Firebase の詳細手順 | ✅ 完了 |
 | [SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md](SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md) | Anthropic → Cloudflare の詳細手順 | ✅ 完了 |
-| [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md) | iOSビルド用CIの設定 | 🔴 **リモートリポジトリが未作成** |
+| [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md) | iOSビルド用CIの設定 | ✅ `verify` 稼働中／iOS は Apple 承認待ち |
 | [CLOSED_TEST_GUIDE.md](CLOSED_TEST_GUIDE.md) | 申請とクローズドテストの流れ（Android / iOS） | 未着手 |
 
 ---
@@ -79,7 +79,7 @@
 | **Android 実機テスト** | **なし。いつでも可能** |
 | 本番の広告ID | AdMob 未登録 |
 | 課金 | RevenueCat（ストア申請待ち） |
-| iOS ビルド | **リモートリポジトリ** → Codemagic → Apple Developer |
+| iOS ビルド | 🔴 **Apple Developer Program のみ**（他は完了） |
 | Google / Apple サインイン | 未設定 |
 | ポリシーの公開 | Cloudflare Pages への配置 |
 

@@ -60,7 +60,7 @@
 | データセーフティ申告 | ✅ 回答集 |
 | 実機テスト手順書 | ✅ |
 | 申請・クローズドテストの流れ | ✅ |
-| Codemagic 設定（`codemagic.yaml`） | ✅ 作成済み |
+| Codemagic 設定（`codemagic.yaml`） | ✅ **CI で全ステップ成功** |
 
 ## 品質
 
@@ -71,6 +71,7 @@
 | セキュリティルールテスト | **77件 全通過** |
 | `flutter analyze` | **0件** |
 | 未コミットの変更 | **なし** |
+| **Codemagic `verify`** | ✅ **成功**（analyze / test / Android ビルド） |
 
 ---
 
@@ -133,7 +134,7 @@ flutter run --release --dart-define-from-file=config/prod.json
 | | 状態 |
 |---|---|
 | Codemagic アカウント | ✅ 作成済み |
-| リポジトリ接続 | ⚠️ 未（**`verify` は今すぐ動かせます**） |
+| リポジトリ接続 | ✅ 接続済み・**`verify` は push ごとに自動実行** |
 | Apple Developer Program | 🔴 未申請 |
 | **Sign in with Apple** | 🔴 **未設定。無いとリジェクト** |
 
@@ -145,7 +146,7 @@ flutter run --release --dart-define-from-file=config/prod.json
 |---|---|
 | リマインダーのプッシュ通知化 | ⏸ **PM判断で保留**（`PLAN_push_reminders.md`） |
 | `firebase_messaging` の依存 | ⏸ 上記の判断待ちで残置 |
-| Android ビルドを CI に追加 | 未。**同種の取りこぼしを防ぐ価値あり** |
+| Android ビルドを CI に追加 | ✅ 完了。**マニフェスト破損の再発を CI が拾います** |
 
 ---
 
