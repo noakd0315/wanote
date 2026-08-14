@@ -25,6 +25,7 @@ abstract class HealthRecordRepository {
     List<Uint8List> photoBytes,
     List<HealthRecordTag> tags,
     String? memo,
+    List<String> linkedPhotoUrls,
   });
 
   /// Updates an existing record's tags/memo/recordedAt, optionally appending
@@ -109,6 +110,15 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
     List<Uint8List> photoBytes = const [],
     List<HealthRecordTag> tags = const [],
     String? memo,
+    // Photos that already exist somewhere else, referenced rather than
+    // uploaded again. A stool record copied into the daily log points at the
+    // image the toilet record already holds: one file, one place, so the two
+    // entries can never drift into showing different pictures.
+    //
+    // Deliberately not part of this record's own Storage folder, which is
+    // what delete() clears -- deleting the copy must not reach into the
+    // record it was copied from.
+    List<String> linkedPhotoUrls = const [],
   }) async {
     assert(
       photoBytes.length <= HealthRecord.maxPhotos,
@@ -126,7 +136,7 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
       recordId: recordId,
       petId: petId,
       recordedAt: recordedAt,
-      photos: photoUrls,
+      photos: [...linkedPhotoUrls, ...photoUrls],
       tags: tags,
       memo: memo,
     );
@@ -175,6 +185,8 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
     // points at those photos, and deleting first would leave it pointing at
     // nothing.
     await _deleteRemovedPhotos(
+      uid: uid,
+      record: record,
       previous: record.photos,
       retained: retained,
     );
@@ -185,13 +197,23 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
   /// the upload index, and an edit renumbers nothing, so a name cannot be
   /// derived from position after photos have been removed.
   Future<void> _deleteRemovedPhotos({
+    required String uid,
+    required HealthRecord record,
     required List<String> previous,
     required List<String> retained,
   }) async {
+    // Only files this record owns. A record copied from a stool entry points
+    // at the toilet record's photo, and dropping that photo here must not
+    // reach across and delete someone else's file -- the copy would take the
+    // original's picture with it.
+    final own =
+        'users/$uid/pets/${record.petId}/health_records/${record.recordId}/';
     final removed = previous.where((url) => !retained.contains(url));
     for (final url in removed) {
       try {
-        await _storage.refFromURL(url).delete();
+        final ref = _storage.refFromURL(url);
+        if (!ref.fullPath.startsWith(own)) continue;
+        await ref.delete();
       } catch (_) {
         // A photo that will not delete is left for the record's own deletion
         // to sweep up. It must not make the edit look like it failed.

@@ -62,6 +62,7 @@ void main() {
         photoBytes: any(named: 'photoBytes'),
         tags: any(named: 'tags'),
         memo: any(named: 'memo'),
+        linkedPhotoUrls: any(named: 'linkedPhotoUrls'),
       ),
     ).thenAnswer(
       (_) async => HealthRecord(
@@ -123,6 +124,7 @@ void main() {
         photoBytes: any(named: 'photoBytes'),
         tags: any(named: 'tags'),
         memo: any(named: 'memo'),
+        linkedPhotoUrls: any(named: 'linkedPhotoUrls'),
       ),
     );
   });
@@ -152,6 +154,7 @@ void main() {
         photoBytes: captureAny(named: 'photoBytes'),
         tags: captureAny(named: 'tags'),
         memo: any(named: 'memo'),
+        linkedPhotoUrls: any(named: 'linkedPhotoUrls'),
       ),
     ).captured;
 
@@ -179,6 +182,7 @@ void main() {
         photoBytes: any(named: 'photoBytes'),
         tags: any(named: 'tags'),
         memo: any(named: 'memo'),
+        linkedPhotoUrls: any(named: 'linkedPhotoUrls'),
       ),
     ).thenThrow(Exception('offline'));
 

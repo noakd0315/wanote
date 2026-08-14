@@ -153,7 +153,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
     final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
-      await widget.repository.create(
+      final saved = await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
         type: ToiletType.stool,
@@ -166,8 +166,10 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       // still exists, which is the half that matters; the owner is told so
       // they do not enter it again.
       //
-      // The photo is not copied. It stays with this record, which is the
-      // one place it can be viewed (PM: 写真はトイレの記録で保存).
+      // The photo is referenced, not duplicated: the copy points at the file
+      // this record already uploaded. One image, one place, so the two
+      // entries can never end up showing different pictures, and the storage
+      // is paid for once (PM: 一元管理が好ましい).
       final healthRecords = widget.healthRecordRepository;
       if (_copyToDailyLog && healthRecords != null) {
         try {
@@ -176,6 +178,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             petId: widget.petId,
             recordedAt: _recordedAt,
             photoBytes: const [],
+            linkedPhotoUrls: [if (saved.photo != null) saved.photo!],
             tags: _copiedTags(),
             memo: location.isEmpty ? copyMemo : '$copyMemo / $location',
           );
