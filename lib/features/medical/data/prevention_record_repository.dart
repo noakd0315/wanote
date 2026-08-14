@@ -1,8 +1,11 @@
+import 'dart:developer' as developer;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../shared/firestore_paths.dart';
 import '../domain/models/prevention_record.dart';
+import 'certificate_storage_service.dart';
 
 /// CRUD + live list for `prevention_records` (spec 5.3), scoped to one pet.
 /// Records live in a pet-level subcollection (not nested under the program)
@@ -41,11 +44,15 @@ class FirestorePreventionRecordRepository
     implements PreventionRecordRepository {
   FirestorePreventionRecordRepository({
     FirebaseFirestore? firestore,
+    CertificateStorageService? certificateStorage,
     Uuid? uuid,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _certificateStorage =
+           certificateStorage ?? FirebaseCertificateStorageService(),
        _uuid = uuid ?? const Uuid();
 
   final FirebaseFirestore _firestore;
+  final CertificateStorageService _certificateStorage;
   final Uuid _uuid;
 
   @override
@@ -123,5 +130,27 @@ class FirestorePreventionRecordRepository
         .collection(FirestorePaths.preventionRecords(uid, petId))
         .doc(recordId)
         .delete();
+    // The document first, then the image. Reversed, a failure here would
+    // leave a record pointing at a picture that no longer exists; this way
+    // the worst case is a file nobody can reach, which account deletion
+    // sweeps up.
+    //
+    // Best-effort, like the other record types: the owner asked for this to
+    // be gone, and the document being gone is what they see. An error here
+    // must not make the deletion look as though it failed.
+    try {
+      await _certificateStorage.delete(
+        uid: uid,
+        petId: petId,
+        recordId: recordId,
+      );
+    } catch (error, stackTrace) {
+      developer.log(
+        'Could not delete the certificate image',
+        name: 'PreventionRecordRepository',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

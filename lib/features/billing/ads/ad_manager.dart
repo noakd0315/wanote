@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
-import 'package:flutter/services.dart';
-
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../domain/ad_policy.dart';
+import 'ad_backdrop.dart';
 import 'ad_unit_ids.dart';
 
 /// Thin wrapper around `google_mobile_ads` for interstitial ads, gated by
@@ -23,6 +22,9 @@ class AdManager {
       _supported = supported ?? platformSupported;
 
   final AdPolicy Function() _currentPolicy;
+
+  /// Covers whatever the ad leaves showing. See [AdBackdrop].
+  final AdBackdrop _backdrop = AdBackdrop(appNavigatorKey);
 
   /// Injected only by tests, which run on the host platform.
   final bool _supported;
@@ -81,48 +83,18 @@ class AdManager {
     _loadedInterstitial = null;
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
-        _restoreStatusBar();
+        _backdrop.hide();
         ad.dispose();
         preloadInterstitial();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        _restoreStatusBar();
+        _backdrop.hide();
         ad.dispose();
         preloadInterstitial();
       },
     );
-    _darkenStatusBarForAd();
+    _backdrop.show();
     await ad.show();
-  }
-
-  /// The ad fills the screen but not the status bar, so a strip of this app
-  /// stays visible above it -- cream against the ad's black letterbox, which
-  /// is what made the ad look like it was sliding up over something rather
-  /// than replacing it (PM: "画面上部まできれいにラップされていない").
-  ///
-  /// The letterboxing itself belongs to the ad SDK and cannot be changed
-  /// from here. That strip is ours, so it is the part worth matching.
-  void _darkenStatusBarForAd() {
-    if (!_supported) return;
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0xFF000000),
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
-  }
-
-  /// Restored on both dismissal paths, including the failure one: leaving a
-  /// black bar across the top of a cream app would be a worse bug than the
-  /// one this fixes.
-  void _restoreStatusBar() {
-    if (!_supported) return;
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Color(0x00000000),
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
   }
 
   void dispose() {

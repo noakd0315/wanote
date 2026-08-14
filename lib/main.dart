@@ -11,6 +11,7 @@ import 'firebase_options.dart';
 import 'shared/config/firebase_options_demo.dart';
 import 'shared/services/locale_controller.dart';
 import 'shared/theme/app_theme.dart';
+import 'features/billing/ads/ad_backdrop.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,6 +80,10 @@ class WanoteApp extends StatelessWidget {
           // Lets a message outlive the screen that produced it -- see
           // shared/app_messenger.dart for the case that needs it.
           scaffoldMessengerKey: appMessengerKey,
+          // Lets AdBackdrop reach the overlay: an interstitial outlives
+          // the frame that triggered it, so the code covering the app
+          // behind it has no BuildContext of its own.
+          navigatorKey: appNavigatorKey,
           theme: buildWanoteTheme(),
           // Shipaton targets a global audience (spec section on i18n), so
           // UI text follows the device's own language setting by default

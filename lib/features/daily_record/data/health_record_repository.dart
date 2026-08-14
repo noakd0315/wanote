@@ -167,7 +167,36 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
       uid,
       record.petId,
     ).doc(record.recordId).set(updated.toMap());
+    // Photos dropped during the edit were only unlinked, never deleted, so
+    // they stayed in Storage until the whole record was deleted. Someone who
+    // removes a photo means it to be gone.
+    //
+    // After the write, not before: if the write fails the record still
+    // points at those photos, and deleting first would leave it pointing at
+    // nothing.
+    await _deleteRemovedPhotos(
+      previous: record.photos,
+      retained: retained,
+    );
     return updated;
+  }
+
+  /// Best-effort, and by URL rather than by path: the file names come from
+  /// the upload index, and an edit renumbers nothing, so a name cannot be
+  /// derived from position after photos have been removed.
+  Future<void> _deleteRemovedPhotos({
+    required List<String> previous,
+    required List<String> retained,
+  }) async {
+    final removed = previous.where((url) => !retained.contains(url));
+    for (final url in removed) {
+      try {
+        await _storage.refFromURL(url).delete();
+      } catch (_) {
+        // A photo that will not delete is left for the record's own deletion
+        // to sweep up. It must not make the edit look like it failed.
+      }
+    }
   }
 
   @override
