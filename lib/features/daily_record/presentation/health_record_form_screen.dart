@@ -105,6 +105,11 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
     final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
     final hasNewPhotos = _newPhotoBytes.isNotEmpty;
     try {
+      // Ad first, write behind it -- see toilet_record_form_screen.dart for
+      // the reasoning and the trade.
+      final adShown = hasNewPhotos
+          ? adGate?.maybeShow(AdTrigger.healthRecordUpload)
+          : null;
       final existing = widget.existingRecord;
       if (existing == null) {
         await widget.repository.create(
@@ -149,11 +154,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
       // record from a lost one (PM report). The message goes through the
       // app-level messenger because the screen that would have shown it is
       // deliberately gone by then.
+      await adShown;
       if (mounted) Navigator.of(context).pop();
       showAppMessage(savedMessage);
-      if (hasNewPhotos) {
-        await adGate?.maybeShow(AdTrigger.healthRecordUpload);
-      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

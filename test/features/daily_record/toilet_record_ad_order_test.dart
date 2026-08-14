@@ -23,16 +23,21 @@ class MockImagePicker extends Mock implements ImagePicker {}
 
 class FakeStoolCondition extends Fake implements StoolCondition {}
 
-/// The ordering rule that protects the owner's data.
+/// The ad goes up first and the write runs behind it.
 ///
-/// An ad shown between the tap and the write landing can cost them the
-/// record they just entered: the process can be killed behind a full-screen
-/// ad, and the write never completes. Saving first means the only thing at
-/// risk is the ad impression.
+/// This reverses what this file used to assert, and the reversal is the
+/// PM's, made after using it: waiting for the upload to finish before
+/// showing anything left a visible gap with nothing in it. The ad now
+/// covers the time the upload takes rather than being added after it.
 ///
-/// This is a one-line reordering to break, it looks harmless in a diff, and
-/// nothing about the running app would reveal it -- the ad appears either
-/// way. Hence a test that watches the order rather than the outcome.
+/// **What that gives up.** The old order meant a process killed behind a
+/// full-screen ad could not cost the owner their record, because nothing
+/// was in flight yet. Now it can. The window is one upload long, and the
+/// call was made with that stated.
+///
+/// Still a test about order rather than outcome: the ad appears either way,
+/// so nothing in the running app would reveal a reordering, and it is a
+/// one-line change that looks harmless in a diff.
 void main() {
   setUpAll(() {
     registerFallbackValue(FakeStoolCondition());
@@ -142,14 +147,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('saves before it shows anything, when there is a photo', (
+  testWidgets('shows the ad on the tap, with the write running behind it', (
     tester,
   ) async {
     await pumpForm(tester);
     await attachPhoto(tester);
     await tapSave(tester);
 
-    expect(calls, ['save', 'ad']);
+    expect(calls, ['ad', 'save']);
   });
 
   testWidgets('a record with no photo shows no ad at all', (tester) async {

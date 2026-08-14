@@ -168,6 +168,19 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
     final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
+      // The ad goes up on the tap and the write runs behind it, rather than
+      // the write finishing first and the ad following. Waiting for the
+      // upload before showing anything left a gap with nothing in it (PM:
+      // "変なタイムラグ"), and the ad now fills exactly the time the upload
+      // takes instead of being added on top of it.
+      //
+      // The trade this makes: if Android kills the process while the ad is
+      // up, an in-flight write can be lost. Previously that could not
+      // happen, because nothing was in flight. It is the owner's call, and
+      // the window is the length of one upload.
+      final adShown = hasPhoto
+          ? adGate?.maybeShow(AdTrigger.toiletRecordUpload)
+          : null;
       final saved = await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
@@ -220,14 +233,12 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       // record from a lost one (PM report). The message goes through the
       // app-level messenger because the screen that would have shown it is
       // deliberately gone by then.
+      // Waits for the ad to be dismissed, not merely shown. The message
+      // below is the whole point of this ordering, and behind a full-screen
+      // ad nobody would ever see it.
+      await adShown;
       if (mounted) Navigator.of(context).pop();
       showAppMessage(savedMessage);
-      // After the write, never before -- see health_record_form_screen.dart
-      // for why the ad impression is the thing that may be lost here and the
-      // record is not. Photos only, same reason.
-      if (hasPhoto) {
-        await adGate?.maybeShow(AdTrigger.toiletRecordUpload);
-      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

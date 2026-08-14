@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform;
+    show TargetPlatform, defaultTargetPlatform, kReleaseMode;
 
 /// Every build-time value the app reads, declared in one place.
 ///
@@ -58,6 +58,23 @@ class AppConfig {
   static const String _revenueCatApiKey = String.fromEnvironment(
     'REVENUECAT_API_KEY',
   );
+
+  /// Pretends the account holds an active subscription, for testing the
+  /// unlocked behaviour before RevenueCat exists.
+  ///
+  /// Billing cannot be configured until the app is in a store, which leaves
+  /// no way to see what a subscriber sees: no ads, no usage limit, the
+  /// premium-only screens reachable. This makes that state reachable from a
+  /// build flag instead of from a purchase.
+  ///
+  ///     flutter run --dart-define=PRETEND_PREMIUM=true ...
+  ///
+  /// Guarded by [kReleaseMode] as well, so a value left in a config file
+  /// cannot ship an app that gives everything away. A release build ignores
+  /// it entirely.
+  static bool get pretendPremium =>
+      !kReleaseMode &&
+      const String.fromEnvironment('PRETEND_PREMIUM') == 'true';
 
   static String get revenueCatApiKey {
     final platformKey = defaultTargetPlatform == TargetPlatform.iOS

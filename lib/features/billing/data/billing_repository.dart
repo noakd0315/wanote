@@ -7,6 +7,7 @@ import '../domain/billing_models.dart';
 import '../domain/product_ids.dart';
 import 'billing_backend_client.dart';
 import 'billing_config.dart';
+import '../../../shared/config/app_config.dart';
 
 /// Wraps `purchases_flutter` (RevenueCat) so the rest of the app never talks
 /// to the SDK directly. Offerings are returned using RevenueCat's own
@@ -77,6 +78,14 @@ class RevenueCatBillingRepository implements BillingRepository {
 
   @override
   Future<void> configure() async {
+    // Debug-only override, so the unlocked behaviour can be seen before
+    // there is a store to buy anything in. See AppConfig.pretendPremium --
+    // it is inert in release builds.
+    if (AppConfig.pretendPremium) {
+      _lastPremiumStatus = PremiumStatus.active;
+      _premiumStatusController.add(PremiumStatus.active);
+      return;
+    }
     if (!BillingConfig.isConfigured) {
       // RevenueCat API key not supplied yet — leave the SDK unconfigured.
       // Every other method below already no-ops or is simply never called

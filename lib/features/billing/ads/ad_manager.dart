@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -74,6 +76,12 @@ class AdManager {
   /// Shows a preloaded interstitial if [AdPolicy.shouldShowInterstitial] is
   /// true and one is ready; otherwise does nothing (never blocks the caller
   /// waiting on an ad to load).
+  ///
+  /// **Completes when the ad is dismissed**, not when it appears. `show()`
+  /// alone returns as soon as the ad is on screen, which meant a caller's
+  /// next line ran behind a full-screen ad -- and that is exactly where the
+  /// "saved" message was going. It was shown, and covered, and gone by the
+  /// time the owner got back (PM: "一度も見れませんでした").
   Future<void> maybeShowInterstitial() async {
     if (!_supported) return;
     if (!_currentPolicy().shouldShowInterstitial) return;
@@ -81,20 +89,33 @@ class AdManager {
     if (ad == null) return;
 
     _loadedInterstitial = null;
+    final dismissed = Completer<void>();
+    void finish() {
+      _backdrop.hide();
+      if (!dismissed.isCompleted) dismissed.complete();
+    }
+
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
-        _backdrop.hide();
+        finish();
         ad.dispose();
         preloadInterstitial();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        _backdrop.hide();
+        finish();
         ad.dispose();
         preloadInterstitial();
       },
     );
     _backdrop.show();
     await ad.show();
+    // A callback that never fires would strand the caller mid-save, so the
+    // wait has a ceiling. Generous: this is an upper bound on a stuck SDK,
+    // not a limit on how long someone may look at an ad.
+    await dismissed.future.timeout(
+      const Duration(minutes: 2),
+      onTimeout: finish,
+    );
   }
 
   void dispose() {

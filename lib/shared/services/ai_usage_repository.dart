@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../firestore_paths.dart';
+import '../config/app_config.dart';
 
 /// Which of an account's three sources would pay for the next AI call.
 enum AiUsageSource {
@@ -93,11 +94,11 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
     final snapshot = await _doc(uid).get();
     final data = snapshot.data();
     if (data == null) {
-      return const AiUsageStatus(
+      return AiUsageStatus(
         freeConsultationsRemainingThisMonth:
             FirestoreAiUsageRepository.freeMonthlyQuota,
         ticketsRemaining: 0,
-        hasUnlimitedSubscription: false,
+        hasUnlimitedSubscription: AppConfig.pretendPremium,
       );
     }
     final storedPeriod = data['period'] as String?;
@@ -108,7 +109,11 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
       freeConsultationsRemainingThisMonth: (freeMonthlyQuota - usedThisMonth)
           .clamp(0, freeMonthlyQuota),
       ticketsRemaining: (data['tickets_remaining'] as num?)?.toInt() ?? 0,
-      hasUnlimitedSubscription: data['unlimited'] as bool? ?? false,
+      // The debug override makes the usage limit disappear too. Without it
+      // the ads would go away but the third consultation would still be
+      // refused, which is not what a subscriber sees.
+      hasUnlimitedSubscription:
+          AppConfig.pretendPremium || (data['unlimited'] as bool? ?? false),
     );
   }
 
