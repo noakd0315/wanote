@@ -9,6 +9,23 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # `build/` is generated output, not source. Nothing here is ours and
+    # nothing here is shipped, so analysing it can only produce noise.
+    #
+    # This is not hypothetical: CI failed with 1757 errors, every one of
+    # them inside build/macos/SourcePackages/firebase_storage-13.4.6/test/
+    # -- a third-party package's own tests, which reference mockito, a
+    # dev-dependency of that package that we do not have. `flutter analyze`
+    # exits non-zero on any error, so somebody else's unresolvable imports
+    # failed our build.
+    #
+    # It never showed up on Windows because the macOS SourcePackages tree
+    # only exists on a Mac, and `verify` moved onto one when the Linux
+    # instance turned out not to be available on this plan.
+    - build/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
