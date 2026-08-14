@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../data/weight_record_repository.dart';
 import '../domain/weight_trend_calculator.dart';
 import '../models/weight_record.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// Spec 3.2: line chart with a 3 months / 6 months / 1 year period toggle,
 /// plus the "前回比" / "1ヶ月前比" delta display from spec 3.4. The actual
@@ -181,8 +182,8 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  '${DateFormat('yyyy/MM/dd').format(trend.periodStart)} 〜 '
-                  '${DateFormat('yyyy/MM/dd').format(trend.periodEnd)}',
+                  '${formatDate(context, trend.periodStart)} 〜 '
+                  '${formatDate(context, trend.periodEnd)}',
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -300,12 +301,12 @@ class _WeightRecordTable extends StatelessWidget {
             ? null
             : record.weightKg - previous.weightKg;
         return ListTile(
-          title: Text(DateFormat('yyyy/MM/dd').format(record.measuredAt)),
+          title: Text(formatDate(context, record.measuredAt)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${record.weightKg.toStringAsFixed(1)}kg',
+                formatWeight(context, record.weightKg),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               if (delta != null) ...[
@@ -338,7 +339,7 @@ class _DeltaBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = delta == null
         ? '-'
-        : '${delta! >= 0 ? '+' : ''}${delta!.toStringAsFixed(1)}kg';
+        : '${delta! >= 0 ? '+' : ''}${formatWeight(context, delta!)}';
     final color = delta == null
         ? null
         : (delta! > 0
@@ -384,7 +385,7 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.commonDateLabel),
-            subtitle: Text(DateFormat('yyyy/MM/dd').format(_date)),
+            subtitle: Text(formatDate(context, _date)),
             trailing: const Icon(Icons.edit_calendar),
             onTap: () async {
               final picked = await showDatePicker(
@@ -399,7 +400,11 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
           TextField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: l10n.weightKgFieldLabel),
+            decoration: InputDecoration(
+              labelText: l10n.weightFieldLabelWithUnit(
+                weightInputUnit(context),
+              ),
+            ),
           ),
         ],
       ),
@@ -410,7 +415,14 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
         ),
         FilledButton(
           onPressed: () {
-            final weight = double.tryParse(_weightController.text);
+            // Parsed through the same helper that labelled the field, so
+            // a value typed in pounds is stored as kilograms. Records are
+            // always kilograms: a stored unit that depended on the reader's
+            // language would corrupt the history the moment they switched.
+            final weight = parseWeightToKilograms(
+              context,
+              _weightController.text,
+            );
             if (weight == null) return;
             Navigator.of(context).pop((date: _date, weightKg: weight));
           },

@@ -1774,5 +1774,18 @@
   "healthRecordFilterClear": "Clear filters",
   "@healthRecordFilterClear": {
     "description": "Resets both filters, so a filtered-empty list is never a dead end."
+  },
+  "weightFieldLabelWithUnit": "Weight ({unit})",
+  "@weightFieldLabelWithUnit": {
+    "description": "Weight input label carrying the unit it expects, so the label and the parsing cannot drift apart. Kilograms in Japanese, pounds in English.",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "petProfileFormWeightLabelWithUnit": "Weight ({unit}) - optional",
+  "@petProfileFormWeightLabelWithUnit": {
+    "description": "The same for the pet profile, where weight is optional."
   }
 }

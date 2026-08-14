@@ -14,6 +14,7 @@ import '../../../../shared/widgets/image_source_sheet.dart';
 import '../auth_controller.dart';
 import 'photo_crop_screen.dart';
 import '../../../../shared/utils/image_picking.dart';
+import '../../../../shared/utils/formatting.dart';
 
 /// Create or edit a single pet profile (spec 1.2 -
 /// ペットプロフィール登録：犬種、名前、生年月日、性別、体重（初期値）、
@@ -77,9 +78,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     final pet = widget.existingPet;
     _nameController = TextEditingController(text: pet?.name ?? '');
     _breedController = TextEditingController(text: pet?.breed ?? '');
-    _weightController = TextEditingController(
-      text: pet?.weightKg?.toString() ?? '',
-    );
+    // Filled in didChangeDependencies: the unit depends on the language,
+    // and Localizations is not available yet in initState.
+    _weightController = TextEditingController();
     _birthday = pet?.birthday;
     _sex = pet?.sex ?? PetSex.male;
     _neutered = pet?.neutered ?? false;
@@ -91,6 +92,16 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _backgroundAlignmentX = pet?.backgroundAlignmentX ?? 0.0;
     _backgroundAlignmentY = pet?.backgroundAlignmentY ?? 0.0;
     _backgroundZoom = pet?.backgroundZoom ?? 1.0;
+  }
+
+  bool _weightPrefilled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_weightPrefilled) return;
+    _weightPrefilled = true;
+    _weightController.text = weightInputText(context, widget.existingPet?.weightKg);
   }
 
   @override
@@ -282,7 +293,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
 
     setState(() => _isBusy = true);
     final weightText = _weightController.text.trim();
-    final weightKg = weightText.isEmpty ? null : double.tryParse(weightText);
+    final weightKg = weightText.isEmpty
+        ? null
+        : parseWeightToKilograms(context, weightText);
 
     try {
       PetProfile pet;
@@ -466,7 +479,10 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                               decimal: true,
                             ),
                             decoration: InputDecoration(
-                              labelText: l10n.petProfileFormWeightLabel,
+                              labelText: l10n
+                                  .petProfileFormWeightLabelWithUnit(
+                                    weightInputUnit(context),
+                                  ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {

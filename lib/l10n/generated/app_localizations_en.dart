@@ -1353,4 +1353,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get healthRecordFilterClear => 'Clear filters';
+
+  @override
+  String weightFieldLabelWithUnit(String unit) {
+    return 'Weight ($unit)';
+  }
+
+  @override
+  String petProfileFormWeightLabelWithUnit(Object unit) {
+    return 'Weight ($unit) - optional';
+  }
 }

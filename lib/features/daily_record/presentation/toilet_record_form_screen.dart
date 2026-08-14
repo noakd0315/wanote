@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../billing/ads/ad_gate.dart';
 import '../../billing/domain/ad_trigger.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/image_source_sheet.dart';
@@ -18,6 +17,7 @@ import 'dart:developer' as developer;
 import '../../../shared/app_messenger.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// Spec 4.2: "便の状態選択（硬さ：正常／軟便／下痢／硬い、色：正常／血便疑い
 /// ／白っぽい 等）" plus optional photo attachment for abnormal findings, plus
@@ -255,14 +255,14 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.commonDateLabel),
-              subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
+              subtitle: Text(formatDate(context, _recordedAt)),
               trailing: const Icon(Icons.edit_calendar),
               onTap: _pickDate,
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.commonTimeLabel),
-              subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
+              subtitle: Text(formatTime(context, _recordedAt)),
               trailing: const Icon(Icons.access_time),
               onTap: _pickTime,
             ),

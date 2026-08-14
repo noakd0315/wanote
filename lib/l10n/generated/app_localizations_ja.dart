@@ -1300,4 +1300,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get healthRecordFilterClear => '絞り込みを解除';
+
+  @override
+  String weightFieldLabelWithUnit(String unit) {
+    return '体重（$unit）';
+  }
+
+  @override
+  String petProfileFormWeightLabelWithUnit(Object unit) {
+    return '体重（$unit）・任意';
+  }
 }

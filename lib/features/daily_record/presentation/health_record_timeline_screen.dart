@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../data/health_record_repository.dart';
@@ -7,6 +6,7 @@ import '../models/health_record.dart';
 import 'health_record_detail_screen.dart';
 import 'health_record_form_screen.dart';
 import 'widgets/health_record_labels.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// How far back the timeline shows.
 enum HealthRecordPeriod {
@@ -200,7 +200,7 @@ class _HealthRecordTimelineScreenState
                     ? const Icon(Icons.photo)
                     : const Icon(Icons.notes),
                 title: Text(
-                  DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt),
+                  formatDateTime(context, record.recordedAt),
                 ),
                 subtitle: Text(
                   record.tags.isEmpty

@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/services/ai_usage_repository.dart';
@@ -10,6 +9,7 @@ import '../domain/monthly_report_generator.dart';
 import '../models/monthly_report_input_stats.dart';
 import 'widgets/disclaimer_banner.dart';
 import 'widgets/upgrade_prompt_card.dart';
+import '../../../shared/utils/formatting.dart';
 
 enum _SummaryState { idle, loading, ready, needsUpgrade, error }
 
@@ -370,7 +370,7 @@ class _ReportScreenState extends State<ReportScreen> {
   // range label -- the two screens previously formatted the same kind of
   // date range differently (this one without zero-padding), which read as
   // a mismatch even once the underlying period calculation was unified.
-  String _fullDateLabel(DateTime d) => DateFormat('yyyy/MM/dd').format(d);
+  String _fullDateLabel(DateTime d) => formatDate(context, d);
 
   /// Short axis-tick format -- the full "対象期間" line already states the
   /// year, so repeating it on every X-axis tick would just crowd the chart.

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'health_record_form_screen.dart';
 import 'widgets/health_record_labels.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// Spec 2.2: "記録詳細画面：編集・削除".
 class HealthRecordDetailScreen extends StatelessWidget {
@@ -53,7 +53,7 @@ class HealthRecordDetailScreen extends StatelessWidget {
       // pattern across every non-input-form screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt)),
+        title: Text(formatDateTime(context, record.recordedAt)),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),

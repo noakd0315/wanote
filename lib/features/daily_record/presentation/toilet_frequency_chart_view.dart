@@ -1,11 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../data/toilet_record_repository.dart';
 import '../domain/toilet_frequency_aggregator.dart';
 import '../models/toilet_record.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// Spec 4.2: "頻度グラフ（日別回数の推移）". Bucketing is done by the pure,
 /// unit-tested [ToiletFrequencyAggregator] — this widget only renders bars
@@ -113,7 +113,7 @@ class ToiletFrequencyChartView extends StatelessWidget {
                               return const SizedBox.shrink();
                             }
                             return Text(
-                              DateFormat('M/d').format(days[index]),
+                              formatShortDate(context, days[index]),
                               style: const TextStyle(fontSize: 10),
                             );
                           },

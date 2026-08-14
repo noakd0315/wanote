@@ -8,6 +8,7 @@ import '../data/ai_backend_client.dart';
 import '../domain/food_portion_calculator.dart';
 import '../domain/usage_limit_policy.dart';
 import 'widgets/upgrade_prompt_card.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// Display labels for [DogLifeStage], kept here (not on the enum itself)
 /// since the enum lives in the framework-free domain layer and can't call
@@ -113,9 +114,9 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   @override
   void initState() {
     super.initState();
-    _weightController = TextEditingController(
-      text: widget.initialWeightKg?.toString() ?? '',
-    );
+    // Filled in didChangeDependencies: the unit follows the language, and
+    // Localizations is not available yet here.
+    _weightController = TextEditingController();
     _lifeStage = widget.calculator.suggestDefaultLifeStage(
       birthday: widget.birthday,
       now: DateTime.now(),
@@ -134,6 +135,16 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
         '算出値との差を踏まえて、増減が必要かどうかも教えてください。';
   }
 
+  bool _weightPrefilled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_weightPrefilled) return;
+    _weightPrefilled = true;
+    _weightController.text = weightInputText(context, widget.initialWeightKg);
+  }
+
   @override
   void dispose() {
     _weightController.dispose();
@@ -143,7 +154,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   }
 
   void _calculate() {
-    final weightKg = double.tryParse(_weightController.text);
+    final weightKg = parseWeightToKilograms(context, _weightController.text);
     final foodKcalPer100g = double.tryParse(_foodDensityController.text);
     if (weightKg == null ||
         weightKg <= 0 ||

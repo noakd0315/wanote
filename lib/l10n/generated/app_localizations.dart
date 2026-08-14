@@ -2545,6 +2545,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear filters'**
   String get healthRecordFilterClear;
+
+  /// Weight input label carrying the unit it expects, so the label and the parsing cannot drift apart. Kilograms in Japanese, pounds in English.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight ({unit})'**
+  String weightFieldLabelWithUnit(String unit);
+
+  /// The same for the pet profile, where weight is optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight ({unit}) - optional'**
+  String petProfileFormWeightLabelWithUnit(Object unit);
 }
 
 class _AppLocalizationsDelegate

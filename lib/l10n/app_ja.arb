@@ -407,5 +407,7 @@
   "healthRecordFilterLastYear": "1年",
   "healthRecordFilterAllTags": "すべてのカテゴリ",
   "healthRecordFilterNoMatches": "条件に合う記録がありません。",
-  "healthRecordFilterClear": "絞り込みを解除"
+  "healthRecordFilterClear": "絞り込みを解除",
+  "weightFieldLabelWithUnit": "体重（{unit}）",
+  "petProfileFormWeightLabelWithUnit": "体重（{unit}）・任意"
 }

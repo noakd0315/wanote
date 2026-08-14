@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
 import 'widgets/toilet_labels.dart';
+import '../../../shared/utils/formatting.dart';
 
 /// The full view of a stool record, and the only place its photo can be
 /// seen.
@@ -75,7 +75,7 @@ class ToiletRecordDetailScreen extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.commonDateLabel),
             subtitle: Text(
-              DateFormat('yyyy/MM/dd HH:mm').format(record.recordedAt),
+              formatDateTime(context, record.recordedAt),
             ),
           ),
           if (condition != null) ...[
