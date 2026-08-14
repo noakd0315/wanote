@@ -1,10 +1,10 @@
 # wanote 作業引き継ぎメモ
 
-最終更新: 2026-08-14（**Firebase の実環境構築まで完了**。次は Android 実機テスト、
-または Cloudflare / Anthropic の設定から。Flutter 320 / Worker 119 / rules 77）
+最終更新: 2026-08-14（**Firebase / Cloudflare / Anthropic の実環境構築、
+GitHub へのバックアップまで完了**。次は **Android 実機テスト**。
+Flutter 321 / Worker 119 / rules 77）
 
-**着手順は `docs/PLAN_implementation_first.md` が正**（申請より実装優先・PM指示）。
-実環境の残作業は `docs/CLOUD_SETUP_CHECKLIST.md`。
+**完了／未了の一覧は `docs/STATUS.md`。着手順は `docs/PLAN_implementation_first.md`。**
 
 再開時はこのファイルを読んでから作業を始めてください。
 
@@ -522,6 +522,55 @@ PM要望。**問い合わせに答えられない期間を伝える手段**が�
 | 広告（テストID） | ✅ RevenueCat 無しでも出る（`37d4bc3`） |
 | AI相談・レポート・OCR | ❌ Cloudflare + Anthropic 未設定 |
 | 課金 | ❌ RevenueCat（申請待ち） |
+
+---
+
+## 0-A10. 2026-08-14（後半）：バックエンド接続・ストア準備・バックアップ
+
+### Cloudflare / Anthropic（完了）
+
+- Worker: `https://wanote-functions.wanote-app-reply.workers.dev`
+- **Durable Objects は無料プランで通った**（懸念していた点）
+- シークレット4件設定済み。**Worker → Firestore 到達を実確認**
+- **Anthropic の実キーでAI応答を確認**（日本語・免責付き）
+- `config/prod.json` に Worker URL を記載（gitignore 済み）
+
+> ⚠️ **Cloudflare が 403（エラー1010）で弾く事象**があった。
+> User-Agent によるボット判定。ブラウザ相当の UA では通った。
+> **Flutter の HTTP クライアントが同じ判定を受けるかは実機でしか分からない。**
+
+### 🔴 私が壊していた2件（修正済み）
+
+1. **`AndroidManifest.xml` が XML として不正だった。**
+   コメント内に `--` を句読点として使用。**XMLでは使えない**。
+   リマインダー/広告の設定を入れた時点から**Androidビルドは全滅**していた。
+   `flutter analyze` もテストも Web ビルドもこのファイルを解析しないため、
+   **Androidビルドを実行するまで誰も気づけない**
+2. **アカウント削除の失敗が利用者に伝わらなかった**（`6a266d7`）。
+   Web で実プロジェクトに繋いで通し検証したときに発覚。
+   ペット削除→一覧が空→土台画面が差し替わる→**削除画面ごとエラーが消える**。
+   アプリ全体の ScaffoldMessenger 経由に変更
+
+### ストア準備（作成済み・未使用）
+
+- `site/privacy-ja.html` / `privacy-en.html` — **公開用HTML。事業者名は
+  `TomoakiNamekawa`**。ブラウザで375px・ライト/ダーク確認済み
+- `STORE_LISTING_DRAFT.md` — 掲載文（日英）
+- `DATA_SAFETY_DECLARATION.md` — 申告の回答集
+- `CLOSED_TEST_GUIDE.md` — 申請とクローズドテストの流れ
+- `codemagic.yaml` — **`verify`（analyze+test）と `ios` に分離**。
+  前者は Apple 不要で今すぐ動く
+- リリース署名を `android/key.properties` から読む形に配線
+  （**鍵が無ければデバッグ鍵にフォールバック**。実機テストを止めないため）
+
+### GitHub バックアップ（完了）
+
+- `git@github.com:noakd0315/wanote.git`（**Private 要確認**）
+- SSH 鍵 `~/.ssh/id_ed25519_wanote` ＋ `~/.ssh/config`
+  （`IdentitiesOnly yes`。GitLab は別ホストなので競合しない）
+- **`C:\Dev\docs` を `wanote/docs/` に統合**。文書内の絶対パスは相対化
+- **秘密情報の漏洩なし**（設定6ファイルとも未追跡を確認）
+- **コピー元の `C:\Dev\docs` はまだ残してある**（削除は指示待ち）
 
 ---
 

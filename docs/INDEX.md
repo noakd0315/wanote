@@ -10,7 +10,8 @@
 
 | ファイル | 何が書いてあるか |
 |---|---|
-| **[SESSION_HANDOVER.md](SESSION_HANDOVER.md)** | **作業の引き継ぎ。再開時はまずこれ**。日付順の全経緯 |
+| **[STATUS.md](STATUS.md)** | **完了／未了の一覧。まずこれ** |
+| **[SESSION_HANDOVER.md](SESSION_HANDOVER.md)** | 作業の引き継ぎ。日付順の全経緯 |
 | **[PLAN_implementation_first.md](PLAN_implementation_first.md)** | **着手順はこれが正**。申請より実装を優先する方針（PM指示） |
 | **[ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md)** | **次にやること**。実機テストの手順と確認項目 |
 
