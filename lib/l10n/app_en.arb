@@ -1642,5 +1642,48 @@
   "anomalyDismissButton": "Dismiss",
   "@anomalyDismissButton": {
     "description": "Hides the warning banner. PM request: it reappeared on every visit with no way to put it away, including after the problem had been dealt with."
+  },
+  "reminderMedicationBody": "Time for medication.",
+  "@reminderMedicationBody": {
+    "description": "Body of a medication reminder notification. These texts used to be Japanese literals inside the schedulers, so an English user received Japanese notifications."
+  },
+  "reminderMedicationBodyWithDosage": "Time for medication ({dosage}).",
+  "@reminderMedicationBodyWithDosage": {
+    "description": "Medication reminder when a dosage was recorded.",
+    "placeholders": {
+      "dosage": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderPreventionTitle": "{productName} reminder",
+  "@reminderPreventionTitle": {
+    "description": "Title of a preventive care reminder.",
+    "placeholders": {
+      "productName": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderPreventionVaccineBody": "The next dose is due within {days} days. Consider booking a vet visit.",
+  "@reminderPreventionVaccineBody": {
+    "description": "Body for a vaccine reminder.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "reminderPreventionMedicationBody": "The next dose is due soon.",
+  "@reminderPreventionMedicationBody": {
+    "description": "Body for a preventive medication reminder (heartworm, flea/tick)."
+  },
+  "reminderChannelName": "Medication and prevention reminders",
+  "@reminderChannelName": {
+    "description": "Android notification channel name, shown in the system settings for this app."
+  },
+  "reminderChannelDescription": "Reminders for medication and for vaccine, heartworm and flea/tick prevention.",
+  "@reminderChannelDescription": {
+    "description": "Android notification channel description, shown in the system settings for this app."
   }
 }

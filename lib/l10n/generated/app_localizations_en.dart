@@ -1263,4 +1263,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get anomalyDismissButton => 'Dismiss';
+
+  @override
+  String get reminderMedicationBody => 'Time for medication.';
+
+  @override
+  String reminderMedicationBodyWithDosage(String dosage) {
+    return 'Time for medication ($dosage).';
+  }
+
+  @override
+  String reminderPreventionTitle(String productName) {
+    return '$productName reminder';
+  }
+
+  @override
+  String reminderPreventionVaccineBody(int days) {
+    return 'The next dose is due within $days days. Consider booking a vet visit.';
+  }
+
+  @override
+  String get reminderPreventionMedicationBody => 'The next dose is due soon.';
+
+  @override
+  String get reminderChannelName => 'Medication and prevention reminders';
+
+  @override
+  String get reminderChannelDescription =>
+      'Reminders for medication and for vaccine, heartworm and flea/tick prevention.';
 }

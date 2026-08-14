@@ -1,5 +1,6 @@
 import 'models/medication.dart';
 import 'reminder_scheduler.dart';
+import 'reminder_strings.dart';
 
 /// Pure computation of the daily dose reminders spec 5.2 asks for
 /// (`reminder_enabled` + `reminder_time` on a medication).
@@ -13,7 +14,12 @@ import 'reminder_scheduler.dart';
 /// The medication fields have been stored since the form screen was built,
 /// but nothing ever read them -- these reminders had never fired.
 class MedicationReminderScheduler {
-  const MedicationReminderScheduler();
+  const MedicationReminderScheduler({
+    this.strings = ReminderStrings.fallback,
+  });
+
+  /// The wording for the notifications this builds. See [ReminderStrings].
+  final ReminderStrings strings;
 
   /// Which daily reminders should exist right now for [medications].
   ///
@@ -62,13 +68,8 @@ class MedicationReminderScheduler {
     return reminders;
   }
 
-  String _bodyFor(Medication medication) {
-    final dosage = medication.dosage;
-    if (dosage == null || dosage.isEmpty) {
-      return 'お薬の時間です。';
-    }
-    return 'お薬の時間です（$dosage）。';
-  }
+  String _bodyFor(Medication medication) =>
+      strings.medicationBodyFor(medication.dosage);
 
   static DateTime _dateOnly(DateTime value) =>
       DateTime(value.year, value.month, value.day);

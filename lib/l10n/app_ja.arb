@@ -381,5 +381,12 @@
   "commonSavedMessage": "保存しました。",
   "anomalyBloodInStoolMessage": "血便の疑いがある記録があります。念のため獣医師にご相談ください。",
   "anomalyProlongedDiarrheaMessage": "下痢が{days}日以上続いています。獣医師への相談をご検討ください。",
-  "anomalyDismissButton": "閉じる"
+  "anomalyDismissButton": "閉じる",
+  "reminderMedicationBody": "お薬の時間です。",
+  "reminderMedicationBodyWithDosage": "お薬の時間です（{dosage}）。",
+  "reminderPreventionTitle": "{productName}の予防リマインダー",
+  "reminderPreventionVaccineBody": "次回接種予定日が近づいています（あと{days}日以内）。動物病院の予約をご検討ください。",
+  "reminderPreventionMedicationBody": "そろそろ次回投与の時期です。忘れずに投与しましょう。",
+  "reminderChannelName": "投薬・予防のリマインダー",
+  "reminderChannelDescription": "投薬とワクチン・フィラリア・ノミダニ予防のリマインダー通知"
 }

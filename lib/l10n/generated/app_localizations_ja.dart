@@ -1212,4 +1212,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get anomalyDismissButton => '閉じる';
+
+  @override
+  String get reminderMedicationBody => 'お薬の時間です。';
+
+  @override
+  String reminderMedicationBodyWithDosage(String dosage) {
+    return 'お薬の時間です（$dosage）。';
+  }
+
+  @override
+  String reminderPreventionTitle(String productName) {
+    return '$productNameの予防リマインダー';
+  }
+
+  @override
+  String reminderPreventionVaccineBody(int days) {
+    return '次回接種予定日が近づいています（あと$days日以内）。動物病院の予約をご検討ください。';
+  }
+
+  @override
+  String get reminderPreventionMedicationBody => 'そろそろ次回投与の時期です。忘れずに投与しましょう。';
+
+  @override
+  String get reminderChannelName => '投薬・予防のリマインダー';
+
+  @override
+  String get reminderChannelDescription => '投薬とワクチン・フィラリア・ノミダニ予防のリマインダー通知';
 }

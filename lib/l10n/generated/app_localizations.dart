@@ -2389,6 +2389,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismiss'**
   String get anomalyDismissButton;
+
+  /// Body of a medication reminder notification. These texts used to be Japanese literals inside the schedulers, so an English user received Japanese notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for medication.'**
+  String get reminderMedicationBody;
+
+  /// Medication reminder when a dosage was recorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for medication ({dosage}).'**
+  String reminderMedicationBodyWithDosage(String dosage);
+
+  /// Title of a preventive care reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'{productName} reminder'**
+  String reminderPreventionTitle(String productName);
+
+  /// Body for a vaccine reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'The next dose is due within {days} days. Consider booking a vet visit.'**
+  String reminderPreventionVaccineBody(int days);
+
+  /// Body for a preventive medication reminder (heartworm, flea/tick).
+  ///
+  /// In en, this message translates to:
+  /// **'The next dose is due soon.'**
+  String get reminderPreventionMedicationBody;
+
+  /// Android notification channel name, shown in the system settings for this app.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication and prevention reminders'**
+  String get reminderChannelName;
+
+  /// Android notification channel description, shown in the system settings for this app.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders for medication and for vaccine, heartworm and flea/tick prevention.'**
+  String get reminderChannelDescription;
 }
 
 class _AppLocalizationsDelegate

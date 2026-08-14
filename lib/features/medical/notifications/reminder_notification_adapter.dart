@@ -6,6 +6,7 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../domain/reminder_scheduler.dart';
+import '../domain/reminder_strings.dart';
 
 /// Thin adapter that turns the schedulers' pure output into actual
 /// `flutter_local_notifications` calls. All the "what/when to notify"
@@ -25,11 +26,15 @@ class ReminderNotificationAdapter {
   ReminderNotificationAdapter({
     FlutterLocalNotificationsPlugin? plugin,
     bool? supported,
+    this.strings = ReminderStrings.fallback,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
        _supported = supported ?? platformSupported;
 
+  /// The channel's own name and description are shown in Android's settings
+  /// for this app, so they are localized like the notifications themselves.
+  final ReminderStrings strings;
+
   static const String _channelId = 'medical_reminders';
-  static const String _channelName = '投薬・予防のリマインダー';
 
   final FlutterLocalNotificationsPlugin _plugin;
 
@@ -121,15 +126,15 @@ class ReminderNotificationAdapter {
         title: reminder.title,
         body: reminder.body,
         scheduledDate: tz.TZDateTime.from(reminder.fireAt, tz.local),
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
-            _channelName,
-            channelDescription: '投薬とワクチン・フィラリア・ノミダニ予防のリマインダー通知',
+            strings.channelName,
+            channelDescription: strings.channelDescription,
             importance: Importance.high,
             priority: Priority.high,
           ),
-          iOS: DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(),
         ),
         // uiLocalNotificationDateInterpretation is gone in 22: a TZDateTime
         // is now always interpreted as absolute time, which is what we were

@@ -37,6 +37,9 @@ import 'announcements_screen.dart';
 import 'daily_record_section.dart';
 import 'home_screen.dart';
 import 'settings_section.dart';
+import '../features/medical/domain/reminder_strings.dart';
+import '../features/medical/domain/reminder_scheduler.dart';
+import '../features/medical/domain/medication_reminder_scheduler.dart';
 
 /// The real app shell, handed to [LaunchGateScreen] as its `homeBuilder`
 /// from main.dart once a signed-in user has at least one pet.
@@ -102,7 +105,7 @@ class _HomeShellState extends State<HomeShell> {
   late final MonthlyReportGenerator _reportGenerator;
   late final BillingRepository _billingRepository;
   late final CampaignCodeRepository _campaignCodeRepository;
-  late final ReminderSyncService _reminderSyncService;
+  ReminderSyncService? _reminderSyncService;
   late final AdManager _adManager;
   late final AdGate _adGate;
   final AnnouncementRepository _announcementRepository =
@@ -138,18 +141,57 @@ class _HomeShellState extends State<HomeShell> {
       premiumStatus: () => _billingRepository.currentPremiumStatus,
     );
     unawaited(_prepareAds());
-    _reminderSyncService = ReminderSyncService(
-      medicationRepository: FirestoreMedicationRepository(),
-      preventionProgramRepository: FirestorePreventionProgramRepository(),
-      preventionRecordRepository: FirestorePreventionRecordRepository(),
-      adapter: ReminderNotificationAdapter(),
-    );
+    // Built in didChangeDependencies instead: the notification wording has
+    // to come from AppLocalizations, which is not available in initState.
     unawaited(_initializeBilling());
     unawaited(_redeemPendingReferralCodeIfAny());
 
     // read, not watch: this is a one-time hook-up, not a rebuild dependency.
     _authController = context.read<AuthController>()
       ..addListener(_onPetsChanged);
+    _onPetsChanged();
+  }
+
+  /// Language for the notifications, and the schedule that carries it.
+  ///
+  /// Reminders fire days later with the app closed, so their wording is
+  /// resolved now and handed to the scheduler. Changing the app's language
+  /// rebuilds the whole schedule, otherwise the notifications already booked
+  /// would keep arriving in the old one.
+  Locale? _remindersLocale;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_remindersLocale == locale) return;
+    _remindersLocale = locale;
+
+    final l10n = AppLocalizations.of(context)!;
+    final strings = ReminderStrings(
+      medicationBody: l10n.reminderMedicationBody,
+      medicationBodyWithDosage: l10n.reminderMedicationBodyWithDosage(
+        '{dosage}',
+      ),
+      preventionTitle: l10n.reminderPreventionTitle('{productName}'),
+      preventionVaccineBody: l10n.reminderPreventionVaccineBody(0)
+          .replaceFirst('0', '{days}'),
+      preventionMedicationBody: l10n.reminderPreventionMedicationBody,
+      channelName: l10n.reminderChannelName,
+      channelDescription: l10n.reminderChannelDescription,
+    );
+
+    unawaited(_reminderSyncService?.stop() ?? Future<void>.value());
+    _reminderSyncService = ReminderSyncService(
+      medicationRepository: FirestoreMedicationRepository(),
+      preventionProgramRepository: FirestorePreventionProgramRepository(),
+      preventionRecordRepository: FirestorePreventionRecordRepository(),
+      adapter: ReminderNotificationAdapter(strings: strings),
+      preventionScheduler: ReminderScheduler(strings: strings),
+      medicationScheduler: MedicationReminderScheduler(strings: strings),
+    );
+    // The set has not changed, but the service has, so it needs telling.
+    _trackedPetIds = const [];
     _onPetsChanged();
   }
 
@@ -163,7 +205,10 @@ class _HomeShellState extends State<HomeShell> {
         .toList();
     if (_listEquals(petIds, _trackedPetIds)) return;
     _trackedPetIds = petIds;
-    unawaited(_reminderSyncService.start(uid: widget.uid, petIds: petIds));
+    unawaited(
+      _reminderSyncService?.start(uid: widget.uid, petIds: petIds) ??
+          Future<void>.value(),
+    );
   }
 
   static bool _listEquals(List<String> a, List<String> b) {
@@ -232,7 +277,7 @@ class _HomeShellState extends State<HomeShell> {
   void dispose() {
     _adManager.dispose();
     _authController?.removeListener(_onPetsChanged);
-    unawaited(_reminderSyncService.stop());
+    unawaited(_reminderSyncService?.stop() ?? Future<void>.value());
     _billingRepository.dispose();
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();

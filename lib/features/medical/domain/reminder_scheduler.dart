@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'models/prevention_program.dart';
+import 'reminder_strings.dart';
 
 /// Minimal input the scheduler needs about one prevention record + its
 /// parent program. Deliberately not the full [PreventionRecord]/
@@ -96,7 +97,11 @@ class ReminderScheduler {
     this.vaccineLeadDays = defaultVaccineLeadDays,
     this.recurringLeadDays = defaultRecurringLeadDays,
     this.reminderHourOfDay = defaultReminderHourOfDay,
+    this.strings = ReminderStrings.fallback,
   });
+
+  /// The wording for the notifications this builds. See [ReminderStrings].
+  final ReminderStrings strings;
 
   /// Named constant per task instructions ("make N a named constant e.g.
   /// 7"): vaccines are infrequent/appointment-based, so give a full week's
@@ -165,16 +170,15 @@ class ReminderScheduler {
     return reminders;
   }
 
-  String _titleFor(ReminderCandidate record) {
-    return '${record.productName}の予防リマインダー';
-  }
+  String _titleFor(ReminderCandidate record) =>
+      strings.preventionTitleFor(record.productName);
 
   String _bodyFor(ReminderCandidate record, int leadDays) {
     switch (record.type) {
       case PreventionType.vaccine:
-        return '次回接種予定日が近づいています（あと$leadDays日以内）。動物病院の予約をご検討ください。';
+        return strings.preventionVaccineBodyFor(leadDays);
       case PreventionType.medication:
-        return 'そろそろ次回投与の時期です。忘れずに投与しましょう。';
+        return strings.preventionMedicationBody;
     }
   }
 
