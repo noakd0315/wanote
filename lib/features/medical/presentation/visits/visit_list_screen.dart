@@ -4,6 +4,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/visit_repository.dart';
 import '../../domain/models/visit.dart';
 import 'visit_form_screen.dart';
+import '../../../../shared/widgets/stream_error_view.dart';
 
 /// Spec 5.1 list/detail screen. Kept intentionally simple (per task scope):
 /// a single scrollable list with inline delete, tapping opens the edit form.
@@ -31,6 +32,9 @@ class VisitListScreen extends StatelessWidget {
       body: StreamBuilder<List<Visit>>(
         stream: repository.watchVisits(uid, petId),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return StreamErrorView(error: snapshot.error!);
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }

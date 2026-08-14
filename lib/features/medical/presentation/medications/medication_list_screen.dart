@@ -4,6 +4,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/medication_repository.dart';
 import '../../domain/models/medication.dart';
 import 'medication_form_screen.dart';
+import '../../../../shared/widgets/stream_error_view.dart';
 
 /// Spec 5.2 list screen.
 class MedicationListScreen extends StatelessWidget {
@@ -30,6 +31,9 @@ class MedicationListScreen extends StatelessWidget {
       body: StreamBuilder<List<Medication>>(
         stream: repository.watchMedications(uid, petId),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return StreamErrorView(error: snapshot.error!);
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }

@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "//": "watchRecordsForProgram: where('program_id') + orderBy('administered_at'). Firestore serves an equality filter and a sort on a different field only from a composite index, and refuses the query outright without one -- which is what left the prevention record history spinning with records saved and visible in the console. COLLECTION_GROUP, not COLLECTION: this collection lives under users/{uid}/pets/{petId}, so every owner has their own copy of it.",
+      "collectionGroup": "prevention_records",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "program_id", "order": "ASCENDING" },
+        { "fieldPath": "administered_at", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

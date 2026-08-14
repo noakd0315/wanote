@@ -2251,6 +2251,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Announcements could not be loaded.'**
   String get announcementsLoadFailed;
+
+  /// Shown when a Firestore list query fails. Replaces an indefinite spinner: PM report -- the prevention record history sat loading forever, because the only branch was 'no data yet' and a failed stream never has data.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this list.'**
+  String get listLoadFailedMessage;
+
+  /// Rebuilds the list screen so the query is attempted again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get listLoadFailedRetryButton;
 }
 
 class _AppLocalizationsDelegate

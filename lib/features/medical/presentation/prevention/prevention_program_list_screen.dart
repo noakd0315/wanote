@@ -8,6 +8,7 @@ import '../../domain/models/prevention_program.dart';
 import '../prevention_type_label.dart';
 import 'prevention_program_form_screen.dart';
 import 'prevention_record_list_screen.dart';
+import '../../../../shared/widgets/stream_error_view.dart';
 
 /// Spec 5.3 program list ("何をどの頻度で行うか" settings). Tapping a program
 /// opens its administration history ([PreventionRecordListScreen]); long-press
@@ -127,6 +128,9 @@ class _PreventionProgramListScreenState
       body: StreamBuilder<List<PreventionProgram>>(
         stream: widget.repository.watchPrograms(widget.uid, widget.petId),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return StreamErrorView(error: snapshot.error!);
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }

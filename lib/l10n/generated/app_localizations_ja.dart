@@ -1138,4 +1138,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get announcementsLoadFailed => 'お知らせを読み込めませんでした。';
+
+  @override
+  String get listLoadFailedMessage => '一覧を読み込めませんでした。';
+
+  @override
+  String get listLoadFailedRetryButton => '再試行';
 }

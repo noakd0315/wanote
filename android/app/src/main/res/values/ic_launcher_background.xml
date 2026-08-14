@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The app's own cream surface, so the icon and the first screen the
+         owner sees are the same colour. -->
+    <color name="ic_launcher_background">#FDF4EE</color>
+</resources>

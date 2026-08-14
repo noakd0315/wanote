@@ -1184,4 +1184,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get announcementsLoadFailed => 'Announcements could not be loaded.';
+
+  @override
+  String get listLoadFailedMessage => 'Could not load this list.';
+
+  @override
+  String get listLoadFailedRetryButton => 'Retry';
 }

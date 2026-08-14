@@ -13,6 +13,7 @@ import '../models/consultation.dart';
 import 'widgets/disclaimer_banner.dart';
 import 'widgets/emergency_notice.dart';
 import 'widgets/upgrade_prompt_card.dart';
+import '../../../shared/widgets/stream_error_view.dart';
 
 enum _ResultKind { none, emergency, response, needsUpgrade, error }
 
@@ -279,6 +280,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         widget.petId,
       ),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return StreamErrorView(error: snapshot.error!);
+        }
         if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),

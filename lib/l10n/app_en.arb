@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-
   "signInTitle": "Sign in",
   "@signInTitle": {
     "description": "Heading shown on the sign-in screen in sign-in mode."
@@ -89,7 +88,6 @@
   "@forcedSignOutMessage": {
     "description": "Snackbar shown when this device is signed out because a different device claimed the account's single active session."
   },
-
   "authErrorEmailAlreadyInUse": "This email address is already registered.",
   "@authErrorEmailAlreadyInUse": {
     "description": "Friendly message for Firebase Auth's 'email-already-in-use' error code, shown when signing up with an email that's already registered."
@@ -126,7 +124,6 @@
   "@authErrorGeneric": {
     "description": "Fallback friendly message for any sign-in/sign-up failure whose error code isn't specifically mapped -- the underlying exception is always logged for developers, never shown on screen."
   },
-
   "switchPetMenuTitle": "Switch or add a pet",
   "@switchPetMenuTitle": {
     "description": "Settings menu item that opens the pet switcher/add-pet screen."
@@ -143,7 +140,6 @@
   "@signOutMenuTitle": {
     "description": "Settings menu item that signs the user out."
   },
-
   "languageMenuTitle": "Language",
   "@languageMenuTitle": {
     "description": "Label for the in-app language switcher (sign-in screen icon button, settings menu item)."
@@ -156,7 +152,6 @@
   "@languagePickerTitle": {
     "description": "Title of the language-picker dialog opened from the sign-in screen or settings menu."
   },
-
   "paywallAppBarTitle": "Premium & AI tickets",
   "@paywallAppBarTitle": {
     "description": "AppBar title of the paywall/upgrade screen."
@@ -262,7 +257,6 @@
   "@referralCodeCopiedMessage": {
     "description": "Snackbar shown after copying the referral code to the clipboard."
   },
-
   "aiSectionConsultationTab": "Consultation",
   "@aiSectionConsultationTab": {
     "description": "Tab label for the consultation tab inside the AI section."
@@ -271,7 +265,6 @@
   "@aiSectionReportTab": {
     "description": "Tab label for the monthly report tab inside the AI section."
   },
-
   "dailyRecordHealthTab": "Health record",
   "@dailyRecordHealthTab": {
     "description": "Tab label for the health record tab inside the daily record section."
@@ -284,7 +277,6 @@
   "@dailyRecordToiletTab": {
     "description": "Tab label for the toilet tab inside the daily record section."
   },
-
   "homeShortcutWeightLabel": "Weight",
   "@homeShortcutWeightLabel": {
     "description": "Home screen shortcut chip label that opens the weight chart."
@@ -305,7 +297,6 @@
   "@homeShortcutFoodPortionLabel": {
     "description": "Home screen shortcut chip label that opens the food portion screen."
   },
-
   "navHomeLabel": "Home",
   "@navHomeLabel": {
     "description": "Bottom navigation bar label for the home/dashboard tab."
@@ -330,7 +321,6 @@
   "@referralCodeAppliedMessage": {
     "description": "Snackbar shown when a pending referral code from sign-up is auto-redeemed on app shell startup."
   },
-
   "imageSourceCameraOption": "Take a photo",
   "@imageSourceCameraOption": {
     "description": "Bottom sheet option that opens the camera to take a photo."
@@ -339,7 +329,6 @@
   "@imageSourceGalleryOption": {
     "description": "Bottom sheet option that opens the photo library picker."
   },
-
   "biometricGateAppBarTitle": "Unlock wanote",
   "@biometricGateAppBarTitle": {
     "description": "AppBar title on the biometric re-auth gate shown to returning users with biometric login enabled."
@@ -376,7 +365,6 @@
   "@biometricGateReauthFailedError": {
     "description": "Error shown on the biometric gate when provider re-authentication fails or is cancelled."
   },
-
   "biometricSetupAppBarTitle": "Biometric login",
   "@biometricSetupAppBarTitle": {
     "description": "AppBar title on the post-registration biometric setup screen."
@@ -397,7 +385,6 @@
   "@biometricSetupSkipButton": {
     "description": "Button that skips biometric setup for now."
   },
-
   "petProfileFormAddTitle": "Add a pet",
   "@petProfileFormAddTitle": {
     "description": "AppBar title on the pet profile form when creating a new pet."
@@ -523,7 +510,6 @@
   "@petProfileFormDeleteBackgroundButton": {
     "description": "Button that deletes the background photo."
   },
-
   "yourPetsScreenTitle": "Your pets",
   "@yourPetsScreenTitle": {
     "description": "AppBar title on the pet switcher screen listing every pet on the account."
@@ -553,7 +539,6 @@
   "@removePetDialogConfirmButton": {
     "description": "Confirm button on the remove-pet confirmation dialog."
   },
-
   "saveButton": "Save",
   "@saveButton": {
     "description": "Generic save button label used across the medical feature's create/edit forms."
@@ -582,7 +567,6 @@
   "@scheduleTypeAnnual": {
     "description": "Display label for ScheduleType.annual, used in the prevention program frequency dropdown and the program list's schedule badge."
   },
-
   "medicalTabVisits": "Visits",
   "@medicalTabVisits": {
     "description": "Tab label for the visit-history tab on the medical home screen."
@@ -599,7 +583,6 @@
   "@medicalTabCertificates": {
     "description": "Tab label for the certificates tab on the medical home screen."
   },
-
   "medicationFormAddTitle": "Add medication record",
   "@medicationFormAddTitle": {
     "description": "AppBar title of the medication form when adding a new medication."
@@ -636,7 +619,6 @@
   "@medicationReminderTimeLabel": {
     "description": "ListTile title for the medication reminder time picker."
   },
-
   "medicationListTitle": "Medications",
   "@medicationListTitle": {
     "description": "AppBar title of the medication list screen."
@@ -658,7 +640,6 @@
       }
     }
   },
-
   "certificateListTitle": "Certificates",
   "@certificateListTitle": {
     "description": "AppBar title of the certificate list screen."
@@ -675,7 +656,6 @@
   "@certificateAddPreventionRecordLabel": {
     "description": "Button label and FAB tooltip that navigate from the certificate list to the prevention programs screen."
   },
-
   "preventionProgramFormAddTitle": "Add prevention program",
   "@preventionProgramFormAddTitle": {
     "description": "AppBar title of the prevention program form when adding a new program."
@@ -716,7 +696,6 @@
   "@preventionProgramActiveSwitchLabel": {
     "description": "SwitchListTile title toggling whether the prevention program is active."
   },
-
   "preventionProgramListTitle": "Prevention programs",
   "@preventionProgramListTitle": {
     "description": "AppBar title of the prevention program list screen."
@@ -758,7 +737,6 @@
   "@preventionProgramInactiveSuffix": {
     "description": "Suffix appended to a prevention program list entry's subtitle when the program is inactive."
   },
-
   "savingInProgressMessage": "Saving, please wait",
   "@savingInProgressMessage": {
     "description": "Snackbar shown when the user tries to leave the prevention record form while a save is still in progress."
@@ -828,7 +806,6 @@
       }
     }
   },
-
   "vaccinationHistoryLabel": "Vaccination history",
   "@vaccinationHistoryLabel": {
     "description": "Short label for a vaccine-type prevention program's administration history, used in the record list's title."
@@ -875,7 +852,6 @@
       }
     }
   },
-
   "visitFormAddTitle": "Add visit record",
   "@visitFormAddTitle": {
     "description": "AppBar title of the visit form when adding a new visit."
@@ -904,7 +880,6 @@
   "@nextVisitDateLabel": {
     "description": "ListTile title for the next-visit-date picker on the visit form."
   },
-
   "visitListTitle": "Visit history",
   "@visitListTitle": {
     "description": "AppBar title of the visit list screen."
@@ -926,7 +901,6 @@
       }
     }
   },
-
   "aiDisclaimerText": "This feature is not a medical diagnosis -- it's reference information to help you judge whether a vet visit is needed. If symptoms continue or you're concerned, please be sure to see a veterinarian.",
   "@aiDisclaimerText": {
     "description": "Permanent disclaimer shown on every AI response screen (consultation, food portion, report)."
@@ -939,7 +913,6 @@
   "@aiUpgradeCardButtonLabel": {
     "description": "Button label on the AI feature's usage-limit upgrade prompt card."
   },
-
   "consultationScreenAppBarTitle": "AI Consultation",
   "@consultationScreenAppBarTitle": {
     "description": "AppBar title of the AI consultation screen."
@@ -972,7 +945,6 @@
   "@consultationHistoryEmptyMessage": {
     "description": "Empty-state message shown when the pet has no past consultations."
   },
-
   "foodPortionAppBarTitle": "Calculate food portion",
   "@foodPortionAppBarTitle": {
     "description": "AppBar title of the food portion calculator screen."
@@ -1080,7 +1052,6 @@
   "@foodPortionAdviceRetryButton": {
     "description": "Button that retries a failed AI feeding advice request."
   },
-
   "dogLifeStagePuppyLabel": "Puppy (growing)",
   "@dogLifeStagePuppyLabel": {
     "description": "Display label for DogLifeStage.puppy, used in the food portion screen's life stage dropdown."
@@ -1113,7 +1084,6 @@
   "@activityLevelHighLabel": {
     "description": "Display label for ActivityLevel.high, used in the food portion screen's activity level dropdown."
   },
-
   "reportAppBarTitle": "AI Health Report",
   "@reportAppBarTitle": {
     "description": "AppBar title of the AI health report screen."
@@ -1174,7 +1144,6 @@
   "@reportStoolLegendLabel": {
     "description": "Legend label for the stool bar in the toilet frequency chart."
   },
-
   "commonCancel": "Cancel",
   "@commonCancel": {
     "description": "Generic cancel button label used across daily-record dialogs."
@@ -1199,7 +1168,6 @@
   "@commonTimeLabel": {
     "description": "Label for a time field/list tile that opens a time picker."
   },
-
   "healthRecordDeleteConfirmTitle": "Delete this record?",
   "@healthRecordDeleteConfirmTitle": {
     "description": "Title of the confirmation dialog shown before deleting a health record."
@@ -1232,8 +1200,12 @@
   "@healthRecordPhotoCount": {
     "description": "Shows how many photos are attached out of the maximum allowed, e.g. '2/6 photos'.",
     "placeholders": {
-      "count": {"type": "int"},
-      "max": {"type": "int"}
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "healthRecordCommentLabel": "Comment",
@@ -1244,7 +1216,6 @@
   "@healthRecordTimelineTitle": {
     "description": "AppBar title of the health record timeline screen."
   },
-
   "healthRecordTagSkin": "Skin",
   "@healthRecordTagSkin": {
     "description": "Display label for the HealthRecordTag.skin category tag."
@@ -1269,7 +1240,6 @@
   "@healthRecordTagOther": {
     "description": "Display label for the HealthRecordTag.other category tag."
   },
-
   "toiletFrequencyChartTitle": "Toilet frequency",
   "@toiletFrequencyChartTitle": {
     "description": "AppBar title of the toilet frequency chart screen."
@@ -1282,7 +1252,6 @@
   "@toiletStoolLabel": {
     "description": "Short label for the stool toilet-record type, used on buttons and the chart legend."
   },
-
   "toiletRecordStoolFormTitle": "Record stool",
   "@toiletRecordStoolFormTitle": {
     "description": "AppBar title of the stool record form."
@@ -1316,7 +1285,6 @@
       }
     }
   },
-
   "toiletShowChartTooltip": "Show chart",
   "@toiletShowChartTooltip": {
     "description": "Tooltip on the button that swaps the toilet record list for the frequency chart, in place."
@@ -1337,15 +1305,21 @@
   "@toiletUrineColorSubtitle": {
     "description": "Timeline list-tile subtitle for a urine record, showing the recorded color shade.",
     "placeholders": {
-      "color": {"type": "String"}
+      "color": {
+        "type": "String"
+      }
     }
   },
   "toiletStoolConditionSubtitle": "Hardness: {hardness} / Color: {color}",
   "@toiletStoolConditionSubtitle": {
     "description": "Timeline list-tile subtitle for a stool record, showing its hardness and color.",
     "placeholders": {
-      "hardness": {"type": "String"},
-      "color": {"type": "String"}
+      "hardness": {
+        "type": "String"
+      },
+      "color": {
+        "type": "String"
+      }
     }
   },
   "toiletRecordUrineDialogTitle": "Record urine",
@@ -1360,7 +1334,6 @@
   "@toiletRecordSubmitButtonLabel": {
     "description": "Submit button label in the urine record dialog."
   },
-
   "toiletHardnessNormal": "Normal",
   "@toiletHardnessNormal": {
     "description": "Display label for StoolHardness.normal."
@@ -1401,7 +1374,6 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
-
   "weightRecordTimelineTitle": "Weight records",
   "@weightRecordTimelineTitle": {
     "description": "AppBar title of the weight record chart/table screen."
@@ -1462,7 +1434,6 @@
   "@weightKgFieldLabel": {
     "description": "Label for the numeric weight input field in the weight entry dialog."
   },
-
   "deleteAccountMenuTitle": "Delete account",
   "@deleteAccountMenuTitle": {
     "description": "Settings menu item that opens the account deletion screen. Required in-app by App Store Review Guideline 5.1.1(v) and Google Play's data deletion policy."
@@ -1547,7 +1518,6 @@
   "@deleteAccountRequiresRecentLoginMessage": {
     "description": "Message for Firebase Auth's 'requires-recent-login' error code during deletion."
   },
-
   "announcementsMenuTitle": "Announcements",
   "@announcementsMenuTitle": {
     "description": "Settings menu item, and AppBar title, for the list of in-app notices."
@@ -1567,5 +1537,13 @@
   "announcementsLoadFailed": "Announcements could not be loaded.",
   "@announcementsLoadFailed": {
     "description": "Shown when the announcements query fails. Deliberately not shown on the home banner, which stays silent rather than nagging about its own failure."
+  },
+  "listLoadFailedMessage": "Could not load this list.",
+  "@listLoadFailedMessage": {
+    "description": "Shown when a Firestore list query fails. Replaces an indefinite spinner: PM report -- the prevention record history sat loading forever, because the only branch was 'no data yet' and a failed stream never has data."
+  },
+  "listLoadFailedRetryButton": "Retry",
+  "@listLoadFailedRetryButton": {
+    "description": "Rebuilds the list screen so the query is attempted again."
   }
 }

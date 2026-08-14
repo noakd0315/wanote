@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive icon (Android 8+). The launcher applies its own mask - circle,
+     squircle, rounded square - and crops roughly the outer quarter, so the
+     dog is drawn smaller inside a larger foreground than the legacy icon
+     uses. Without this file the legacy square would be shrunk into a white
+     badge on modern launchers. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>

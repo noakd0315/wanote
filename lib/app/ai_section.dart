@@ -15,6 +15,7 @@ import '../features/daily_record/models/weight_record.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/utils/calendar_period.dart';
+import '../shared/widgets/stream_error_view.dart';
 
 /// AI相談 section of the app shell: combines Agent D's [ConsultationScreen]
 /// and [ReportScreen] behind a small local segmented control, since neither
@@ -237,6 +238,9 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
     return FutureBuilder<MonthlyReportInputStats>(
       future: _statsFuture,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return StreamErrorView(error: snapshot.error!);
+        }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }

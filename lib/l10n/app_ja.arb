@@ -1,6 +1,5 @@
 {
   "@@locale": "ja",
-
   "signInTitle": "サインイン",
   "createAccountTitle": "アカウントを作成",
   "emailLabel": "Email",
@@ -23,7 +22,6 @@
   "passwordResetEmailSent": "パスワード再設定用のメールを送信しました",
   "passwordResetEmailFailed": "送信に失敗しました。もう一度お試しください。",
   "forcedSignOutMessage": "別の端末でログインされたため、サインアウトしました。",
-
   "authErrorEmailAlreadyInUse": "このメールアドレスは既に登録されています。",
   "authErrorInvalidEmail": "有効なメールアドレスを入力してください。",
   "authErrorWeakPassword": "より強力なパスワードを設定してください。",
@@ -33,16 +31,13 @@
   "authErrorNetworkRequestFailed": "通信エラーが発生しました。接続をご確認の上、再度お試しください。",
   "authErrorAccountExistsWithDifferentCredential": "このメールアドレスは別のログイン方法で既に登録されています。",
   "authErrorGeneric": "問題が発生しました。もう一度お試しください。",
-
   "switchPetMenuTitle": "ペットを切り替える・追加する",
   "upgradePlanMenuTitle": "プランをアップグレード",
   "upgradePlanMenuSubtitle": "サブスクリプション・AI相談チケットの購入",
   "signOutMenuTitle": "サインアウト",
-
   "languageMenuTitle": "言語",
   "languageMenuSubtitleSystem": "端末の設定に従う",
   "languagePickerTitle": "言語を選択",
-
   "paywallAppBarTitle": "プレミアム & AIチケット",
   "restorePurchasesButton": "購入を復元",
   "purchaseCompleteMessage": "購入が完了しました。",
@@ -68,30 +63,24 @@
   "referralCodeDisplay": "あなたの紹介コード: {code}",
   "copyTooltip": "コピー",
   "referralCodeCopiedMessage": "紹介コードをコピーしました。",
-
   "aiSectionConsultationTab": "相談",
   "aiSectionReportTab": "レポート",
-
   "dailyRecordHealthTab": "健康",
   "dailyRecordWeightTab": "体重",
   "dailyRecordToiletTab": "トイレ",
-
   "homeShortcutWeightLabel": "体重",
   "homeShortcutToiletLabel": "トイレ",
   "homeShortcutCertificatesLabel": "証明書",
   "homeShortcutConsultationLabel": "AI相談",
   "homeShortcutFoodPortionLabel": "餌の量",
-
   "navHomeLabel": "ホーム",
   "navDailyRecordLabel": "日々の記録",
   "navMedicalLabel": "医療",
   "navAiConsultationLabel": "AI相談",
   "navSettingsLabel": "設定",
   "referralCodeAppliedMessage": "紹介コードを適用し、プレミアムを1ヶ月分付与しました。",
-
   "imageSourceCameraOption": "カメラで撮影",
   "imageSourceGalleryOption": "フォトライブラリから選択",
-
   "biometricGateAppBarTitle": "wanoteのロックを解除",
   "biometricGateUnlockButton": "ロック解除",
   "biometricGateMismatchMessage": "生体認証が一致しませんでした。",
@@ -101,13 +90,11 @@
   "biometricGateIncorrectPasswordError": "パスワードが正しくありません。もう一度お試しください。",
   "biometricGateReauthPrompt": "続行するにはもう一度サインインしてください。",
   "biometricGateReauthFailedError": "サインインを完了できませんでした。",
-
   "biometricSetupAppBarTitle": "生体認証ログイン",
   "biometricSetupHeadline": "生体認証ログインを有効にしますか？",
   "biometricSetupDescription": "次回からパスワードを入力する代わりに、Face ID／Touch ID／指紋認証でwanoteのロックを解除できます。生体認証データ自体がこの端末の外に送信されることはありません。",
   "biometricSetupEnableButton": "有効にする",
   "biometricSetupSkipButton": "今はしない",
-
   "petProfileFormAddTitle": "ペットを追加",
   "petProfileFormEditTitle": "ペットを編集",
   "petProfileFormSavingInProgressMessage": "保存中です。しばらくお待ちください",
@@ -138,14 +125,12 @@
   "petProfileFormBackgroundSectionTitle": "背景写真（ホーム画面）",
   "petProfileFormChangeBackgroundButton": "変更",
   "petProfileFormDeleteBackgroundButton": "削除",
-
   "yourPetsScreenTitle": "ペット一覧",
   "noPetsYetMessage": "まだペットが登録されていません。下から最初のペットを追加してください。",
   "removePetDialogTitle": "ペットを削除",
   "removePetDialogContent": "{petName}をこのアカウントから削除しますか？",
   "removePetDialogCancelButton": "キャンセル",
   "removePetDialogConfirmButton": "削除",
-
   "saveButton": "保存",
   "requiredFieldValidationError": "必須項目です",
   "notSetLabel": "未設定",
@@ -153,12 +138,10 @@
   "preventionTypeMedication": "投薬",
   "scheduleTypeMonthly": "毎月",
   "scheduleTypeAnnual": "毎年",
-
   "medicalTabVisits": "通院",
   "medicalTabMedications": "薬",
   "medicalTabPrevention": "予防",
   "medicalTabCertificates": "証明書",
-
   "medicationFormAddTitle": "薬の記録を追加",
   "medicationFormEditTitle": "薬の記録を編集",
   "medicationNameLabel": "薬品名",
@@ -168,17 +151,14 @@
   "medicationEndDateLabel": "終了日",
   "medicationReminderSwitchLabel": "リマインダーを有効にする",
   "medicationReminderTimeLabel": "リマインダー時刻",
-
   "medicationListTitle": "薬の記録",
   "medicationListEmptyMessage": "薬の記録がありません",
   "medicationOngoingLabel": "継続中",
   "medicationEndDateSubtitle": "〜{date}",
-
   "certificateListTitle": "証明書一覧",
   "certificateListEmptyTitle": "登録済みの証明書がありません",
   "certificateListEmptyDescription": "証明書は「予防医療」タブでワクチン・フィラリア・ノミダニ予防の記録を追加するときに撮影・登録します。",
   "certificateAddPreventionRecordLabel": "予防医療の記録を追加する",
-
   "preventionProgramFormAddTitle": "予防プログラムを追加",
   "preventionProgramFormEditTitle": "予防プログラムを編集",
   "preventionTypeFieldLabel": "種別",
@@ -189,7 +169,6 @@
   "intervalDaysLabel": "間隔（日数）",
   "numericValueValidationError": "数値を入力してください",
   "preventionProgramActiveSwitchLabel": "有効",
-
   "preventionProgramListTitle": "予防医療",
   "preventionDefaultProgramRabies": "狂犬病ワクチン",
   "preventionDefaultProgramCombinationVaccine": "混合ワクチン",
@@ -199,7 +178,6 @@
   "scheduleTypeSingleBadge": "単発",
   "scheduleIntervalDaysLabel": "{days}日ごと",
   "preventionProgramInactiveSuffix": "（無効）",
-
   "savingInProgressMessage": "保存中です。しばらくお待ちください",
   "preventionRecordFormAddTitle": "投与記録を追加",
   "preventionRecordFormEditTitle": "投与記録を編集",
@@ -216,7 +194,6 @@
   "ocrImageTooLargeMessage": "画像が大きすぎて読み取れません。撮り直すか、手動で入力してください",
   "ocrReadFailedMessage": "読み取れませんでした。手動で入力してください",
   "ocrConfidenceLabel": "AI読み取り信頼度: {percent}%（内容は必ずご確認ください）",
-
   "vaccinationHistoryLabel": "接種履歴",
   "medicationHistoryLabel": "投薬履歴",
   "vaccinationRecordLabel": "接種記録",
@@ -224,7 +201,6 @@
   "preventionRecordListTitle": "{productName} の{historyLabel}",
   "preventionRecordListEmptyMessage": "{recordLabel}がありません",
   "nextDueDatePrefixLabel": "次回: {date}",
-
   "visitFormAddTitle": "通院記録を追加",
   "visitFormEditTitle": "通院記録を編集",
   "visitedAtLabel": "通院日",
@@ -232,16 +208,13 @@
   "diagnosisLabel": "診断内容",
   "visitCostLabel": "費用（円）",
   "nextVisitDateLabel": "次回通院予定日",
-
   "visitListTitle": "通院履歴",
   "visitListEmptyMessage": "通院記録がありません",
   "visitFallbackTitle": "通院記録",
   "visitCostYenSuffix": "{cost}円",
-
   "aiDisclaimerText": "本機能は医療診断ではなく、受診目安の参考情報です。症状が続く場合や心配な場合は、必ず動物病院を受診してください。",
   "aiEmergencyMessage": "至急動物病院へ連絡・受診してください。\nこの内容は緊急性が高い可能性があるため、AIによる回答はスキップし、すぐに動物病院に相談することをおすすめします。",
   "aiUpgradeCardButtonLabel": "チケットを購入 / 有料プランを見る",
-
   "consultationScreenAppBarTitle": "AI相談",
   "consultationReferenceRecordsLabel": "関連する記録を参照する（任意）",
   "consultationInputHintText": "気になる症状や様子を入力してください（例：今朝からぐったりしている）",
@@ -250,7 +223,6 @@
   "consultationSubmitFailedMessage": "相談の送信に失敗しました。通信状況をご確認のうえ、もう一度お試しください。",
   "consultationHistoryTitle": "相談履歴",
   "consultationHistoryEmptyMessage": "相談履歴はまだありません。",
-
   "foodPortionAppBarTitle": "餌の量を計算",
   "foodPortionWeightLabel": "体重 (kg)",
   "foodPortionLifeStageLabel": "ライフステージ",
@@ -274,7 +246,6 @@
   "foodPortionAdviceUsageLimitMessage": "AI相談の利用回数上限に達しています。",
   "foodPortionAdviceFailedMessage": "アドバイスの取得に失敗しました。",
   "foodPortionAdviceRetryButton": "再試行",
-
   "dogLifeStagePuppyLabel": "子犬（成長期）",
   "dogLifeStageAdultLabel": "成犬",
   "bodyConditionUnderweightLabel": "痩せ気味",
@@ -283,7 +254,6 @@
   "activityLevelLowLabel": "運動量少なめ",
   "activityLevelNormalLabel": "普通",
   "activityLevelHighLabel": "活発",
-
   "reportAppBarTitle": "AI健康レポート",
   "reportExportPdfTooltip": "PDFで書き出す",
   "reportPeriodLabel": "対象期間: {start} 〜 {end}",
@@ -297,14 +267,12 @@
   "reportNoToiletDataMessage": "トイレの記録がありません。",
   "reportUrineLegendLabel": "排尿",
   "reportStoolLegendLabel": "排便",
-
   "commonCancel": "キャンセル",
   "commonSave": "保存",
   "commonDelete": "削除",
   "commonNoRecordsYet": "記録がまだありません",
   "commonDateLabel": "日付",
   "commonTimeLabel": "時刻",
-
   "healthRecordDeleteConfirmTitle": "この記録を削除しますか？",
   "healthRecordNoCommentPlaceholder": "(コメントなし)",
   "healthRecordFormTitleNew": "新規健康記録",
@@ -315,18 +283,15 @@
   "healthRecordPhotoCount": "{count}/{max}枚",
   "healthRecordCommentLabel": "コメント",
   "healthRecordTimelineTitle": "健康の記録",
-
   "healthRecordTagSkin": "皮膚",
   "healthRecordTagAppetiteLoss": "食欲不振",
   "healthRecordTagLowEnergy": "元気がない",
   "healthRecordTagVomiting": "嘔吐",
   "healthRecordTagDiarrhea": "下痢",
   "healthRecordTagOther": "その他",
-
   "toiletFrequencyChartTitle": "トイレ頻度",
   "toiletUrineLabel": "排尿",
   "toiletStoolLabel": "排便",
-
   "toiletRecordStoolFormTitle": "排便を記録",
   "toiletHardnessSectionLabel": "硬さ",
   "toiletColorSectionLabel": "色",
@@ -334,7 +299,6 @@
   "toiletPhotoChangeLabel": "写真を変更",
   "toiletLocationOptionalLabel": "場所（任意）",
   "toiletLocationSubtitle": "場所: {location}",
-
   "toiletShowChartTooltip": "グラフ表示",
   "toiletShowTimelineTooltip": "記録一覧を表示",
   "toiletRecordTimelineTitle": "トイレの記録",
@@ -344,7 +308,6 @@
   "toiletRecordUrineDialogTitle": "排尿を記録",
   "toiletUrineColorShadeLabel": "色の濃淡",
   "toiletRecordSubmitButtonLabel": "記録する",
-
   "toiletHardnessNormal": "正常",
   "toiletHardnessSoft": "軟便",
   "toiletHardnessDiarrhea": "下痢",
@@ -355,7 +318,6 @@
   "urineColorPale": "薄い（無色に近い）",
   "urineColorNormal": "正常（淡黄色）",
   "urineColorDark": "濃い（濃縮尿）",
-
   "weightRecordTimelineTitle": "体重の記録",
   "weightShowChartTooltip": "グラフ表示",
   "weightShowTableTooltip": "表形式で表示",
@@ -371,7 +333,6 @@
   "weightNoRecordsForPeriod": "この期間の記録がありません",
   "weightEntryDialogTitle": "体重を記録",
   "weightKgFieldLabel": "体重 (kg)",
-
   "deleteAccountMenuTitle": "アカウントを削除",
   "deleteAccountWarningTitle": "この操作は取り消せません",
   "deleteAccountWarningBody": "アカウントを削除すると、以下がすべて完全に削除されます。復元はできません。",
@@ -393,10 +354,11 @@
   "deleteAccountCompletedMessage": "アカウントを削除しました。",
   "deleteAccountFailedMessage": "削除に失敗しました。通信環境をご確認の上、もう一度お試しください。",
   "deleteAccountRequiresRecentLoginMessage": "確認のため、もう一度サインインしてからお試しください。",
-
   "announcementsMenuTitle": "お知らせ",
   "announcementDismissTooltip": "閉じる",
   "announcementSeeAllButton": "お知らせ一覧",
   "announcementsEmpty": "現在お知らせはありません。",
-  "announcementsLoadFailed": "お知らせを読み込めませんでした。"
+  "announcementsLoadFailed": "お知らせを読み込めませんでした。",
+  "listLoadFailedMessage": "一覧を読み込めませんでした。",
+  "listLoadFailedRetryButton": "再試行"
 }

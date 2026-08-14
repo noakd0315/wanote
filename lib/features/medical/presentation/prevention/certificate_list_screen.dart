@@ -9,6 +9,7 @@ import '../../data/prevention_record_repository.dart';
 import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
 import 'prevention_program_list_screen.dart';
+import '../../../../shared/widgets/stream_error_view.dart';
 
 /// Spec 5.3's certificate list requirement: "一覧から証明書を即座に確認できる
 /// ようにする（ペットホテル・ドッグラン・トリミング施設での提示を想定）",
@@ -56,6 +57,9 @@ class CertificateListScreen extends StatelessWidget {
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecords(uid, petId),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return StreamErrorView(error: snapshot.error!);
+          }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
