@@ -1198,4 +1198,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get foodPortionCurrentAmountHelperText => '分からない場合は空欄で構いません。';
+
+  @override
+  String get commonSavedMessage => '保存しました。';
+
+  @override
+  String get anomalyBloodInStoolMessage => '血便の疑いがある記録があります。念のため獣医師にご相談ください。';
+
+  @override
+  String anomalyProlongedDiarrheaMessage(int days) {
+    return '下痢が$days日以上続いています。獣医師への相談をご検討ください。';
+  }
+
+  @override
+  String get anomalyDismissButton => '閉じる';
 }

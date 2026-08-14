@@ -6,7 +6,8 @@ import '../../data/medication_repository.dart';
 import '../../data/prevention_program_repository.dart';
 import '../../domain/models/medication.dart';
 import '../../domain/models/prevention_program.dart';
-import '../prevention/prevention_program_form_screen.dart';
+import '../../data/prevention_record_repository.dart';
+import '../prevention/prevention_record_form_screen.dart';
 import 'medication_form_screen.dart';
 
 /// Spec 5.2 list screen, plus the preventive treatments that are also
@@ -28,15 +29,23 @@ class MedicationListScreen extends StatelessWidget {
     required this.petId,
     MedicationRepository? repository,
     PreventionProgramRepository? preventionProgramRepository,
+    PreventionRecordRepository? preventionRecordRepository,
   }) : repository = repository ?? FirestoreMedicationRepository(),
        preventionProgramRepository =
            preventionProgramRepository ??
-           FirestorePreventionProgramRepository();
+           FirestorePreventionProgramRepository(),
+       preventionRecordRepository =
+           preventionRecordRepository ??
+           FirestorePreventionRecordRepository();
 
   final String uid;
   final String petId;
   final MedicationRepository repository;
   final PreventionProgramRepository preventionProgramRepository;
+
+  /// Where a dose given today is written. The programme says what and how
+  /// often; this holds each administration.
+  final PreventionRecordRepository preventionRecordRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -157,10 +166,14 @@ class MedicationListScreen extends StatelessWidget {
     AppLocalizations l10n,
     PreventionProgram program,
   ) {
-    // No Dismissible, deliberately. Swiping this row away would delete a
-    // preventive care programme from a screen that does not own it, taking
-    // its schedule and its reminders with it. Deletion stays where the
-    // record lives.
+    // Opens a new dose, not the programme's settings. This is the
+    // medication history: tapping a row here means "I gave this today", and
+    // it opened the schedule editor instead (PM report).
+    //
+    // No Dismissible either, deliberately. Swiping this row away would
+    // delete a preventive care programme from a screen that does not own
+    // it, taking its schedule and its reminders with it. Deletion stays
+    // where the record lives.
     //
     // Reminders keep working untouched: they are driven from the programme
     // by ReminderSyncService, and nothing here changes the programme.
@@ -168,13 +181,14 @@ class MedicationListScreen extends StatelessWidget {
       leading: const Icon(Icons.vaccines_outlined),
       title: Text(program.productName),
       subtitle: Text(l10n.medicationListPreventionBadge),
+      trailing: const Icon(Icons.add),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => PreventionProgramFormScreen(
+          builder: (_) => PreventionRecordFormScreen(
             uid: uid,
             petId: petId,
-            repository: preventionProgramRepository,
             program: program,
+            repository: preventionRecordRepository,
           ),
         ),
       ),

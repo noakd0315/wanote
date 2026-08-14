@@ -1248,4 +1248,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get foodPortionCurrentAmountHelperText =>
       'Leave blank if you do not know.';
+
+  @override
+  String get commonSavedMessage => 'Saved.';
+
+  @override
+  String get anomalyBloodInStoolMessage =>
+      'A record suggests blood in the stool. Please consider seeing a vet.';
+
+  @override
+  String anomalyProlongedDiarrheaMessage(int days) {
+    return 'Diarrhea has continued for $days days or more. Please consider seeing a vet.';
+  }
+
+  @override
+  String get anomalyDismissButton => 'Dismiss';
 }

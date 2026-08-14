@@ -13,6 +13,7 @@ import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'widgets/health_record_labels.dart';
 import '../../../shared/utils/image_picking.dart';
+import '../../../shared/app_messenger.dart';
 
 /// Spec 2.2: "新規記録画面：写真添付（複数枚、最大4〜6枚程度を想定）、
 /// カテゴリタグ選択、コメント入力". Also doubles as the edit form when
@@ -101,6 +102,7 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
     setState(() => _saving = true);
     // Read before the first await; used after the save completes.
     final adGate = adGateOf(context);
+    final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
     final hasNewPhotos = _newPhotoBytes.isNotEmpty;
     try {
       final existing = widget.existingRecord;
@@ -137,10 +139,21 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
       // Photos only: a text-only record is the everyday act this app exists
       // for, and putting an ad in front of it daily would make the core
       // feature unpleasant (PLAN_ads decision 2).
+      // Leave first, then confirm, then the ad. The record is already
+      // written by this point, so nothing is at risk in closing the screen,
+      // and the owner ends up back at the list with their entry in it --
+      // which is the answer to "did that work?".
+      //
+      // Previously the ad went up while the form was still on screen and
+      // there was no message at all, so there was no way to tell a saved
+      // record from a lost one (PM report). The message goes through the
+      // app-level messenger because the screen that would have shown it is
+      // deliberately gone by then.
+      if (mounted) Navigator.of(context).pop();
+      showAppMessage(savedMessage);
       if (hasNewPhotos) {
         await adGate?.maybeShow(AdTrigger.healthRecordUpload);
       }
-      if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);
     }

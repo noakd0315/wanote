@@ -20,6 +20,7 @@ import '../../domain/models/prevention_record.dart';
 import '../../domain/ocr_result_validator.dart';
 import '../../domain/prevention_due_date_calculator.dart';
 import '../../../../shared/utils/image_picking.dart';
+import '../../../../shared/app_messenger.dart';
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -231,6 +232,8 @@ class _PreventionRecordFormScreenState
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    // Read before the first await, like everything else taken from context.
+    final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
     setState(() => _saving = true);
     try {
       final hospitalName = _hospitalController.text.trim().isEmpty
@@ -290,6 +293,9 @@ class _PreventionRecordFormScreenState
         );
       }
       if (mounted) Navigator.of(context).pop();
+      // Same reason as the daily-record forms: the screen is gone by the
+      // time this is said, so it is said through the app-level messenger.
+      showAppMessage(savedMessage);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

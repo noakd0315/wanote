@@ -1621,5 +1621,26 @@
   "foodPortionCurrentAmountHelperText": "Leave blank if you do not know.",
   "@foodPortionCurrentAmountHelperText": {
     "description": "Makes clear the field is not required."
+  },
+  "commonSavedMessage": "Saved.",
+  "@commonSavedMessage": {
+    "description": "Confirms a record was written. PM report: after saving, an ad appeared and the form was still there, with nothing to say whether the save had worked."
+  },
+  "anomalyBloodInStoolMessage": "A record suggests blood in the stool. Please consider seeing a vet.",
+  "@anomalyBloodInStoolMessage": {
+    "description": "Warning banner above the toilet timeline. The text used to live in the detector as a Japanese literal, so it stayed Japanese in the English app (PM report)."
+  },
+  "anomalyProlongedDiarrheaMessage": "Diarrhea has continued for {days} days or more. Please consider seeing a vet.",
+  "@anomalyProlongedDiarrheaMessage": {
+    "description": "Warning banner for a diarrhea streak.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "anomalyDismissButton": "Dismiss",
+  "@anomalyDismissButton": {
+    "description": "Hides the warning banner. PM request: it reappeared on every visit with no way to put it away, including after the problem had been dealt with."
   }
 }

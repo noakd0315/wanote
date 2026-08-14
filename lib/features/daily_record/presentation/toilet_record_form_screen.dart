@@ -31,12 +31,23 @@ class ToiletRecordFormScreen extends StatefulWidget {
     required this.uid,
     required this.petId,
     required this.repository,
+    this.type = ToiletType.stool,
     this.healthRecordRepository,
     this.imagePicker,
   });
 
   final String uid;
   final String petId;
+
+  /// Which kind of record this form writes.
+  ///
+  /// Urine used to be entered in a dialog, which the keyboard broke when the
+  /// location field was focused. Fixing the dialog kept it fast but left two
+  /// different ways to record the same kind of thing; the PM asked for one
+  /// screen, matching stool. The form adapts rather than being duplicated --
+  /// the date, the location and the save are identical, and only the
+  /// condition fields differ.
+  final ToiletType type;
   final ToiletRecordRepository repository;
 
   /// Supplied only when the daily log is reachable from here. Null in tests
@@ -57,6 +68,9 @@ class ToiletRecordFormScreen extends StatefulWidget {
 class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   StoolHardness _hardness = StoolHardness.normal;
   StoolColor _color = StoolColor.normal;
+  UrineColor _urineColor = UrineColor.normal;
+
+  bool get _isUrine => widget.type == ToiletType.urine;
   Uint8List? _photoBytes;
 
   /// Off by default, deliberately. Most bowel movements are unremarkable,
@@ -150,14 +164,18 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       stoolColorLabel(context, _color),
     );
     final copyFailedMessage = l10n.toiletCopyToDailyLogFailedMessage;
+    final savedMessage = l10n.commonSavedMessage;
     final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
       final saved = await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
-        type: ToiletType.stool,
-        stoolCondition: StoolCondition(hardness: _hardness, color: _color),
+        type: widget.type,
+        stoolCondition: _isUrine
+            ? null
+            : StoolCondition(hardness: _hardness, color: _color),
+        urineColor: _isUrine ? _urineColor : null,
         photoBytes: _photoBytes,
         recordedAt: _recordedAt,
         location: location.isEmpty ? null : location,
@@ -171,7 +189,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       // entries can never end up showing different pictures, and the storage
       // is paid for once (PM: 一元管理が好ましい).
       final healthRecords = widget.healthRecordRepository;
-      if (_copyToDailyLog && healthRecords != null) {
+      if (_copyToDailyLog && healthRecords != null && !_isUrine) {
         try {
           await healthRecords.create(
             uid: widget.uid,
@@ -192,13 +210,24 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
           showAppMessage(copyFailedMessage);
         }
       }
+      // Leave first, then confirm, then the ad. The record is already
+      // written by this point, so nothing is at risk in closing the screen,
+      // and the owner ends up back at the list with their entry in it --
+      // which is the answer to "did that work?".
+      //
+      // Previously the ad went up while the form was still on screen and
+      // there was no message at all, so there was no way to tell a saved
+      // record from a lost one (PM report). The message goes through the
+      // app-level messenger because the screen that would have shown it is
+      // deliberately gone by then.
+      if (mounted) Navigator.of(context).pop();
+      showAppMessage(savedMessage);
       // After the write, never before -- see health_record_form_screen.dart
       // for why the ad impression is the thing that may be lost here and the
       // record is not. Photos only, same reason.
       if (hasPhoto) {
         await adGate?.maybeShow(AdTrigger.toiletRecordUpload);
       }
-      if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -238,35 +267,52 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
               onTap: _pickTime,
             ),
             const SizedBox(height: 8),
-            Text(
-              l10n.toiletHardnessSectionLabel,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Wrap(
-              spacing: 8,
-              children: StoolHardness.values.map((h) {
-                return ChoiceChip(
-                  label: Text(stoolHardnessLabel(context, h)),
-                  selected: _hardness == h,
-                  onSelected: (_) => setState(() => _hardness = h),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.toiletColorSectionLabel,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Wrap(
-              spacing: 8,
-              children: StoolColor.values.map((c) {
-                return ChoiceChip(
-                  label: Text(stoolColorLabel(context, c)),
-                  selected: _color == c,
-                  onSelected: (_) => setState(() => _color = c),
-                );
-              }).toList(),
-            ),
+            if (_isUrine) ...[
+              Text(
+                l10n.toiletUrineColorShadeLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8,
+                children: UrineColor.values.map((c) {
+                  return ChoiceChip(
+                    label: Text(urineColorLabel(context, c)),
+                    selected: _urineColor == c,
+                    onSelected: (_) => setState(() => _urineColor = c),
+                  );
+                }).toList(),
+              ),
+            ] else ...[
+              Text(
+                l10n.toiletHardnessSectionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8,
+                children: StoolHardness.values.map((h) {
+                  return ChoiceChip(
+                    label: Text(stoolHardnessLabel(context, h)),
+                    selected: _hardness == h,
+                    onSelected: (_) => setState(() => _hardness = h),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.toiletColorSectionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8,
+                children: StoolColor.values.map((c) {
+                  return ChoiceChip(
+                    label: Text(stoolColorLabel(context, c)),
+                    selected: _color == c,
+                    onSelected: (_) => setState(() => _color = c),
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: 16),
             TextField(
               controller: _locationController,
@@ -275,16 +321,20 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _pickPhoto,
-              icon: const Icon(Icons.camera_alt),
-              label: Text(
-                _photoBytes == null
-                    ? l10n.toiletPhotoAddLabel
-                    : l10n.toiletPhotoChangeLabel,
+            // Urine records take no photo -- the PM confirmed there is
+            // nothing to look at -- so the button, the preview and the ad
+            // that follows an upload are all absent for them.
+            if (!_isUrine)
+              OutlinedButton.icon(
+                onPressed: _pickPhoto,
+                icon: const Icon(Icons.camera_alt),
+                label: Text(
+                  _photoBytes == null
+                      ? l10n.toiletPhotoAddLabel
+                      : l10n.toiletPhotoChangeLabel,
+                ),
               ),
-            ),
-            if (_photoBytes != null)
+            if (!_isUrine && _photoBytes != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: ClipRRect(
@@ -297,7 +347,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
                   ),
                 ),
               ),
-            if (widget.healthRecordRepository != null)
+            if (widget.healthRecordRepository != null && !_isUrine)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _copyToDailyLog,

@@ -60,21 +60,45 @@ class _ToiletRecordTimelineScreenState
   /// glance at a summary rather than a preferred way of reading the data.
   bool _showChart = false;
 
-  Future<void> _recordUrine() async {
-    final result = await showDialog<_UrineRecordDialogResult>(
-      context: context,
-      builder: (_) => const _RecordedAtDialog(),
-    );
-    if (result == null) return;
-    await widget.repository.create(
-      uid: widget.uid,
-      petId: widget.petId,
-      type: ToiletType.urine,
-      recordedAt: result.recordedAt,
-      urineColor: result.color,
-      location: result.location,
+  /// Reasons the owner has put away in this session.
+  ///
+  /// The banner used to reappear on every visit with no way to dismiss it,
+  /// including after the vet had already been called (PM request). Kept in
+  /// memory rather than persisted: a warning that is still true tomorrow
+  /// should say so again.
+  final Set<ConsultationSuggestionReason> _dismissed = {};
+
+  /// A screen, not a dialog.
+  ///
+  /// The dialog was the faster path for the app's most frequent record, but
+  /// the keyboard broke it the moment the location field was focused, and it
+  /// left two different ways to enter the same kind of thing. PM decision:
+  /// one screen, the same one stool uses.
+  void _recordUrine() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ToiletRecordFormScreen(
+          uid: widget.uid,
+          petId: widget.petId,
+          repository: widget.repository,
+          type: ToiletType.urine,
+        ),
+      ),
     );
   }
+
+  /// The banner's wording, built here rather than carried on the
+  /// suggestion. The detector has no BuildContext and cannot localize, which
+  /// is how its Japanese literal ended up on the English screen.
+  String _suggestionMessage(
+    AppLocalizations l10n,
+    ConsultationSuggestion suggestion,
+  ) => switch (suggestion.reason) {
+    ConsultationSuggestionReason.bloodInStoolSuspected =>
+      l10n.anomalyBloodInStoolMessage,
+    ConsultationSuggestionReason.prolongedDiarrhea =>
+      l10n.anomalyProlongedDiarrheaMessage(suggestion.streakDayCount ?? 0),
+  };
 
   void _handleSuggestions(List<ToiletRecord> records) {
     final now = DateTime.now();
@@ -142,12 +166,20 @@ class _ToiletRecordTimelineScreenState
                   now: now,
                   lastSuggestedAt: const {},
                 );
+                final remaining = currentSuggestions
+                    .where((s) => !_dismissed.contains(s.reason))
+                    .toList();
+                final visibleSuggestion = remaining.isEmpty
+                    ? null
+                    : remaining.first;
 
                 return Column(
                   children: [
-                    if (currentSuggestions.isNotEmpty)
+                    if (visibleSuggestion != null)
                       MaterialBanner(
-                        content: Text(currentSuggestions.first.message),
+                        content: Text(
+                          _suggestionMessage(l10n, visibleSuggestion),
+                        ),
                         leading: const Icon(
                           Icons.warning_amber,
                           color: Colors.orange,
@@ -155,8 +187,14 @@ class _ToiletRecordTimelineScreenState
                         actions: [
                           TextButton(
                             onPressed: () => widget.onConsultationSuggested
-                                ?.call(currentSuggestions.first),
+                                ?.call(visibleSuggestion),
                             child: Text(l10n.toiletConsultAiButtonLabel),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(
+                              () => _dismissed.add(visibleSuggestion.reason),
+                            ),
+                            child: Text(l10n.anomalyDismissButton),
                           ),
                         ],
                       ),
@@ -275,161 +313,6 @@ class _ToiletRecordTimelineScreenState
                 );
               },
             ),
-    );
-  }
-}
-
-/// Return value of [_RecordedAtDialog]: the confirmed timestamp plus the
-/// optional urine color shade (PM request: "排尿に色の濃淡を設定できるように
-/// したい").
-class _UrineRecordDialogResult {
-  const _UrineRecordDialogResult({
-    required this.recordedAt,
-    required this.color,
-    required this.location,
-  });
-
-  final DateTime recordedAt;
-  final UrineColor? color;
-  final String? location;
-}
-
-/// Confirms the timestamp (and optionally the color shade) for a one-tap
-/// urine record before saving it. Defaults to "now" and "正常" so a plain
-/// tap-through reproduces the original one-tap behavior (spec 4.2's "記録
-/// 時刻は自動入力"); all fields are editable for logging something noticed
-/// after the fact.
-class _RecordedAtDialog extends StatefulWidget {
-  const _RecordedAtDialog();
-
-  @override
-  State<_RecordedAtDialog> createState() => _RecordedAtDialogState();
-}
-
-class _RecordedAtDialogState extends State<_RecordedAtDialog> {
-  late DateTime _recordedAt = DateTime.now();
-  UrineColor _color = UrineColor.normal;
-  final _locationController = TextEditingController();
-
-  @override
-  void dispose() {
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _recordedAt,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked == null) return;
-    setState(() {
-      _recordedAt = DateTime(
-        picked.year,
-        picked.month,
-        picked.day,
-        _recordedAt.hour,
-        _recordedAt.minute,
-      );
-    });
-  }
-
-  Future<void> _pickTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_recordedAt),
-    );
-    if (picked == null) return;
-    setState(() {
-      _recordedAt = DateTime(
-        _recordedAt.year,
-        _recordedAt.month,
-        _recordedAt.day,
-        picked.hour,
-        picked.minute,
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.toiletRecordUrineDialogTitle),
-      // Scrollable, because the keyboard takes half the screen the moment
-      // the location field is focused. AlertDialog responds by shrinking,
-      // and a plain Column has nowhere to shrink to -- it just overflowed
-      // and broke the layout (PM report). Urine records are the most
-      // frequent thing in this app, so the quick dialog stays; it only has
-      // to survive the keyboard.
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-            children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.commonDateLabel),
-              subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
-              trailing: const Icon(Icons.edit_calendar),
-              onTap: _pickDate,
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.commonTimeLabel),
-              subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
-              trailing: const Icon(Icons.access_time),
-              onTap: _pickTime,
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                l10n.toiletUrineColorShadeLabel,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              children: UrineColor.values.map((c) {
-                return ChoiceChip(
-                  label: Text(urineColorLabel(context, c)),
-                  selected: _color == c,
-                  onSelected: (_) => setState(() => _color = c),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _locationController,
-              decoration: InputDecoration(
-                labelText: l10n.toiletLocationOptionalLabel,
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.commonCancel),
-        ),
-        FilledButton(
-          onPressed: () {
-            final location = _locationController.text.trim();
-            Navigator.of(context).pop(
-              _UrineRecordDialogResult(
-                recordedAt: _recordedAt,
-                color: _color,
-                location: location.isEmpty ? null : location,
-              ),
-            );
-          },
-          child: Text(l10n.toiletRecordSubmitButtonLabel),
-        ),
-      ],
     );
   }
 }

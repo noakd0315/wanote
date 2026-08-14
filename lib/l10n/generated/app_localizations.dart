@@ -2365,6 +2365,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave blank if you do not know.'**
   String get foodPortionCurrentAmountHelperText;
+
+  /// Confirms a record was written. PM report: after saving, an ad appeared and the form was still there, with nothing to say whether the save had worked.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved.'**
+  String get commonSavedMessage;
+
+  /// Warning banner above the toilet timeline. The text used to live in the detector as a Japanese literal, so it stayed Japanese in the English app (PM report).
+  ///
+  /// In en, this message translates to:
+  /// **'A record suggests blood in the stool. Please consider seeing a vet.'**
+  String get anomalyBloodInStoolMessage;
+
+  /// Warning banner for a diarrhea streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Diarrhea has continued for {days} days or more. Please consider seeing a vet.'**
+  String anomalyProlongedDiarrheaMessage(int days);
+
+  /// Hides the warning banner. PM request: it reappeared on every visit with no way to put it away, including after the problem had been dealt with.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get anomalyDismissButton;
 }
 
 class _AppLocalizationsDelegate

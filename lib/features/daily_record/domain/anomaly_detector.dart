@@ -112,6 +112,7 @@ class AnomalyDetector {
 
     return ConsultationSuggestion(
       reason: ConsultationSuggestionReason.prolongedDiarrhea,
+      streakDayCount: streakDayCount,
       message: '下痢が$diarrheaStreakThresholdDays日以上続いています。獣医師への相談をご検討ください。',
       reference: ConsultationReferenceRecord(
         recordId: latest.toiletId,

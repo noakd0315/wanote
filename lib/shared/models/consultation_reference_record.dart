@@ -61,14 +61,24 @@ enum ConsultationSuggestionReason { bloodInStoolSuspected, prolongedDiarrhea }
 class ConsultationSuggestion extends Equatable {
   const ConsultationSuggestion({
     required this.reason,
+    this.streakDayCount,
     required this.message,
     required this.reference,
   });
 
   final ConsultationSuggestionReason reason;
+
+  /// Kept for tests and logs. **Not for display** -- it is written in one
+  /// fixed language, which is exactly how the warning banner ended up
+  /// Japanese in the English app. The screen builds its own text from
+  /// [reason] and [streakDayCount].
   final String message;
+
+  /// How many consecutive days the streak ran, for the reasons that have
+  /// one. Null otherwise.
+  final int? streakDayCount;
   final ConsultationReferenceRecord reference;
 
   @override
-  List<Object?> get props => [reason, message, reference];
+  List<Object?> get props => [reason, message, streakDayCount, reference];
 }
