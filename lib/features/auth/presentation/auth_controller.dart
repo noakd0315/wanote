@@ -99,6 +99,29 @@ class AuthController extends ChangeNotifier {
   AuthGateAction _gateAction = AuthGateAction.requireSignIn;
   AuthGateAction get gateAction => _gateAction;
 
+  /// False until the first answer about the session has actually arrived.
+  ///
+  /// [gateAction] and [pets] both have to start at *something*, and their
+  /// starting values -- "sign in" and "no pets" -- are indistinguishable
+  /// from real answers. Rendering them as answers is what produced two PM
+  /// reports: the sign-in screen appearing for an instant when the app was
+  /// rebuilt after being killed in the background (taking a photo is enough
+  /// to trigger it), and the "add your first pet" screen appearing for an
+  /// instant on every sign-in, before the pet list had loaded.
+  ///
+  /// Both look alike to the owner, and both look like data loss.
+  bool _authResolved = false;
+  bool _petsResolved = false;
+
+  /// True while the gate genuinely does not know yet, so the launch screen
+  /// can wait instead of guessing. Covers only the first resolution of each
+  /// question -- later changes flow through normally, without a spinner.
+  bool get isResolvingSession =>
+      !_authResolved ||
+      (_gateAction == AuthGateAction.enterApp &&
+          _currentUser != null &&
+          !_petsResolved);
+
   List<PetProfile> _pets = const [];
   List<PetProfile> get pets => _pets;
 
@@ -181,6 +204,9 @@ class AuthController extends ChangeNotifier {
         biometricEnabled: false,
         biometricAvailable: _biometricAvailable,
       );
+      // Signed out is a real answer, and there is no pet list coming.
+      _authResolved = true;
+      _petsResolved = true;
       notifyListeners();
       return;
     }
@@ -229,6 +255,7 @@ class AuthController extends ChangeNotifier {
     }
     _subscribeToSession(identity.uid);
 
+    _authResolved = true;
     _isLoading = false;
     notifyListeners();
   }
@@ -351,8 +378,13 @@ class AuthController extends ChangeNotifier {
 
   void _subscribeToPets(String uid) {
     _petsSub?.cancel();
+    // A new account's list has not arrived yet, and "not arrived" must not
+    // read as "no pets" -- that is what put the first-pet form in front of
+    // returning owners for an instant on every sign-in.
+    _petsResolved = false;
     _petsSub = _petProfileRepository.watchPets(uid).listen((pets) async {
       _pets = pets;
+      _petsResolved = true;
       final prefs = await _prefsFuture;
       final previousActiveId =
           _activePet?.petId ?? prefs.getString(_lastActivePetIdPrefsKey);
@@ -367,6 +399,19 @@ class AuthController extends ChangeNotifier {
         _activePet = match.isEmpty ? null : match.first;
         await prefs.setString(_lastActivePetIdPrefsKey, resolvedId);
       }
+      notifyListeners();
+    }, onError: (Object error, StackTrace stackTrace) {
+      // Without this the app would sit on the waiting screen forever if the
+      // pet list never arrives -- offline, or rules refusing the read. Far
+      // better to carry on with what we have: the owner reaches a screen
+      // they can act on, and the stream delivers if it recovers.
+      developer.log(
+        'Could not watch pets',
+        name: 'AuthController',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _petsResolved = true;
       notifyListeners();
     });
   }

@@ -69,6 +69,14 @@ class _LaunchGateScreenState extends State<LaunchGateScreen>
   Widget build(BuildContext context) {
     final controller = context.watch<AuthController>();
 
+    // Nothing is known yet, so nothing is claimed yet. Every branch below
+    // makes a definite statement about this account -- "you are signed out",
+    // "you have no pets" -- and making one too early is what flashed the
+    // sign-in and first-pet screens at owners who were neither.
+    if (controller.isResolvingSession) {
+      return const _ResolvingScreen();
+    }
+
     switch (controller.gateAction) {
       case AuthGateAction.requireSignIn:
         return const SignUpScreen();
@@ -96,6 +104,27 @@ class _LaunchGateScreenState extends State<LaunchGateScreen>
         return widget.homeBuilder?.call(context) ??
             const PetProfileSwitchScreen();
     }
+  }
+}
+
+/// Shown while the gate is still working out which screen is the right one.
+///
+/// Deliberately says nothing about the account -- no "signing in", no "no
+/// pets yet". The whole point is that we do not know yet, and a caption that
+/// guesses wrong is the same mistake in words instead of screens.
+class _ResolvingScreen extends StatelessWidget {
+  const _ResolvingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(child: DogSilhouetteBackground()),
+          Center(child: CircularProgressIndicator()),
+        ],
+      ),
+    );
   }
 }
 
