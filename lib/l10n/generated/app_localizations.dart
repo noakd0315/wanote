@@ -2263,6 +2263,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get listLoadFailedRetryButton;
+
+  /// Empties the question field and the answer. PM report: the last question and its answer stayed on screen after asking, so the next visit opened onto stale content.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get consultationClearButton;
+
+  /// Title of the dialog showing a stored consultation in full.
+  ///
+  /// In en, this message translates to:
+  /// **'Past consultation'**
+  String get consultationHistoryDetailTitle;
+
+  /// Section label above the stored question.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get consultationHistoryQuestionLabel;
+
+  /// Section label above the stored answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get consultationHistoryAnswerLabel;
+
+  /// Dismisses a dialog that only shows information, where there is nothing to cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
 }
 
 class _AppLocalizationsDelegate

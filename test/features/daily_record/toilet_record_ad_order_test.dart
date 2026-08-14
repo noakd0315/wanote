@@ -51,7 +51,18 @@ void main() {
     imagePicker = MockImagePicker();
     calls = [];
 
-    when(() => imagePicker.pickImage(source: any(named: 'source'))).thenAnswer(
+    // The size limits matter here: the screen now picks through
+    // pickImageDownscaled, and a stub that only matched a bare source
+    // silently returned null -- no photo, so no ad, so the ordering this
+    // test exists to protect was never exercised.
+    when(
+      () => imagePicker.pickImage(
+        source: any(named: 'source'),
+        maxWidth: any(named: 'maxWidth'),
+        maxHeight: any(named: 'maxHeight'),
+        imageQuality: any(named: 'imageQuality'),
+      ),
+    ).thenAnswer(
       // A real 1x1 PNG, not arbitrary bytes: the form renders a preview of
       // whatever it is handed, and Image.memory throws on anything it
       // cannot decode.

@@ -1545,5 +1545,25 @@
   "listLoadFailedRetryButton": "Retry",
   "@listLoadFailedRetryButton": {
     "description": "Rebuilds the list screen so the query is attempted again."
+  },
+  "consultationClearButton": "Clear",
+  "@consultationClearButton": {
+    "description": "Empties the question field and the answer. PM report: the last question and its answer stayed on screen after asking, so the next visit opened onto stale content."
+  },
+  "consultationHistoryDetailTitle": "Past consultation",
+  "@consultationHistoryDetailTitle": {
+    "description": "Title of the dialog showing a stored consultation in full."
+  },
+  "consultationHistoryQuestionLabel": "Question",
+  "@consultationHistoryQuestionLabel": {
+    "description": "Section label above the stored question."
+  },
+  "consultationHistoryAnswerLabel": "Answer",
+  "@consultationHistoryAnswerLabel": {
+    "description": "Section label above the stored answer."
+  },
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Dismisses a dialog that only shows information, where there is nothing to cancel."
   }
 }

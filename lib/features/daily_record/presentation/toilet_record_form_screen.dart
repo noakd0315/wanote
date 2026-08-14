@@ -13,6 +13,7 @@ import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
 import 'widgets/toilet_labels.dart';
+import '../../../shared/utils/image_picking.dart';
 
 /// Spec 4.2: "便の状態選択（硬さ：正常／軟便／下痢／硬い、色：正常／血便疑い
 /// ／白っぽい 等）" plus optional photo attachment for abnormal findings, plus
@@ -110,7 +111,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   }
 
   Future<void> _pickAndSet(ImageSource source) async {
-    final file = await _imagePicker.pickImage(source: source);
+    final file = await _imagePicker.pickImageDownscaled(source: source);
     if (file == null) return;
     final bytes = await file.readAsBytes();
     if (!mounted) return;

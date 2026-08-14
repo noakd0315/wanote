@@ -1190,4 +1190,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listLoadFailedRetryButton => 'Retry';
+
+  @override
+  String get consultationClearButton => 'Clear';
+
+  @override
+  String get consultationHistoryDetailTitle => 'Past consultation';
+
+  @override
+  String get consultationHistoryQuestionLabel => 'Question';
+
+  @override
+  String get consultationHistoryAnswerLabel => 'Answer';
+
+  @override
+  String get commonClose => 'Close';
 }

@@ -13,6 +13,7 @@ import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/image_source_sheet.dart';
 import '../auth_controller.dart';
 import 'photo_crop_screen.dart';
+import '../../../../shared/utils/image_picking.dart';
 
 /// Create or edit a single pet profile (spec 1.2 -
 /// ペットプロフィール登録：犬種、名前、生年月日、性別、体重（初期値）、
@@ -117,7 +118,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     ImageSource source,
     void Function(Uint8List bytes) onPicked,
   ) async {
-    final picked = await _imagePicker.pickImage(source: source);
+    final picked = await _imagePicker.pickImageDownscaled(source: source);
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
     if (!mounted) return;

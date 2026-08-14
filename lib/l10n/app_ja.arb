@@ -360,5 +360,10 @@
   "announcementsEmpty": "現在お知らせはありません。",
   "announcementsLoadFailed": "お知らせを読み込めませんでした。",
   "listLoadFailedMessage": "一覧を読み込めませんでした。",
-  "listLoadFailedRetryButton": "再試行"
+  "listLoadFailedRetryButton": "再試行",
+  "consultationClearButton": "クリア",
+  "consultationHistoryDetailTitle": "過去の相談",
+  "consultationHistoryQuestionLabel": "質問",
+  "consultationHistoryAnswerLabel": "回答",
+  "commonClose": "閉じる"
 }

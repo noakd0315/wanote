@@ -1144,4 +1144,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get listLoadFailedRetryButton => '再試行';
+
+  @override
+  String get consultationClearButton => 'クリア';
+
+  @override
+  String get consultationHistoryDetailTitle => '過去の相談';
+
+  @override
+  String get consultationHistoryQuestionLabel => '質問';
+
+  @override
+  String get consultationHistoryAnswerLabel => '回答';
+
+  @override
+  String get commonClose => '閉じる';
 }

@@ -70,6 +70,17 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   _ResultKind _resultKind = _ResultKind.none;
   String? _resultText;
 
+  /// Empties the question and the answer together. Clearing one and
+  /// leaving the other would read as an answer to a question that is no
+  /// longer there.
+  void _clear() {
+    _controller.clear();
+    setState(() {
+      _resultKind = _ResultKind.none;
+      _resultText = null;
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -210,21 +221,43 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           TextField(
             controller: _controller,
             maxLines: 5,
+            // Rebuilds so the clear button appears with the first character
+            // typed rather than after the next unrelated rebuild.
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               hintText: l10n.consultationInputHintText,
             ),
           ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _submitting ? null : _submit,
-            child: _submitting
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.consultationSubmitButton),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: _submitting ? null : _submit,
+                  child: _submitting
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(l10n.consultationSubmitButton),
+                ),
+              ),
+              // The question and its answer used to stay on screen with no
+              // way to dismiss them, so returning to this tab opened onto
+              // the last conversation (PM report). Hidden while there is
+              // nothing to clear, so it never sits there doing nothing.
+              if (!_submitting &&
+                  (_controller.text.isNotEmpty ||
+                      _resultKind != _ResultKind.none)) ...[
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: _clear,
+                  child: Text(l10n.consultationClearButton),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 16),
           _buildResult(l10n),
@@ -237,6 +270,45 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           ),
           const SizedBox(height: 8),
           _buildHistory(),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showConsultation(Consultation consultation) {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.consultationHistoryDetailTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.consultationHistoryQuestionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              SelectableText(consultation.questionText),
+              const SizedBox(height: 16),
+              Text(
+                l10n.consultationHistoryAnswerLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              // Selectable: advice worth keeping is worth copying into a
+              // message to the clinic.
+              SelectableText(consultation.aiResponse),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.commonClose),
+          ),
         ],
       ),
     );
@@ -303,6 +375,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
               .map(
                 (c) => Card(
                   child: ListTile(
+                    // The answer was stored all along and shown truncated to
+                    // three lines, with no way to read the rest -- which is
+                    // why the history looked not worth keeping (PM: "回答が
+                    // 見れないのであれば履歴として残す必要はない").
+                    onTap: () => _showConsultation(c),
                     title: Text(
                       c.questionText,
                       maxLines: 2,

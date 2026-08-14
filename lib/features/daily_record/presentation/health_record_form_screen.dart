@@ -12,6 +12,7 @@ import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'widgets/health_record_labels.dart';
+import '../../../shared/utils/image_picking.dart';
 
 /// Spec 2.2: "新規記録画面：写真添付（複数枚、最大4〜6枚程度を想定）、
 /// カテゴリタグ選択、コメント入力". Also doubles as the edit form when
@@ -78,7 +79,7 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
   // Camera capture is inherently one photo at a time, unlike the gallery
   // multi-select below.
   Future<void> _pickFromCamera() async {
-    final file = await _picker.pickImage(source: ImageSource.camera);
+    final file = await _picker.pickImageDownscaled(source: ImageSource.camera);
     if (file == null) return;
     final bytes = await file.readAsBytes();
     if (!mounted) return;
@@ -88,7 +89,7 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
   Future<void> _pickFromGallery() async {
     final remaining = HealthRecord.maxPhotos - _totalPhotoCount;
     if (remaining <= 0) return;
-    final picked = await _picker.pickMultiImage(limit: remaining);
+    final picked = await _picker.pickMultiImageDownscaled(limit: remaining);
     for (final file in picked.take(remaining)) {
       final bytes = await file.readAsBytes();
       _newPhotoBytes.add(bytes);

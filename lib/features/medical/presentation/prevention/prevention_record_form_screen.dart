@@ -19,6 +19,7 @@ import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
 import '../../domain/ocr_result_validator.dart';
 import '../../domain/prevention_due_date_calculator.dart';
+import '../../../../shared/utils/image_picking.dart';
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -130,7 +131,10 @@ class _PreventionRecordFormScreenState
     final l10n = AppLocalizations.of(context)!;
     // Read before the first await, like l10n above.
     final adGate = adGateOf(context);
-    final picked = await widget.imagePicker.pickImage(source: source);
+    final picked = await widget.imagePicker.pickImageDownscaled(
+      source: source,
+      maxDimension: kPickedCertificateMaxDimension,
+    );
     if (picked == null) return;
 
     // Resize/compress client-side BEFORE any upload/API call (spec 5.4 step
