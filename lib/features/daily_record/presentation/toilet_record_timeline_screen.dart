@@ -332,50 +332,58 @@ class _RecordedAtDialogState extends State<_RecordedAtDialog> {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.toiletRecordUrineDialogTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.commonDateLabel),
-            subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
-            trailing: const Icon(Icons.edit_calendar),
-            onTap: _pickDate,
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.commonTimeLabel),
-            subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
-            trailing: const Icon(Icons.access_time),
-            onTap: _pickTime,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              l10n.toiletUrineColorShadeLabel,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+      // Scrollable, because the keyboard takes half the screen the moment
+      // the location field is focused. AlertDialog responds by shrinking,
+      // and a plain Column has nowhere to shrink to -- it just overflowed
+      // and broke the layout (PM report). Urine records are the most
+      // frequent thing in this app, so the quick dialog stays; it only has
+      // to survive the keyboard.
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+            children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.commonDateLabel),
+              subtitle: Text(DateFormat('yyyy/MM/dd').format(_recordedAt)),
+              trailing: const Icon(Icons.edit_calendar),
+              onTap: _pickDate,
             ),
-          ),
-          const SizedBox(height: 4),
-          Wrap(
-            spacing: 8,
-            children: UrineColor.values.map((c) {
-              return ChoiceChip(
-                label: Text(urineColorLabel(context, c)),
-                selected: _color == c,
-                onSelected: (_) => setState(() => _color = c),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _locationController,
-            decoration: InputDecoration(
-              labelText: l10n.toiletLocationOptionalLabel,
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.commonTimeLabel),
+              subtitle: Text(DateFormat('HH:mm').format(_recordedAt)),
+              trailing: const Icon(Icons.access_time),
+              onTap: _pickTime,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.toiletUrineColorShadeLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              children: UrineColor.values.map((c) {
+                return ChoiceChip(
+                  label: Text(urineColorLabel(context, c)),
+                  selected: _color == c,
+                  onSelected: (_) => setState(() => _color = c),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _locationController,
+              decoration: InputDecoration(
+                labelText: l10n.toiletLocationOptionalLabel,
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
