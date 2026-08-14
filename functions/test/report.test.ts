@@ -114,15 +114,15 @@ describe('summarizeReportStats', () => {
 describe('buildReportUserPrompt', () => {
   it('includes the period, weight change and toilet stats', () => {
     const prompt = buildReportUserPrompt(parseReportRequestBody(validBody));
-    expect(prompt).toContain('対象期間: 2026-07-01 〜 2026-07-31');
-    expect(prompt).toContain('体重推移: 10.2kg → 10.8kg（変化量: 0.6kg）');
-    expect(prompt).toContain('トイレ記録: 合計8回（1日平均 4回）');
+    expect(prompt).toContain('Period: 2026-07-01 to 2026-07-31');
+    expect(prompt).toContain('Weight: 10.2kg -> 10.8kg (change: 0.6kg)');
+    expect(prompt).toContain('Toilet records: 8 in total (4 per day on average)');
   });
 
   it('reports no weight data explicitly when there are no samples', () => {
     const prompt = buildReportUserPrompt(
       parseReportRequestBody({ petId: 'pet-1', periodStart: '2026-07-01', periodEnd: '2026-07-31' }),
     );
-    expect(prompt).toContain('体重推移: この期間の体重記録はありません。');
+    expect(prompt).toContain('Weight: no weight records in this period.');
   });
 });

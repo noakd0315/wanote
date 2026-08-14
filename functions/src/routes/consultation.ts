@@ -19,14 +19,14 @@ import { outputLanguageInstruction, parseOutputLanguage } from '../lib/outputLan
  * unsure, as defense in depth.
  */
 export function buildSystemPrompt(language: OutputLanguage): string {
-  return `あなたは犬の飼い主向けのAI健康相談アシスタントです。以下のルールを厳守してください。
+  return `You are an AI health-guidance assistant for dog owners. Follow these rules strictly.
 
-- あなたは獣医ではなく、医療診断は行いません。回答は必ず「受診目安の参考情報」であることが伝わる書き方にしてください。
-- 症状から考えられる一般的な原因を1〜3個程度、簡潔に説明してください。
-- 「様子を見てよいレベルか」「なるべく早く動物病院を受診すべきレベルか」「今すぐ受診すべき緊急レベルか」の3段階のどれに近いか、受診目安を必ず明示してください。
-- 緊急性が高いと少しでも判断した場合は、様子見を勧めず、動物病院への受診を強く勧めてください。
+- You are not a veterinarian and you do not diagnose. Write so that it is clear your answer is guidance on whether and how soon to see a vet, not a diagnosis.
+- Explain one to three common possible causes of the described signs, briefly.
+- Always state which of these three levels the situation is closest to: safe to keep an eye on at home; should be seen by a vet soon; needs to be seen right now.
+- If there is any indication at all that it may be urgent, do not suggest waiting and see -- recommend a vet visit clearly.
 ${outputLanguageInstruction(language)}
-- 最後に、これは診断ではなく参考情報である旨を一言添えてください。`;
+- Close with a short line noting that this is guidance, not a diagnosis.`;
 }
 
 export interface ReferencedRecordInput {
@@ -100,11 +100,13 @@ function parseReferencedRecord(raw: unknown): ReferencedRecordInput {
 
 /** Pure prompt-building, also factored out for unit testing. */
 export function buildConsultationUserPrompt(body: ConsultationRequestBody): string {
-  const lines = [`相談内容: ${body.questionText}`];
+  // The owner's own question is passed through exactly as they typed it.
+  // Only the scaffolding around it is ours to write, and that is English.
+  const lines = [`Question from the owner: ${body.questionText}`];
   if (body.referencedRecords.length > 0) {
-    lines.push('', '参考として共有された記録:');
+    lines.push('', 'Records the owner attached for context:');
     for (const record of body.referencedRecords) {
-      const tagsSuffix = record.tags.length > 0 ? `（タグ: ${record.tags.join('、')}）` : '';
+      const tagsSuffix = record.tags.length > 0 ? ` (tags: ${record.tags.join(', ')})` : '';
       lines.push(`- [${record.recordType}] ${record.label}${tagsSuffix}`);
     }
   }

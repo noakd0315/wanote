@@ -103,7 +103,9 @@ describe('buildConsultationUserPrompt', () => {
       referencedRecords: [],
     });
 
-    expect(prompt).toBe('相談内容: 今日はあまりご飯を食べません');
+    // The owner's words are passed through untouched -- the scaffolding
+    // around them is English, the question is not translated.
+    expect(prompt).toBe('Question from the owner: 今日はあまりご飯を食べません');
   });
 
   it('appends referenced record context, including tags, when present', () => {
@@ -116,8 +118,8 @@ describe('buildConsultationUserPrompt', () => {
       ],
     });
 
-    expect(prompt).toContain('相談内容: 軟便が続いています');
-    expect(prompt).toContain('- [toiletRecord] 軟便 7/28（タグ: 軟便）');
+    expect(prompt).toContain('Question from the owner: 軟便が続いています');
+    expect(prompt).toContain('- [toiletRecord] 軟便 7/28 (tags: 軟便)');
     expect(prompt).toContain('- [weightRecord] 12.4kg (7/28)');
   });
 });

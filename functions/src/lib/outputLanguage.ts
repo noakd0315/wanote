@@ -1,15 +1,19 @@
 /**
  * Output-language directive appended to the AI system prompts.
  *
- * The prompts themselves stay in Japanese even when the reply is English:
- * they carry the reviewed safety framing (受診目安の3段階, 診断しない, etc.),
- * and maintaining a second translated copy of those rules would let the two
- * drift apart -- a mistranslated safety rule is a much worse failure than a
- * Japanese instruction producing an English answer, which Claude handles
- * fine. So only the *output* language is parameterized here.
+ * The prompts themselves are written in English and there is only one copy
+ * of them, which is the point: the earlier arrangement kept them in Japanese
+ * precisely to avoid maintaining two translations of the safety rules that
+ * could drift apart. One canonical copy answers that concern outright, and
+ * puts every future edit in a single place.
+ *
+ * The owner's own words are never translated on the way in. A description of
+ * a symptom loses too much in translation, and a mistranslated symptom is a
+ * worse failure than a prompt and a question being in different languages --
+ * which the model handles without difficulty.
  *
  * The reply is written directly in the target language rather than drafted
- * in Japanese and translated, which reads more naturally and costs one pass
+ * in one and translated, which reads more naturally and costs one pass
  * instead of two.
  */
 export type OutputLanguage = 'ja' | 'en';
@@ -29,10 +33,14 @@ export function parseOutputLanguage(raw: unknown): OutputLanguage {
 export function outputLanguageInstruction(language: OutputLanguage): string {
   if (language === 'en') {
     return [
-      '- 出力は英語で書いてください。日本語で書いてから訳すのではなく、',
-      '  最初から英語ネイティブが読んで自然な文章として書いてください。',
-      '- 長さは150〜250語程度を目安に簡潔にまとめてください。',
+      '- Write your answer in English. Write it as English from the start,',
+      '  not as a translation of something drafted in another language.',
+      '- Aim for roughly 150-250 words.',
     ].join('\n');
   }
-  return '- 出力は日本語、200〜400文字程度を目安に簡潔にまとめてください。';
+  return [
+    '- Write your answer in Japanese (日本語). Write it as Japanese from the',
+    '  start, not as a translation of something drafted in English.',
+    '- Aim for roughly 200-400 characters.',
+  ].join('\n');
 }

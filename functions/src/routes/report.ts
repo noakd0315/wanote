@@ -23,12 +23,12 @@ import { outputLanguageInstruction, parseOutputLanguage } from '../lib/outputLan
  * Firestore access; see the "open questions" section of that report).
  */
 export function buildSystemPrompt(language: OutputLanguage): string {
-  return `あなたは犬の健康記録から月次サマリーを作成するアシスタントです。以下のルールを厳守してください。
+  return `You write a monthly summary of a dog's health records. Follow these rules strictly.
 
-- 入力される体重推移・トイレ回数の集計データのみを根拠に、事実ベースの要約を書いてください。憶測で診断や病名を挙げないでください。
-- 「今月は体重が◯kg増加/減少しました」「トイレの回数は先月と比べ◯回増加/減少しています」のような、具体的な数値を含む文章にしてください。
-- 気になる変化（体重の急な増減、トイレ回数の大きな変化）があれば、受診を検討する目安として触れてください。
-- これは医療診断ではなく参考情報である旨を最後に一言添えてください。
+- Base the summary only on the weight and toilet-count figures supplied. Do not speculate about diagnoses or name conditions.
+- Include the actual numbers, e.g. "weight went up/down by N kg this month" or "toilet visits were N more/fewer than last month".
+- If anything stands out -- a sharp change in weight, a large change in toilet frequency -- mention it as a reason to consider a vet visit.
+- Close with a short line noting that this is guidance, not a medical diagnosis.
 ${outputLanguageInstruction(language)}`;
 }
 
@@ -135,16 +135,16 @@ export function buildReportUserPrompt(body: ReportRequestBody): string {
   const stats = summarizeReportStats(body);
   const weightLine =
     stats.weightStartKg !== null && stats.weightEndKg !== null
-      ? `体重推移: ${stats.weightStartKg}kg → ${stats.weightEndKg}kg（変化量: ${stats.weightChangeKg}kg）`
-      : '体重推移: この期間の体重記録はありません。';
-  const toiletLine = `トイレ記録: 合計${stats.toiletTotalCount}回（1日平均 ${stats.toiletAveragePerDay}回）`;
+      ? `Weight: ${stats.weightStartKg}kg -> ${stats.weightEndKg}kg (change: ${stats.weightChangeKg}kg)`
+      : 'Weight: no weight records in this period.';
+  const toiletLine = `Toilet records: ${stats.toiletTotalCount} in total (${stats.toiletAveragePerDay} per day on average)`;
 
   return [
-    `対象期間: ${body.periodStart} 〜 ${body.periodEnd}`,
+    `Period: ${body.periodStart} to ${body.periodEnd}`,
     weightLine,
     toiletLine,
     '',
-    '上記のデータをもとに、飼い主向けの月次健康サマリーを作成してください。',
+    'Write the monthly health summary for the owner from the figures above.',
   ].join('\n');
 }
 

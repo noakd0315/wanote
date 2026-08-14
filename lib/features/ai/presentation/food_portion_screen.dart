@@ -131,8 +131,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   String _currentAmountText() {
     final grams = double.tryParse(_currentAmountController.text.trim());
     if (grams == null || grams <= 0) return '';
-    return '現在は1日あたり${grams.round()}gを与えています。'
-        '算出値との差を踏まえて、増減が必要かどうかも教えてください。';
+    return 'The dog is currently fed ${grams.round()}g per day. '
+        'Say whether that should change, given the calculated figure. ';
   }
 
   bool _weightPrefilled = false;
@@ -184,6 +184,9 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     final languageCode = Localizations.localeOf(context).languageCode;
     // Same reason: read from the context before the first await.
     final adGate = adGateOf(context);
+    // Same again: the weight is read in the field's unit and converted here,
+    // while the context is still safe to touch.
+    final weightKg = parseWeightToKilograms(context, _weightController.text);
     final result = _result;
     if (result == null) return;
 
@@ -199,17 +202,27 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       }
 
       final isAdult = _lifeStage == DogLifeStage.adult;
-      // Deliberately compact/structured -- just the numbers already
-      // computed, not a conversational prompt -- to keep the token cost of
-      // this call low per the PM's request.
+      // English, like every other prompt the app sends: one language for
+      // everything we write, so a change lands in one place. Nothing here is
+      // the owner's own words -- it is entirely figures this screen just
+      // calculated -- so there is nothing to lose by writing it in English.
+      // The answer's language is pinned separately by languageCode.
+      //
+      // Deliberately compact and structured rather than conversational, to
+      // keep the token cost of this call low per the PM's request.
       final questionText =
-          '体重${_weightController.text}kg、${_lifeStage.label}'
-          '${isAdult ? '（${widget.neutered ? '避妊・去勢済み' : '未避妊・未去勢'}、体型:${_bodyCondition.label}、活動量:${_activityLevel.label}）' : ''}、'
-          '1日の目安摂取カロリー${result.maintenanceEnergyKcal.round()}kcal、'
-          '使用フード${_foodDensityController.text}kcal/100gで'
-          '1日あたり${result.dailyFoodGrams.round()}g程度と算出しました。'
+          // Stored units, not the display ones: the prompt is not read by
+          // the owner, and mixing units into it would only invite mistakes.
+          'Weight ${weightKg?.toStringAsFixed(1)}kg, ${_lifeStage.name}'
+          '${isAdult ? ' (${widget.neutered ? 'neutered' : 'not neutered'}, '
+                'body condition: ${_bodyCondition.name}, '
+                'activity: ${_activityLevel.name})' : ''}. '
+          'Daily maintenance energy ${result.maintenanceEnergyKcal.round()}kcal. '
+          'Food is ${_foodDensityController.text}kcal/100g, '
+          'so about ${result.dailyFoodGrams.round()}g per day was calculated. '
           '${_currentAmountText()}'
-          '給餌回数の分け方や注意点があれば簡潔に教えてください。';
+          'How should this be split across meals, and is there anything to '
+          'watch out for? Keep it brief.';
 
       // Read before recording the use -- see consultation_screen.dart.
       final usageSource = (await widget.usageRepository.getStatus(
