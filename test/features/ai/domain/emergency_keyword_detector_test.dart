@@ -49,4 +49,53 @@ void main() {
       expect(customDetector.isEmergency('けいれんしています'), isFalse);
     },
   );
+
+  _englishTests();
+}
+
+/// English detection, added because the app is entered into Shipaton and
+/// has to work for English speakers.
+///
+/// Until now the keywords were Japanese only, so "my dog is having a
+/// seizure" went to the AI as an ordinary question -- the one case the whole
+/// check exists to short-circuit.
+void _englishTests() {
+  const detector = EmergencyKeywordDetector();
+
+  test('catches the English emergencies', () {
+    for (final keyword in EmergencyKeywordDetector.englishKeywords) {
+      expect(
+        detector.isEmergency('My dog $keyword, what should I do?'),
+        isTrue,
+        reason: 'should have matched "$keyword"',
+      );
+    }
+  });
+
+  test('both languages are live at once, whichever the app is set to', () {
+    // Someone using the app in English may still know a Japanese term, and
+    // vice versa. The detector is not switched on the locale.
+    expect(detector.isEmergency('He is having a seizure'), isTrue);
+    expect(detector.isEmergency('けいれんしています'), isTrue);
+  });
+
+  test('leaves ordinary English questions alone', () {
+    expect(
+      detector.isEmergency('She has been scratching her ear a lot lately'),
+      isFalse,
+    );
+    expect(
+      detector.isEmergency('How much food should a 10kg adult dog get?'),
+      isFalse,
+    );
+    expect(
+      detector.isEmergency('When is the next vaccination due?'),
+      isFalse,
+    );
+  });
+
+  test('is case- and spacing-insensitive, like the Japanese path', () {
+    expect(detector.isEmergency('NOT BREATHING'), isTrue);
+    expect(detector.isEmergency('Hit  by   a car'), isTrue);
+  });
 }

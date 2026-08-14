@@ -10,12 +10,23 @@ class EmergencyKeywordDetector {
   const EmergencyKeywordDetector({List<String>? keywords})
     : _keywords = keywords ?? defaultKeywords;
 
-  /// Minimum set called out explicitly by spec 6.5 ("けいれん、意識がない、
-  /// 誤飲 等") plus two additional high-urgency terms that seem reasonable
-  /// to include out of the gate (ぐったり = collapsed/limp, 血を吐く =
-  /// vomiting blood). Extend this list freely — it's a plain constant, not
-  /// baked into any control flow.
+  /// Every keyword, in every language the app ships, checked on every
+  /// message.
+  ///
+  /// Not switched on the current locale, deliberately: someone using the app
+  /// in Japanese may still type "not breathing", and someone using it in
+  /// English may type a word they know in Japanese. The cost of carrying
+  /// both lists is a longer scan of one short string; the cost of picking
+  /// the wrong list is missing an emergency.
   static const List<String> defaultKeywords = [
+    ...japaneseKeywords,
+    ...englishKeywords,
+  ];
+
+  /// Minimum set called out explicitly by spec 6.5 ("けいれん、意識がない、
+  /// 誤飲 等") plus two additional high-urgency terms (ぐったり = collapsed
+  /// /limp, 血を吐く = vomiting blood).
+  static const List<String> japaneseKeywords = [
     'けいれん',
     '意識がない',
     '誤飲',
@@ -23,12 +34,52 @@ class EmergencyKeywordDetector {
     '血を吐く',
   ];
 
-  /// Fixed message shown instead of calling the AI backend, per spec 6.5:
-  /// "AI回答より先に「至急動物病院へ」という定型メッセージを優先表示する".
-  static const String emergencyMessage =
-      '至急動物病院へ連絡・受診してください。\n'
-      'この内容は緊急性が高い可能性があるため、AIによる回答はスキップし、'
-      'すぐに動物病院に相談することをおすすめします。';
+  /// The same emergencies in English, plus the ones a vet would put on any
+  /// "come in now" list.
+  ///
+  /// Phrases rather than single words wherever a single word would be
+  /// ambiguous. Matching ignores whitespace, so word boundaries are gone --
+  /// "blood" alone would fire on "bloodwork", and "toxic" on "non-toxic".
+  /// A false positive here costs an AI answer the owner did not get; a false
+  /// negative costs them the one thing this check exists for. The list leans
+  /// toward matching, but not so far that ordinary questions trip it.
+  static const List<String> englishKeywords = [
+    'seizure',
+    'seizing',
+    'convulsion',
+    'unconscious',
+    'unresponsive',
+    'collapsed',
+    'not breathing',
+    'cannot breathe',
+    "can't breathe",
+    'difficulty breathing',
+    'trouble breathing',
+    'labored breathing',
+    'laboured breathing',
+    'choking',
+    'swallowed',
+    'ingested',
+    'vomiting blood',
+    'blood in vomit',
+    'blood in stool',
+    'bloated',
+    'heatstroke',
+    'heat stroke',
+    'hit by a car',
+    'poisoned',
+    'poisoning',
+    'xylitol',
+    'antifreeze',
+    'pale gums',
+    "won't wake up",
+    'will not wake up',
+  ];
+
+  // The emergency wording itself is not here. It lives in the l10n files
+  // and is rendered by EmergencyNotice: a message this important must not
+  // exist in only one language. A Japanese copy of it used to sit here,
+  // unused, waiting to be picked up by mistake.
 
   final List<String> _keywords;
 
