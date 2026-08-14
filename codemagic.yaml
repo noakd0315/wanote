@@ -6,8 +6,9 @@
 #
 # Two workflows, deliberately split:
 #
-#   verify  -- analyze + test. Needs no accounts, no signing, no secrets.
-#              Usable the moment the repository is connected.
+#   verify  -- analyze, test, and an Android build. Needs no accounts, no
+#              signing, no secrets. Usable the moment the repository is
+#              connected.
 #   ios     -- builds and ships to TestFlight. Needs an Apple Developer
 #              Program membership and an App Store Connect API key, so it
 #              stays unusable until those exist.
@@ -24,7 +25,7 @@ definitions:
 workflows:
 
   verify:
-    name: Analyze and test
+    name: Analyze, test and build Android
     instance_type: linux_x2
     max_build_duration: 30
     environment:
@@ -67,6 +68,44 @@ workflows:
 
       - name: Test
         script: flutter test
+
+      # The google-services gradle plugin refuses to build without this
+      # file, and it is gitignored like the rest of the Firebase config.
+      # A placeholder is enough: nothing here is ever run, only compiled.
+      - name: Stub google-services.json
+        script: |
+          if [ ! -f android/app/google-services.json ]; then
+            cat > android/app/google-services.json <<'JSON'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "ci-placeholder",
+              "storage_bucket": "ci-placeholder.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": { "package_name": "jp.wanote.app" }
+                },
+                "oauth_client": [],
+                "api_key": [ { "current_key": "AIzaSyCI00000000000000000000000000000000" } ],
+                "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          JSON
+          fi
+
+      # The step that would have caught the broken AndroidManifest.xml.
+      # analyze, the tests and the web build never parse that file; only an
+      # Android build does, and none had run for days.
+      #
+      # Debug, not release: this is a compile check, and the release signing
+      # key is not present in CI (nor should it be).
+      - name: Build Android
+        script: flutter build apk --debug
 
   ios:
     name: iOS build to TestFlight
