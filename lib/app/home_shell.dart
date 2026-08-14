@@ -12,10 +12,10 @@ import '../features/ai/presentation/consultation_screen.dart';
 import '../features/auth/auth.dart';
 import '../features/billing/ads/ad_gate.dart';
 import '../features/billing/ads/ad_manager.dart';
+import '../features/billing/ads/ad_preparer.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/data/campaign_code_repository.dart';
 import '../features/billing/domain/ad_policy.dart';
-import '../features/billing/domain/billing_models.dart';
 import '../features/billing/domain/campaign_code_models.dart';
 import '../features/billing/presentation/paywall_screen.dart';
 import '../features/daily_record/data/health_record_repository.dart';
@@ -176,20 +176,12 @@ class _HomeShellState extends State<HomeShell> {
 
   /// Ads are best-effort from the first line: a failure here must never be
   /// visible to someone using the app.
-  Future<void> _prepareAds() async {
-    try {
-      await AdManager.initialize();
-      // Only fetches once RevenueCat has confirmed the account is not
-      // premium, so a subscriber never has an ad loaded to flash at them.
-      await _billingRepository
-          .premiumStatusChanges()
-          .firstWhere((status) => status.state != EntitlementState.unknown)
-          .timeout(const Duration(seconds: 10));
-      await _adGate.preload();
-    } catch (_) {
-      // No ads this session. Nothing else changes.
-    }
-  }
+  Future<void> _prepareAds() => prepareAds(
+    initializeSdk: AdManager.initialize,
+    premiumStatusChanges: _billingRepository.premiumStatusChanges(),
+    currentPremiumStatus: () => _billingRepository.currentPremiumStatus,
+    preload: _adGate.preload,
+  );
 
   Future<void> _initializeBilling() async {
     // Both configure() and logIn() are documented no-ops until
