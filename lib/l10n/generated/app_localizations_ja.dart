@@ -1186,4 +1186,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get toiletStoolDeleteButton => '削除';
+
+  @override
+  String get medicationListPreventionSectionTitle => '予防医療から';
+
+  @override
+  String get medicationListPreventionBadge => '予防';
 }

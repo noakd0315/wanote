@@ -1234,4 +1234,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toiletStoolDeleteButton => 'Delete';
+
+  @override
+  String get medicationListPreventionSectionTitle => 'From preventive care';
+
+  @override
+  String get medicationListPreventionBadge => 'Preventive';
 }

@@ -2341,6 +2341,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get toiletStoolDeleteButton;
+
+  /// Heading above preventive programmes shown on the medication list. PM: heartworm and flea/tick treatments are medication and belong in the medication history, but they are still owned by preventive care -- one record, listed in both places.
+  ///
+  /// In en, this message translates to:
+  /// **'From preventive care'**
+  String get medicationListPreventionSectionTitle;
+
+  /// Marks a row that comes from preventive care rather than from a medication entry, so tapping it opening a different form is not a surprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Preventive'**
+  String get medicationListPreventionBadge;
 }
 
 class _AppLocalizationsDelegate

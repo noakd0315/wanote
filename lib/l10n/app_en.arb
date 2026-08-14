@@ -1605,5 +1605,13 @@
   "toiletStoolDeleteButton": "Delete",
   "@toiletStoolDeleteButton": {
     "description": "Confirms deletion of a stool record."
+  },
+  "medicationListPreventionSectionTitle": "From preventive care",
+  "@medicationListPreventionSectionTitle": {
+    "description": "Heading above preventive programmes shown on the medication list. PM: heartworm and flea/tick treatments are medication and belong in the medication history, but they are still owned by preventive care -- one record, listed in both places."
+  },
+  "medicationListPreventionBadge": "Preventive",
+  "@medicationListPreventionBadge": {
+    "description": "Marks a row that comes from preventive care rather than from a medication entry, so tapping it opening a different form is not a surprise."
   }
 }

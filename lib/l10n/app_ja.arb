@@ -373,5 +373,7 @@
   "toiletCopyToDailyLogFailedMessage": "保存しましたが、日々の記録への転記に失敗しました。",
   "toiletStoolCopyMemo": "排便: {hardness} / {color}",
   "toiletStoolDeleteConfirmationMessage": "この記録を削除しますか？写真も一緒に削除されます。",
-  "toiletStoolDeleteButton": "削除"
+  "toiletStoolDeleteButton": "削除",
+  "medicationListPreventionSectionTitle": "予防医療から",
+  "medicationListPreventionBadge": "予防"
 }
