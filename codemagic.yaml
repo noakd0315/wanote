@@ -111,10 +111,9 @@ workflows:
     name: iOS build to TestFlight
     instance_type: mac_mini_m2
     max_build_duration: 60
-    # Manual only for now. Every run costs build minutes, and until the
-    # signing setup below exists it can only fail.
-    triggering:
-      events: []
+    # No triggering section: this runs only when started by hand. Every run
+    # costs macOS build minutes, and until the signing setup below exists it
+    # can only fail.
     environment:
       flutter: *flutter_version
       xcode: latest
@@ -155,10 +154,23 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
-        # Not submitted for App Review automatically. Shipping to reviewers
-        # should be a decision someone makes, not a side effect of a push.
-        submit_to_app_store: false
+
+    # TestFlight upload is deliberately absent until the App Store Connect
+    # integration exists. `auth: integration` is only valid alongside a
+    # matching `integrations: app_store_connect:` entry, and declaring one
+    # that does not exist makes Codemagic reject the WHOLE file -- taking
+    # the verify workflow down with it, which is what happened here.
+    #
+    # Once the integration is configured (docs/CODEMAGIC_SETUP.md B-2),
+    # add both halves back together:
+    #
+    #     integrations:
+    #       app_store_connect: <the integration name from Codemagic>
+    #
+    #     publishing:
+    #       app_store_connect:
+    #         auth: integration
+    #         submit_to_testflight: true
+    #         submit_to_app_store: false
+    #
+    # Until then the IPA is downloadable from the build artifacts above.

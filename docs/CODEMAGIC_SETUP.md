@@ -95,6 +95,19 @@ Codemagic → **Teams → Integrations → Apple Developer Portal**
 これで**証明書とプロビジョニングプロファイルは Codemagic が自動管理**します。
 Mac なし運用で最も厄介な署名まわりを任せられるのが、この構成の理由です。
 
+### 🔴 統合を作ったら `codemagic.yaml` に2箇所を戻す
+
+TestFlight への自動アップロードは、**現在あえて外してあります。**
+
+`publishing.app_store_connect.auth: integration` は、**同じワークフローに
+`integrations: app_store_connect:` が無いと設定ファイル全体が無効になり**、
+`verify` まで巻き添えで動かなくなるためです（実際にそうなりました）。
+
+統合を作成したら、`codemagic.yaml` の `ios` ワークフローに**両方まとめて**
+追記してください。書き方はファイル内のコメントに残してあります。
+
+**それまでの間も、ビルドした IPA は成果物からダウンロードできます。**
+
 #### B-3. 環境変数グループ `wanote_ios`
 
 Codemagic → **Environment variables** で、グループ名 **`wanote_ios`** を
