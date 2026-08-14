@@ -2353,6 +2353,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preventive'**
   String get medicationListPreventionBadge;
+
+  /// Optional input. Without it the AI only ever restates the calculated figure, which is why the advice read as canned (PM report). Given it, the advice can address the gap between what the dog eats now and what the calculation suggests.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently feeding (g/day, optional)'**
+  String get foodPortionCurrentAmountLabel;
+
+  /// Makes clear the field is not required.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave blank if you do not know.'**
+  String get foodPortionCurrentAmountHelperText;
 }
 
 class _AppLocalizationsDelegate

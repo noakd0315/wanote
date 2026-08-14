@@ -1613,5 +1613,13 @@
   "medicationListPreventionBadge": "Preventive",
   "@medicationListPreventionBadge": {
     "description": "Marks a row that comes from preventive care rather than from a medication entry, so tapping it opening a different form is not a surprise."
+  },
+  "foodPortionCurrentAmountLabel": "Currently feeding (g/day, optional)",
+  "@foodPortionCurrentAmountLabel": {
+    "description": "Optional input. Without it the AI only ever restates the calculated figure, which is why the advice read as canned (PM report). Given it, the advice can address the gap between what the dog eats now and what the calculation suggests."
+  },
+  "foodPortionCurrentAmountHelperText": "Leave blank if you do not know.",
+  "@foodPortionCurrentAmountHelperText": {
+    "description": "Makes clear the field is not required."
   }
 }

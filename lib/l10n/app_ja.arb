@@ -375,5 +375,7 @@
   "toiletStoolDeleteConfirmationMessage": "この記録を削除しますか？写真も一緒に削除されます。",
   "toiletStoolDeleteButton": "削除",
   "medicationListPreventionSectionTitle": "予防医療から",
-  "medicationListPreventionBadge": "予防"
+  "medicationListPreventionBadge": "予防",
+  "foodPortionCurrentAmountLabel": "現在の給餌量（g/日・任意）",
+  "foodPortionCurrentAmountHelperText": "分からない場合は空欄で構いません。"
 }

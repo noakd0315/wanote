@@ -1192,4 +1192,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get medicationListPreventionBadge => '予防';
+
+  @override
+  String get foodPortionCurrentAmountLabel => '現在の給餌量（g/日・任意）';
+
+  @override
+  String get foodPortionCurrentAmountHelperText => '分からない場合は空欄で構いません。';
 }

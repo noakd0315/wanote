@@ -94,6 +94,14 @@ enum _AdviceState { idle, loading, ready, needsUpgrade, error }
 class _FoodPortionScreenState extends State<FoodPortionScreen> {
   late final TextEditingController _weightController;
   final _foodDensityController = TextEditingController();
+
+  /// What the dog is actually being fed today. Optional.
+  ///
+  /// Without it the advice had nothing to work with beyond the figure the
+  /// app had just calculated, so it could only restate it -- which is why
+  /// it read as a canned answer (PM report). With it, there is a gap to
+  /// talk about, and how to close it.
+  final _currentAmountController = TextEditingController();
   late DogLifeStage _lifeStage;
   BodyCondition _bodyCondition = BodyCondition.ideal;
   ActivityLevel _activityLevel = ActivityLevel.normal;
@@ -114,10 +122,23 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     );
   }
 
+  /// The sentence describing what the dog is fed now, or nothing at all.
+  ///
+  /// Nothing at all when the field is blank or not a number: an invented or
+  /// misread figure would have the advice reason from something the owner
+  /// never said.
+  String _currentAmountText() {
+    final grams = double.tryParse(_currentAmountController.text.trim());
+    if (grams == null || grams <= 0) return '';
+    return '現在は1日あたり${grams.round()}gを与えています。'
+        '算出値との差を踏まえて、増減が必要かどうかも教えてください。';
+  }
+
   @override
   void dispose() {
     _weightController.dispose();
     _foodDensityController.dispose();
+    _currentAmountController.dispose();
     super.dispose();
   }
 
@@ -176,6 +197,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           '1日の目安摂取カロリー${result.maintenanceEnergyKcal.round()}kcal、'
           '使用フード${_foodDensityController.text}kcal/100gで'
           '1日あたり${result.dailyFoodGrams.round()}g程度と算出しました。'
+          '${_currentAmountText()}'
           '給餌回数の分け方や注意点があれば簡潔に教えてください。';
 
       // Read before recording the use -- see consultation_screen.dart.
@@ -303,6 +325,15 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             decoration: InputDecoration(
               labelText: l10n.foodPortionCalorieDensityLabel,
               helperText: l10n.foodPortionCalorieDensityHelperText,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _currentAmountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: l10n.foodPortionCurrentAmountLabel,
+              helperText: l10n.foodPortionCurrentAmountHelperText,
             ),
           ),
           const SizedBox(height: 16),

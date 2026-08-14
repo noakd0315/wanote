@@ -1240,4 +1240,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get medicationListPreventionBadge => 'Preventive';
+
+  @override
+  String get foodPortionCurrentAmountLabel =>
+      'Currently feeding (g/day, optional)';
+
+  @override
+  String get foodPortionCurrentAmountHelperText =>
+      'Leave blank if you do not know.';
 }
