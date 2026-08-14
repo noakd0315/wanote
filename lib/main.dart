@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'app/home_shell.dart';
 import 'features/auth/auth.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'shared/app_messenger.dart';
 import 'shared/config/emulator_config.dart';
 import 'firebase_options.dart';
 import 'shared/config/firebase_options_demo.dart';
@@ -75,6 +76,9 @@ class WanoteApp extends StatelessWidget {
       child: Consumer<LocaleController>(
         builder: (context, localeController, _) => MaterialApp(
           title: 'wanote',
+          // Lets a message outlive the screen that produced it -- see
+          // shared/app_messenger.dart for the case that needs it.
+          scaffoldMessengerKey: appMessengerKey,
           theme: buildWanoteTheme(),
           // Shipaton targets a global audience (spec section on i18n), so
           // UI text follows the device's own language setting by default

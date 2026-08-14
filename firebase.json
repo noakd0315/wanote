@@ -39,7 +39,8 @@
           "projectId": "wanote-7dca0",
           "configurations": {
             "android": "1:715210245467:android:c93de079d628e3181b067e",
-            "ios": "1:715210245467:ios:43311e742f5dd2081b067e"
+            "ios": "1:715210245467:ios:43311e742f5dd2081b067e",
+            "web": "1:715210245467:web:63adf41fda8733081b067e"
           }
         }
       }

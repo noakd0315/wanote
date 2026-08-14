@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:wanote/features/auth/presentation/auth_controller.dart';
 import 'package:wanote/features/auth/presentation/screens/account_deletion_screen.dart';
 import 'package:wanote/l10n/generated/app_localizations.dart';
+import 'package:wanote/shared/app_messenger.dart';
 import 'package:wanote/shared/models/app_user.dart';
 import 'package:wanote/shared/models/auth_provider_type.dart';
 
@@ -44,6 +45,7 @@ void main() {
       ChangeNotifierProvider<AuthController>.value(
         value: controller,
         child: MaterialApp(
+          scaffoldMessengerKey: appMessengerKey,
           locale: const Locale('en'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -150,6 +152,76 @@ void main() {
     expect(find.textContaining('sign in again'), findsOneWidget);
   });
 
+  testWidgets('says so even when the screen is torn down under it', (
+    tester,
+  ) async {
+    // The failure that actually happened against the real project: the
+    // deletion got far enough to remove the account's pets before failing,
+    // which empties the pet list, which makes LaunchGateScreen swap the whole
+    // app shell -- and the deletion screen, and its error -- for the "add a
+    // pet" screen. The owner was left in an app emptied of their data with
+    // nothing said about why.
+    signedInAs(AuthProviderType.email);
+    when(
+      () => controller.deleteAccount(password: any(named: 'password')),
+    ).thenThrow(Exception('backend down'));
+
+    late void Function(void Function()) rebuild;
+    var shellAlive = true;
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AuthController>.value(
+        value: controller,
+        child: MaterialApp(
+          scaffoldMessengerKey: appMessengerKey,
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              // Stands in for LaunchGateScreen choosing a different home.
+              // The shell owns its own Navigator, which is what the deletion
+              // screen is pushed into -- so losing the shell loses the
+              // screen, exactly as it does in the app.
+              if (!shellAlive) return const Scaffold(body: Text('add a pet'));
+              return Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (routeContext) => Scaffold(
+                    body: TextButton(
+                      onPressed: () => Navigator.of(routeContext).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AccountDeletionScreen(),
+                        ),
+                      ),
+                      child: const Text('open settings entry'),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open settings entry'));
+    await tester.pumpAndSettle();
+
+    await tapDeleteButton(tester);
+    await tester.tap(find.text('Delete'));
+    await tester.pump();
+
+    // The pets are gone, so the app swaps its home out from under us.
+    shellAlive = false;
+    rebuild(() {});
+    await tester.pumpAndSettle();
+
+    expect(find.text('add a pet'), findsOneWidget);
+    expect(find.byType(AccountDeletionScreen), findsNothing);
+    // The whole point: the explanation survived the screen.
+    expect(find.textContaining('Deletion failed'), findsOneWidget);
+  });
+
   testWidgets('shows a message when deletion fails, and stays put', (
     tester,
   ) async {
@@ -163,7 +235,9 @@ void main() {
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Deletion failed'), findsOneWidget);
+    // Twice on purpose while the screen survives: inline (stays until they
+    // dismiss it) and as a snackbar (the copy that outlives the screen).
+    expect(find.textContaining('Deletion failed'), findsWidgets);
     // Retrying is the documented recovery, so the button has to come back.
     expect(find.text('Delete my account'), findsOneWidget);
   });

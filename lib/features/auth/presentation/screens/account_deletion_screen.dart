@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../shared/app_messenger.dart';
 import '../../../../shared/models/auth_provider_type.dart';
 import '../auth_controller.dart';
 
@@ -137,16 +138,13 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
     });
 
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await controller.deleteAccount(
         password: _passwordController.text.isEmpty
             ? null
             : _passwordController.text,
       );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.deleteAccountCompletedMessage)),
-      );
+      showAppMessage(l10n.deleteAccountCompletedMessage);
       // The account is gone, so LaunchGateScreen underneath has already
       // rebuilt into the sign-in screen; this route is just covering it.
       navigator.popUntil((route) => route.isFirst);
@@ -159,10 +157,21 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
         error: error,
         stackTrace: stackTrace,
       );
+      final message = _errorMessageFor(error, l10n);
+      // Through the app-level messenger, not this screen's.
+      //
+      // A deletion that fails part-way has usually already removed the
+      // account's pets -- which empties the pet list, which makes
+      // LaunchGateScreen replace the entire app shell with the "add a pet"
+      // screen. This screen goes with it, and an error shown only here goes
+      // too: the owner is left in an app emptied of their data with nothing
+      // said about why. That is what happened the first time this ran
+      // against the real project.
+      showAppMessage(message);
       if (!mounted) return;
       setState(() {
         _isDeleting = false;
-        _errorMessage = _errorMessageFor(error, l10n);
+        _errorMessage = message;
       });
     }
   }
