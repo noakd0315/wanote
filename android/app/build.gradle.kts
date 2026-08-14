@@ -1,3 +1,20 @@
+import java.util.Properties
+
+// Upload-key credentials, kept out of the repository.
+//
+// android/key.properties is gitignored and holds the keystore path and its
+// passwords. It is absent on a fresh clone and in CI, which is why every use
+// below is guarded: a missing file must still leave `flutter run --release`
+// working for day-to-day device testing. Only the Play upload actually needs
+// the real key.
+//
+// See docs/CLOSED_TEST_GUIDE.md for how to create the keystore.
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val hasUploadKey = keystoreProperties.getProperty("storeFile") != null
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -22,8 +39,18 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
+    signingConfigs {
+        if (hasUploadKey) {
+            create("upload") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "jp.wanote.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -35,9 +62,18 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // The upload key when it is available, the debug key otherwise.
+            //
+            // Falling back rather than failing is deliberate: device testing
+            // runs `flutter run --release` constantly and must not require
+            // the signing key to be present. Play rejects debug-signed
+            // bundles, so an accidental debug-signed upload cannot slip
+            // through unnoticed -- it is refused at the door.
+            signingConfig = if (hasUploadKey) {
+                signingConfigs.getByName("upload")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

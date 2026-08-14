@@ -1,0 +1,13 @@
+# Copy to android/key.properties and fill in. That file is gitignored.
+#
+# Create the keystore first (see docs/CLOSED_TEST_GUIDE.md):
+#   keytool -genkey -v -keystore C:\Users\tomoc\wanote-upload.jks \
+#           -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# LOSING THE KEYSTORE OR ITS PASSWORD MEANS THE APP CAN NEVER BE UPDATED.
+# Keep the .jks outside this repository and back it up separately.
+
+storeFile=C:\Users\tomoc\wanote-upload.jks
+storePassword=
+keyAlias=upload
+keyPassword=

@@ -12,7 +12,7 @@
 
          Deliberately NOT declared: SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM.
          Google Play restricts those to apps whose core purpose is alarms or
-         calendars, and on Android 14 the user has to grant them by hand --
+         calendars, and on Android 14 the user has to grant them by hand;
          a denial would mean reminders that never fire at all. See
          ReminderNotificationAdapter for the inexact-alarm tradeoff. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -57,8 +57,8 @@
 
              This is Google's published sample application id, which pairs
              with the sample ad units in AppConfig. Replace both together
-             with the values from the PM's own AdMob account before release
-             -- see config/dart_define.example.json. Do not guess an id. -->
+             with the values from the PM's own AdMob account before release.
+             See config/dart_define.example.json. Do not guess an id. -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713"/>

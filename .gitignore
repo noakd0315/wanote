@@ -77,3 +77,8 @@ ios/Runner/GoogleService-Info.plist
 # Build-time configuration. The example is tracked; filled-in copies are not.
 config/*.json
 !config/dart_define.example.json
+
+# Upload-key credentials. The example is tracked; the real file is not.
+android/key.properties
+*.jks
+*.keystore
