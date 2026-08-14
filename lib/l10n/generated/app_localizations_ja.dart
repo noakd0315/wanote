@@ -1239,4 +1239,65 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reminderChannelDescription => '投薬とワクチン・フィラリア・ノミダニ予防のリマインダー通知';
+
+  @override
+  String reportPdfTitle(String petName) {
+    return '$petName 健康レポート';
+  }
+
+  @override
+  String get reportPdfDefaultPetName => 'ペット';
+
+  @override
+  String reportPdfPeriod(String start, String end) {
+    return '対象期間: $start 〜 $end';
+  }
+
+  @override
+  String get reportPdfSummaryHeading => 'AIサマリー';
+
+  @override
+  String get reportPdfNoSummary => '（このレポートにはAIサマリーは含まれていません）';
+
+  @override
+  String get reportPdfWeightHeading => '体重の推移';
+
+  @override
+  String get reportPdfToiletHeading => 'トイレ回数の推移';
+
+  @override
+  String get reportPdfDateColumn => '日付';
+
+  @override
+  String get reportPdfWeightColumn => '体重(kg)';
+
+  @override
+  String get reportPdfCountColumn => '回数';
+
+  @override
+  String get consultationHistoryDeleteButton => '削除';
+
+  @override
+  String get consultationHistoryDeleteConfirmation => 'この相談を削除しますか？';
+
+  @override
+  String get healthRecordFilterAllPeriods => 'すべて';
+
+  @override
+  String get healthRecordFilterLastMonth => '1か月';
+
+  @override
+  String get healthRecordFilterLastThreeMonths => '3か月';
+
+  @override
+  String get healthRecordFilterLastYear => '1年';
+
+  @override
+  String get healthRecordFilterAllTags => 'すべてのカテゴリ';
+
+  @override
+  String get healthRecordFilterNoMatches => '条件に合う記録がありません。';
+
+  @override
+  String get healthRecordFilterClear => '絞り込みを解除';
 }

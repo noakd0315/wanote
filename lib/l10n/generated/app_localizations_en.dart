@@ -1291,4 +1291,66 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderChannelDescription =>
       'Reminders for medication and for vaccine, heartworm and flea/tick prevention.';
+
+  @override
+  String reportPdfTitle(String petName) {
+    return '$petName health report';
+  }
+
+  @override
+  String get reportPdfDefaultPetName => 'Pet';
+
+  @override
+  String reportPdfPeriod(String start, String end) {
+    return 'Period: $start to $end';
+  }
+
+  @override
+  String get reportPdfSummaryHeading => 'AI summary';
+
+  @override
+  String get reportPdfNoSummary => '(This report contains no AI summary.)';
+
+  @override
+  String get reportPdfWeightHeading => 'Weight';
+
+  @override
+  String get reportPdfToiletHeading => 'Toilet frequency';
+
+  @override
+  String get reportPdfDateColumn => 'Date';
+
+  @override
+  String get reportPdfWeightColumn => 'Weight (kg)';
+
+  @override
+  String get reportPdfCountColumn => 'Count';
+
+  @override
+  String get consultationHistoryDeleteButton => 'Delete';
+
+  @override
+  String get consultationHistoryDeleteConfirmation =>
+      'Delete this consultation?';
+
+  @override
+  String get healthRecordFilterAllPeriods => 'All';
+
+  @override
+  String get healthRecordFilterLastMonth => 'Last month';
+
+  @override
+  String get healthRecordFilterLastThreeMonths => 'Last 3 months';
+
+  @override
+  String get healthRecordFilterLastYear => 'Last year';
+
+  @override
+  String get healthRecordFilterAllTags => 'All categories';
+
+  @override
+  String get healthRecordFilterNoMatches => 'No records match these filters.';
+
+  @override
+  String get healthRecordFilterClear => 'Clear filters';
 }

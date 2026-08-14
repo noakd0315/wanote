@@ -1685,5 +1685,94 @@
   "reminderChannelDescription": "Reminders for medication and for vaccine, heartworm and flea/tick prevention.",
   "@reminderChannelDescription": {
     "description": "Android notification channel description, shown in the system settings for this app."
+  },
+  "reportPdfTitle": "{petName} health report",
+  "@reportPdfTitle": {
+    "description": "Heading of the exported PDF. The PDF was written entirely in Japanese literals, so an English user exported a Japanese document.",
+    "placeholders": {
+      "petName": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPdfDefaultPetName": "Pet",
+  "@reportPdfDefaultPetName": {
+    "description": "Used in the PDF heading when the pet has no name recorded."
+  },
+  "reportPdfPeriod": "Period: {start} to {end}",
+  "@reportPdfPeriod": {
+    "description": "Date range covered by the report.",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPdfSummaryHeading": "AI summary",
+  "@reportPdfSummaryHeading": {
+    "description": "Section heading above the generated summary."
+  },
+  "reportPdfNoSummary": "(This report contains no AI summary.)",
+  "@reportPdfNoSummary": {
+    "description": "Shown in place of the summary when the report was exported without one."
+  },
+  "reportPdfWeightHeading": "Weight",
+  "@reportPdfWeightHeading": {
+    "description": "Section heading above the weight table."
+  },
+  "reportPdfToiletHeading": "Toilet frequency",
+  "@reportPdfToiletHeading": {
+    "description": "Section heading above the toilet count table."
+  },
+  "reportPdfDateColumn": "Date",
+  "@reportPdfDateColumn": {
+    "description": "Table column header."
+  },
+  "reportPdfWeightColumn": "Weight (kg)",
+  "@reportPdfWeightColumn": {
+    "description": "Table column header."
+  },
+  "reportPdfCountColumn": "Count",
+  "@reportPdfCountColumn": {
+    "description": "Table column header."
+  },
+  "consultationHistoryDeleteButton": "Delete",
+  "@consultationHistoryDeleteButton": {
+    "description": "Removes a stored consultation. PM request: history should be the owner's to clear."
+  },
+  "consultationHistoryDeleteConfirmation": "Delete this consultation?",
+  "@consultationHistoryDeleteConfirmation": {
+    "description": "Confirmation before removing a stored consultation."
+  },
+  "healthRecordFilterAllPeriods": "All",
+  "@healthRecordFilterAllPeriods": {
+    "description": "Period filter option meaning no date limit."
+  },
+  "healthRecordFilterLastMonth": "Last month",
+  "@healthRecordFilterLastMonth": {
+    "description": "Period filter option: the last 30 days."
+  },
+  "healthRecordFilterLastThreeMonths": "Last 3 months",
+  "@healthRecordFilterLastThreeMonths": {
+    "description": "Period filter option."
+  },
+  "healthRecordFilterLastYear": "Last year",
+  "@healthRecordFilterLastYear": {
+    "description": "Period filter option."
+  },
+  "healthRecordFilterAllTags": "All categories",
+  "@healthRecordFilterAllTags": {
+    "description": "Category filter option meaning every tag."
+  },
+  "healthRecordFilterNoMatches": "No records match these filters.",
+  "@healthRecordFilterNoMatches": {
+    "description": "Distinct from having no records at all: with filters on, an empty list would otherwise read as the records having disappeared."
+  },
+  "healthRecordFilterClear": "Clear filters",
+  "@healthRecordFilterClear": {
+    "description": "Resets both filters, so a filtered-empty list is never a dead end."
   }
 }

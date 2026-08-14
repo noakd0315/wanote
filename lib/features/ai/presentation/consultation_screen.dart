@@ -275,6 +275,32 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     );
   }
 
+  Future<void> _confirmDelete(Consultation consultation) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.consultationHistoryDeleteConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.consultationHistoryDeleteButton),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await widget.consultationRepository.delete(
+      uid: widget.uid,
+      petId: widget.petId,
+      consultationId: consultation.consultationId,
+    );
+  }
+
   Future<void> _showConsultation(Consultation consultation) {
     final l10n = AppLocalizations.of(context)!;
     return showDialog<void>(
@@ -380,6 +406,13 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                     // why the history looked not worth keeping (PM: "回答が
                     // 見れないのであれば履歴として残す必要はない").
                     onTap: () => _showConsultation(c),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: AppLocalizations.of(
+                        context,
+                      )!.consultationHistoryDeleteButton,
+                      onPressed: () => _confirmDelete(c),
+                    ),
                     title: Text(
                       c.questionText,
                       maxLines: 2,
@@ -389,10 +422,6 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                       c.aiResponse,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(
-                      '${c.createdAt.month}/${c.createdAt.day}',
-                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ),

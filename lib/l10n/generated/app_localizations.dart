@@ -2431,6 +2431,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reminders for medication and for vaccine, heartworm and flea/tick prevention.'**
   String get reminderChannelDescription;
+
+  /// Heading of the exported PDF. The PDF was written entirely in Japanese literals, so an English user exported a Japanese document.
+  ///
+  /// In en, this message translates to:
+  /// **'{petName} health report'**
+  String reportPdfTitle(String petName);
+
+  /// Used in the PDF heading when the pet has no name recorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get reportPdfDefaultPetName;
+
+  /// Date range covered by the report.
+  ///
+  /// In en, this message translates to:
+  /// **'Period: {start} to {end}'**
+  String reportPdfPeriod(String start, String end);
+
+  /// Section heading above the generated summary.
+  ///
+  /// In en, this message translates to:
+  /// **'AI summary'**
+  String get reportPdfSummaryHeading;
+
+  /// Shown in place of the summary when the report was exported without one.
+  ///
+  /// In en, this message translates to:
+  /// **'(This report contains no AI summary.)'**
+  String get reportPdfNoSummary;
+
+  /// Section heading above the weight table.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get reportPdfWeightHeading;
+
+  /// Section heading above the toilet count table.
+  ///
+  /// In en, this message translates to:
+  /// **'Toilet frequency'**
+  String get reportPdfToiletHeading;
+
+  /// Table column header.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get reportPdfDateColumn;
+
+  /// Table column header.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get reportPdfWeightColumn;
+
+  /// Table column header.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get reportPdfCountColumn;
+
+  /// Removes a stored consultation. PM request: history should be the owner's to clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get consultationHistoryDeleteButton;
+
+  /// Confirmation before removing a stored consultation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this consultation?'**
+  String get consultationHistoryDeleteConfirmation;
+
+  /// Period filter option meaning no date limit.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get healthRecordFilterAllPeriods;
+
+  /// Period filter option: the last 30 days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last month'**
+  String get healthRecordFilterLastMonth;
+
+  /// Period filter option.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 3 months'**
+  String get healthRecordFilterLastThreeMonths;
+
+  /// Period filter option.
+  ///
+  /// In en, this message translates to:
+  /// **'Last year'**
+  String get healthRecordFilterLastYear;
+
+  /// Category filter option meaning every tag.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get healthRecordFilterAllTags;
+
+  /// Distinct from having no records at all: with filters on, an empty list would otherwise read as the records having disappeared.
+  ///
+  /// In en, this message translates to:
+  /// **'No records match these filters.'**
+  String get healthRecordFilterNoMatches;
+
+  /// Resets both filters, so a filtered-empty list is never a dead end.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get healthRecordFilterClear;
 }
 
 class _AppLocalizationsDelegate

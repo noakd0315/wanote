@@ -12,8 +12,14 @@ import '../models/monthly_report_input_stats.dart';
 class ReportPdfExporter {
   const ReportPdfExporter();
 
+  /// [strings] carries the localized headings. The exporter is const and
+  /// has no BuildContext -- the screen that triggers the export resolves the
+  /// wording and passes it in, the same way reminders do. The PDF used to be
+  /// written entirely in Japanese literals, so an English user exported a
+  /// Japanese document.
   Future<Uint8List> buildPdfBytes({
     required MonthlyReportInputStats stats,
+    required ReportPdfStrings strings,
     String? summaryText,
     String? petName,
   }) async {
@@ -24,28 +30,31 @@ class ReportPdfExporter {
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             pw.Text(
-              '${petName ?? 'ペット'} 健康レポート',
+              strings.titleFor(petName ?? strings.defaultPetName),
               style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
             pw.Text(
-              '対象期間: ${_dateOnly(stats.periodStart)} 〜 ${_dateOnly(stats.periodEnd)}',
+              strings.periodFor(
+                _dateOnly(stats.periodStart),
+                _dateOnly(stats.periodEnd),
+              ),
             ),
             pw.SizedBox(height: 16),
             pw.Text(
-              'AIサマリー',
+              strings.summaryHeading,
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
-            pw.Text(summaryText ?? '（このレポートにはAIサマリーは含まれていません）'),
+            pw.Text(summaryText ?? strings.noSummary),
             pw.SizedBox(height: 16),
             pw.Text(
-              '体重の推移',
+              strings.weightHeading,
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
             pw.TableHelper.fromTextArray(
-              headers: ['日付', '体重(kg)'],
+              headers: [strings.dateColumn, strings.weightColumn],
               data: stats.weightSamples
                   .map(
                     (s) => [_dateOnly(s.date), s.weightKg.toStringAsFixed(1)],
@@ -54,12 +63,12 @@ class ReportPdfExporter {
             ),
             pw.SizedBox(height: 16),
             pw.Text(
-              'トイレ回数の推移',
+              strings.toiletHeading,
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 4),
             pw.TableHelper.fromTextArray(
-              headers: ['日付', '回数'],
+              headers: [strings.dateColumn, strings.countColumn],
               data: stats.toiletCountsByDay
                   .map((c) => [_dateOnly(c.date), c.count.toString()])
                   .toList(),
@@ -75,12 +84,14 @@ class ReportPdfExporter {
   /// the PDF file to the vet" use cases via the `printing` package).
   Future<void> shareOrPrint({
     required MonthlyReportInputStats stats,
+    required ReportPdfStrings strings,
     String? summaryText,
     String? petName,
   }) async {
     await Printing.layoutPdf(
       onLayout: (format) => buildPdfBytes(
         stats: stats,
+        strings: strings,
         summaryText: summaryText,
         petName: petName,
       ),
@@ -89,4 +100,43 @@ class ReportPdfExporter {
 
   static String _dateOnly(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+}
+
+/// The headings and column names used in the exported report.
+///
+/// Resolved by the screen and passed in, because the exporter is a const
+/// value object with no BuildContext of its own.
+class ReportPdfStrings {
+  const ReportPdfStrings({
+    required this.title,
+    required this.defaultPetName,
+    required this.period,
+    required this.summaryHeading,
+    required this.noSummary,
+    required this.weightHeading,
+    required this.toiletHeading,
+    required this.dateColumn,
+    required this.weightColumn,
+    required this.countColumn,
+  });
+
+  /// Contains `{petName}`.
+  final String title;
+  final String defaultPetName;
+
+  /// Contains `{start}` and `{end}`.
+  final String period;
+
+  final String summaryHeading;
+  final String noSummary;
+  final String weightHeading;
+  final String toiletHeading;
+  final String dateColumn;
+  final String weightColumn;
+  final String countColumn;
+
+  String titleFor(String petName) => title.replaceAll('{petName}', petName);
+
+  String periodFor(String start, String end) =>
+      period.replaceAll('{start}', start).replaceAll('{end}', end);
 }

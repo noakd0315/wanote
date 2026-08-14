@@ -9,6 +9,17 @@ import '../models/consultation.dart';
 abstract class ConsultationRepository {
   Stream<List<Consultation>> watchHistory(String uid, String petId);
 
+  /// Removes one stored consultation.
+  ///
+  /// A consultation holds what the owner asked about their dog and what came
+  /// back. That is theirs to keep or not, and until now it could only
+  /// accumulate.
+  Future<void> delete({
+    required String uid,
+    required String petId,
+    required String consultationId,
+  });
+
   Future<Consultation> save({
     required String uid,
     required String petId,
@@ -59,5 +70,17 @@ class FirestoreConsultationRepository implements ConsultationRepository {
         .doc(consultation.consultationId)
         .set(consultation.toMap());
     return consultation;
+  }
+
+  @override
+  Future<void> delete({
+    required String uid,
+    required String petId,
+    required String consultationId,
+  }) async {
+    await _firestore
+        .collection(FirestorePaths.consultations(uid, petId))
+        .doc(consultationId)
+        .delete();
   }
 }
