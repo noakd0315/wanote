@@ -409,5 +409,6 @@
   "healthRecordFilterNoMatches": "条件に合う記録がありません。",
   "healthRecordFilterClear": "絞り込みを解除",
   "weightFieldLabelWithUnit": "体重（{unit}）",
-  "petProfileFormWeightLabelWithUnit": "体重（{unit}）・任意"
+  "petProfileFormWeightLabelWithUnit": "体重（{unit}）・任意",
+  "medicationAddReminderTimeButton": "時刻を追加"
 }

@@ -1310,4 +1310,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String petProfileFormWeightLabelWithUnit(Object unit) {
     return '体重（$unit）・任意';
   }
+
+  @override
+  String get medicationAddReminderTimeButton => '時刻を追加';
 }

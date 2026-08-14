@@ -31,7 +31,12 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
   DateTime? _endDate;
   bool _ongoing = true;
   bool _reminderEnabled = false;
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 8, minute: 0);
+  /// Every time of day this medicine is due, in order.
+  ///
+  /// A list because a course is often more than once a day -- morning and
+  /// evening, or with each meal (PM request). A single time could only ever
+  /// describe a once-daily medicine.
+  List<ReminderTime> _reminderTimes = const [ReminderTime(8, 0)];
   bool _saving = false;
 
   @override
@@ -44,13 +49,33 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
     _endDate = medication?.endDate;
     _ongoing = medication == null ? true : medication.isOngoing;
     _reminderEnabled = medication?.reminderEnabled ?? false;
-    if (medication?.reminderHour != null &&
-        medication?.reminderMinute != null) {
-      _reminderTime = TimeOfDay(
-        hour: medication!.reminderHour!,
-        minute: medication.reminderMinute!,
-      );
+    if (medication != null && medication.reminderTimes.isNotEmpty) {
+      _reminderTimes = List.of(medication.reminderTimes);
     }
+  }
+
+  /// Adds a time, or replaces one when [replacing] is given.
+  ///
+  /// Duplicates are dropped rather than refused: two reminders at the same
+  /// minute would fire as one anyway, since the time is part of the
+  /// notification id.
+  Future<void> _pickTime({ReminderTime? replacing}) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: replacing == null
+          ? const TimeOfDay(hour: 8, minute: 0)
+          : TimeOfDay(hour: replacing.hour, minute: replacing.minute),
+    );
+    if (picked == null) return;
+    final added = ReminderTime(picked.hour, picked.minute);
+    setState(() {
+      final next = <ReminderTime>[
+        for (final time in _reminderTimes)
+          if (time != replacing) time,
+      ];
+      if (!next.contains(added)) next.add(added);
+      _reminderTimes = next..sort();
+    });
   }
 
   @override
@@ -82,8 +107,9 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
           ? null
           : _dosageController.text.trim();
       final endDate = _ongoing ? null : _endDate;
-      final reminderHour = _reminderEnabled ? _reminderTime.hour : null;
-      final reminderMinute = _reminderEnabled ? _reminderTime.minute : null;
+      final reminderTimes = _reminderEnabled
+          ? (List.of(_reminderTimes)..sort())
+          : const <ReminderTime>[];
 
       if (existing == null) {
         await widget.repository.create(
@@ -94,8 +120,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
           startDate: _startDate,
           endDate: endDate,
           reminderEnabled: _reminderEnabled,
-          reminderHour: reminderHour,
-          reminderMinute: reminderMinute,
+          reminderTimes: reminderTimes,
         );
       } else {
         await widget.repository.update(
@@ -107,8 +132,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
             endDate: endDate,
             clearEndDate: endDate == null,
             reminderEnabled: _reminderEnabled,
-            reminderHour: reminderHour,
-            reminderMinute: reminderMinute,
+            reminderTimes: reminderTimes,
           ),
         );
       }
@@ -184,20 +208,49 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
               value: _reminderEnabled,
               onChanged: (v) => setState(() => _reminderEnabled = v),
             ),
-            if (_reminderEnabled)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.medicationReminderTimeLabel),
-                subtitle: Text(_reminderTime.format(context)),
-                trailing: const Icon(Icons.access_time),
-                onTap: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: _reminderTime,
-                  );
-                  if (picked != null) setState(() => _reminderTime = picked);
-                },
+            if (_reminderEnabled) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  l10n.medicationReminderTimeLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
+              for (final time in _reminderTimes)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    TimeOfDay(
+                      hour: time.hour,
+                      minute: time.minute,
+                    ).format(context),
+                  ),
+                  leading: const Icon(Icons.access_time),
+                  // The last one cannot be removed while reminders are on:
+                  // a reminder with no time would never fire, and nothing on
+                  // screen would say why.
+                  trailing: _reminderTimes.length > 1
+                      ? IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: () => setState(
+                            () => _reminderTimes = [
+                              for (final other in _reminderTimes)
+                                if (other != time) other,
+                            ],
+                          ),
+                        )
+                      : null,
+                  onTap: () => _pickTime(replacing: time),
+                ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _pickTime(),
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.medicationAddReminderTimeButton),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _saving ? null : _save,

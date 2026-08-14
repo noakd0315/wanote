@@ -99,8 +99,7 @@ void main() {
     startDate: DateTime(2026, 8, 1),
     endDate: endDate,
     reminderEnabled: reminderEnabled,
-    reminderHour: reminderEnabled ? 8 : null,
-    reminderMinute: reminderEnabled ? 0 : null,
+    reminderTimes: reminderEnabled ? const [ReminderTime(8, 0)] : const [],
   );
 
   PreventionProgram program({

@@ -16,8 +16,7 @@ abstract class MedicationRepository {
     required bool reminderEnabled,
     String? dosage,
     DateTime? endDate,
-    int? reminderHour,
-    int? reminderMinute,
+    List<ReminderTime> reminderTimes = const [],
   });
 
   Future<void> update(String uid, Medication medication);
@@ -53,8 +52,7 @@ class FirestoreMedicationRepository implements MedicationRepository {
     required bool reminderEnabled,
     String? dosage,
     DateTime? endDate,
-    int? reminderHour,
-    int? reminderMinute,
+    List<ReminderTime> reminderTimes = const [],
   }) async {
     final medication = Medication(
       medicationId: _uuid.v4(),
@@ -64,8 +62,7 @@ class FirestoreMedicationRepository implements MedicationRepository {
       startDate: startDate,
       endDate: endDate,
       reminderEnabled: reminderEnabled,
-      reminderHour: reminderHour,
-      reminderMinute: reminderMinute,
+      reminderTimes: reminderTimes,
     );
     await _firestore
         .collection(FirestorePaths.medications(uid, petId))

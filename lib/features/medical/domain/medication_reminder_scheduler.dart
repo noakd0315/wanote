@@ -34,9 +34,7 @@ class MedicationReminderScheduler {
     final reminders = <ScheduledReminder>[];
 
     for (final medication in medications) {
-      final hour = medication.reminderHour;
-      final minute = medication.reminderMinute;
-      if (!medication.reminderEnabled || hour == null || minute == null) {
+      if (!medication.reminderEnabled || medication.reminderTimes.isEmpty) {
         continue;
       }
 
@@ -50,20 +48,31 @@ class MedicationReminderScheduler {
         continue;
       }
 
-      reminders.add(
-        ScheduledReminder(
-          notificationId: stableNotificationId(
-            'medication:${medication.medicationId}',
+      // One reminder per time of day. A twice-daily course is two
+      // notifications, not one that fires at whichever time was saved last.
+      for (final time in medication.reminderTimes) {
+        reminders.add(
+          ScheduledReminder(
+            // The time is part of the id, so the two do not collide and
+            // cancel each other. Deriving it from the index instead would
+            // renumber every reminder when one is removed from the middle.
+            notificationId: stableNotificationId(
+              'medication:${medication.medicationId}:${time.wireValue}',
+            ),
+            recordId: medication.medicationId,
+            // Only the time-of-day is used for a daily repeat, but the date
+            // still has to be a real upcoming instant for the first fire.
+            fireAt: _nextOccurrence(
+              now: now,
+              hour: time.hour,
+              minute: time.minute,
+            ),
+            title: medication.name,
+            body: _bodyFor(medication),
+            repeatsDaily: true,
           ),
-          recordId: medication.medicationId,
-          // Only the time-of-day is used for a daily repeat, but the date
-          // still has to be a real upcoming instant for the first fire.
-          fireAt: _nextOccurrence(now: now, hour: hour, minute: minute),
-          title: medication.name,
-          body: _bodyFor(medication),
-          repeatsDaily: true,
-        ),
-      );
+        );
+      }
     }
     return reminders;
   }

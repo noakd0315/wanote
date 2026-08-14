@@ -2557,6 +2557,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Weight ({unit}) - optional'**
   String petProfileFormWeightLabelWithUnit(Object unit);
+
+  /// Adds another reminder time to a medication. PM request: some courses are several doses a day, and a single time could only describe a once-daily medicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a time'**
+  String get medicationAddReminderTimeButton;
 }
 
 class _AppLocalizationsDelegate

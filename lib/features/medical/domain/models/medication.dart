@@ -1,11 +1,47 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
+/// A time of day for a reminder.
+///
+/// Hour and minute rather than a `TimeOfDay` so the medical models keep no
+/// Flutter dependency and stay trivially serializable. Written to Firestore
+/// as "HH:mm", which is readable in the console and sorts correctly as a
+/// string.
+class ReminderTime extends Equatable implements Comparable<ReminderTime> {
+  const ReminderTime(this.hour, this.minute);
+
+  final int hour;
+  final int minute;
+
+  String get wireValue =>
+      '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+
+  static ReminderTime? tryParse(Object? value) {
+    if (value is! String) return null;
+    final parts = value.split(':');
+    if (parts.length != 2) return null;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return ReminderTime(hour, minute);
+  }
+
+  @override
+  int compareTo(ReminderTime other) =>
+      (hour * 60 + minute).compareTo(other.hour * 60 + other.minute);
+
+  @override
+  List<Object?> get props => [hour, minute];
+}
+
 /// Mirrors spec section 5.2 (薬の記録). [endDate] is nullable to mean
-/// "ongoing" (継続中扱い) per the spec's備考. When [reminderEnabled] is true
-/// the spec requires a reminder time, modelled here as separate hour/minute
-/// ints rather than a `TimeOfDay` so this model has no Flutter/material
-/// dependency and stays trivially testable/serializable.
+/// "ongoing" (継続中扱い) per the spec's備考.
+///
+/// [reminderTimes] is a list because a course is often several doses a day
+/// -- morning and evening, or with each meal (PM request). It replaces a
+/// single hour/minute pair, which could only ever describe a once-daily
+/// medicine.
 class Medication extends Equatable {
   const Medication({
     required this.medicationId,
@@ -15,11 +51,10 @@ class Medication extends Equatable {
     required this.reminderEnabled,
     this.dosage,
     this.endDate,
-    this.reminderHour,
-    this.reminderMinute,
+    this.reminderTimes = const [],
   }) : assert(
-         !reminderEnabled || (reminderHour != null && reminderMinute != null),
-         'reminder_time is required when reminder_enabled is true (spec 5.2)',
+         !reminderEnabled || reminderTimes.length > 0,
+         'at least one reminder time is required when reminder_enabled is true (spec 5.2)',
        );
 
   final String medicationId;
@@ -31,8 +66,9 @@ class Medication extends Equatable {
   /// Null means "continuing" (継続中) per spec 5.2.
   final DateTime? endDate;
   final bool reminderEnabled;
-  final int? reminderHour;
-  final int? reminderMinute;
+
+  /// Every time of day this medicine is due. Empty when reminders are off.
+  final List<ReminderTime> reminderTimes;
 
   bool get isOngoing => endDate == null;
 
@@ -43,8 +79,7 @@ class Medication extends Equatable {
     DateTime? endDate,
     bool clearEndDate = false,
     bool? reminderEnabled,
-    int? reminderHour,
-    int? reminderMinute,
+    List<ReminderTime>? reminderTimes,
   }) {
     return Medication(
       medicationId: medicationId,
@@ -54,8 +89,7 @@ class Medication extends Equatable {
       startDate: startDate ?? this.startDate,
       endDate: clearEndDate ? null : (endDate ?? this.endDate),
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
-      reminderHour: reminderHour ?? this.reminderHour,
-      reminderMinute: reminderMinute ?? this.reminderMinute,
+      reminderTimes: reminderTimes ?? this.reminderTimes,
     );
   }
 
@@ -68,8 +102,7 @@ class Medication extends Equatable {
       'start_date': Timestamp.fromDate(startDate),
       'end_date': endDate == null ? null : Timestamp.fromDate(endDate!),
       'reminder_enabled': reminderEnabled,
-      'reminder_hour': reminderHour,
-      'reminder_minute': reminderMinute,
+      'reminder_times': [for (final time in reminderTimes) time.wireValue],
     };
   }
 
@@ -82,9 +115,27 @@ class Medication extends Equatable {
       startDate: _readDate(map['start_date'])!,
       endDate: _readDate(map['end_date']),
       reminderEnabled: map['reminder_enabled'] as bool? ?? false,
-      reminderHour: (map['reminder_hour'] as num?)?.toInt(),
-      reminderMinute: (map['reminder_minute'] as num?)?.toInt(),
+      reminderTimes: _readReminderTimes(map),
     );
+  }
+
+  /// Reads the list, falling back to the single hour/minute a document
+  /// written before this change would have. Records already saved on a
+  /// phone must keep their reminder rather than quietly losing it.
+  static List<ReminderTime> _readReminderTimes(Map<String, dynamic> map) {
+    final raw = map['reminder_times'];
+    if (raw is List) {
+      final times = <ReminderTime>[];
+      for (final value in raw) {
+        final time = ReminderTime.tryParse(value);
+        if (time != null) times.add(time);
+      }
+      if (times.isNotEmpty) return (times..sort());
+    }
+    final hour = (map['reminder_hour'] as num?)?.toInt();
+    final minute = (map['reminder_minute'] as num?)?.toInt();
+    if (hour == null || minute == null) return const [];
+    return [ReminderTime(hour, minute)];
   }
 
   static DateTime? _readDate(Object? value) {
@@ -103,7 +154,6 @@ class Medication extends Equatable {
     startDate,
     endDate,
     reminderEnabled,
-    reminderHour,
-    reminderMinute,
+    reminderTimes,
   ];
 }

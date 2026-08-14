@@ -1363,4 +1363,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String petProfileFormWeightLabelWithUnit(Object unit) {
     return 'Weight ($unit) - optional';
   }
+
+  @override
+  String get medicationAddReminderTimeButton => 'Add a time';
 }
