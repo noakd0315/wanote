@@ -2293,6 +2293,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get commonClose;
+
+  /// Display label for the HealthRecordTag.bloodyStool category tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood in stool'**
+  String get healthRecordTagBloodyStool;
+
+  /// Toggle on the stool form. Off by default: the owner decides whether a bowel movement is worth a daily-log entry, rather than the app deciding for them.
+  ///
+  /// In en, this message translates to:
+  /// **'Also add to the daily log'**
+  String get toiletCopyToDailyLogLabel;
+
+  /// Explains what the copy does, and that the photo is not duplicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies the details as a daily record. The photo stays with this record.'**
+  String get toiletCopyToDailyLogDescription;
+
+  /// App bar title of the stool detail screen, which is the only place its photo can be seen.
+  ///
+  /// In en, this message translates to:
+  /// **'Stool record'**
+  String get toiletStoolDetailTitle;
+
+  /// The stool record itself was written; only the copy failed. Says both, so the owner does not re-enter a record that already exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved, but could not add it to the daily log.'**
+  String get toiletCopyToDailyLogFailedMessage;
+
+  /// Memo written onto the copied daily record, so the entry says what it came from.
+  ///
+  /// In en, this message translates to:
+  /// **'Stool: {hardness} / {color}'**
+  String toiletStoolCopyMemo(String hardness, String color);
+
+  /// Confirmation before deleting a stool record. Says the photo goes too, because the detail screen is the only place it was ever visible.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this record? The photo is deleted with it.'**
+  String get toiletStoolDeleteConfirmationMessage;
+
+  /// Confirms deletion of a stool record.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get toiletStoolDeleteButton;
 }
 
 class _AppLocalizationsDelegate

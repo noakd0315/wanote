@@ -131,6 +131,7 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
                 repository: widget.weightRecordRepository,
               ),
               ToiletRecordTimelineScreen(
+                healthRecordRepository: widget.healthRecordRepository,
                 uid: widget.uid,
                 petId: widget.petId,
                 repository: widget.toiletRecordRepository,

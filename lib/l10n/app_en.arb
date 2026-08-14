@@ -1565,5 +1565,45 @@
   "commonClose": "Close",
   "@commonClose": {
     "description": "Dismisses a dialog that only shows information, where there is nothing to cancel."
+  },
+  "healthRecordTagBloodyStool": "Blood in stool",
+  "@healthRecordTagBloodyStool": {
+    "description": "Display label for the HealthRecordTag.bloodyStool category tag."
+  },
+  "toiletCopyToDailyLogLabel": "Also add to the daily log",
+  "@toiletCopyToDailyLogLabel": {
+    "description": "Toggle on the stool form. Off by default: the owner decides whether a bowel movement is worth a daily-log entry, rather than the app deciding for them."
+  },
+  "toiletCopyToDailyLogDescription": "Copies the details as a daily record. The photo stays with this record.",
+  "@toiletCopyToDailyLogDescription": {
+    "description": "Explains what the copy does, and that the photo is not duplicated."
+  },
+  "toiletStoolDetailTitle": "Stool record",
+  "@toiletStoolDetailTitle": {
+    "description": "App bar title of the stool detail screen, which is the only place its photo can be seen."
+  },
+  "toiletCopyToDailyLogFailedMessage": "Saved, but could not add it to the daily log.",
+  "@toiletCopyToDailyLogFailedMessage": {
+    "description": "The stool record itself was written; only the copy failed. Says both, so the owner does not re-enter a record that already exists."
+  },
+  "toiletStoolCopyMemo": "Stool: {hardness} / {color}",
+  "@toiletStoolCopyMemo": {
+    "description": "Memo written onto the copied daily record, so the entry says what it came from.",
+    "placeholders": {
+      "hardness": {
+        "type": "String"
+      },
+      "color": {
+        "type": "String"
+      }
+    }
+  },
+  "toiletStoolDeleteConfirmationMessage": "Delete this record? The photo is deleted with it.",
+  "@toiletStoolDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting a stool record. Says the photo goes too, because the detail screen is the only place it was ever visible."
+  },
+  "toiletStoolDeleteButton": "Delete",
+  "@toiletStoolDeleteButton": {
+    "description": "Confirms deletion of a stool record."
   }
 }

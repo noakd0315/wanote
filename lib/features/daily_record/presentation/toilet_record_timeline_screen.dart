@@ -9,6 +9,8 @@ import '../models/toilet_record.dart';
 import 'toilet_frequency_chart_view.dart';
 import 'toilet_record_form_screen.dart';
 import 'widgets/toilet_labels.dart';
+import '../data/health_record_repository.dart';
+import 'toilet_record_detail_screen.dart';
 
 /// Spec 4.2's one-tap timeline, plus the anomaly-driven AI-consultation
 /// banner from spec 4.4.
@@ -24,6 +26,7 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
     required this.uid,
     required this.petId,
     required this.repository,
+    this.healthRecordRepository,
     this.anomalyDetector = const AnomalyDetector(),
     this.onConsultationSuggested,
   });
@@ -31,6 +34,10 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
   final String uid;
   final String petId;
   final ToiletRecordRepository repository;
+
+  /// Passed through to the stool form, which offers to copy the record into
+  /// the daily log. Null in tests that build this screen alone.
+  final HealthRecordRepository? healthRecordRepository;
   final AnomalyDetector anomalyDetector;
   final void Function(ConsultationSuggestion suggestion)?
   onConsultationSuggested;
@@ -174,6 +181,8 @@ class _ToiletRecordTimelineScreenState
                                       uid: widget.uid,
                                       petId: widget.petId,
                                       repository: widget.repository,
+                                      healthRecordRepository:
+                                          widget.healthRecordRepository,
                                     ),
                                   ),
                                 );
@@ -223,6 +232,23 @@ class _ToiletRecordTimelineScreenState
                                     ),
                                 ];
                                 return ListTile(
+                                  // Stool only. A urine record holds nothing
+                                  // a list row does not already show, and
+                                  // carries no photo (PM: 排尿は写真不要),
+                                  // so a detail screen for it would open on
+                                  // the same three facts.
+                                  onTap: isUrine
+                                      ? null
+                                      : () => Navigator.of(context).push(
+                                          MaterialPageRoute<void>(
+                                            builder: (_) =>
+                                                ToiletRecordDetailScreen(
+                                                  uid: widget.uid,
+                                                  record: record,
+                                                  repository: widget.repository,
+                                                ),
+                                          ),
+                                        ),
                                   leading: Icon(
                                     isUrine ? Icons.water_drop : Icons.circle,
                                   ),

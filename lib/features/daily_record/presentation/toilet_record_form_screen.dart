@@ -14,6 +14,10 @@ import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
 import 'widgets/toilet_labels.dart';
 import '../../../shared/utils/image_picking.dart';
+import 'dart:developer' as developer;
+import '../../../shared/app_messenger.dart';
+import '../data/health_record_repository.dart';
+import '../models/health_record.dart';
 
 /// Spec 4.2: "便の状態選択（硬さ：正常／軟便／下痢／硬い、色：正常／血便疑い
 /// ／白っぽい 等）" plus optional photo attachment for abnormal findings, plus
@@ -27,12 +31,18 @@ class ToiletRecordFormScreen extends StatefulWidget {
     required this.uid,
     required this.petId,
     required this.repository,
+    this.healthRecordRepository,
     this.imagePicker,
   });
 
   final String uid;
   final String petId;
   final ToiletRecordRepository repository;
+
+  /// Supplied only when the daily log is reachable from here. Null in tests
+  /// that build this screen alone, and the copy toggle is hidden then --
+  /// an offer the app cannot honour should not be on screen.
+  final HealthRecordRepository? healthRecordRepository;
 
   /// Injectable so a test can drive the photo path, the way
   /// PreventionRecordFormScreen already allows. Without it the
@@ -48,6 +58,11 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   StoolHardness _hardness = StoolHardness.normal;
   StoolColor _color = StoolColor.normal;
   Uint8List? _photoBytes;
+
+  /// Off by default, deliberately. Most bowel movements are unremarkable,
+  /// and copying every one into the daily log would bury the entries the
+  /// owner made because something was wrong. PM: the owner decides.
+  bool _copyToDailyLog = false;
   bool _saving = false;
 
   // PM request: 排便の記録も日時が欲しい -- defaults to now like the urine
@@ -118,10 +133,23 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
     setState(() => _photoBytes = bytes);
   }
 
+  /// The tags a copied entry gets. Mapped, not inferred: both come from
+  /// choices the owner made on this form.
+  List<HealthRecordTag> _copiedTags() => [
+    if (_hardness == StoolHardness.diarrhea) HealthRecordTag.diarrhea,
+    if (_color == StoolColor.bloodSuspected) HealthRecordTag.bloodyStool,
+  ];
+
   Future<void> _save() async {
     setState(() => _saving = true);
     // Read before the first await; used after the save completes.
     final adGate = adGateOf(context);
+    final l10n = AppLocalizations.of(context)!;
+    final copyMemo = l10n.toiletStoolCopyMemo(
+      stoolHardnessLabel(context, _hardness),
+      stoolColorLabel(context, _color),
+    );
+    final copyFailedMessage = l10n.toiletCopyToDailyLogFailedMessage;
     final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
@@ -134,6 +162,33 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
         recordedAt: _recordedAt,
         location: location.isEmpty ? null : location,
       );
+      // The copy comes after the record it copies. If this fails the record
+      // still exists, which is the half that matters; the owner is told so
+      // they do not enter it again.
+      //
+      // The photo is not copied. It stays with this record, which is the
+      // one place it can be viewed (PM: 写真はトイレの記録で保存).
+      final healthRecords = widget.healthRecordRepository;
+      if (_copyToDailyLog && healthRecords != null) {
+        try {
+          await healthRecords.create(
+            uid: widget.uid,
+            petId: widget.petId,
+            recordedAt: _recordedAt,
+            photoBytes: const [],
+            tags: _copiedTags(),
+            memo: location.isEmpty ? copyMemo : '$copyMemo / $location',
+          );
+        } catch (error, stackTrace) {
+          developer.log(
+            'Could not copy the stool record into the daily log',
+            name: 'ToiletRecordFormScreen',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          showAppMessage(copyFailedMessage);
+        }
+      }
       // After the write, never before -- see health_record_form_screen.dart
       // for why the ad impression is the thing that may be lost here and the
       // record is not. Photos only, same reason.
@@ -238,6 +293,15 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
                     fit: BoxFit.cover,
                   ),
                 ),
+              ),
+            if (widget.healthRecordRepository != null)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _copyToDailyLog,
+                onChanged: (value) =>
+                    setState(() => _copyToDailyLog = value),
+                title: Text(l10n.toiletCopyToDailyLogLabel),
+                subtitle: Text(l10n.toiletCopyToDailyLogDescription),
               ),
             const SizedBox(height: 24),
             FilledButton(

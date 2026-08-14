@@ -1205,4 +1205,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonClose => 'Close';
+
+  @override
+  String get healthRecordTagBloodyStool => 'Blood in stool';
+
+  @override
+  String get toiletCopyToDailyLogLabel => 'Also add to the daily log';
+
+  @override
+  String get toiletCopyToDailyLogDescription =>
+      'Copies the details as a daily record. The photo stays with this record.';
+
+  @override
+  String get toiletStoolDetailTitle => 'Stool record';
+
+  @override
+  String get toiletCopyToDailyLogFailedMessage =>
+      'Saved, but could not add it to the daily log.';
+
+  @override
+  String toiletStoolCopyMemo(String hardness, String color) {
+    return 'Stool: $hardness / $color';
+  }
+
+  @override
+  String get toiletStoolDeleteConfirmationMessage =>
+      'Delete this record? The photo is deleted with it.';
+
+  @override
+  String get toiletStoolDeleteButton => 'Delete';
 }

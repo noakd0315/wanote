@@ -365,5 +365,13 @@
   "consultationHistoryDetailTitle": "過去の相談",
   "consultationHistoryQuestionLabel": "質問",
   "consultationHistoryAnswerLabel": "回答",
-  "commonClose": "閉じる"
+  "commonClose": "閉じる",
+  "healthRecordTagBloodyStool": "血便",
+  "toiletCopyToDailyLogLabel": "日々の記録にも残す",
+  "toiletCopyToDailyLogDescription": "内容を日々の記録に転記します。写真はこの記録に残ります。",
+  "toiletStoolDetailTitle": "排便の記録",
+  "toiletCopyToDailyLogFailedMessage": "保存しましたが、日々の記録への転記に失敗しました。",
+  "toiletStoolCopyMemo": "排便: {hardness} / {color}",
+  "toiletStoolDeleteConfirmationMessage": "この記録を削除しますか？写真も一緒に削除されます。",
+  "toiletStoolDeleteButton": "削除"
 }

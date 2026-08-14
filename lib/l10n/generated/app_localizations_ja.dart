@@ -1159,4 +1159,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get commonClose => '閉じる';
+
+  @override
+  String get healthRecordTagBloodyStool => '血便';
+
+  @override
+  String get toiletCopyToDailyLogLabel => '日々の記録にも残す';
+
+  @override
+  String get toiletCopyToDailyLogDescription => '内容を日々の記録に転記します。写真はこの記録に残ります。';
+
+  @override
+  String get toiletStoolDetailTitle => '排便の記録';
+
+  @override
+  String get toiletCopyToDailyLogFailedMessage => '保存しましたが、日々の記録への転記に失敗しました。';
+
+  @override
+  String toiletStoolCopyMemo(String hardness, String color) {
+    return '排便: $hardness / $color';
+  }
+
+  @override
+  String get toiletStoolDeleteConfirmationMessage =>
+      'この記録を削除しますか？写真も一緒に削除されます。';
+
+  @override
+  String get toiletStoolDeleteButton => '削除';
 }

@@ -22,6 +22,7 @@ String healthRecordTagLabel(BuildContext context, HealthRecordTag tag) {
     HealthRecordTag.lowEnergy => l10n.healthRecordTagLowEnergy,
     HealthRecordTag.vomiting => l10n.healthRecordTagVomiting,
     HealthRecordTag.diarrhea => l10n.healthRecordTagDiarrhea,
+    HealthRecordTag.bloodyStool => l10n.healthRecordTagBloodyStool,
     HealthRecordTag.other => l10n.healthRecordTagOther,
   };
 }

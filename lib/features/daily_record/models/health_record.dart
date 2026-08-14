@@ -13,6 +13,10 @@ enum HealthRecordTag {
   lowEnergy,
   vomiting,
   diarrhea,
+  // PM request. StoolColor.bloodSuspected already existed on the toilet
+  // side, so a stool record copied into the daily log has something exact
+  // to become -- the tag is mapped, not guessed.
+  bloodyStool,
   other;
 
   String get wireName => name;
