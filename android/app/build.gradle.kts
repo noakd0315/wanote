@@ -74,6 +74,14 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+
+            // R8 runs on release builds, and until now it ran with no rules
+            // of our own. That shipped a release APK that died on launch --
+            // see proguard-rules.pro for what it stripped and why.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

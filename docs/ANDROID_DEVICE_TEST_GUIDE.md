@@ -70,7 +70,20 @@ flutter run --release --dart-define-from-file=config/prod.json
 
 ### 3-1. サインインまわり
 
-- [ ] アプリが起動する（**ここで落ちるなら Firebase 接続の問題**）
+- [ ] アプリが起動する
+
+> **1件目はここで出ました。** リリースAPKが起動時に即死していました
+> （R8 が Room のコンストラクタを削除。`android/app/proguard-rules.pro`）。
+> **`--release` でしか再現しません。** デバッグビルドは難読化しないので、
+> 起動確認は**必ずリリースビルドで**行ってください。
+>
+> 落ちたときの原因の見分け方:
+>
+> ```bash
+> %LOCALAPPDATA%\Android\Sdk\platform-toolsdb.exe logcat -d -b crash
+> ```
+>
+> `FATAL EXCEPTION` の下に出るのが本当の原因です。**Firebase とは限りません。**
 - [ ] 新規アカウントを作成できる
 - [ ] 一度アプリを終了し、再起動しても**サインインしたまま**
 - [ ] サインアウトできる
