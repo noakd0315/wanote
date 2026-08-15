@@ -15,6 +15,7 @@
 | **[PLAN_implementation_first.md](PLAN_implementation_first.md)** | **着手順はこれが正**。申請より実装を優先する方針（PM指示） |
 | **[ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md)** | **次にやること**。実機テストの手順と確認項目 |
 | **[VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md)** | **いま確認するもの**。第3回・8/20までの通し確認（削除まで含む） |
+| **[RELEASE_SETUP_STEPS.md](RELEASE_SETUP_STEPS.md)** | **PMの作業手順**。署名鍵→課金→広告。順番に意味があります |
 | **[BACKLOG.md](BACKLOG.md)** | **後回しにしているものの一覧**。判断済み・着手待ち・意図的な見送りを理由つきで |
 
 ---
