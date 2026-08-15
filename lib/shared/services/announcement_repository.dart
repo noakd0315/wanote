@@ -36,18 +36,31 @@ class FirestoreAnnouncementRepository implements AnnouncementRepository {
 
   @override
   Stream<List<Announcement>> watchVisible() {
-    return _db
-        .collection('announcements')
-        .orderBy('published_at', descending: true)
-        .limit(_limit)
-        .snapshots()
-        .map((snapshot) {
-          final now = DateTime.now();
-          return snapshot.docs
+    // Deliberately unordered, and sorted below in Dart instead.
+    //
+    // `orderBy('published_at')` drops any document that does not carry that
+    // exact field -- silently, as a missing row rather than an error. A
+    // notice typed by hand with a stray space or tab in the field name is
+    // therefore invisible with nothing anywhere to say why. That happened
+    // on the first real notice (2026-08-16), and it is precisely the
+    // failure this feature was built to avoid: a notice nobody can see and
+    // nobody can explain.
+    //
+    // Sorting on the device costs nothing here -- the collection is capped
+    // at [_limit] and holds a handful of rows -- and it is the same trade
+    // already made for the visibility window just below.
+    return _db.collection('announcements').limit(_limit).snapshots().map((
+      snapshot,
+    ) {
+      final now = DateTime.now();
+      final visible =
+          snapshot.docs
               .map((doc) => Announcement.fromMap(doc.id, doc.data()))
               .where((announcement) => announcement.isVisibleAt(now))
-              .toList();
-        });
+              .toList()
+            ..sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
+      return visible;
+    });
   }
 }
 

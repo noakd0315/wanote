@@ -59,6 +59,22 @@ void main() {
   });
 
   group('language', () {
+    test('reads fields whose names carry stray whitespace', () {
+      // Pasting a field name out of a table or an aligned block brings a
+      // leading tab with it, and the Firebase console accepts it happily.
+      // The notice then saves, reads back blank, and nothing anywhere says
+      // why. This happened on the first real notice (2026-08-16).
+      final a = Announcement.fromMap('id', {
+        '	published_at': Timestamp.fromDate(DateTime(2026, 8, 15)),
+        ' title_ja': 'お知らせ',
+        'body_ja ': '本文',
+      });
+
+      expect(a.titleJa, 'お知らせ');
+      expect(a.bodyJa, '本文');
+      expect(a.publishedAt, DateTime(2026, 8, 15));
+    });
+
     test('uses the English text when there is some', () {
       final a = announcement(titleEn: 'Support closed', bodyEn: 'Back on 20th');
       expect(a.titleFor('en'), 'Support closed');

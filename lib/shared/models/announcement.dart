@@ -58,7 +58,19 @@ class Announcement extends Equatable {
   String bodyFor(String languageCode) =>
       languageCode == 'en' ? (bodyEn ?? bodyJa) : bodyJa;
 
-  factory Announcement.fromMap(String id, Map<String, dynamic> map) {
+  factory Announcement.fromMap(String id, Map<String, dynamic> rawMap) {
+    // Field names are trimmed before anything is read.
+    //
+    // These documents are typed by hand into the Firebase console, usually
+    // by pasting a field name out of a table or an aligned block, and a
+    // leading tab or space rides along invisibly. The console accepts it --
+    // `\tpublished_at` is a perfectly legal field name -- so the notice
+    // saves, looks right on screen, and then arrives here with every field
+    // blank. Being strict about it only punishes the person publishing.
+    final map = <String, dynamic>{
+      for (final entry in rawMap.entries) entry.key.trim(): entry.value,
+    };
+
     return Announcement(
       id: id,
       titleJa: map['title_ja'] as String? ?? '',
