@@ -1346,6 +1346,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get dangerZoneSectionTitle => '取り消せない操作';
+
+  @override
+  String get deleteAccountMenuSubtitle => 'すべての記録と写真が消えます';
+
+  @override
   String get preventionVaccineTypeLabel => 'ワクチンの種類';
 
   @override

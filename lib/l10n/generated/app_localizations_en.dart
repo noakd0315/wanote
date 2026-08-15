@@ -1400,6 +1400,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dangerZoneSectionTitle => 'Cannot be undone';
+
+  @override
+  String get deleteAccountMenuSubtitle => 'Every record and photo is erased';
+
+  @override
   String get preventionVaccineTypeLabel => 'Vaccine type';
 
   @override

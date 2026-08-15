@@ -96,9 +96,29 @@ class SettingsSection extends StatelessWidget {
           title: Text(l10n.signOutMenuTitle),
           onTap: () => controller.signOut(),
         ),
-        // Sits below sign-out and is styled as destructive so it can't be
-        // mistaken for it. It has to be reachable from inside the app --
-        // App Store Review Guideline 5.1.1(v).
+
+        // Deliberately far from sign-out.
+        //
+        // These two used to be adjacent rows, told apart only by colour, and
+        // the PM reached for sign-out and hit account deletion instead
+        // (2026-08-16). Red text does not help a thumb that has already
+        // started moving: the two need to be different distances away, not
+        // just different colours. Nothing else goes in this gap -- the empty
+        // space is the safeguard.
+        //
+        // It stays reachable from inside the app either way, which App Store
+        // Review Guideline 5.1.1(v) requires.
+        const SizedBox(height: 48),
+        const Divider(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+          child: Text(
+            l10n.dangerZoneSectionTitle,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ),
         ListTile(
           leading: Icon(
             Icons.delete_forever_outlined,
@@ -108,10 +128,14 @@ class SettingsSection extends StatelessWidget {
             l10n.deleteAccountMenuTitle,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
+          // Says what it costs, on the row itself. Someone who has tapped it
+          // by mistake should learn that from here, not from the next screen.
+          subtitle: Text(l10n.deleteAccountMenuSubtitle),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const AccountDeletionScreen()),
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }

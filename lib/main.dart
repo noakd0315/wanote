@@ -118,7 +118,20 @@ class WanoteApp extends StatelessWidget {
               if (activePet == null) {
                 return const PetProfileFormScreen();
               }
-              return HomeShell(uid: uid, activePet: activePet);
+              // Keyed by uid so a new session never inherits the previous
+              // one's shell.
+              //
+              // Without a key, Flutter reuses the same State when the tree
+              // switches back to a HomeShell after sign-in, and the shell
+              // reopens on whichever tab the last session left it on --
+              // usually 設定, since that is where sign-out lives (PM report,
+              // 2026-08-16). Signing in should land on the home tab, the
+              // same as a cold start does.
+              return HomeShell(
+                key: ValueKey(uid),
+                uid: uid,
+                activePet: activePet,
+              );
             },
           ),
         ),
