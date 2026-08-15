@@ -1384,6 +1384,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Edit medication record';
 
   @override
+  String foodPortionHistorySummary(
+    String weight,
+    String profile,
+    String amount,
+    String energy,
+    String density,
+  ) {
+    return 'Weight $weight / $profile / suggested $amount (needs $energy kcal a day, food is $density kcal/100g)';
+  }
+
+  @override
+  String foodPortionHistoryCurrentAmount(String amount) {
+    return ' / currently $amount';
+  }
+
+  @override
   String get preventionVaccineTypeLabel => 'Vaccine type';
 
   @override

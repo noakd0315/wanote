@@ -1812,6 +1812,22 @@
   "@preventionRecordFormEditTitleMedication": {
     "description": "As above, when editing."
   },
+  "foodPortionHistorySummary": "Weight {weight} / {profile} / suggested {amount} (needs {energy} kcal a day, food is {density} kcal/100g)",
+  "@foodPortionHistorySummary": {
+    "description": "What the food-portion screen writes into the consultation history. Separate from the English prompt sent to the model: this one is read by the owner, so it is localized and uses their display units.",
+    "placeholders": {
+      "weight": { "type": "String" },
+      "profile": { "type": "String" },
+      "amount": { "type": "String" },
+      "energy": { "type": "String" },
+      "density": { "type": "String" }
+    }
+  },
+  "foodPortionHistoryCurrentAmount": " / currently {amount}",
+  "@foodPortionHistoryCurrentAmount": {
+    "description": "Appended to foodPortionHistorySummary when the owner entered what they feed now.",
+    "placeholders": { "amount": { "type": "String" } }
+  },
   "preventionVaccineTypeLabel": "Vaccine type",
   "@preventionVaccineTypeLabel": {
     "description": "Free-text field on a vaccination record naming which vaccine was given; the medication equivalent is medicationNameLabel."

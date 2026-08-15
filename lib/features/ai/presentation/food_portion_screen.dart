@@ -141,6 +141,43 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   /// Nothing at all when the field is blank or not a number: an invented or
   /// misread figure would have the advice reason from something the owner
   /// never said.
+  /// What goes into the consultation history for a food-portion enquiry.
+  ///
+  /// Deliberately a second rendering of the same figures rather than a
+  /// reuse of the prompt. The prompt is English, carries stored units, and
+  /// ends with instructions aimed at the model; none of that belongs in
+  /// something the owner opens and reads months later. The duplication is
+  /// the point, and was accepted knowingly (PM decision, 2026-08-15).
+  String _historyText(
+    BuildContext context,
+    AppLocalizations l10n,
+    double? weightKg,
+    FoodPortionResult result,
+  ) {
+    final profile = [
+      _lifeStageLabel(l10n, _lifeStage),
+      if (_lifeStage == DogLifeStage.adult) ...[
+        _bodyConditionLabel(l10n, _bodyCondition),
+        _activityLevelLabel(l10n, _activityLevel),
+      ],
+    ].join('・');
+
+    final summary = l10n.foodPortionHistorySummary(
+      weightKg == null ? '-' : formatWeight(context, weightKg),
+      profile,
+      formatFoodQuantity(context, result.dailyFoodGrams),
+      result.maintenanceEnergyKcal.round().toString(),
+      _foodDensityController.text.trim(),
+    );
+
+    final current = double.tryParse(_currentAmountController.text.trim());
+    if (current == null || current <= 0) return summary;
+    return summary +
+        l10n.foodPortionHistoryCurrentAmount(
+          formatFoodQuantity(context, current),
+        );
+  }
+
   String _currentAmountText() {
     final grams = double.tryParse(_currentAmountController.text.trim());
     if (grams == null || grams <= 0) return '';
@@ -197,12 +234,17 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     final languageCode = Localizations.localeOf(context).languageCode;
     // Same reason: read from the context before the first await.
     final adGate = adGateOf(context);
-    final historyPrefix =
-        AppLocalizations.of(context)!.consultationHistoryFoodPortionPrefix;
+    final l10n = AppLocalizations.of(context)!;
+    final historyPrefix = l10n.consultationHistoryFoodPortionPrefix;
     // Same again: the weight is read in the field's unit and converted here,
     // while the context is still safe to touch.
     final weightKg = parseWeightToKilograms(context, _weightController.text);
     final result = _result;
+    // Built here, from the context, for the same reason as everything else
+    // above -- and kept apart from the prompt on purpose. See _historyText.
+    final historyText = result == null
+        ? null
+        : _historyText(context, l10n, weightKg, result);
     if (result == null) return;
 
     setState(() => _adviceState = _AdviceState.loading);
@@ -267,7 +309,11 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       await widget.consultationRepository.save(
         uid: widget.uid,
         petId: widget.petId,
-        questionText: '$historyPrefix$questionText',
+        // NOT the prompt. The prompt is English and ends in instructions to
+        // the model ("Keep it brief"), which is exactly what the owner saw
+        // in their own history (PM report, 2026-08-15). What gets stored is
+        // a localized summary of what they entered, in their display units.
+        questionText: '$historyPrefix$historyText',
         aiResponse: advice,
         referencedRecordIds: const [],
       );

@@ -417,5 +417,7 @@
   "preventionRecordFormAddTitleMedication": "投薬記録を追加",
   "preventionRecordFormEditTitleMedication": "投薬記録を編集",
   "saveFailedRetryMessage": "保存できませんでした。もう一度お試しください。",
-  "preventionVaccineTypeLabel": "ワクチンの種類"
+  "preventionVaccineTypeLabel": "ワクチンの種類",
+  "foodPortionHistorySummary": "体重{weight}／{profile}／目安 {amount}（必要エネルギー {energy}kcal、フード {density}kcal/100g）",
+  "foodPortionHistoryCurrentAmount": "／現在 {amount}"
 }

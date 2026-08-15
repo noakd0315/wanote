@@ -2594,6 +2594,24 @@ abstract class AppLocalizations {
   /// **'Edit medication record'**
   String get preventionRecordFormEditTitleMedication;
 
+  /// What the food-portion screen writes into the consultation history. Separate from the English prompt sent to the model: this one is read by the owner, so it is localized and uses their display units.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight {weight} / {profile} / suggested {amount} (needs {energy} kcal a day, food is {density} kcal/100g)'**
+  String foodPortionHistorySummary(
+    String weight,
+    String profile,
+    String amount,
+    String energy,
+    String density,
+  );
+
+  /// Appended to foodPortionHistorySummary when the owner entered what they feed now.
+  ///
+  /// In en, this message translates to:
+  /// **' / currently {amount}'**
+  String foodPortionHistoryCurrentAmount(String amount);
+
   /// Free-text field on a vaccination record naming which vaccine was given; the medication equivalent is medicationNameLabel.
   ///
   /// In en, this message translates to:

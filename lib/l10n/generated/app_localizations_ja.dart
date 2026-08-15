@@ -1330,6 +1330,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionRecordFormEditTitleMedication => '投薬記録を編集';
 
   @override
+  String foodPortionHistorySummary(
+    String weight,
+    String profile,
+    String amount,
+    String energy,
+    String density,
+  ) {
+    return '体重$weight／$profile／目安 $amount（必要エネルギー ${energy}kcal、フード ${density}kcal/100g）';
+  }
+
+  @override
+  String foodPortionHistoryCurrentAmount(String amount) {
+    return '／現在 $amount';
+  }
+
+  @override
   String get preventionVaccineTypeLabel => 'ワクチンの種類';
 
   @override
