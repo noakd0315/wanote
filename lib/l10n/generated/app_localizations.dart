@@ -2563,6 +2563,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a time'**
   String get medicationAddReminderTimeButton;
+
+  /// Marks a history entry that came from the food-portion calculator rather than a typed question. PM asked for the two to be distinguishable in the list.
+  ///
+  /// In en, this message translates to:
+  /// **'[Food portion] '**
+  String get consultationHistoryFoodPortionPrefix;
 }
 
 class _AppLocalizationsDelegate

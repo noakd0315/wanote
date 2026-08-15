@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../shared/firestore_paths.dart';
 import '../domain/models/prevention_record.dart';
 import 'certificate_storage_service.dart';
+import '../domain/models/medication.dart' show ReminderTime;
 
 /// CRUD + live list for `prevention_records` (spec 5.3), scoped to one pet.
 /// Records live in a pet-level subcollection (not nested under the program)
@@ -27,9 +28,12 @@ abstract class PreventionRecordRepository {
     required String petId,
     required String programId,
     required DateTime administeredAt,
+    String? dosage,
     String? visitId,
     String? hospitalName,
     DateTime? nextDueDate,
+    bool reminderEnabled = true,
+    ReminderTime? reminderTime,
     String? certificateFile,
     Map<String, dynamic>? ocrExtractedData,
     double? ocrConfidence,
@@ -90,9 +94,12 @@ class FirestorePreventionRecordRepository
     required String petId,
     required String programId,
     required DateTime administeredAt,
+    String? dosage,
     String? visitId,
     String? hospitalName,
     DateTime? nextDueDate,
+    bool reminderEnabled = true,
+    ReminderTime? reminderTime,
     String? certificateFile,
     Map<String, dynamic>? ocrExtractedData,
     double? ocrConfidence,
@@ -102,6 +109,9 @@ class FirestorePreventionRecordRepository
       programId: programId,
       petId: petId,
       administeredAt: administeredAt,
+      dosage: dosage,
+      reminderEnabled: reminderEnabled,
+      reminderTime: reminderTime,
       visitId: visitId,
       hospitalName: hospitalName,
       nextDueDate: nextDueDate,

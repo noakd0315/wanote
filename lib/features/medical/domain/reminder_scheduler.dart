@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'models/medication.dart' show ReminderTime;
 import 'models/prevention_program.dart';
 import 'reminder_strings.dart';
 
@@ -13,11 +14,23 @@ class ReminderCandidate extends Equatable {
     required this.type,
     required this.productName,
     required this.nextDueDate,
+    this.reminderEnabled = true,
+    this.reminderTime,
   });
 
   final String recordId;
   final PreventionType type;
   final String productName;
+
+  /// The owner's switch. Off means no notification for this one, however
+  /// close the due date is.
+  final bool reminderEnabled;
+
+  /// The hour the owner chose, or null to use [reminderHourOfDay].
+  ///
+  /// PM: a reminder arriving just after midnight is no use, so the time is
+  /// not left to a constant.
+  final ReminderTime? reminderTime;
 
   /// `prevention_records.next_due_date`. `null` means no reminder can be
   /// computed (e.g. a `single`-schedule vaccine whose next date wasn't
@@ -127,6 +140,7 @@ class ReminderScheduler {
   }) {
     final reminders = <ScheduledReminder>[];
     for (final record in records) {
+      if (!record.reminderEnabled) continue;
       final nextDueDate = record.nextDueDate;
       if (nextDueDate == null) {
         // No-due-date edge case: nothing to schedule.
@@ -141,7 +155,8 @@ class ReminderScheduler {
         nextDueDate.year,
         nextDueDate.month,
         nextDueDate.day,
-        reminderHourOfDay,
+        record.reminderTime?.hour ?? reminderHourOfDay,
+        record.reminderTime?.minute ?? 0,
       );
       if (!dueAt.isAfter(now)) {
         // Already due or overdue: this scheduler only handles upcoming

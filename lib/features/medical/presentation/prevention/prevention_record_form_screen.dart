@@ -21,6 +21,7 @@ import '../../domain/ocr_result_validator.dart';
 import '../../domain/prevention_due_date_calculator.dart';
 import '../../../../shared/utils/image_picking.dart';
 import '../../../../shared/app_messenger.dart';
+import '../../domain/models/medication.dart' show ReminderTime;
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -71,6 +72,19 @@ class _PreventionRecordFormScreenState
     extends State<PreventionRecordFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _hospitalController = TextEditingController();
+
+  /// PM request: heartworm and flea/tick treatments are medicine, so the
+  /// form asks what any other medicine asks.
+  final _dosageController = TextEditingController();
+
+  /// The reminder for the next dose. On by default -- the point of
+  /// recording a due date is not to miss it -- but a one-off vaccine or a
+  /// course that has ended does not need one.
+  bool _reminderEnabled = true;
+
+  /// PM: a reminder just after midnight is no use to anyone, so the hour is
+  /// the owner's to choose.
+  ReminderTime _reminderTime = const ReminderTime(9, 0);
   late DateTime _administeredAt;
   DateTime? _nextDueDate;
   bool _nextDueDateManuallyEdited = false;
@@ -94,6 +108,9 @@ class _PreventionRecordFormScreenState
     _nextDueDate = record?.nextDueDate;
     _nextDueDateManuallyEdited = _nextDueDate != null;
     _hospitalController.text = record?.hospitalName ?? '';
+    _dosageController.text = record?.dosage ?? '';
+    _reminderEnabled = record?.reminderEnabled ?? true;
+    _reminderTime = record?.reminderTime ?? const ReminderTime(9, 0);
     _existingCertificateUrl = record?.certificateFile;
     _ocrExtractedData = record?.ocrExtractedData;
     _ocrConfidence = record?.ocrConfidence;
@@ -102,6 +119,7 @@ class _PreventionRecordFormScreenState
   @override
   void dispose() {
     _hospitalController.dispose();
+    _dosageController.dispose();
     super.dispose();
   }
 
@@ -239,6 +257,9 @@ class _PreventionRecordFormScreenState
       final hospitalName = _hospitalController.text.trim().isEmpty
           ? null
           : _hospitalController.text.trim();
+      final dosage = _dosageController.text.trim().isEmpty
+          ? null
+          : _dosageController.text.trim();
 
       final existing = widget.record;
       String? certificateUrl = _existingCertificateUrl;
@@ -249,8 +270,11 @@ class _PreventionRecordFormScreenState
           petId: widget.petId,
           programId: widget.program.programId,
           administeredAt: _administeredAt,
+          dosage: dosage,
           hospitalName: hospitalName,
           nextDueDate: _nextDueDate,
+          reminderEnabled: _reminderEnabled,
+          reminderTime: _reminderTime,
           ocrExtractedData: _ocrExtractedData,
           ocrConfidence: _ocrConfidence,
         );
@@ -283,9 +307,12 @@ class _PreventionRecordFormScreenState
           widget.uid,
           existing.copyWith(
             administeredAt: _administeredAt,
+            dosage: dosage,
             hospitalName: hospitalName,
             nextDueDate: _nextDueDate,
             clearNextDueDate: _nextDueDate == null,
+            reminderEnabled: _reminderEnabled,
+            reminderTime: _reminderTime,
             certificateFile: certificateUrl,
             ocrExtractedData: _ocrExtractedData,
             ocrConfidence: _ocrConfidence,
@@ -357,11 +384,52 @@ class _PreventionRecordFormScreenState
                 ),
               ),
               TextFormField(
+                controller: _dosageController,
+                decoration: InputDecoration(
+                  labelText: l10n.medicationDosageLabel,
+                ),
+              ),
+              TextFormField(
                 controller: _hospitalController,
                 decoration: InputDecoration(
                   labelText: l10n.hospitalNameOptionalLabel,
                 ),
               ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _reminderEnabled,
+                onChanged: (value) =>
+                    setState(() => _reminderEnabled = value),
+                title: Text(l10n.medicationReminderSwitchLabel),
+              ),
+              if (_reminderEnabled)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.medicationReminderTimeLabel),
+                  subtitle: Text(
+                    TimeOfDay(
+                      hour: _reminderTime.hour,
+                      minute: _reminderTime.minute,
+                    ).format(context),
+                  ),
+                  trailing: const Icon(Icons.access_time),
+                  onTap: () async {
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay(
+                        hour: _reminderTime.hour,
+                        minute: _reminderTime.minute,
+                      ),
+                    );
+                    if (picked == null) return;
+                    setState(
+                      () => _reminderTime = ReminderTime(
+                        picked.hour,
+                        picked.minute,
+                      ),
+                    );
+                  },
+                ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.nextDueDateLabel),

@@ -330,6 +330,7 @@ class _HomeShellState extends State<HomeShell> {
         toiletRecordRepository: _toiletRecordRepository,
         usageRepository: _aiUsageRepository,
         backendClient: _aiBackendClient,
+        consultationRepository: _consultationRepository,
         onRequestUpgrade: () => _openPaywall(context),
         onOpenWeight: () => _openSectionTab(1, _dailyRecordTabRequest, 1),
         onOpenToilet: () => _openSectionTab(1, _dailyRecordTabRequest, 2),

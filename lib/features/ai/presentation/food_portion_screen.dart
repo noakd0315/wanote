@@ -9,6 +9,7 @@ import '../domain/food_portion_calculator.dart';
 import '../domain/usage_limit_policy.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
+import '../data/consultation_repository.dart';
 
 /// Display labels for [DogLifeStage], kept here (not on the enum itself)
 /// since the enum lives in the framework-free domain layer and can't call
@@ -62,6 +63,7 @@ class FoodPortionScreen extends StatefulWidget {
     required this.neutered,
     required this.usageRepository,
     required this.backendClient,
+    required this.consultationRepository,
     required this.onRequestUpgrade,
     this.initialWeightKg,
     this.calculator = const FoodPortionCalculator(),
@@ -74,6 +76,13 @@ class FoodPortionScreen extends StatefulWidget {
   final bool neutered;
   final AiUsageRepository usageRepository;
   final AiBackendClient backendClient;
+
+  /// The advice is written to the same history as a typed consultation.
+  ///
+  /// PM request. It is an AI answer about this dog that the owner paid a
+  /// quota slot for, and it used to vanish the moment the screen closed --
+  /// while a typed question asking the same thing would have been kept.
+  final ConsultationRepository consultationRepository;
   final VoidCallback onRequestUpgrade;
 
   /// Latest known weight (from features/daily_record's weight records),
@@ -184,6 +193,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
     final languageCode = Localizations.localeOf(context).languageCode;
     // Same reason: read from the context before the first await.
     final adGate = adGateOf(context);
+    final historyPrefix =
+        AppLocalizations.of(context)!.consultationHistoryFoodPortionPrefix;
     // Same again: the weight is read in the field's unit and converted here,
     // while the context is still safe to touch.
     final weightKg = parseWeightToKilograms(context, _weightController.text);
@@ -243,6 +254,15 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
+      // Prefixed so the two kinds are told apart in the list: this one was
+      // assembled by a calculator, not typed by the owner.
+      await widget.consultationRepository.save(
+        uid: widget.uid,
+        petId: widget.petId,
+        questionText: '$historyPrefix$questionText',
+        aiResponse: advice,
+        referencedRecordIds: const [],
+      );
       setState(() {
         _adviceText = advice;
         _adviceState = _AdviceState.ready;

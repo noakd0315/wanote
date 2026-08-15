@@ -1313,4 +1313,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get medicationAddReminderTimeButton => '時刻を追加';
+
+  @override
+  String get consultationHistoryFoodPortionPrefix => '【餌の量】';
 }

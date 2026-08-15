@@ -1791,5 +1791,9 @@
   "medicationAddReminderTimeButton": "Add a time",
   "@medicationAddReminderTimeButton": {
     "description": "Adds another reminder time to a medication. PM request: some courses are several doses a day, and a single time could only describe a once-daily medicine."
+  },
+  "consultationHistoryFoodPortionPrefix": "[Food portion] ",
+  "@consultationHistoryFoodPortionPrefix": {
+    "description": "Marks a history entry that came from the food-portion calculator rather than a typed question. PM asked for the two to be distinguishable in the list."
   }
 }

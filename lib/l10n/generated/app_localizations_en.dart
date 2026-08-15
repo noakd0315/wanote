@@ -1366,4 +1366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get medicationAddReminderTimeButton => 'Add a time';
+
+  @override
+  String get consultationHistoryFoodPortionPrefix => '[Food portion] ';
 }

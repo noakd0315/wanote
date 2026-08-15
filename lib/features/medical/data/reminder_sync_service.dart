@@ -199,6 +199,8 @@ class ReminderSyncService {
           type: program.type,
           productName: program.productName,
           nextDueDate: record.nextDueDate,
+          reminderEnabled: record.reminderEnabled,
+          reminderTime: record.reminderTime,
         ),
       );
     }

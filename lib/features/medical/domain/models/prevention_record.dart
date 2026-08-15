@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
+import 'medication.dart' show ReminderTime;
+
 /// Administration history (投与履歴) per spec 5.3. [petId] is intentionally
 /// denormalized onto the record (spec: "記録一覧の検索を高速化するため非正規化
 /// して保持") even though it's derivable via the parent [programId].
@@ -10,9 +12,12 @@ class PreventionRecord extends Equatable {
     required this.programId,
     required this.petId,
     required this.administeredAt,
+    this.dosage,
     this.visitId,
     this.hospitalName,
     this.nextDueDate,
+    this.reminderEnabled = true,
+    this.reminderTime,
     this.certificateFile,
     this.ocrExtractedData,
     this.ocrConfidence,
@@ -22,6 +27,12 @@ class PreventionRecord extends Equatable {
   final String programId;
   final String petId;
   final DateTime administeredAt;
+
+  /// How much was given, in the owner's own words. Free text for the same
+  /// reason a medication's dosage is: "1錠", "半分", "体重に合わせて2本" are
+  /// all things a vet says, and none of them are a number (PM request: the
+  /// same fields as any other medicine).
+  final String? dosage;
 
   /// Links to a visit (5.1) if this administration happened during a
   /// hospital visit.
@@ -35,6 +46,18 @@ class PreventionRecord extends Equatable {
   /// [PreventionDueDateCalculator]); manual overwrite is allowed per spec.
   final DateTime? nextDueDate;
 
+  /// Whether the next dose is worth a notification. Defaults to on, since
+  /// the whole point of recording a due date is not to miss it -- but a
+  /// finished course or a one-off vaccine does not need reminding about.
+  final bool reminderEnabled;
+
+  /// What time of day to remind, when [reminderEnabled].
+  ///
+  /// Null falls back to the scheduler's default hour. PM: a reminder that
+  /// arrives just after midnight is no use to anyone, so the hour is the
+  /// owner's to choose rather than a constant.
+  final ReminderTime? reminderTime;
+
   /// Download URL for the certificate image/PDF in Firebase Storage.
   final String? certificateFile;
 
@@ -45,10 +68,13 @@ class PreventionRecord extends Equatable {
 
   PreventionRecord copyWith({
     DateTime? administeredAt,
+    String? dosage,
     String? visitId,
     String? hospitalName,
     DateTime? nextDueDate,
     bool clearNextDueDate = false,
+    bool? reminderEnabled,
+    ReminderTime? reminderTime,
     String? certificateFile,
     Map<String, dynamic>? ocrExtractedData,
     double? ocrConfidence,
@@ -58,6 +84,9 @@ class PreventionRecord extends Equatable {
       programId: programId,
       petId: petId,
       administeredAt: administeredAt ?? this.administeredAt,
+      dosage: dosage ?? this.dosage,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderTime: reminderTime ?? this.reminderTime,
       visitId: visitId ?? this.visitId,
       hospitalName: hospitalName ?? this.hospitalName,
       nextDueDate: clearNextDueDate ? null : (nextDueDate ?? this.nextDueDate),
@@ -78,6 +107,9 @@ class PreventionRecord extends Equatable {
       'next_due_date': nextDueDate == null
           ? null
           : Timestamp.fromDate(nextDueDate!),
+      'dosage': dosage,
+      'reminder_enabled': reminderEnabled,
+      'reminder_time': reminderTime?.wireValue,
       'certificate_file': certificateFile,
       'ocr_extracted_data': ocrExtractedData,
       'ocr_confidence': ocrConfidence,
@@ -93,6 +125,12 @@ class PreventionRecord extends Equatable {
       visitId: map['visit_id'] as String?,
       hospitalName: map['hospital_name'] as String?,
       nextDueDate: _readDate(map['next_due_date']),
+      dosage: map['dosage'] as String?,
+      // Records written before reminders were settable default to on, which
+      // is what they were doing: the scheduler reminded about every due date
+      // it found.
+      reminderEnabled: map['reminder_enabled'] as bool? ?? true,
+      reminderTime: ReminderTime.tryParse(map['reminder_time']),
       certificateFile: map['certificate_file'] as String?,
       ocrExtractedData: (map['ocr_extracted_data'] as Map?)
           ?.cast<String, dynamic>(),
@@ -113,6 +151,9 @@ class PreventionRecord extends Equatable {
     programId,
     petId,
     administeredAt,
+    dosage,
+    reminderEnabled,
+    reminderTime,
     visitId,
     hospitalName,
     nextDueDate,

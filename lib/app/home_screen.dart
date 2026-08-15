@@ -10,6 +10,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/widgets/pet_background_photo.dart';
+import '../features/ai/data/consultation_repository.dart';
 
 /// Whether [HomeScreen] should render the active pet's photo as its
 /// background, vs. falling back to the default illustration. Factored out
@@ -49,6 +50,7 @@ class HomeScreen extends StatelessWidget {
     required this.toiletRecordRepository,
     required this.usageRepository,
     required this.backendClient,
+    required this.consultationRepository,
     required this.onRequestUpgrade,
     required this.onOpenWeight,
     required this.onOpenToilet,
@@ -61,6 +63,10 @@ class HomeScreen extends StatelessWidget {
   final ToiletRecordRepository toiletRecordRepository;
   final AiUsageRepository usageRepository;
   final AiBackendClient backendClient;
+
+  /// Passed through to the food-portion screen, which now keeps its advice
+  /// in the same history as a typed consultation.
+  final ConsultationRepository consultationRepository;
 
   /// Forwarded straight through to [ConsultationScreen], mirroring
   /// HomeShell's `_openPaywall` hook.
@@ -103,6 +109,7 @@ class HomeScreen extends StatelessWidget {
           initialWeightKg: latestWeightKg,
           usageRepository: usageRepository,
           backendClient: backendClient,
+          consultationRepository: consultationRepository,
           onRequestUpgrade: onRequestUpgrade,
         ),
       ),
