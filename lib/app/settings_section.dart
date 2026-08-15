@@ -110,15 +110,6 @@ class SettingsSection extends StatelessWidget {
         // Review Guideline 5.1.1(v) requires.
         const SizedBox(height: 48),
         const Divider(),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          child: Text(
-            l10n.dangerZoneSectionTitle,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.error,
-            ),
-          ),
-        ),
         ListTile(
           leading: Icon(
             Icons.delete_forever_outlined,

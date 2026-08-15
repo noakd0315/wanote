@@ -2612,12 +2612,6 @@ abstract class AppLocalizations {
   /// **' / currently {amount}'**
   String foodPortionHistoryCurrentAmount(String amount);
 
-  /// Heading over the account-deletion row, set well apart from sign-out so the two are not adjacent.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot be undone'**
-  String get dangerZoneSectionTitle;
-
   /// Says what deletion costs on the row itself, so a mistaken tap is caught here rather than on the next screen.
   ///
   /// In en, this message translates to:

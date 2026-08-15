@@ -1828,10 +1828,6 @@
     "description": "Appended to foodPortionHistorySummary when the owner entered what they feed now.",
     "placeholders": { "amount": { "type": "String" } }
   },
-  "dangerZoneSectionTitle": "Cannot be undone",
-  "@dangerZoneSectionTitle": {
-    "description": "Heading over the account-deletion row, set well apart from sign-out so the two are not adjacent."
-  },
   "deleteAccountMenuSubtitle": "Every record and photo is erased",
   "@deleteAccountMenuSubtitle": {
     "description": "Says what deletion costs on the row itself, so a mistaken tap is caught here rather than on the next screen."

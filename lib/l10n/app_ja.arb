@@ -418,7 +418,6 @@
   "preventionRecordFormEditTitleMedication": "投薬記録を編集",
   "saveFailedRetryMessage": "保存できませんでした。もう一度お試しください。",
   "preventionVaccineTypeLabel": "ワクチンの種類",
-  "dangerZoneSectionTitle": "取り消せない操作",
   "deleteAccountMenuSubtitle": "すべての記録と写真が消えます",
   "foodPortionHistorySummary": "体重{weight}／{profile}／目安 {amount}（必要エネルギー {energy}kcal、フード {density}kcal/100g）",
   "foodPortionHistoryCurrentAmount": "／現在 {amount}"
