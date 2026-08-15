@@ -1,6 +1,6 @@
 # wanote ドキュメント一覧
 
-最終更新: 2026-08-14
+最終更新: 2026-08-15
 
 **迷ったらここから。** 目的別に並べてあります。
 
@@ -14,7 +14,7 @@
 | **[SESSION_HANDOVER.md](SESSION_HANDOVER.md)** | 作業の引き継ぎ。日付順の全経緯 |
 | **[PLAN_implementation_first.md](PLAN_implementation_first.md)** | **着手順はこれが正**。申請より実装を優先する方針（PM指示） |
 | **[ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md)** | **次にやること**。実機テストの手順と確認項目 |
-| **[VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md)** | **いま確認するもの**。第2回の実機確認事項 |
+| **[VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md)** | **いま確認するもの**。第3回・8/20までの通し確認（削除まで含む） |
 | **[BACKLOG.md](BACKLOG.md)** | **後回しにしているものの一覧**。判断済み・着手待ち・意図的な見送りを理由つきで |
 
 ---
