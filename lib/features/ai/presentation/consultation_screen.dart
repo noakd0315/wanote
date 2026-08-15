@@ -67,6 +67,15 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   final Set<ConsultationReferenceRecord> _selectedReferences = {};
 
   bool _submitting = false;
+
+  /// Whether this screen has already spent its ad impression.
+  ///
+  /// The ad starts as soon as the request does, so a request that then
+  /// fails has still cost the owner an ad. Charging them a second one to
+  /// retry the same question would be charging twice for one consultation,
+  /// and the failure was not theirs (PM report).
+  bool _adAlreadyShown = false;
+
   _ResultKind _resultKind = _ResultKind.none;
   String? _resultText;
 
@@ -135,13 +144,18 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
         languageCode: languageCode,
       );
       // Started after the request, and awaited after it: the ad plays while
-      // the answer is being generated, so it costs no extra waiting. Asking
-      // before sending would mean showing an ad for a request that then
-      // failed.
-      final adFuture = adGate?.maybeShow(
-        AdTrigger.aiConsultation,
-        aiUsageSource: usageSource,
-      );
+      // the answer is being generated, so it costs no extra waiting.
+      //
+      // A failed request has still played its ad by then -- the two run
+      // concurrently, so there is no way to take it back. What we can do is
+      // not play a second one when the owner retries.
+      final adFuture = _adAlreadyShown
+          ? null
+          : adGate?.maybeShow(
+              AdTrigger.aiConsultation,
+              aiUsageSource: usageSource,
+            );
+      if (adFuture != null) _adAlreadyShown = true;
 
       final responseText = await responseFuture;
       await adFuture;

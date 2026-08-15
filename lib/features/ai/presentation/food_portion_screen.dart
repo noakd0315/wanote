@@ -120,6 +120,10 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   _AdviceState _adviceState = _AdviceState.idle;
   String? _adviceText;
 
+  /// Whether this screen has already spent its ad impression -- see
+  /// consultation_screen.dart for why a retry must not cost a second one.
+  bool _adAlreadyShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -245,10 +249,14 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
         questionText: questionText,
         languageCode: languageCode,
       );
-      final adFuture = adGate?.maybeShow(
-        AdTrigger.aiFoodPortion,
-        aiUsageSource: usageSource,
-      );
+      // Not a second time on a retry -- see consultation_screen.dart.
+      final adFuture = _adAlreadyShown
+          ? null
+          : adGate?.maybeShow(
+              AdTrigger.aiFoodPortion,
+              aiUsageSource: usageSource,
+            );
+      if (adFuture != null) _adAlreadyShown = true;
 
       final advice = await adviceFuture;
       await adFuture;
