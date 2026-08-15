@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -47,6 +48,14 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
   final List<Uint8List> _newPhotoBytes = [];
   DateTime _recordedAt = DateTime.now();
   bool _saving = false;
+
+  /// Whether this form has already spent its ad impression.
+  ///
+  /// A failed save leaves the owner on the screen to try again, and making
+  /// them sit through a second ad for the same record would be charging
+  /// them twice for one action -- the failure was not theirs (PM request).
+  bool _adAlreadyShown = false;
+
 
   int get _totalPhotoCount => _retainedPhotoUrls.length + _newPhotoBytes.length;
 
@@ -103,13 +112,16 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
     // Read before the first await; used after the save completes.
     final adGate = adGateOf(context);
     final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
+    final saveFailedMessage =
+        AppLocalizations.of(context)!.saveFailedRetryMessage;
     final hasNewPhotos = _newPhotoBytes.isNotEmpty;
     try {
       // Ad first, write behind it -- see toilet_record_form_screen.dart for
       // the reasoning and the trade.
-      final adShown = hasNewPhotos
+      final adShown = (hasNewPhotos && !_adAlreadyShown)
           ? adGate?.maybeShow(AdTrigger.healthRecordUpload)
           : null;
+      if (adShown != null) _adAlreadyShown = true;
       final existing = widget.existingRecord;
       if (existing == null) {
         await widget.repository.create(
@@ -157,6 +169,16 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
       await adShown;
       if (mounted) Navigator.of(context).pop();
       showAppMessage(savedMessage);
+    } catch (error, stackTrace) {
+      // Stay put, with everything still filled in -- including the photos,
+      // which would otherwise have to be taken again.
+      developer.log(
+        'Could not save the health record',
+        name: 'HealthRecordFormScreen',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      showAppMessage(saveFailedMessage);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

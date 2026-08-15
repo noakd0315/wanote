@@ -77,6 +77,14 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   /// and copying every one into the daily log would bury the entries the
   /// owner made because something was wrong. PM: the owner decides.
   bool _copyToDailyLog = false;
+
+  /// Whether this form has already spent its ad impression.
+  ///
+  /// A failed save leaves the owner on the screen to try again, and making
+  /// them sit through a second ad for the same record would be charging
+  /// them twice for one action -- the failure was not theirs (PM request).
+  bool _adAlreadyShown = false;
+
   bool _saving = false;
 
   // PM request: 排便の記録も日時が欲しい -- defaults to now like the urine
@@ -165,6 +173,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
     );
     final copyFailedMessage = l10n.toiletCopyToDailyLogFailedMessage;
     final savedMessage = l10n.commonSavedMessage;
+    final saveFailedMessage = l10n.saveFailedRetryMessage;
     final hasPhoto = _photoBytes != null;
     try {
       final location = _locationController.text.trim();
@@ -178,9 +187,10 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       // up, an in-flight write can be lost. Previously that could not
       // happen, because nothing was in flight. It is the owner's call, and
       // the window is the length of one upload.
-      final adShown = hasPhoto
+      final adShown = (hasPhoto && !_adAlreadyShown)
           ? adGate?.maybeShow(AdTrigger.toiletRecordUpload)
           : null;
+      if (adShown != null) _adAlreadyShown = true;
       final saved = await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
@@ -239,6 +249,17 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       await adShown;
       if (mounted) Navigator.of(context).pop();
       showAppMessage(savedMessage);
+    } catch (error, stackTrace) {
+      // Stay put, with everything still filled in. Closing on a failure
+      // would throw away what the owner typed and leave them to enter it
+      // again from memory.
+      developer.log(
+        'Could not save the toilet record',
+        name: 'ToiletRecordFormScreen',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      showAppMessage(saveFailedMessage);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -1795,5 +1795,25 @@
   "consultationHistoryFoodPortionPrefix": "[Food portion] ",
   "@consultationHistoryFoodPortionPrefix": {
     "description": "Marks a history entry that came from the food-portion calculator rather than a typed question. PM asked for the two to be distinguishable in the list."
+  },
+  "preventionRecordFormAddTitleVaccine": "Add vaccination record",
+  "@preventionRecordFormAddTitleVaccine": {
+    "description": "Title when the programme is a vaccine. One wording for both kinds called a vaccination a dose of medicine (PM report)."
+  },
+  "preventionRecordFormEditTitleVaccine": "Edit vaccination record",
+  "@preventionRecordFormEditTitleVaccine": {
+    "description": "As above, when editing."
+  },
+  "preventionRecordFormAddTitleMedication": "Add medication record",
+  "@preventionRecordFormAddTitleMedication": {
+    "description": "Title when the programme is a preventive medication (heartworm, flea/tick)."
+  },
+  "preventionRecordFormEditTitleMedication": "Edit medication record",
+  "@preventionRecordFormEditTitleMedication": {
+    "description": "As above, when editing."
+  },
+  "saveFailedRetryMessage": "Could not save. Please try again.",
+  "@saveFailedRetryMessage": {
+    "description": "Shown when a save fails. The form stays open with everything still filled in -- closing it would throw away what the owner typed, and they would have to enter it again from memory."
   }
 }

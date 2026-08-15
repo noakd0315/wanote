@@ -1369,4 +1369,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get consultationHistoryFoodPortionPrefix => '[Food portion] ';
+
+  @override
+  String get preventionRecordFormAddTitleVaccine => 'Add vaccination record';
+
+  @override
+  String get preventionRecordFormEditTitleVaccine => 'Edit vaccination record';
+
+  @override
+  String get preventionRecordFormAddTitleMedication => 'Add medication record';
+
+  @override
+  String get preventionRecordFormEditTitleMedication =>
+      'Edit medication record';
+
+  @override
+  String get saveFailedRetryMessage => 'Could not save. Please try again.';
 }

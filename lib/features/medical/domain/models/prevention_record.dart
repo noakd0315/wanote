@@ -16,7 +16,7 @@ class PreventionRecord extends Equatable {
     this.visitId,
     this.hospitalName,
     this.nextDueDate,
-    this.reminderEnabled = true,
+    this.reminderEnabled = false,
     this.reminderTime,
     this.certificateFile,
     this.ocrExtractedData,
@@ -126,10 +126,10 @@ class PreventionRecord extends Equatable {
       hospitalName: map['hospital_name'] as String?,
       nextDueDate: _readDate(map['next_due_date']),
       dosage: map['dosage'] as String?,
-      // Records written before reminders were settable default to on, which
-      // is what they were doing: the scheduler reminded about every due date
-      // it found.
-      reminderEnabled: map['reminder_enabled'] as bool? ?? true,
+      // Off unless it was turned on. PM decision: a preventive record is
+      // usually one dose in a routine the owner already tracks, and a
+      // notification for every due date found was more than they asked for.
+      reminderEnabled: map['reminder_enabled'] as bool? ?? false,
       reminderTime: ReminderTime.tryParse(map['reminder_time']),
       certificateFile: map['certificate_file'] as String?,
       ocrExtractedData: (map['ocr_extracted_data'] as Map?)

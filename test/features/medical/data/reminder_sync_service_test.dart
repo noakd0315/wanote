@@ -121,12 +121,17 @@ void main() {
     String programId = 'prog-1',
     required DateTime administeredAt,
     DateTime? nextDueDate,
+    // The model now defaults this to off, so a test that wants a reminder
+    // has to ask for one. These helpers ask by default because that is the
+    // case most of the tests below are about.
+    bool reminderEnabled = true,
   }) => PreventionRecord(
     recordId: id,
     programId: programId,
     petId: petId,
     administeredAt: administeredAt,
     nextDueDate: nextDueDate,
+    reminderEnabled: reminderEnabled,
   );
 
   test('schedules medication and prevention reminders together', () async {
@@ -154,6 +159,24 @@ void main() {
         record(
           administeredAt: DateTime(2026, 8, 1),
           nextDueDate: DateTime(2026, 9, 1),
+        ),
+      ],
+    );
+
+    expect(await scheduleFor(const [petId]), isEmpty);
+  });
+
+  test('a dose recorded with the reminder switch off schedules nothing', () async {
+    // The switch now starts off (PM request), so this is the shape of a
+    // record saved by an owner who just left it alone. A programme that is
+    // still active must not schedule a reminder off the back of it.
+    seed(
+      programList: [program()],
+      recordList: [
+        record(
+          administeredAt: DateTime(2026, 8, 1),
+          nextDueDate: DateTime(2026, 9, 1),
+          reminderEnabled: false,
         ),
       ],
     );

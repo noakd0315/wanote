@@ -1316,4 +1316,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get consultationHistoryFoodPortionPrefix => '【餌の量】';
+
+  @override
+  String get preventionRecordFormAddTitleVaccine => '接種記録を追加';
+
+  @override
+  String get preventionRecordFormEditTitleVaccine => '接種記録を編集';
+
+  @override
+  String get preventionRecordFormAddTitleMedication => '投薬記録を追加';
+
+  @override
+  String get preventionRecordFormEditTitleMedication => '投薬記録を編集';
+
+  @override
+  String get saveFailedRetryMessage => '保存できませんでした。もう一度お試しください。';
 }

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -80,7 +81,7 @@ class _PreventionRecordFormScreenState
   /// The reminder for the next dose. On by default -- the point of
   /// recording a due date is not to miss it -- but a one-off vaccine or a
   /// course that has ended does not need one.
-  bool _reminderEnabled = true;
+  bool _reminderEnabled = false;
 
   /// PM: a reminder just after midnight is no use to anyone, so the hour is
   /// the owner's to choose.
@@ -109,7 +110,7 @@ class _PreventionRecordFormScreenState
     _nextDueDateManuallyEdited = _nextDueDate != null;
     _hospitalController.text = record?.hospitalName ?? '';
     _dosageController.text = record?.dosage ?? '';
-    _reminderEnabled = record?.reminderEnabled ?? true;
+    _reminderEnabled = record?.reminderEnabled ?? false;
     _reminderTime = record?.reminderTime ?? const ReminderTime(9, 0);
     _existingCertificateUrl = record?.certificateFile;
     _ocrExtractedData = record?.ocrExtractedData;
@@ -248,10 +249,24 @@ class _PreventionRecordFormScreenState
     await adGate?.maybeShow(AdTrigger.certificateCapture);
   }
 
+  String _title(AppLocalizations l10n) {
+    final isVaccine = widget.program.type == PreventionType.vaccine;
+    if (widget.record == null) {
+      return isVaccine
+          ? l10n.preventionRecordFormAddTitleVaccine
+          : l10n.preventionRecordFormAddTitleMedication;
+    }
+    return isVaccine
+        ? l10n.preventionRecordFormEditTitleVaccine
+        : l10n.preventionRecordFormEditTitleMedication;
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     // Read before the first await, like everything else taken from context.
     final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
+    final saveFailedMessage =
+        AppLocalizations.of(context)!.saveFailedRetryMessage;
     setState(() => _saving = true);
     try {
       final hospitalName = _hospitalController.text.trim().isEmpty
@@ -323,6 +338,17 @@ class _PreventionRecordFormScreenState
       // Same reason as the daily-record forms: the screen is gone by the
       // time this is said, so it is said through the app-level messenger.
       showAppMessage(savedMessage);
+    } catch (error, stackTrace) {
+      // Stay put, with everything still filled in. Closing the form on a
+      // failure would throw away what the owner typed and leave them to
+      // enter it again from memory (PM request).
+      developer.log(
+        'Could not save the prevention record',
+        name: 'PreventionRecordFormScreen',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      showAppMessage(saveFailedMessage);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -357,11 +383,10 @@ class _PreventionRecordFormScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            widget.record == null
-                ? l10n.preventionRecordFormAddTitle
-                : l10n.preventionRecordFormEditTitle,
-          ),
+          // Vaccines are given, medicines are administered, and calling a
+          // vaccination a dose of medicine reads as the wrong screen (PM
+          // report). The programme already knows which this is.
+          title: Text(_title(l10n)),
         ),
         body: Form(
           key: _formKey,

@@ -2569,6 +2569,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'[Food portion] '**
   String get consultationHistoryFoodPortionPrefix;
+
+  /// Title when the programme is a vaccine. One wording for both kinds called a vaccination a dose of medicine (PM report).
+  ///
+  /// In en, this message translates to:
+  /// **'Add vaccination record'**
+  String get preventionRecordFormAddTitleVaccine;
+
+  /// As above, when editing.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit vaccination record'**
+  String get preventionRecordFormEditTitleVaccine;
+
+  /// Title when the programme is a preventive medication (heartworm, flea/tick).
+  ///
+  /// In en, this message translates to:
+  /// **'Add medication record'**
+  String get preventionRecordFormAddTitleMedication;
+
+  /// As above, when editing.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit medication record'**
+  String get preventionRecordFormEditTitleMedication;
+
+  /// Shown when a save fails. The form stays open with everything still filled in -- closing it would throw away what the owner typed, and they would have to enter it again from memory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Please try again.'**
+  String get saveFailedRetryMessage;
 }
 
 class _AppLocalizationsDelegate

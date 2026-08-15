@@ -77,7 +77,15 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
   FirestoreAiUsageRepository({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  static const int freeMonthlyQuota = 3;
+  /// Free AI calls per calendar month, shared by AI相談 and 給餌量相談.
+  ///
+  /// Raised from 3 to 5 on PM request: with food-portion advice drawing on
+  /// the same pool, three was under one real consultation plus a follow-up.
+  /// The cost of the two extra calls is around 1 yen per month for an owner
+  /// who uses every one of them (Haiku 4.5, 768-token answer ceiling), so
+  /// this number is set by what makes the ticket worth buying, not by what
+  /// the API costs.
+  static const int freeMonthlyQuota = 5;
 
   final FirebaseFirestore _firestore;
 

@@ -7,6 +7,7 @@ import '../../data/prevention_program_repository.dart';
 import '../../domain/models/medication.dart';
 import '../../domain/models/prevention_program.dart';
 import '../../data/prevention_record_repository.dart';
+import '../prevention/prevention_program_form_screen.dart';
 import '../prevention/prevention_record_form_screen.dart';
 import 'medication_form_screen.dart';
 
@@ -166,29 +167,39 @@ class MedicationListScreen extends StatelessWidget {
     AppLocalizations l10n,
     PreventionProgram program,
   ) {
-    // Opens a new dose, not the programme's settings. This is the
-    // medication history: tapping a row here means "I gave this today", and
-    // it opened the schedule editor instead (PM report).
+    // Two destinations, because the row means two things (PM request): the
+    // name is the programme, the plus is a dose given. Sending both to the
+    // same screen made one of the two wrong whichever was chosen.
     //
-    // No Dismissible either, deliberately. Swiping this row away would
-    // delete a preventive care programme from a screen that does not own
-    // it, taking its schedule and its reminders with it. Deletion stays
-    // where the record lives.
-    //
-    // Reminders keep working untouched: they are driven from the programme
-    // by ReminderSyncService, and nothing here changes the programme.
+    // No Dismissible, deliberately. Swiping this row away would delete a
+    // preventive care programme from a screen that does not own it, taking
+    // its schedule and its reminders with it. Deletion stays where the
+    // record lives.
     return ListTile(
       leading: const Icon(Icons.vaccines_outlined),
       title: Text(program.productName),
       subtitle: Text(l10n.medicationListPreventionBadge),
-      trailing: const Icon(Icons.add),
+      trailing: IconButton(
+        icon: const Icon(Icons.add),
+        tooltip: l10n.preventionRecordFormAddTitleMedication,
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PreventionRecordFormScreen(
+              uid: uid,
+              petId: petId,
+              program: program,
+              repository: preventionRecordRepository,
+            ),
+          ),
+        ),
+      ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => PreventionRecordFormScreen(
+          builder: (_) => PreventionProgramFormScreen(
             uid: uid,
             petId: petId,
+            repository: preventionProgramRepository,
             program: program,
-            repository: preventionRecordRepository,
           ),
         ),
       ),
