@@ -2594,6 +2594,12 @@ abstract class AppLocalizations {
   /// **'Edit medication record'**
   String get preventionRecordFormEditTitleMedication;
 
+  /// Free-text field on a vaccination record naming which vaccine was given; the medication equivalent is medicationNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine type'**
+  String get preventionVaccineTypeLabel;
+
   /// Shown when a save fails. The form stays open with everything still filled in -- closing it would throw away what the owner typed, and they would have to enter it again from memory.
   ///
   /// In en, this message translates to:

@@ -416,5 +416,6 @@
   "preventionRecordFormEditTitleVaccine": "接種記録を編集",
   "preventionRecordFormAddTitleMedication": "投薬記録を追加",
   "preventionRecordFormEditTitleMedication": "投薬記録を編集",
-  "saveFailedRetryMessage": "保存できませんでした。もう一度お試しください。"
+  "saveFailedRetryMessage": "保存できませんでした。もう一度お試しください。",
+  "preventionVaccineTypeLabel": "ワクチンの種類"
 }

@@ -74,9 +74,16 @@ class _PreventionRecordFormScreenState
   final _formKey = GlobalKey<FormState>();
   final _hospitalController = TextEditingController();
 
+  /// The vaccine type, or the drug name -- see the field's comment in
+  /// build(). Also the landing place for the OCR's `product_name`, which
+  /// used to be read off the certificate and discarded.
+  final _productNameController = TextEditingController();
+
   /// PM request: heartworm and flea/tick treatments are medicine, so the
   /// form asks what any other medicine asks.
   final _dosageController = TextEditingController();
+
+  bool get _isVaccine => widget.program.type == PreventionType.vaccine;
 
   /// The reminder for the next dose. On by default -- the point of
   /// recording a due date is not to miss it -- but a one-off vaccine or a
@@ -99,6 +106,13 @@ class _PreventionRecordFormScreenState
   bool _ocrRunning = false;
   String? _ocrFallbackMessage;
 
+  /// Whether this screen has already spent its ad impression.
+  ///
+  /// One ad per record, not per attempt: rescanning a certificate that did
+  /// not read the first time is the owner fixing our failure, and charging
+  /// them again for it is charging twice for one action (PM request).
+  bool _adAlreadyShown = false;
+
   bool _saving = false;
 
   @override
@@ -109,6 +123,11 @@ class _PreventionRecordFormScreenState
     _nextDueDate = record?.nextDueDate;
     _nextDueDateManuallyEdited = _nextDueDate != null;
     _hospitalController.text = record?.hospitalName ?? '';
+    // Falls back to the programme's own product name: a new dose of an
+    // existing programme is almost always the same product, and retyping
+    // it every month is work the app can do.
+    _productNameController.text =
+        record?.productName ?? widget.program.productName;
     _dosageController.text = record?.dosage ?? '';
     _reminderEnabled = record?.reminderEnabled ?? false;
     _reminderTime = record?.reminderTime ?? const ReminderTime(9, 0);
@@ -120,6 +139,7 @@ class _PreventionRecordFormScreenState
   @override
   void dispose() {
     _hospitalController.dispose();
+    _productNameController.dispose();
     _dosageController.dispose();
     super.dispose();
   }
@@ -182,6 +202,7 @@ class _PreventionRecordFormScreenState
     }
 
     setState(() => _ocrRunning = true);
+    var ocrSucceeded = false;
     try {
       final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (idToken == null) {
@@ -199,6 +220,7 @@ class _PreventionRecordFormScreenState
 
       final outcome = widget.ocrValidator.evaluate(result.confidence);
       if (outcome == OcrValidationOutcome.prefillForReview) {
+        ocrSucceeded = true;
         setState(() {
           if (result.administeredAt != null) {
             _administeredAt = result.administeredAt!;
@@ -209,6 +231,12 @@ class _PreventionRecordFormScreenState
           }
           if (result.hospitalName != null) {
             _hospitalController.text = result.hospitalName!;
+          }
+          // The service has always extracted this; the form had nowhere to
+          // put it until the vaccine-type / drug-name field existed, so it
+          // was read off the certificate and thrown away (PM request).
+          if (result.productName != null) {
+            _productNameController.text = result.productName!;
           }
           _ocrFallbackMessage = null;
         });
@@ -243,10 +271,18 @@ class _PreventionRecordFormScreenState
     // an ad in front of a scan that then failed would have taken their
     // attention for nothing.
     //
+    // And not at all when the scan failed, for the same reason: a rate
+    // limit or an unreadable photo leaves the owner with nothing, so there
+    // is nothing to charge for. The retry after it is free too (PM
+    // request) -- the flag is per screen, not per scan.
+    //
     // Not exempted by an AI ticket balance: the scan does not consume one
     // (tickets are sold as AI相談チケット and the OCR route is bounded
     // server-side instead) -- PM decision, 2026-08-12.
-    await adGate?.maybeShow(AdTrigger.certificateCapture);
+    if (ocrSucceeded && !_adAlreadyShown) {
+      _adAlreadyShown = true;
+      await adGate?.maybeShow(AdTrigger.certificateCapture);
+    }
   }
 
   String _title(AppLocalizations l10n) {
@@ -272,7 +308,12 @@ class _PreventionRecordFormScreenState
       final hospitalName = _hospitalController.text.trim().isEmpty
           ? null
           : _hospitalController.text.trim();
-      final dosage = _dosageController.text.trim().isEmpty
+      final productName = _productNameController.text.trim().isEmpty
+          ? null
+          : _productNameController.text.trim();
+      // A vaccine has no dose field on screen, so whatever a previous
+      // medication edit left in the controller must not be written back.
+      final dosage = (_isVaccine || _dosageController.text.trim().isEmpty)
           ? null
           : _dosageController.text.trim();
 
@@ -285,6 +326,7 @@ class _PreventionRecordFormScreenState
           petId: widget.petId,
           programId: widget.program.programId,
           administeredAt: _administeredAt,
+          productName: productName,
           dosage: dosage,
           hospitalName: hospitalName,
           nextDueDate: _nextDueDate,
@@ -322,6 +364,7 @@ class _PreventionRecordFormScreenState
           widget.uid,
           existing.copyWith(
             administeredAt: _administeredAt,
+            productName: productName,
             dosage: dosage,
             hospitalName: hospitalName,
             nextDueDate: _nextDueDate,
@@ -408,12 +451,27 @@ class _PreventionRecordFormScreenState
                   },
                 ),
               ),
+              // A vaccination records which vaccine; a medication records
+              // which drug and how much of it. Both name the substance, so
+              // one controller carries both and only the label and the
+              // company it keeps change (PM request).
               TextFormField(
-                controller: _dosageController,
+                controller: _productNameController,
                 decoration: InputDecoration(
-                  labelText: l10n.medicationDosageLabel,
+                  labelText: _isVaccine
+                      ? l10n.preventionVaccineTypeLabel
+                      : l10n.medicationNameLabel,
                 ),
               ),
+              // Dose is a medication idea. A vaccine is one shot of whatever
+              // the vet drew up, and asking "how much" invites a guess.
+              if (!_isVaccine)
+                TextFormField(
+                  controller: _dosageController,
+                  decoration: InputDecoration(
+                    labelText: l10n.medicationDosageLabel,
+                  ),
+                ),
               TextFormField(
                 controller: _hospitalController,
                 decoration: InputDecoration(

@@ -1330,5 +1330,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionRecordFormEditTitleMedication => '投薬記録を編集';
 
   @override
+  String get preventionVaccineTypeLabel => 'ワクチンの種類';
+
+  @override
   String get saveFailedRetryMessage => '保存できませんでした。もう一度お試しください。';
 }

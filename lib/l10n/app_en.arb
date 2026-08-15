@@ -1812,6 +1812,10 @@
   "@preventionRecordFormEditTitleMedication": {
     "description": "As above, when editing."
   },
+  "preventionVaccineTypeLabel": "Vaccine type",
+  "@preventionVaccineTypeLabel": {
+    "description": "Free-text field on a vaccination record naming which vaccine was given; the medication equivalent is medicationNameLabel."
+  },
   "saveFailedRetryMessage": "Could not save. Please try again.",
   "@saveFailedRetryMessage": {
     "description": "Shown when a save fails. The form stays open with everything still filled in -- closing it would throw away what the owner typed, and they would have to enter it again from memory."

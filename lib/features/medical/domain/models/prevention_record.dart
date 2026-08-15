@@ -12,6 +12,7 @@ class PreventionRecord extends Equatable {
     required this.programId,
     required this.petId,
     required this.administeredAt,
+    this.productName,
     this.dosage,
     this.visitId,
     this.hospitalName,
@@ -27,6 +28,16 @@ class PreventionRecord extends Equatable {
   final String programId;
   final String petId;
   final DateTime administeredAt;
+
+  /// What was given: the vaccine type for a vaccination, the drug name for
+  /// a medication (PM request -- the label the form shows differs, but both
+  /// name the substance, so one field carries both).
+  ///
+  /// Free text: there are far too many vaccine combinations to offer a list
+  /// (PM decision, 2026-08-15). This is also where the OCR's `product_name`
+  /// lands, which the form previously read off the certificate and threw
+  /// away for want of somewhere to put it.
+  final String? productName;
 
   /// How much was given, in the owner's own words. Free text for the same
   /// reason a medication's dosage is: "1錠", "半分", "体重に合わせて2本" are
@@ -68,6 +79,7 @@ class PreventionRecord extends Equatable {
 
   PreventionRecord copyWith({
     DateTime? administeredAt,
+    String? productName,
     String? dosage,
     String? visitId,
     String? hospitalName,
@@ -84,6 +96,7 @@ class PreventionRecord extends Equatable {
       programId: programId,
       petId: petId,
       administeredAt: administeredAt ?? this.administeredAt,
+      productName: productName ?? this.productName,
       dosage: dosage ?? this.dosage,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
@@ -107,6 +120,7 @@ class PreventionRecord extends Equatable {
       'next_due_date': nextDueDate == null
           ? null
           : Timestamp.fromDate(nextDueDate!),
+      'product_name': productName,
       'dosage': dosage,
       'reminder_enabled': reminderEnabled,
       'reminder_time': reminderTime?.wireValue,
@@ -125,6 +139,7 @@ class PreventionRecord extends Equatable {
       visitId: map['visit_id'] as String?,
       hospitalName: map['hospital_name'] as String?,
       nextDueDate: _readDate(map['next_due_date']),
+      productName: map['product_name'] as String?,
       dosage: map['dosage'] as String?,
       // Off unless it was turned on. PM decision: a preventive record is
       // usually one dose in a routine the owner already tracks, and a
@@ -151,6 +166,7 @@ class PreventionRecord extends Equatable {
     programId,
     petId,
     administeredAt,
+    productName,
     dosage,
     reminderEnabled,
     reminderTime,

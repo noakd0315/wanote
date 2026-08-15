@@ -1384,5 +1384,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Edit medication record';
 
   @override
+  String get preventionVaccineTypeLabel => 'Vaccine type';
+
+  @override
   String get saveFailedRetryMessage => 'Could not save. Please try again.';
 }
