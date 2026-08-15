@@ -16,6 +16,7 @@
 | **[ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md)** | **次にやること**。実機テストの手順と確認項目 |
 | **[VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md)** | **いま確認するもの**。第3回・8/20までの通し確認（削除まで含む） |
 | **[RELEASE_SETUP_STEPS.md](RELEASE_SETUP_STEPS.md)** | **PMの作業手順**。署名鍵→課金→広告。順番に意味があります |
+| **[ANNOUNCEMENT_TEST_DATA.md](ANNOUNCEMENT_TEST_DATA.md)** | お知らせの貼り付け用テストデータ（コンソール作業） |
 | **[BACKLOG.md](BACKLOG.md)** | **後回しにしているものの一覧**。判断済み・着手待ち・意図的な見送りを理由つきで |
 
 ---
