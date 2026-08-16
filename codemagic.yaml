@@ -132,9 +132,16 @@ workflows:
         - wanote_ios
       vars:
         BUNDLE_ID: jp.wanote.app
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: jp.wanote.app
+      # No `ios_signing:` block, deliberately.
+      #
+      # That block turns on Codemagic's automatic signing, which looks up
+      # existing profiles through the App Store Connect integration and
+      # fails when there are none -- "No matching profiles found for bundle
+      # identifier jp.wanote.app and distribution type app_store". It never
+      # creates them, so a brand-new account can never get past it, and it
+      # runs during environment setup, before any script could help.
+      #
+      # The "Set up signing" step below does the same job with --create.
     scripts:
       - name: Fetch packages
         script: flutter pub get
