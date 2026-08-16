@@ -89,6 +89,21 @@ class AuthController extends ChangeNotifier {
   /// subscription opened before a claim can tell that it is now stale.
   int _sessionGeneration = 0;
 
+  /// The session id this device is in the middle of claiming, if any.
+  ///
+  /// Set synchronously at the top of [_claimSession] and cleared once the
+  /// claim has been written both remotely and locally. Between those two
+  /// points the account doc already says the new id while this device's own
+  /// copy still says the old one, and any listener reading that moment sees
+  /// exactly what a takeover by another device looks like.
+  ///
+  /// The generation counter alone does not cover this: it is bumped before
+  /// the writes, so a subscription opened *during* the claim carries the
+  /// current generation and is considered live. That is the window the PM
+  /// signed in through -- signed out, signed straight back in, and was told
+  /// another device had taken the account (2026-08-16).
+  String? _pendingClaimSessionId;
+
   StreamSubscription<AuthIdentity?>? _authSub;
   StreamSubscription<List<PetProfile>>? _petsSub;
   StreamSubscription<String?>? _sessionSub;
@@ -287,6 +302,9 @@ class AuthController extends ChangeNotifier {
     ) async {
       if (generation != _sessionGeneration) return;
       if (remoteSessionId == null) return;
+      // Our own claim, seen before it finished writing itself down locally.
+      // Not a takeover -- see [_pendingClaimSessionId].
+      if (remoteSessionId == _pendingClaimSessionId) return;
       final prefs = await _prefsFuture;
       final key = '$_localSessionIdPrefsKeyPrefix$uid';
       final localSessionId = prefs.getString(key);
@@ -368,12 +386,23 @@ class AuthController extends ChangeNotifier {
     // see _subscribeToSession.
     _sessionGeneration++;
     final sessionId = _uuid.v4();
-    final prefs = await _prefsFuture;
-    await _userAccountRepository.setActiveSession(
-      uid: uid,
-      sessionId: sessionId,
-    );
-    await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
+    // Recorded before the first await, so no listener can run between the
+    // two writes below without knowing this id is ours -- see the field's
+    // doc comment.
+    _pendingClaimSessionId = sessionId;
+    try {
+      final prefs = await _prefsFuture;
+      await _userAccountRepository.setActiveSession(
+        uid: uid,
+        sessionId: sessionId,
+      );
+      await prefs.setString('$_localSessionIdPrefsKeyPrefix$uid', sessionId);
+    } finally {
+      // Cleared even if the claim failed. Leaving a stale id here would
+      // make a genuine takeover by another device look like our own claim,
+      // which is the failure this whole mechanism exists to catch.
+      if (_pendingClaimSessionId == sessionId) _pendingClaimSessionId = null;
+    }
   }
 
   void _subscribeToPets(String uid) {

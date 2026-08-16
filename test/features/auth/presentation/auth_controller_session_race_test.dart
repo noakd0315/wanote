@@ -284,4 +284,50 @@ void main() {
       expect(prefs.getString(_localSessionKey), sessionStore.value);
     },
   );
+
+  test(
+    'a listener that opens mid-claim does not read the claim as a takeover',
+    () async {
+      // The window this test covers is the one the PM signed in through:
+      // the account doc already says the new session id while this device's
+      // own copy still says the old one.
+      //
+      // The generation counter does not close it. That is bumped before the
+      // writes, so a subscription opened during the claim carries the
+      // current generation and is treated as live -- and what it reads in
+      // that moment is indistinguishable from another device taking over.
+      //
+      // Reproduced by firing the auth stream from inside the remote write,
+      // which is when Firebase Auth really does fire it: the sign-in call
+      // and the stream both drive _onAuthChanged, concurrently.
+      SharedPreferences.setMockInitialValues({_localSessionKey: 'session-old'});
+      setUpWith(existingRemoteSession: 'session-old');
+
+      when(
+        () => userAccountRepository.setActiveSession(
+          uid: any(named: 'uid'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((invocation) async {
+        authStateController.add(_identity);
+        await _settle();
+        await sessionStore.set(invocation.namedArguments[#sessionId] as String);
+        await _settle();
+      });
+
+      final controller = buildController();
+      await controller.initialize();
+      await controller.signInWithEmail(email: _email, password: 'password1');
+      await _settle();
+
+      expect(
+        controller.wasForcedSignedOut,
+        isFalse,
+        reason:
+            'The device claimed the session itself. Seeing its own claim '
+            'arrive before it finished writing it down is not a takeover.',
+      );
+      verifyNever(() => authRepository.signOut());
+    },
+  );
 }
