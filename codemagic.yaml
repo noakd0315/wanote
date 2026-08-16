@@ -162,22 +162,23 @@ workflows:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
 
-    # TestFlight upload is deliberately absent until the App Store Connect
-    # integration exists. `auth: integration` is only valid alongside a
-    # matching `integrations: app_store_connect:` entry, and declaring one
-    # that does not exist makes Codemagic reject the WHOLE file -- taking
-    # the verify workflow down with it, which is what happened here.
+    # TestFlight, internal testers only.
     #
-    # Once the integration is configured (docs/CODEMAGIC_SETUP.md B-2),
-    # add both halves back together:
+    # Internal testing needs no Beta App Review -- the build is available to
+    # internal testers as soon as App Store Connect finishes processing it.
+    # Only external testing is reviewed. That is what makes same-evening
+    # device testing possible at all.
     #
-    #     integrations:
-    #       app_store_connect: <the integration name from Codemagic>
-    #
-    #     publishing:
-    #       app_store_connect:
-    #         auth: integration
-    #         submit_to_testflight: true
-    #         submit_to_app_store: false
-    #
-    # Until then the IPA is downloadable from the build artifacts above.
+    # `auth: integration` requires a matching integrations entry, and naming
+    # one that does not exist makes Codemagic reject the WHOLE file, taking
+    # the verify workflow down with it (that happened once already). The
+    # integration must therefore be created in Codemagic under exactly this
+    # name before this file is pushed.
+    integrations:
+      app_store_connect: wanote_asc
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
