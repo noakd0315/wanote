@@ -180,10 +180,21 @@ workflows:
       # --create is what makes this work on a fresh account: it asks App
       # Store Connect to issue the distribution certificate and provisioning
       # profile rather than expecting someone to have made them by hand.
+      #
+      # --certificate-key is the half that was missing. A certificate is a
+      # signed public key, so issuing one needs a private key to bind it to;
+      # without it the run logged "Cannot save Signing Certificates without
+      # certificate private key", left the keychain empty, and the build
+      # failed later with "No valid code signing certificates were found".
+      #
+      # The key is generated once and held in CERTIFICATE_PRIVATE_KEY, not
+      # generated per build. Apple caps how many distribution certificates a
+      # team may hold, and a fresh key each time would mint a new one on
+      # every run until that cap stopped the builds.
       - name: Set up signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID"             --type IOS_APP_STORE             --certificate-key=@env:CERTIFICATE_PRIVATE_KEY             --create
           keychain add-certificates
           xcode-project use-profiles
 
