@@ -150,8 +150,22 @@ workflows:
         script: |
           echo $FIREBASE_OPTIONS_DART_BASE64 | base64 --decode > lib/firebase_options.dart
 
+      # Fetches the signing files, creating them if the account has none
+      # yet -- which on a first build it does not.
+      #
+      # `xcode-project use-profiles` alone only consumes profiles already on
+      # disk, so the first build failed with "No matching profiles found for
+      # bundle identifier". Nothing had put any there.
+      #
+      # --create is what makes this work on a fresh account: it asks App
+      # Store Connect to issue the distribution certificate and provisioning
+      # profile rather than expecting someone to have made them by hand.
       - name: Set up signing
-        script: xcode-project use-profiles
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
 
       - name: Build IPA
         script: |
