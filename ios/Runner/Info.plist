@@ -72,12 +72,27 @@
 	     多言語化するには ja.lproj / en.lproj に InfoPlist.strings を置き
 	     Xcode プロジェクトへ登録する必要がある（CLOUD_PHASE_TASKS.md E-1）。 -->
 	<!-- AdMob application id. Read natively by the Google Mobile Ads SDK
-	     before any Dart runs, so it cannot come from the --dart-define
-	     config file the way the ad *unit* ids do.
+	     before any Dart runs, so it cannot come from the dart-define
+	     config file the way the ad *unit* ids do. (Written without the
+	     leading double hyphen on purpose: two hyphens in a row are not
+	     legal inside an XML comment, and this file is a plist.)
 
 	     Google's published sample id, pairing with the sample ad units in
 	     AppConfig. Replace both together with the values from the PM's own
 	     AdMob account before release; do not guess one. -->
+	<!-- Google sign-in hands control to Safari and needs a way back. iOS
+	     routes the callback by URL scheme, and the scheme is the reversed
+	     client id from GoogleService-Info.plist. Without this entry the
+	     browser opens, the person signs in, and nothing returns to the app. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.715210245467-vo9nsm5e7b2oogavv92v2tovotko144c</string>
+			</array>
+		</dict>
+	</array>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>NSCameraUsageDescription</key>
