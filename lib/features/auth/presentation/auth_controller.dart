@@ -89,6 +89,16 @@ class AuthController extends ChangeNotifier {
   /// subscription opened before a claim can tell that it is now stale.
   int _sessionGeneration = 0;
 
+  /// How many times this device has claimed a session, for anything that
+  /// needs to tell one sign-in from the next.
+  ///
+  /// The app shell keys itself on this. Keying on the uid alone was not
+  /// enough: signing out and back in to the same account produces the same
+  /// key, so the shell was reused and reopened on the tab the previous
+  /// session left it on -- 設定, since that is where sign-out lives (PM
+  /// report, 2026-08-16).
+  int get sessionGeneration => _sessionGeneration;
+
   /// The session id this device is in the middle of claiming, if any.
   ///
   /// Set synchronously at the top of [_claimSession] and cleared once the

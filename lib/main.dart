@@ -118,17 +118,18 @@ class WanoteApp extends StatelessWidget {
               if (activePet == null) {
                 return const PetProfileFormScreen();
               }
-              // Keyed by uid so a new session never inherits the previous
-              // one's shell.
+              // Keyed per sign-in, not per account.
               //
-              // Without a key, Flutter reuses the same State when the tree
-              // switches back to a HomeShell after sign-in, and the shell
-              // reopens on whichever tab the last session left it on --
-              // usually 設定, since that is where sign-out lives (PM report,
-              // 2026-08-16). Signing in should land on the home tab, the
-              // same as a cold start does.
+              // Flutter otherwise reuses the same State when the tree
+              // switches back to a HomeShell, and the shell reopens on
+              // whichever tab the last session left it on -- 設定, since
+              // that is where sign-out lives. Keying on the uid alone did
+              // not fix it: signing back in to the same account yields the
+              // same key, which is the case the PM actually hit
+              // (2026-08-16). The generation counter changes on every
+              // claim, so each sign-in gets a shell of its own.
               return HomeShell(
-                key: ValueKey(uid),
+                key: ValueKey('$uid#${controller.sessionGeneration}'),
                 uid: uid,
                 activePet: activePet,
               );
