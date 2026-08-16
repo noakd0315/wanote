@@ -157,6 +157,19 @@ workflows:
         script: |
           echo $FIREBASE_OPTIONS_DART_BASE64 | base64 --decode > lib/firebase_options.dart
 
+      # Same reason as the two files above: config/prod.json is gitignored,
+      # so CI has no copy of it and the build died with "Did not find the
+      # file passed to --dart-define-from-file".
+      #
+      # Nothing in it is secret -- the file's own header says so, and every
+      # value is compiled into the shipped binary anyway. It is kept out of
+      # the repository because it is per-deployment configuration, not
+      # because it is sensitive.
+      - name: Restore config/prod.json
+        script: |
+          mkdir -p config
+          echo $PROD_JSON_BASE64 | base64 --decode > config/prod.json
+
       # Fetches the signing files, creating them if the account has none
       # yet -- which on a first build it does not.
       #
