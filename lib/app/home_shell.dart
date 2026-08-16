@@ -60,7 +60,8 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends State<HomeShell>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   /// Owns navigation *within* the shell (e.g. Home's 体重/トイレ/証明書/AI相談
@@ -119,6 +120,7 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _healthRecordRepository = FirestoreHealthRecordRepository();
     _weightRecordRepository = FirestoreWeightRecordRepository();
     _toiletRecordRepository = FirestoreToiletRecordRepository();
@@ -275,6 +277,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _adManager.dispose();
     _authController?.removeListener(_onPetsChanged);
     unawaited(_reminderSyncService?.stop() ?? Future<void>.value());
@@ -282,6 +285,27 @@ class _HomeShellState extends State<HomeShell> {
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();
     super.dispose();
+  }
+
+  /// Comes back to the home tab when the app is reopened.
+  ///
+  /// Swiping the app away on Android usually does not end its process, so
+  /// reopening it lands on whatever was last on screen. To the owner that
+  /// reads as the app having remembered where they were, when what they
+  /// expected was a fresh start (PM request, 2026-08-16).
+  ///
+  /// Only the tab is reset. Anything pushed on top -- every record form,
+  /// every detail screen -- is left exactly where it was, because that is
+  /// where half-finished input lives, and throwing it away to satisfy a
+  /// preference about tabs would be a far worse trade. The sections sit in
+  /// an IndexedStack and keep their own state either way, so a tab the
+  /// owner was part-way through is one tap from where they left it.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) return;
+    if (!mounted || _selectedIndex == 0) return;
+    setState(() => _selectedIndex = 0);
   }
 
   void _openConsultation(
