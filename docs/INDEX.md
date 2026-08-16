@@ -1,6 +1,6 @@
 # wanote ドキュメント一覧
 
-最終更新: 2026-08-15
+最終更新: 2026-08-16
 
 **迷ったらここから。** 目的別に並べてあります。
 
@@ -10,6 +10,7 @@
 
 | ファイル | 何が書いてあるか |
 |---|---|
+| **[NEXT_SESSION.md](NEXT_SESSION.md)** | **再開時はまずこれ**。終わったこと・次にやること |
 | **[STATUS.md](STATUS.md)** | **完了／未了の一覧。まずこれ** |
 | **[SESSION_HANDOVER.md](SESSION_HANDOVER.md)** | 作業の引き継ぎ。日付順の全経緯 |
 | **[PLAN_implementation_first.md](PLAN_implementation_first.md)** | **着手順はこれが正**。申請より実装を優先する方針（PM指示） |
