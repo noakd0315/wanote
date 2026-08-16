@@ -20,6 +20,18 @@ import 'toilet_record_detail_screen.dart';
 /// doc comment for why). Wire it up to actual navigation to the AI
 /// consultation screen at the app-shell level, passing the
 /// [ConsultationSuggestion.reference] through as prefill context.
+///
+/// **Only the banner's button calls it.** It used to fire on its own
+/// whenever the record stream delivered something the detector flagged,
+/// and the shell turned that into a pushed screen -- so an owner with one
+/// bloody-stool record on file had the AI consultation screen open itself
+/// over the home screen on every launch and every sign-in, unasked (PM
+/// report, 2026-08-16). The sections sit in an IndexedStack, so this
+/// screen's stream runs whether or not its tab is the one on screen.
+///
+/// The banner is the whole feature: it says what was noticed and offers a
+/// button. Navigating for the owner is not a stronger version of that, it
+/// is a different and worse thing.
 class ToiletRecordTimelineScreen extends StatefulWidget {
   const ToiletRecordTimelineScreen({
     super.key,
@@ -49,12 +61,6 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
 
 class _ToiletRecordTimelineScreenState
     extends State<ToiletRecordTimelineScreen> {
-  /// Per-reason "last shown" timestamps, for AnomalyDetector's dedupe-by-day
-  /// input. Held in memory here for simplicity; a production build should
-  /// persist this (e.g. shared_preferences or a small Firestore doc) so the
-  /// suppression survives app restarts. See AnomalyDetector.detect's doc.
-  final Map<ConsultationSuggestionReason, DateTime> _lastSuggestedAt = {};
-
   /// Whether the frequency chart is showing instead of the record list. Not
   /// persisted: unlike the weight screen's chart/table choice, this is a
   /// glance at a summary rather than a preferred way of reading the data.
@@ -100,20 +106,6 @@ class _ToiletRecordTimelineScreenState
       l10n.anomalyProlongedDiarrheaMessage(suggestion.streakDayCount ?? 0),
   };
 
-  void _handleSuggestions(List<ToiletRecord> records) {
-    final now = DateTime.now();
-    final suggestions = widget.anomalyDetector.detect(
-      records: records,
-      now: now,
-      lastSuggestedAt: _lastSuggestedAt,
-    );
-    if (suggestions.isEmpty) return;
-    for (final suggestion in suggestions) {
-      _lastSuggestedAt[suggestion.reason] = now;
-      widget.onConsultationSuggested?.call(suggestion);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -156,10 +148,6 @@ class _ToiletRecordTimelineScreenState
                   return const Center(child: CircularProgressIndicator());
                 }
                 final records = snapshot.data ?? const <ToiletRecord>[];
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _handleSuggestions(records),
-                );
-
                 final now = DateTime.now();
                 final currentSuggestions = widget.anomalyDetector.detect(
                   records: records,
