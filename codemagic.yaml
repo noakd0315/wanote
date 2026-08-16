@@ -245,5 +245,16 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
+        # Uploaded, not submitted.
+        #
+        # submit_to_testflight sends the build to TestFlight *beta review*,
+        # which is the external-testing path: it demands a feedback email,
+        # a review contact, and a description of what to test, and it fails
+        # the whole step without them.
+        #
+        # Internal testers need none of that. The build reaches them as soon
+        # as App Store Connect finishes processing it, which the upload above
+        # already accomplishes. Asking for review as well only produced a red
+        # build for something nobody wanted (2026-08-16).
+        submit_to_testflight: false
         submit_to_app_store: false
