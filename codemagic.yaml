@@ -132,6 +132,9 @@ workflows:
         - wanote_ios
       vars:
         BUNDLE_ID: jp.wanote.app
+        # Needed to ask App Store Connect what it already has -- see the
+        # build-number step below.
+        APP_STORE_APP_ID: 6802021501
       # No `ios_signing:` block, deliberately.
       #
       # That block turns on Codemagic's automatic signing, which looks up
@@ -218,9 +221,27 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
+      # Asks App Store Connect what it already has, rather than trusting a
+      # local counter.
+      #
+      # pubspec's build number is 1 and stays 1, so the second upload was
+      # refused: "The bundle version must be higher than the previously
+      # uploaded version: 1". Every later build would have hit the same wall.
+      #
+      # Deriving it from the store is self-correcting -- it stays right
+      # through a re-run, a rebuilt CI, or a build uploaded from somewhere
+      # else entirely, none of which a counter kept on this side would
+      # survive.
+      - name: Set the build number
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0)
+          echo "Latest build number on App Store Connect: $LATEST"
+          echo "NEXT_BUILD_NUMBER=$((LATEST + 1))" >> $CM_ENV
+
       - name: Build IPA
         script: |
           flutter build ipa --release \
+            --build-number=$NEXT_BUILD_NUMBER \
             --dart-define-from-file=config/prod.json \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
