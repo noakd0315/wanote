@@ -30,6 +30,7 @@
   "authErrorTooManyRequests": "試行回数が多すぎます。しばらく待ってから再度お試しください。",
   "authErrorNetworkRequestFailed": "通信エラーが発生しました。接続をご確認の上、再度お試しください。",
   "authErrorAccountExistsWithDifferentCredential": "このメールアドレスは別のログイン方法で既に登録されています。",
+  "authErrorProviderNotConfigured": "このログイン方法はまだ利用できません。メールアドレスでログインしてください。",
   "authErrorGeneric": "問題が発生しました。もう一度お試しください。",
   "switchPetMenuTitle": "ペットを切り替える・追加する",
   "upgradePlanMenuTitle": "プランをアップグレード",

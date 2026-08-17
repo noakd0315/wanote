@@ -108,6 +108,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'An account already exists with this email using a different sign-in method.';
 
   @override
+  String get authErrorProviderNotConfigured =>
+      'This sign-in method is not available yet. Please sign in with your email address.';
+
+  @override
   String get authErrorGeneric => 'Something went wrong. Please try again.';
 
   @override

@@ -278,6 +278,12 @@ abstract class AppLocalizations {
   /// **'An account already exists with this email using a different sign-in method.'**
   String get authErrorAccountExistsWithDifferentCredential;
 
+  /// Shown when the provider itself is misconfigured -- retrying fails identically until someone finishes the setup, so the message does not ask for one.
+  ///
+  /// In en, this message translates to:
+  /// **'This sign-in method is not available yet. Please sign in with your email address.'**
+  String get authErrorProviderNotConfigured;
+
   /// Fallback friendly message for any sign-in/sign-up failure whose error code isn't specifically mapped -- the underlying exception is always logged for developers, never shown on screen.
   ///
   /// In en, this message translates to:

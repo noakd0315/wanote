@@ -101,6 +101,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'このメールアドレスは別のログイン方法で既に登録されています。';
 
   @override
+  String get authErrorProviderNotConfigured =>
+      'このログイン方法はまだ利用できません。メールアドレスでログインしてください。';
+
+  @override
   String get authErrorGeneric => '問題が発生しました。もう一度お試しください。';
 
   @override

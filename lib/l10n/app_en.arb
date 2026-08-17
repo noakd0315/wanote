@@ -120,6 +120,10 @@
   "@authErrorAccountExistsWithDifferentCredential": {
     "description": "Friendly message for Firebase Auth's 'account-exists-with-different-credential' error code."
   },
+  "authErrorProviderNotConfigured": "This sign-in method is not available yet. Please sign in with your email address.",
+  "@authErrorProviderNotConfigured": {
+    "description": "Shown when the provider itself is misconfigured -- retrying fails identically until someone finishes the setup, so the message does not ask for one."
+  },
   "authErrorGeneric": "Something went wrong. Please try again.",
   "@authErrorGeneric": {
     "description": "Fallback friendly message for any sign-in/sign-up failure whose error code isn't specifically mapped -- the underlying exception is always logged for developers, never shown on screen."

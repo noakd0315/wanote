@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -483,11 +485,39 @@ class AuthController extends ChangeNotifier {
         error: e,
         stackTrace: stackTrace,
       );
-      _errorCode = e is fb.FirebaseAuthException ? e.code : 'unknown';
+      _errorCode = _codeFor(e);
       _isLoading = false;
       notifyListeners();
     }
   }
+
+  /// The stable code the UI maps to a message.
+  ///
+  /// Everything that was not a FirebaseAuthException used to become
+  /// 'unknown', so backing out of the Google sheet was reported as
+  /// "問題が発生しました" -- the app calling the owner's own decision a
+  /// failure. A misconfigured client landed in the same bucket, which is
+  /// the case that actually needs saying out loud (PM report, 2026-08-17).
+  String _codeFor(Object e) {
+    if (e is fb.FirebaseAuthException) return e.code;
+    if (e is GoogleSignInException) {
+      return switch (e.code) {
+        GoogleSignInExceptionCode.canceled => _cancelledCode,
+        GoogleSignInExceptionCode.clientConfigurationError ||
+        GoogleSignInExceptionCode.providerConfigurationError =>
+          'provider-not-configured',
+        _ => 'unknown',
+      };
+    }
+    if (e is SignInWithAppleAuthorizationException &&
+        e.code == AuthorizationErrorCode.canceled) {
+      return _cancelledCode;
+    }
+    return 'unknown';
+  }
+
+  /// Backing out is not an error, and nothing is shown for it.
+  static const _cancelledCode = 'cancelled';
 
   Future<void> signUpWithEmail({
     required String email,

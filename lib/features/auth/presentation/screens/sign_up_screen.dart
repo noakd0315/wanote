@@ -169,6 +169,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return l10n.authErrorNetworkRequestFailed;
       case 'account-exists-with-different-credential':
         return l10n.authErrorAccountExistsWithDifferentCredential;
+      // Says what it is rather than "try again", because trying again will
+      // fail identically until someone finishes the setup.
+      // Firebase's own way of saying the provider is switched off in the
+      // console -- which is exactly what Apple sign-in does today.
+      case 'operation-not-allowed':
+      case 'provider-not-configured':
+        return l10n.authErrorProviderNotConfigured;
       default:
         // Unrecognized codes used to show nothing but "問題が発生しました",
         // which is also what a forced sign-out looks like -- during the
@@ -360,7 +367,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        if (controller.errorCode != null)
+                        // Backing out of the provider sheet is a decision,
+                        // not a failure, and gets no red text.
+                        if (controller.errorCode != null &&
+                            controller.errorCode != 'cancelled')
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Text(
