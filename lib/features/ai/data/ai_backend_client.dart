@@ -121,11 +121,26 @@ class AiBackendClient {
     return _extractResponseText(response);
   }
 
+  /// Decodes the body as UTF-8, rather than however the headers ask.
+  ///
+  /// `response.body` picks its codec from the Content-Type charset, and
+  /// falls back to **latin-1** when there isn't one. The Worker sent
+  /// `application/json` with no charset, so a Japanese answer came back
+  /// with characters replaced by U+FFFD -- the PM saw 栄 render as a black
+  /// diamond in the middle of 栄養管理 (2026-08-17).
+  ///
+  /// The Worker now sends the charset too, but this does not depend on it.
+  /// JSON is UTF-8 by definition (RFC 8259), so reading the bytes that way
+  /// is right whatever the header says, and it cannot regress the next time
+  /// a route is added without one.
+  String _decodeBody(http.Response response) =>
+      utf8.decode(response.bodyBytes, allowMalformed: true);
+
   String _extractResponseText(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? message;
       try {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
         message = decoded['error'] as String?;
       } catch (_) {
         // Body wasn't JSON; fall back to the generic message below.
@@ -136,7 +151,7 @@ class AiBackendClient {
             message ?? 'AI backend request failed (${response.statusCode}).',
       );
     }
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return decoded['responseText'] as String;
   }
 

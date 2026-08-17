@@ -138,7 +138,16 @@ class HttpCertificateOcrService implements CertificateOcrService {
       );
     }
 
-    final json = jsonDecode(response.body) as Map<String, dynamic>;
+    final json = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return OcrExtractionResult.fromJson(json);
   }
+
 }
+
+/// JSON is UTF-8 by definition (RFC 8259). `response.body` instead picks its
+/// codec from the Content-Type charset and falls back to latin-1 when there
+/// is none, which turned Japanese into U+FFFD in the AI answers (PM report,
+/// 2026-08-17). Reading the bytes directly does not depend on a header being
+/// right.
+String _decodeBody(http.Response response) =>
+    utf8.decode(response.bodyBytes, allowMalformed: true);

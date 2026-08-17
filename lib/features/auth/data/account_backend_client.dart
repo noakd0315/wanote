@@ -72,7 +72,7 @@ class AccountBackendClient {
       String? message;
       try {
         message =
-            (jsonDecode(response.body) as Map<String, dynamic>)['error']
+            (jsonDecode(_decodeBody(response)) as Map<String, dynamic>)['error']
                 as String?;
       } catch (_) {
         // Body wasn't JSON; fall back to the generic message below.
@@ -95,4 +95,13 @@ class AccountBackendException implements Exception {
 
   @override
   String toString() => 'AccountBackendException($statusCode): $message';
+
 }
+
+/// JSON is UTF-8 by definition (RFC 8259). `response.body` instead picks its
+/// codec from the Content-Type charset and falls back to latin-1 when there
+/// is none, which turned Japanese into U+FFFD in the AI answers (PM report,
+/// 2026-08-17). Reading the bytes directly does not depend on a header being
+/// right.
+String _decodeBody(http.Response response) =>
+    utf8.decode(response.bodyBytes, allowMalformed: true);

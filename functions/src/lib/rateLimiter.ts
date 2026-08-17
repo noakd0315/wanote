@@ -44,7 +44,7 @@ export async function checkRateLimit(
   const stub = env.RATE_LIMITER.get(id);
   const response = await stub.fetch('https://rate-limiter/check', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json; charset=utf-8' },
     body: JSON.stringify(options),
   });
   return (await response.json()) as RateLimitResult;

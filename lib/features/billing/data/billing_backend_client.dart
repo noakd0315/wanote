@@ -87,7 +87,7 @@ class BillingBackendClient {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? message;
       try {
-        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
         message = decoded['error'] as String?;
       } catch (_) {
         // Body wasn't JSON; fall back to the generic message below.
@@ -99,7 +99,7 @@ class BillingBackendClient {
             'Billing backend request failed (${response.statusCode}).',
       );
     }
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return BackendRedemptionResult(
       granted: decoded['granted'] as bool? ?? false,
       reason: decoded['reason'] as String?,
@@ -123,7 +123,7 @@ class BillingBackendClient {
         message: 'Could not load your referral code.',
       );
     }
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return decoded['code'] as String;
   }
 
@@ -144,7 +144,7 @@ class BillingBackendClient {
         message: 'Could not apply pending rewards.',
       );
     }
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return decoded['applied'] as int? ?? 0;
   }
 }
@@ -168,4 +168,13 @@ class BillingBackendException implements Exception {
 
   @override
   String toString() => 'BillingBackendException($statusCode): $message';
+
 }
+
+/// JSON is UTF-8 by definition (RFC 8259). `response.body` instead picks its
+/// codec from the Content-Type charset and falls back to latin-1 when there
+/// is none, which turned Japanese into U+FFFD in the AI answers (PM report,
+/// 2026-08-17). Reading the bytes directly does not depend on a header being
+/// right.
+String _decodeBody(http.Response response) =>
+    utf8.decode(response.bodyBytes, allowMalformed: true);
