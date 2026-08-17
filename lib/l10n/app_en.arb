@@ -1435,11 +1435,17 @@
       }
     }
   },
-  "aiUsageTicketsRemainingLabel": "{remaining} tickets left",
-  "@aiUsageTicketsRemainingLabel": {
-    "description": "Remaining-usage badge once the free allowance is spent and tickets are being used.",
+  "aiUsageFreeAndTicketsLabel": "{remaining} of {quota} free uses left this month · {tickets} tickets",
+  "@aiUsageFreeAndTicketsLabel": {
+    "description": "Remaining-usage badge when the owner holds tickets. Shows both counts, since free allowance is always spent first and the tickets would otherwise look missing until it ran out.",
     "placeholders": {
       "remaining": {
+        "type": "int"
+      },
+      "quota": {
+        "type": "int"
+      },
+      "tickets": {
         "type": "int"
       }
     }

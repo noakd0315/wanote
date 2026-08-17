@@ -99,17 +99,32 @@ class _AiUsageBadgeState extends State<AiUsageBadge> {
     if (status.hasUnlimitedSubscription) {
       return (l10n.aiUsageUnlimitedLabel, false);
     }
-    if (status.freeConsultationsRemainingThisMonth > 0) {
+    final free = status.freeConsultationsRemainingThisMonth;
+    final tickets = status.ticketsRemaining;
+
+    // Both counts whenever tickets are held (PM request), not just the one
+    // being spent next. Someone who has bought tickets wants to see they
+    // still have them -- a badge that hid them until the free allowance ran
+    // out would look like the purchase had gone missing. Showing free at 0
+    // beside them also explains why tickets are the ones going down.
+    if (tickets > 0) {
       return (
-        l10n.aiUsageFreeRemainingLabel(
-          status.freeConsultationsRemainingThisMonth,
+        l10n.aiUsageFreeAndTicketsLabel(
+          free,
           FirestoreAiUsageRepository.freeMonthlyQuota,
+          tickets,
         ),
         false,
       );
     }
-    if (status.ticketsRemaining > 0) {
-      return (l10n.aiUsageTicketsRemainingLabel(status.ticketsRemaining), false);
+    if (free > 0) {
+      return (
+        l10n.aiUsageFreeRemainingLabel(
+          free,
+          FirestoreAiUsageRepository.freeMonthlyQuota,
+        ),
+        false,
+      );
     }
     return (l10n.aiUsageNoneRemainingLabel, true);
   }

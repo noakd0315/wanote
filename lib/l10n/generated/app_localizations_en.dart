@@ -1091,8 +1091,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String aiUsageTicketsRemainingLabel(int remaining) {
-    return '$remaining tickets left';
+  String aiUsageFreeAndTicketsLabel(int remaining, int quota, int tickets) {
+    return '$remaining of $quota free uses left this month · $tickets tickets';
   }
 
   @override

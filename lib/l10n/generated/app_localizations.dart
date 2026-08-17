@@ -2078,11 +2078,11 @@ abstract class AppLocalizations {
   /// **'{remaining} of {quota} free uses left this month'**
   String aiUsageFreeRemainingLabel(int remaining, int quota);
 
-  /// Remaining-usage badge once the free allowance is spent and tickets are being used.
+  /// Remaining-usage badge when the owner holds tickets. Shows both counts, since free allowance is always spent first and the tickets would otherwise look missing until it ran out.
   ///
   /// In en, this message translates to:
-  /// **'{remaining} tickets left'**
-  String aiUsageTicketsRemainingLabel(int remaining);
+  /// **'{remaining} of {quota} free uses left this month · {tickets} tickets'**
+  String aiUsageFreeAndTicketsLabel(int remaining, int quota, int tickets);
 
   /// Remaining-usage badge for a subscriber, who has no count to show.
   ///
