@@ -160,6 +160,13 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: SegmentedButton<WeightTrendPeriod>(
+                  // No check mark on the selected segment. The icon is laid
+                  // out inside the segment, so it widened whichever one was
+                  // selected and pushed its neighbours along -- the buttons
+                  // appeared to resize as you tapped between them (PM
+                  // report, 2026-08-17). Selection is already obvious from
+                  // the filled background.
+                  showSelectedIcon: false,
                   segments: [
                     ButtonSegment(
                       value: WeightTrendPeriod.threeMonths,
@@ -172,6 +179,10 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                     ButtonSegment(
                       value: WeightTrendPeriod.oneYear,
                       label: Text(l10n.weightPeriodOneYear),
+                    ),
+                    ButtonSegment(
+                      value: WeightTrendPeriod.all,
+                      label: Text(l10n.weightPeriodAll),
                     ),
                   ],
                   selected: {_period},

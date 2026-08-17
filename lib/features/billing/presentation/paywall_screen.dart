@@ -148,7 +148,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
         stackTrace: stackTrace,
       );
       if (mounted) {
-        setState(() => _errorMessage = l10n.restoreFailedMessage);
+        setState(
+          () => _errorMessage = e is BillingNotConfiguredException
+              ? l10n.billingUnavailableMessage
+              : l10n.restoreFailedMessage,
+        );
       }
     }
   }
@@ -183,13 +187,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
+                  // "Not provisioned yet" is not the same as "we tried and
+                  // it failed" -- telling the user to check their connection
+                  // would send them chasing a problem on their end.
+                  final message =
+                      snapshot.error is BillingNotConfiguredException
+                      ? l10n.billingUnavailableMessage
+                      : l10n.offeringsLoadError;
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Text(
-                        l10n.offeringsLoadError,
-                        textAlign: TextAlign.center,
-                      ),
+                      child: Text(message, textAlign: TextAlign.center),
                     ),
                   );
                 }

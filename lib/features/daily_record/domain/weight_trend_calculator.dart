@@ -5,7 +5,7 @@ import '../models/weight_record.dart';
 /// widened the shortest window: unlike people, dogs are not weighed daily, so
 /// a one-month view was usually two or three points and read as noise
 /// ("人間と違い毎日図らないと思うので、３か月、6カ月、１年としてください").
-enum WeightTrendPeriod { threeMonths, sixMonths, oneYear }
+enum WeightTrendPeriod { threeMonths, sixMonths, oneYear, all }
 
 /// Result of [WeightTrendCalculator.calculate]: the series to plot for the
 /// selected period, plus the two deltas spec 3.4 asks for as the MVP
@@ -62,7 +62,13 @@ class WeightTrendCalculator {
     final sorted = [...records]
       ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
 
-    final cutoff = _periodStart(now, period);
+    // "All" starts at the first record rather than at some arbitrary early
+    // date, so the displayed range reads as the pet's actual history. With
+    // no records at all there is nothing to bound, so it collapses to `now`
+    // and the empty series speaks for itself.
+    final cutoff = period == WeightTrendPeriod.all
+        ? (sorted.isEmpty ? now : sorted.first.measuredAt)
+        : _periodStart(now, period);
     final series = sorted
         .where(
           (r) => !r.measuredAt.isBefore(cutoff) && !r.measuredAt.isAfter(now),
@@ -118,6 +124,10 @@ class WeightTrendCalculator {
       WeightTrendPeriod.threeMonths => 3,
       WeightTrendPeriod.sixMonths => 6,
       WeightTrendPeriod.oneYear => 12,
+      // Handled by the caller, which needs the records to answer it.
+      WeightTrendPeriod.all => throw ArgumentError(
+        'WeightTrendPeriod.all has no fixed month count',
+      ),
     };
     return trailingCalendarMonthsStart(now, months);
   }

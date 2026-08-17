@@ -163,6 +163,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No plans are available right now. Please try again later.';
 
   @override
+  String get billingUnavailableMessage =>
+      'Purchases aren\'t available yet. Please check back soon.';
+
+  @override
   String get premiumMonthlyLabel => 'Premium (monthly)';
 
   @override
@@ -1082,6 +1086,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightPeriodOneYear => '1 year';
+
+  @override
+  String get weightPeriodAll => 'All';
 
   @override
   String get weightDeltaVsPreviousLabel => 'vs. previous';

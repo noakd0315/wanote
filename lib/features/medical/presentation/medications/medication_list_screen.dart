@@ -7,8 +7,8 @@ import '../../data/prevention_program_repository.dart';
 import '../../domain/models/medication.dart';
 import '../../domain/models/prevention_program.dart';
 import '../../data/prevention_record_repository.dart';
-import '../prevention/prevention_program_form_screen.dart';
 import '../prevention/prevention_record_form_screen.dart';
+import '../prevention/prevention_record_list_screen.dart';
 import 'medication_form_screen.dart';
 
 /// Spec 5.2 list screen, plus the preventive treatments that are also
@@ -171,6 +171,14 @@ class MedicationListScreen extends StatelessWidget {
     // name is the programme, the plus is a dose given. Sending both to the
     // same screen made one of the two wrong whichever was chosen.
     //
+    // The name opens the administration history, not the programme's edit
+    // form. Recording a dose here and then having no way to see it was the
+    // PM's report ("薬の記録で予防医学を入力しても、履歴をすぐに見れない",
+    // 2026-08-17) -- the history was two levels deep under a different tab.
+    // This also matches PreventionProgramListScreen, where tapping the name
+    // has always meant "show me this programme's doses". Editing the
+    // programme itself stays on the 予防医療 tab, which owns it.
+    //
     // No Dismissible, deliberately. Swiping this row away would delete a
     // preventive care programme from a screen that does not own it, taking
     // its schedule and its reminders with it. Deletion stays where the
@@ -195,11 +203,11 @@ class MedicationListScreen extends StatelessWidget {
       ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => PreventionProgramFormScreen(
+          builder: (_) => PreventionRecordListScreen(
             uid: uid,
             petId: petId,
-            repository: preventionProgramRepository,
             program: program,
+            repository: preventionRecordRepository,
           ),
         ),
       ),

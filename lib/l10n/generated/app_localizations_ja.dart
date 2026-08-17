@@ -154,6 +154,9 @@ class AppLocalizationsJa extends AppLocalizations {
       '現在ご利用いただけるプランがありません。しばらくしてから再度お試しください。';
 
   @override
+  String get billingUnavailableMessage => 'プランのご購入は現在準備中です。もうしばらくお待ちください。';
+
+  @override
   String get premiumMonthlyLabel => 'プレミアム（月額）';
 
   @override
@@ -1045,6 +1048,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get weightPeriodOneYear => '1年';
+
+  @override
+  String get weightPeriodAll => 'すべて';
 
   @override
   String get weightDeltaVsPreviousLabel => '前回比';

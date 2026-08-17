@@ -62,6 +62,46 @@ void main() {
       ]);
     });
 
+    // PM request: a fourth segment, so a pet's whole weight history can be
+    // seen without the oldest entries falling off the left edge.
+    test('all keeps every record, including ones past the 1yr cutoff', () {
+      final result = calculator.calculate(
+        records: all,
+        now: now,
+        period: WeightTrendPeriod.all,
+      );
+      expect(result.series.map((r) => r.weightId), [
+        'r8',
+        'r7',
+        'r6',
+        'r5',
+        'r4',
+        'r3',
+        'r2',
+        'r1',
+      ]);
+    });
+
+    test('all starts the displayed range at the first record', () {
+      final result = calculator.calculate(
+        records: all,
+        now: now,
+        period: WeightTrendPeriod.all,
+      );
+      expect(result.periodStart, r8.measuredAt);
+      expect(result.periodEnd, now);
+    });
+
+    test('all with no records collapses the range rather than throwing', () {
+      final result = calculator.calculate(
+        records: const [],
+        now: now,
+        period: WeightTrendPeriod.all,
+      );
+      expect(result.series, isEmpty);
+      expect(result.periodStart, now);
+    });
+
     test('1 year keeps only records on/after now-1yr', () {
       final result = calculator.calculate(
         records: all,

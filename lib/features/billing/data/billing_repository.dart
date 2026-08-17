@@ -16,6 +16,24 @@ import '../../../shared/config/app_config.dart';
 /// entitlement *events* are mapped to this feature's own [PurchaseEvent] /
 /// [PremiumStatus] models before being exposed, so [PurchaseEventHandler]
 /// and [AdPolicy] never need to import purchases_flutter at all.
+/// Thrown when the paywall is opened before RevenueCat has been provisioned.
+///
+/// This exists so the failure arrives as a *Dart* error. Reaching into the
+/// SDK unconfigured is not a catchable exception on iOS -- RevenueCat's
+/// Swift layer calls `fatalError` on `Purchases.shared`, which kills the
+/// process before any Dart handler runs. The paywall crashed on the PM's
+/// iPhone for exactly this reason (PM report, 2026-08-17): the app is built
+/// without a RevenueCat key today, so `configure()` returned early and the
+/// three methods below still called the SDK.
+class BillingNotConfiguredException implements Exception {
+  const BillingNotConfiguredException();
+
+  @override
+  String toString() =>
+      'BillingNotConfiguredException: RevenueCat has no API key in this '
+      'build, so the store cannot be reached.';
+}
+
 abstract class BillingRepository {
   /// Initializes the RevenueCat SDK. Call once at app start (before
   /// [identify]). No-ops if [BillingConfig.revenueCatApiKey] hasn't been
@@ -127,11 +145,25 @@ class RevenueCatBillingRepository implements BillingRepository {
     _lastPremiumStatus = PremiumStatus.unknown;
   }
 
+  /// Guards every call that reaches into the SDK. See
+  /// [BillingNotConfiguredException] -- on iOS an unconfigured call is a
+  /// process kill, not an exception, so this has to happen before the SDK
+  /// is touched rather than in a `catch` around it.
+  void _requireConfigured() {
+    if (!BillingConfig.isConfigured) {
+      throw const BillingNotConfiguredException();
+    }
+  }
+
   @override
-  Future<Offerings> getOfferings() => Purchases.getOfferings();
+  Future<Offerings> getOfferings() async {
+    _requireConfigured();
+    return Purchases.getOfferings();
+  }
 
   @override
   Future<void> purchase(String packageIdentifier) async {
+    _requireConfigured();
     final offerings = await Purchases.getOfferings();
     final package = _findPackage(offerings, packageIdentifier);
     if (package == null) {
@@ -167,6 +199,7 @@ class RevenueCatBillingRepository implements BillingRepository {
 
   @override
   Future<void> restorePurchases() async {
+    _requireConfigured();
     final customerInfo = await Purchases.restorePurchases();
     _onCustomerInfoUpdate(customerInfo);
   }

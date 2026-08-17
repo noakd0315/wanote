@@ -380,6 +380,12 @@ abstract class AppLocalizations {
   /// **'No plans are available right now. Please try again later.'**
   String get noProductsAvailableMessage;
 
+  /// Message shown on the paywall when the app was built without a RevenueCat API key, so the store cannot be reached at all.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases aren\'t available yet. Please check back soon.'**
+  String get billingUnavailableMessage;
+
   /// Product label for the monthly premium subscription package.
   ///
   /// In en, this message translates to:
@@ -2071,6 +2077,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'1 year'**
   String get weightPeriodOneYear;
+
+  /// Segmented button label for showing every weight record, from the first one onwards.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get weightPeriodAll;
 
   /// Label above the weight delta badge comparing against the previous measurement.
   ///
