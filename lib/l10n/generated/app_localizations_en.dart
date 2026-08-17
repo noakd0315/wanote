@@ -911,7 +911,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get healthRecordNoCommentPlaceholder => '(No comment)';
 
   @override
-  String get healthRecordFormTitleNew => 'New health record';
+  String get healthRecordFormTitleNew => 'Record how they are';
 
   @override
   String get healthRecordFormTitleEdit => 'Edit health record';
@@ -1009,7 +1009,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toiletRecordUrineDialogTitle => 'Record urine';
+  String get toiletRecordUrineFormTitle => 'Record urine';
 
   @override
   String get toiletUrineColorShadeLabel => 'Color shade';

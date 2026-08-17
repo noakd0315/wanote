@@ -280,7 +280,17 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
         ).showSnackBar(SnackBar(content: Text(l10n.savingInProgressMessage)));
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.toiletRecordStoolFormTitle)),
+        // Titled by what is being recorded. The screen serves both kinds
+        // and said "排便を記録" on the urine one, because the stool title
+        // was hard-coded back when urine was still a dialog with its own
+        // (PM report, 2026-08-17).
+        appBar: AppBar(
+          title: Text(
+            _isUrine
+                ? l10n.toiletRecordUrineFormTitle
+                : l10n.toiletRecordStoolFormTitle,
+          ),
+        ),
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [

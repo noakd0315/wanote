@@ -1751,7 +1751,7 @@ abstract class AppLocalizations {
   /// AppBar title of the health record form when creating a new record.
   ///
   /// In en, this message translates to:
-  /// **'New health record'**
+  /// **'Record how they are'**
   String get healthRecordFormTitleNew;
 
   /// AppBar title of the health record form when editing an existing record.
@@ -1932,7 +1932,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Record urine'**
-  String get toiletRecordUrineDialogTitle;
+  String get toiletRecordUrineFormTitle;
 
   /// Section heading above the urine color shade choice chips in the urine record dialog.
   ///

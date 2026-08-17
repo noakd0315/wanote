@@ -1176,7 +1176,7 @@
   "@healthRecordNoCommentPlaceholder": {
     "description": "Placeholder shown in the health record detail screen when no memo/comment was entered."
   },
-  "healthRecordFormTitleNew": "New health record",
+  "healthRecordFormTitleNew": "Record how they are",
   "@healthRecordFormTitleNew": {
     "description": "AppBar title of the health record form when creating a new record."
   },
@@ -1322,8 +1322,8 @@
       }
     }
   },
-  "toiletRecordUrineDialogTitle": "Record urine",
-  "@toiletRecordUrineDialogTitle": {
+  "toiletRecordUrineFormTitle": "Record urine",
+  "@toiletRecordUrineFormTitle": {
     "description": "Title of the dialog used to confirm/edit a one-tap urine record before saving."
   },
   "toiletUrineColorShadeLabel": "Color shade",

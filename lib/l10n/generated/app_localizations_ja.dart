@@ -876,7 +876,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get healthRecordNoCommentPlaceholder => '(コメントなし)';
 
   @override
-  String get healthRecordFormTitleNew => '新規健康記録';
+  String get healthRecordFormTitleNew => '健康状態を記録';
 
   @override
   String get healthRecordFormTitleEdit => '健康記録を編集';
@@ -974,7 +974,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get toiletRecordUrineDialogTitle => '排尿を記録';
+  String get toiletRecordUrineFormTitle => '排尿を記録';
 
   @override
   String get toiletUrineColorShadeLabel => '色の濃淡';
