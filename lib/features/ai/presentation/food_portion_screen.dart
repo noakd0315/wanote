@@ -425,15 +425,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
               helperText: l10n.foodPortionCalorieDensityHelperText,
             ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _currentAmountController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: l10n.foodPortionCurrentAmountLabel,
-              helperText: l10n.foodPortionCurrentAmountHelperText,
-            ),
-          ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _calculate,
@@ -442,6 +433,25 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           if (result != null) ...[
             const SizedBox(height: 24),
             const Divider(),
+            const SizedBox(height: 8),
+            // Below the result, because it is not part of the sum.
+            //
+            // Sitting above the calculate button it read as another figure
+            // the calculation needed, and people filled it in expecting it
+            // to change the answer -- it does not. It only gives the AI
+            // something to compare its suggestion against, which is a
+            // question that does not arise until there is a suggestion (PM
+            // request, 2026-08-17).
+            TextField(
+              controller: _currentAmountController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: l10n.foodPortionCurrentAmountLabel,
+                helperText: l10n.foodPortionCurrentAmountHelperText,
+              ),
+            ),
             const SizedBox(height: 8),
             _ResultRow(
               label: l10n.foodPortionRerLabel,

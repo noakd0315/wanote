@@ -12,6 +12,30 @@ import '../models/monthly_report_input_stats.dart';
 class ReportPdfExporter {
   const ReportPdfExporter();
 
+  /// Noto Sans JP, for a document that has to render Japanese.
+  ///
+  /// Fetched through the printing package rather than bundled: the family
+  /// is several megabytes, and every user would carry it whether or not
+  /// they ever exported a report. The trade is a network fetch on the first
+  /// export, cached afterwards.
+  ///
+  /// Returns null if it cannot be fetched. A Latin-only document is a poor
+  /// result, but it is a result -- the alternative is the export hanging,
+  /// which is what it did before.
+  static Future<pw.ThemeData?> _japaneseTheme() async {
+    try {
+      final regular = await PdfGoogleFonts.notoSansJPRegular();
+      final bold = await PdfGoogleFonts.notoSansJPBold();
+      return pw.ThemeData.withFont(
+        base: regular,
+        bold: bold,
+        fontFallback: [regular],
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// [strings] carries the localized headings. The exporter is const and
   /// has no BuildContext -- the screen that triggers the export resolves the
   /// wording and passes it in, the same way reminders do. The PDF used to be
@@ -23,7 +47,14 @@ class ReportPdfExporter {
     String? summaryText,
     String? petName,
   }) async {
-    final doc = pw.Document();
+    // A PDF with no font registered cannot draw a single Japanese
+    // character. The `pdf` package's built-in Helvetica has no CJK glyphs,
+    // and rather than dropping them it throws -- which left the export
+    // spinning forever, because the failure happened inside the callback
+    // the print dialog was waiting on (PM report, 2026-08-17).
+    final theme = await _japaneseTheme();
+
+    final doc = pw.Document(theme: theme);
     doc.addPage(
       pw.Page(
         build: (context) => pw.Column(
