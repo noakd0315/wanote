@@ -7,6 +7,7 @@ import '../features/ai/presentation/food_portion_screen.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../shared/widgets/shortcut_route.dart';
 import '../shared/models/pet_profile.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/widgets/pet_background_photo.dart';
@@ -100,7 +101,9 @@ class HomeScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     Navigator.of(context).push(
-      MaterialPageRoute(
+      // Not a MaterialPageRoute: this is a shortcut and has to match the
+      // three beside it, which switch sections instantly. See ShortcutRoute.
+      ShortcutRoute<void>(
         builder: (_) => FoodPortionScreen(
           uid: uid,
           petId: activePet.petId,

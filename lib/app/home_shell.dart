@@ -305,6 +305,15 @@ class _HomeShellState extends State<HomeShell>
     super.didChangeAppLifecycleState(state);
     if (state != AppLifecycleState.resumed) return;
     if (!mounted || _selectedIndex == 0) return;
+    // Not while the owner is in the middle of something.
+    //
+    // The camera and the photo picker background the app, so returning from
+    // taking a picture arrives here as a resume -- and this sent the owner
+    // to the home tab with a half-filled record still open behind it (PM
+    // report, 2026-08-17). Anything pushed on the shell means a task is in
+    // progress; a bare tab means they were only looking around, which is
+    // the case this was for.
+    if (_shellNavigatorKey.currentState?.canPop() ?? false) return;
     setState(() => _selectedIndex = 0);
   }
 
