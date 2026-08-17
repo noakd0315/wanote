@@ -126,3 +126,20 @@ Apple のサポートか専門家に確認すること。
 | AIプロンプトの英語化 | ✅ 対応済み（2026-08-14） |
 | **ストア掲載文の英語版** | 実機検証後 |
 | **プライバシーポリシー英語版** | 作成済み・**未公開** |
+
+## iOSの権限ダイアログを英語化する（2026-08-18 記録）
+
+`ios/Runner/Info.plist` の `NSCameraUsageDescription` /
+`NSPhotoLibraryUsageDescription` / `NSFaceIDUsageDescription` が
+日本語で固定されている。英語話者には日本語のダイアログが出る。
+
+`CFBundleLocalizations` を宣言したので**OSが出すUI（カメラ・写真
+ピッカー等）は端末の言語に追従する**ようになったが、これらの文面だけは
+アプリ側の文字列なので追従しない。
+
+必要な作業:
+- `ios/Runner/ja.lproj/InfoPlist.strings` と `en.lproj/InfoPlist.strings` を追加
+- **Xcodeプロジェクト（project.pbxproj）にリソースとして登録**する必要がある
+
+pbxproj の編集を伴うため、iOSビルドを壊すと確認できるのが
+Codemagic のビルド後になる。まとまった時間があるときに着手すること。
