@@ -13,6 +13,7 @@ import 'biometric_setup_screen.dart';
 import 'pet_profile_form_screen.dart';
 import 'pet_profile_switch_screen.dart';
 import 'sign_up_screen.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// The app's initial route (spec 1.2 - 起動時ログイン画面).
 ///
@@ -117,11 +118,11 @@ class _ResolvingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: DogSilhouetteBackground()),
-          Center(child: CircularProgressIndicator()),
+          const Positioned.fill(child: DogSilhouetteBackground()),
+          WanoteLoadingIndicator.centered(),
         ],
       ),
     );

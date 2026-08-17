@@ -6,6 +6,7 @@ import '../data/toilet_record_repository.dart';
 import '../models/toilet_record.dart';
 import 'widgets/toilet_labels.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// The full view of one toilet record, and the only place a photo can be
 /// seen.
@@ -173,9 +174,9 @@ class ToiletRecordDetailScreen extends StatelessWidget {
                     const Icon(Icons.broken_image_outlined, size: 48),
                 loadingBuilder: (context, child, progress) => progress == null
                     ? child
-                    : const Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Center(child: CircularProgressIndicator()),
+                    : Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: WanoteLoadingIndicator.centered(),
                       ),
               ),
             ),

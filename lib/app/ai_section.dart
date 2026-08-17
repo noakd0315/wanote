@@ -16,6 +16,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../shared/services/ai_usage_repository.dart';
 import '../shared/utils/calendar_period.dart';
 import '../shared/widgets/stream_error_view.dart';
+import '../shared/widgets/wanote_loading_indicator.dart';
 
 /// AI相談 section of the app shell: combines Agent D's [ConsultationScreen]
 /// and [ReportScreen] behind a small local segmented control, since neither
@@ -242,7 +243,7 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
           return StreamErrorView(error: snapshot.error!);
         }
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return WanoteLoadingIndicator.centered();
         }
         return ReportScreen(
           uid: widget.uid,

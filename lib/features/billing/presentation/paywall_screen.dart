@@ -10,6 +10,7 @@ import '../data/billing_repository.dart';
 import '../data/campaign_code_repository.dart';
 import '../domain/campaign_code_models.dart';
 import '../domain/product_ids.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Simple, functional (not pixel-perfect) upgrade/paywall screen: lists the
 /// premium_monthly/premium_yearly subscriptions and the ai_tickets_5/15
@@ -184,7 +185,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               future: _offeringsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
+                  return WanoteLoadingIndicator.centered();
                 }
                 if (snapshot.hasError) {
                   // "Not provisioned yet" is not the same as "we tried and

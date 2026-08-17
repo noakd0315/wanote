@@ -6,6 +6,7 @@ import '../data/toilet_record_repository.dart';
 import '../domain/toilet_frequency_aggregator.dart';
 import '../models/toilet_record.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 4.2: "頻度グラフ（日別回数の推移）". Bucketing is done by the pure,
 /// unit-tested [ToiletFrequencyAggregator] — this widget only renders bars
@@ -38,7 +39,7 @@ class ToiletFrequencyChartView extends StatelessWidget {
       stream: repository.watchTimeline(uid, petId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return WanoteLoadingIndicator.centered();
         }
         final records = snapshot.data ?? const <ToiletRecord>[];
         // Split by type (rather than one combined count) so urine and

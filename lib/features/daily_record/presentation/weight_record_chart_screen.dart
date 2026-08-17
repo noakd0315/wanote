@@ -8,6 +8,7 @@ import '../data/weight_record_repository.dart';
 import '../domain/weight_trend_calculator.dart';
 import '../models/weight_record.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 3.2: line chart with a 3 months / 6 months / 1 year period toggle,
 /// plus the "前回比" / "1ヶ月前比" delta display from spec 3.4. The actual
@@ -147,7 +148,7 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         stream: widget.repository.watchAll(widget.uid, widget.petId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final records = snapshot.data ?? const <WeightRecord>[];
           final trend = _calculator.calculate(

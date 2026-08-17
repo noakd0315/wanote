@@ -13,6 +13,7 @@ import '../../../../shared/widgets/dog_silhouette_background.dart';
 import '../../../../shared/widgets/language_picker.dart';
 import '../../data/auth_prefs_keys.dart';
 import '../auth_controller.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Key the referral code typed at sign-up is stashed under until the app
 /// shell is ready to redeem it (see lib/app/home_shell.dart).
@@ -440,9 +441,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           label: Text(l10n.signInWithApple),
                         ),
                         if (controller.isLoading)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 24),
-                            child: Center(child: CircularProgressIndicator()),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 24),
+                            child: WanoteLoadingIndicator.centered(),
                           ),
                       ],
                     ),

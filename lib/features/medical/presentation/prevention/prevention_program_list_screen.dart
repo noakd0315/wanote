@@ -9,6 +9,7 @@ import '../prevention_type_label.dart';
 import 'prevention_program_form_screen.dart';
 import 'prevention_record_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 5.3 program list ("何をどの頻度で行うか" settings). Tapping a program
 /// opens its administration history ([PreventionRecordListScreen]); long-press
@@ -132,7 +133,7 @@ class _PreventionProgramListScreenState
             return StreamErrorView(error: snapshot.error!);
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final programs = snapshot.data!;
           if (programs.isEmpty && !_seedAttempted) {
@@ -140,7 +141,7 @@ class _PreventionProgramListScreenState
             // created docs automatically once seeding completes, so this
             // build just shows the loading state in the meantime.
             unawaited(_seedDefaultsIfEmpty(l10n, programs));
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           if (programs.isEmpty) {
             return Center(child: Text(l10n.preventionProgramListEmptyMessage));

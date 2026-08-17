@@ -7,6 +7,7 @@ import 'health_record_detail_screen.dart';
 import 'health_record_form_screen.dart';
 import 'widgets/health_record_labels.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// How far back the timeline shows.
 enum HealthRecordPeriod {
@@ -78,7 +79,7 @@ class _HealthRecordTimelineScreenState
         stream: widget.repository.watchTimeline(widget.uid, widget.petId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final records = snapshot.data ?? const <HealthRecord>[];
           // watchTimeline already orders by recorded_at descending, but sort

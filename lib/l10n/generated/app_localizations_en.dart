@@ -1056,6 +1056,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String aiUsageFreeRemainingLabel(int remaining, int quota) {
+    return '$remaining of $quota free uses left this month';
+  }
+
+  @override
+  String aiUsageTicketsRemainingLabel(int remaining) {
+    return '$remaining tickets left';
+  }
+
+  @override
+  String get aiUsageUnlimitedLabel => 'Unlimited plan';
+
+  @override
+  String get aiUsageNoneRemainingLabel =>
+      'None left (a ticket or plan is needed)';
+
+  @override
   String get petProfileFormMeasurementsHeading => 'Measurements (optional)';
 
   @override

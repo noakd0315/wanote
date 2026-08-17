@@ -10,6 +10,7 @@ import '../models/monthly_report_input_stats.dart';
 import 'widgets/disclaimer_banner.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 enum _SummaryState { idle, loading, ready, needsUpgrade, error }
 
@@ -186,7 +187,7 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         );
       case _SummaryState.loading:
-        return const Center(child: CircularProgressIndicator());
+        return WanoteLoadingIndicator.centered();
       case _SummaryState.needsUpgrade:
         return UpgradePromptCard(
           message: l10n.reportSummaryUsageLimitMessage,

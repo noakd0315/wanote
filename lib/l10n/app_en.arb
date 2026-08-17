@@ -1382,6 +1382,35 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "aiUsageFreeRemainingLabel": "{remaining} of {quota} free uses left this month",
+  "@aiUsageFreeRemainingLabel": {
+    "description": "Remaining-usage badge on the AI screens while free allowance is left.",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "quota": {
+        "type": "int"
+      }
+    }
+  },
+  "aiUsageTicketsRemainingLabel": "{remaining} tickets left",
+  "@aiUsageTicketsRemainingLabel": {
+    "description": "Remaining-usage badge once the free allowance is spent and tickets are being used.",
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "aiUsageUnlimitedLabel": "Unlimited plan",
+  "@aiUsageUnlimitedLabel": {
+    "description": "Remaining-usage badge for a subscriber, who has no count to show."
+  },
+  "aiUsageNoneRemainingLabel": "None left (a ticket or plan is needed)",
+  "@aiUsageNoneRemainingLabel": {
+    "description": "Remaining-usage badge when nothing is left to spend."
+  },
   "petProfileFormMeasurementsHeading": "Measurements (optional)",
   "@petProfileFormMeasurementsHeading": {
     "description": "Section heading above the three body-measurement fields on the pet form."

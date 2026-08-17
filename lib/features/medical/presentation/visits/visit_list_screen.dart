@@ -5,6 +5,7 @@ import '../../data/visit_repository.dart';
 import '../../domain/models/visit.dart';
 import 'visit_form_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 5.1 list/detail screen. Kept intentionally simple (per task scope):
 /// a single scrollable list with inline delete, tapping opens the edit form.
@@ -36,7 +37,7 @@ class VisitListScreen extends StatelessWidget {
             return StreamErrorView(error: snapshot.error!);
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final visits = snapshot.data!;
           if (visits.isEmpty) {

@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../shared/services/ai_usage_repository.dart';
+
+/// How many AI calls the owner has left, shown on the screens that spend
+/// them (PM request: "AIの残り回数を表示してほしい").
+///
+/// Before this, the only way to find out was to run out: the free
+/// allowance is silent until it is gone, and then the screen refuses. With
+/// five a month, knowing whether this is the second or the last one is the
+/// difference between asking and saving it.
+///
+/// Says the one number that answers "can I ask again", not all three.
+/// Which pot the next call comes out of is [AiUsageStatus.nextSource]'s
+/// business, and free is always spent before tickets -- so the free count
+/// is the live one until it hits zero, at which point tickets become it.
+class AiUsageBadge extends StatefulWidget {
+  const AiUsageBadge({
+    super.key,
+    required this.uid,
+    required this.usageRepository,
+    this.refreshToken = 0,
+  });
+
+  final String uid;
+  final AiUsageRepository usageRepository;
+
+  /// Bumped by the parent after a call is spent, to re-read the count.
+  ///
+  /// A token rather than a stream because the repository has no change
+  /// notification, and rather than a GlobalKey because the parent already
+  /// knows exactly when the number moved -- it is the thing that moved it.
+  final int refreshToken;
+
+  @override
+  State<AiUsageBadge> createState() => _AiUsageBadgeState();
+}
+
+class _AiUsageBadgeState extends State<AiUsageBadge> {
+  late Future<AiUsageStatus> _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.usageRepository.getStatus(widget.uid);
+  }
+
+  @override
+  void didUpdateWidget(AiUsageBadge oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshToken != widget.refreshToken ||
+        oldWidget.uid != widget.uid) {
+      setState(() {
+        _status = widget.usageRepository.getStatus(widget.uid);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return FutureBuilder<AiUsageStatus>(
+      future: _status,
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        // Nothing while it loads, and nothing if it fails. This is a
+        // convenience, not a gate -- the screen's own check is what decides
+        // whether a call may be made, and an error box here would be
+        // alarming about something that does not block anything.
+        if (status == null) return const SizedBox.shrink();
+
+        final (label, isEmpty) = _label(l10n, status);
+        final scheme = Theme.of(context).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              Icon(
+                isEmpty ? Icons.error_outline : Icons.auto_awesome,
+                size: 16,
+                color: isEmpty ? scheme.error : scheme.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: isEmpty ? scheme.error : scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  (String, bool) _label(AppLocalizations l10n, AiUsageStatus status) {
+    if (status.hasUnlimitedSubscription) {
+      return (l10n.aiUsageUnlimitedLabel, false);
+    }
+    if (status.freeConsultationsRemainingThisMonth > 0) {
+      return (
+        l10n.aiUsageFreeRemainingLabel(
+          status.freeConsultationsRemainingThisMonth,
+          FirestoreAiUsageRepository.freeMonthlyQuota,
+        ),
+        false,
+      );
+    }
+    if (status.ticketsRemaining > 0) {
+      return (l10n.aiUsageTicketsRemainingLabel(status.ticketsRemaining), false);
+    }
+    return (l10n.aiUsageNoneRemainingLabel, true);
+  }
+}

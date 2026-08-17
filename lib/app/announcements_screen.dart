@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../shared/models/announcement.dart';
 import '../shared/services/announcement_repository.dart';
+import '../shared/widgets/wanote_loading_indicator.dart';
 
 /// The full list of current notices, reachable from 設定.
 ///
@@ -33,7 +34,7 @@ class AnnouncementsScreen extends StatelessWidget {
           }
           final announcements = snapshot.data;
           if (announcements == null) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           if (announcements.isEmpty) {
             return Center(child: Text(l10n.announcementsEmpty));

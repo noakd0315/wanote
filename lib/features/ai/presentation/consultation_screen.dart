@@ -11,9 +11,11 @@ import '../domain/emergency_keyword_detector.dart';
 import '../domain/usage_limit_policy.dart';
 import '../models/consultation.dart';
 import 'widgets/disclaimer_banner.dart';
+import 'widgets/ai_usage_badge.dart';
 import 'widgets/emergency_notice.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/widgets/stream_error_view.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 enum _ResultKind { none, emergency, response, needsUpgrade, error }
 
@@ -75,6 +77,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   /// retry the same question would be charging twice for one consultation,
   /// and the failure was not theirs (PM report).
   bool _adAlreadyShown = false;
+
+  /// Bumped whenever a call is spent, so the remaining-count badge re-reads.
+  int _usageRefreshToken = 0;
 
   _ResultKind _resultKind = _ResultKind.none;
   String? _resultText;
@@ -161,6 +166,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
+      if (mounted) setState(() => _usageRefreshToken++);
       await widget.consultationRepository.save(
         uid: widget.uid,
         petId: widget.petId,
@@ -201,6 +207,11 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          AiUsageBadge(
+            uid: widget.uid,
+            usageRepository: widget.usageRepository,
+            refreshToken: _usageRefreshToken,
+          ),
           const DisclaimerBanner(),
           const SizedBox(height: 16),
           if (prefill.isNotEmpty) ...[
@@ -396,9 +407,9 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           return StreamErrorView(error: snapshot.error!);
         }
         if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: WanoteLoadingIndicator.centered(),
           );
         }
         final history = snapshot.data!;

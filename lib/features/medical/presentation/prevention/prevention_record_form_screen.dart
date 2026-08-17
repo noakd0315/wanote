@@ -23,6 +23,7 @@ import '../../domain/prevention_due_date_calculator.dart';
 import '../../../../shared/utils/image_picking.dart';
 import '../../../../shared/app_messenger.dart';
 import '../../domain/models/medication.dart' show ReminderTime;
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -561,9 +562,9 @@ class _PreventionRecordFormScreenState
                       loadingBuilder: (context, child, progress) =>
                           progress == null
                           ? child
-                          : const SizedBox(
+                          : SizedBox(
                               height: 160,
-                              child: Center(child: CircularProgressIndicator()),
+                              child: WanoteLoadingIndicator.centered(),
                             ),
                     ),
                   ],

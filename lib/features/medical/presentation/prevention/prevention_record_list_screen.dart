@@ -7,6 +7,7 @@ import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
 import 'prevention_record_form_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Administration history for one [program] (spec 5.3's prevention_records).
 class PreventionRecordListScreen extends StatelessWidget {
@@ -68,7 +69,7 @@ class PreventionRecordListScreen extends StatelessWidget {
             return StreamErrorView(error: snapshot.error!);
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final records = snapshot.data!;
           if (records.isEmpty) {

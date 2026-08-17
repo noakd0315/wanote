@@ -11,6 +11,7 @@ import 'toilet_record_form_screen.dart';
 import 'widgets/toilet_labels.dart';
 import '../data/health_record_repository.dart';
 import 'toilet_record_detail_screen.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 4.2's one-tap timeline, plus the anomaly-driven AI-consultation
 /// banner from spec 4.4.
@@ -157,7 +158,7 @@ class _ToiletRecordTimelineScreenState
               stream: widget.repository.watchTimeline(widget.uid, widget.petId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return WanoteLoadingIndicator.centered();
                 }
                 final allRecords = snapshot.data ?? const <ToiletRecord>[];
                 final now = DateTime.now();

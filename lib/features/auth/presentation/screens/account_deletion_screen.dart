@@ -8,6 +8,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/app_messenger.dart';
 import '../../../../shared/models/auth_provider_type.dart';
 import '../auth_controller.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Permanent account deletion (spec gap; App Store Review Guideline
 /// 5.1.1(v) requires an app that creates accounts to delete them in-app,
@@ -84,7 +85,7 @@ class _AccountDeletionScreenState extends State<AccountDeletionScreen> {
               const SizedBox(height: 12),
             ],
             if (_isDeleting) ...[
-              const Center(child: CircularProgressIndicator()),
+              WanoteLoadingIndicator.centered(),
               const SizedBox(height: 12),
               Text(
                 l10n.deleteAccountProgressMessage,

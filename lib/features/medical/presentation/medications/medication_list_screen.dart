@@ -10,6 +10,7 @@ import '../../data/prevention_record_repository.dart';
 import '../prevention/prevention_record_form_screen.dart';
 import '../prevention/prevention_record_list_screen.dart';
 import 'medication_form_screen.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 5.2 list screen, plus the preventive treatments that are also
 /// medication.
@@ -64,7 +65,7 @@ class MedicationListScreen extends StatelessWidget {
             return StreamErrorView(error: snapshot.error!);
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           return _buildList(context, l10n, snapshot.data!);
         },

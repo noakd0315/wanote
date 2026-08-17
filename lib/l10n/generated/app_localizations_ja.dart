@@ -1020,6 +1020,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String aiUsageFreeRemainingLabel(int remaining, int quota) {
+    return '今月の無料利用 残り$remaining回／$quota回';
+  }
+
+  @override
+  String aiUsageTicketsRemainingLabel(int remaining) {
+    return 'チケット 残り$remaining枚';
+  }
+
+  @override
+  String get aiUsageUnlimitedLabel => '使い放題プラン';
+
+  @override
+  String get aiUsageNoneRemainingLabel => '残り0回（チケットまたはプランが必要です）';
+
+  @override
   String get petProfileFormMeasurementsHeading => 'サイズ（任意）';
 
   @override

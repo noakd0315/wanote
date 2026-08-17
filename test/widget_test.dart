@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wanote/features/auth/auth.dart';
 import 'package:wanote/l10n/generated/app_localizations.dart';
+import 'package:wanote/shared/widgets/wanote_loading_indicator.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -168,7 +169,7 @@ void main() {
 
     await pumpLaunchGate(tester);
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(WanoteLoadingIndicator), findsOneWidget);
     expect(find.text('Sign in'), findsNothing);
   });
 
@@ -206,7 +207,7 @@ void main() {
       // Signed in, but the list has not arrived. "Not arrived" is not "no
       // pets": showing the first-pet form here is what greeted returning
       // owners on every sign-in, and it reads as their dogs being gone.
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(WanoteLoadingIndicator), findsOneWidget);
       expect(find.text('Add a pet'), findsNothing);
 
       pets.add(const <PetProfile>[]);
@@ -257,7 +258,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(WanoteLoadingIndicator), findsNothing);
     expect(find.text('Add a pet'), findsOneWidget);
   });
 }

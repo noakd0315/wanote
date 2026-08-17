@@ -2018,6 +2018,30 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Remaining-usage badge on the AI screens while free allowance is left.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {quota} free uses left this month'**
+  String aiUsageFreeRemainingLabel(int remaining, int quota);
+
+  /// Remaining-usage badge once the free allowance is spent and tickets are being used.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} tickets left'**
+  String aiUsageTicketsRemainingLabel(int remaining);
+
+  /// Remaining-usage badge for a subscriber, who has no count to show.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited plan'**
+  String get aiUsageUnlimitedLabel;
+
+  /// Remaining-usage badge when nothing is left to spend.
+  ///
+  /// In en, this message translates to:
+  /// **'None left (a ticket or plan is needed)'**
+  String get aiUsageNoneRemainingLabel;
+
   /// Section heading above the three body-measurement fields on the pet form.
   ///
   /// In en, this message translates to:

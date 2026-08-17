@@ -10,6 +10,7 @@ import '../../domain/models/prevention_program.dart';
 import '../../domain/models/prevention_record.dart';
 import 'prevention_program_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
+import '../../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Spec 5.3's certificate list requirement: "一覧から証明書を即座に確認できる
 /// ようにする（ペットホテル・ドッグラン・トリミング施設での提示を想定）",
@@ -61,7 +62,7 @@ class CertificateListScreen extends StatelessWidget {
             return StreamErrorView(error: snapshot.error!);
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return WanoteLoadingIndicator.centered();
           }
           final records = snapshot.data!
               .where((r) => r.certificateFile != null)
@@ -347,7 +348,7 @@ class _CertificateImage extends StatelessWidget {
       ),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return WanoteLoadingIndicator.centered();
         }
         final file = snapshot.data;
         if (file != null) {
@@ -370,7 +371,7 @@ class _CertificateImage extends StatelessWidget {
                 const Center(child: Icon(Icons.broken_image)),
             loadingBuilder: (context, child, progress) => progress == null
                 ? child
-                : const Center(child: CircularProgressIndicator()),
+                : WanoteLoadingIndicator.centered(),
           );
         }
         return const Center(child: Icon(Icons.broken_image));

@@ -7,9 +7,11 @@ import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
 import '../domain/food_portion_calculator.dart';
 import '../domain/usage_limit_policy.dart';
+import 'widgets/ai_usage_badge.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
 import '../data/consultation_repository.dart';
+import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Display labels for [DogLifeStage], kept here (not on the enum itself)
 /// since the enum lives in the framework-free domain layer and can't call
@@ -123,6 +125,9 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   /// Whether this screen has already spent its ad impression -- see
   /// consultation_screen.dart for why a retry must not cost a second one.
   bool _adAlreadyShown = false;
+
+  /// Bumped whenever a call is spent, so the remaining-count badge re-reads.
+  int _usageRefreshToken = 0;
 
   @override
   void initState() {
@@ -304,6 +309,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
+      if (mounted) setState(() => _usageRefreshToken++);
       // Prefixed so the two kinds are told apart in the list: this one was
       // assembled by a calculator, not typed by the owner.
       await widget.consultationRepository.save(
@@ -336,6 +342,12 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          AiUsageBadge(
+            uid: widget.uid,
+            usageRepository: widget.usageRepository,
+            refreshToken: _usageRefreshToken,
+          ),
+          const SizedBox(height: 8),
           TextField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -497,7 +509,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           label: Text(l10n.foodPortionRequestAdviceButton),
         );
       case _AdviceState.loading:
-        return const Center(child: CircularProgressIndicator());
+        return WanoteLoadingIndicator.centered();
       case _AdviceState.needsUpgrade:
         return UpgradePromptCard(
           message: l10n.foodPortionAdviceUsageLimitMessage,
