@@ -1,3 +1,6 @@
+import 'dart:developer' as developer;
+
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 /// Outcome of a single biometric prompt attempt.
@@ -63,7 +66,31 @@ class LocalAuthBiometricService implements BiometricService {
       return didAuthenticate
           ? BiometricPromptResult.success
           : BiometricPromptResult.failed;
-    } on Exception {
+    } on PlatformException catch (e) {
+      // The plugin's reason is the whole diagnosis, and it used to be
+      // thrown away: "not enrolled", "locked out after too many attempts"
+      // and "no passcode set at all" arrived here as the same generic
+      // error, so a device where biometrics simply do nothing gave nothing
+      // to go on (PM report, 2026-08-17).
+      developer.log(
+        'Biometric prompt failed: ${e.code}',
+        name: 'LocalAuthBiometricService',
+        error: e,
+      );
+      return switch (e.code) {
+        // Hardware present but nothing registered, or the OS refuses on a
+        // device with no passcode. Neither is an error the owner can fix
+        // from inside this app -- they are told to set it up in Settings.
+        'NotEnrolled' || 'PasscodeNotSet' || 'NotAvailable' =>
+          BiometricPromptResult.notAvailable,
+        _ => BiometricPromptResult.error,
+      };
+    } on Exception catch (e) {
+      developer.log(
+        'Biometric prompt failed',
+        name: 'LocalAuthBiometricService',
+        error: e,
+      );
       return BiometricPromptResult.error;
     }
   }
