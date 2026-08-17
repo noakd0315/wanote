@@ -202,7 +202,22 @@ class _PreventionRecordFormScreenState
     }
 
     setState(() => _ocrRunning = true);
-    var ocrSucceeded = false;
+    // Started with the scan, not after it (PM request, 2026-08-17).
+    //
+    // Waiting for the reading to finish meant the owner watched a spinner
+    // and *then* an ad -- two waits back to back, when the ad could have
+    // covered the first one. Every other screen already plays it over the
+    // work for that reason.
+    //
+    // The cost of the change: a scan that then fails has still spent its
+    // impression, which the previous order avoided. Retrying is still
+    // free, and that is the part worth keeping -- rescanning a certificate
+    // that did not read is the owner fixing our failure.
+    final adFuture = _adAlreadyShown
+        ? null
+        : adGate?.maybeShow(AdTrigger.certificateCapture);
+    if (adFuture != null) _adAlreadyShown = true;
+
     try {
       final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (idToken == null) {
@@ -220,7 +235,6 @@ class _PreventionRecordFormScreenState
 
       final outcome = widget.ocrValidator.evaluate(result.confidence);
       if (outcome == OcrValidationOutcome.prefillForReview) {
-        ocrSucceeded = true;
         setState(() {
           if (result.administeredAt != null) {
             _administeredAt = result.administeredAt!;
@@ -266,23 +280,10 @@ class _PreventionRecordFormScreenState
       if (mounted) setState(() => _ocrRunning = false);
     }
 
-    // One ad for the capture and the reading together: to the owner that was
-    // a single action (PLAN_ads decision 3). After the OCR, not before --
-    // an ad in front of a scan that then failed would have taken their
-    // attention for nothing.
-    //
-    // And not at all when the scan failed, for the same reason: a rate
-    // limit or an unreadable photo leaves the owner with nothing, so there
-    // is nothing to charge for. The retry after it is free too (PM
-    // request) -- the flag is per screen, not per scan.
-    //
-    // Not exempted by an AI ticket balance: the scan does not consume one
-    // (tickets are sold as AI相談チケット and the OCR route is bounded
-    // server-side instead) -- PM decision, 2026-08-12.
-    if (ocrSucceeded && !_adAlreadyShown) {
-      _adAlreadyShown = true;
-      await adGate?.maybeShow(AdTrigger.certificateCapture);
-    }
+    // Awaited, not skipped: the ad was started above and has to be given
+    // the chance to finish before the form is usable again.
+    await adFuture;
+
   }
 
   String _title(AppLocalizations l10n) {

@@ -509,9 +509,18 @@ class AuthController extends ChangeNotifier {
         _ => 'unknown',
       };
     }
-    if (e is SignInWithAppleAuthorizationException &&
-        e.code == AuthorizationErrorCode.canceled) {
-      return _cancelledCode;
+    if (e is SignInWithAppleAuthorizationException) {
+      return e.code == AuthorizationErrorCode.canceled
+          ? _cancelledCode
+          : 'unknown';
+    }
+    // Android reaches Apple through a web flow, which needs a Services ID
+    // and a redirect URI the app does not have yet, so the plugin refuses
+    // before anything reaches Firebase. Same situation as a provider
+    // switched off in the console, and it reads better said that way than
+    // as "something went wrong" (PM report, 2026-08-17).
+    if (e is SignInWithAppleNotSupportedException) {
+      return 'provider-not-configured';
     }
     return 'unknown';
   }
