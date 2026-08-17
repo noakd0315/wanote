@@ -1382,6 +1382,47 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "historyCopyButtonLabel": "Fill from a past record",
+  "@historyCopyButtonLabel": {
+    "description": "Button on a new-record form that copies the content of an earlier record."
+  },
+  "historyCopyPickerTitle": "Pick a record to copy",
+  "@historyCopyPickerTitle": {
+    "description": "Title of the sheet listing recent records to copy from."
+  },
+  "historyCopyPickerEmptyMessage": "There are no records to copy yet.",
+  "@historyCopyPickerEmptyMessage": {
+    "description": "Shown in the copy sheet when the pet has no earlier records."
+  },
+  "historyCopyAppliedMessage": "Copied. The date is still today's.",
+  "@historyCopyAppliedMessage": {
+    "description": "Confirmation after copying, making clear the date was deliberately not copied."
+  },
+  "ocrNeedsReviewLabel": "Check",
+  "@ocrNeedsReviewLabel": {
+    "description": "Short mark beside a field the certificate OCR filled in, meaning the value has not been confirmed by a person yet."
+  },
+  "ocrNeedsReviewHelper": "Check this: read from the certificate",
+  "@ocrNeedsReviewHelper": {
+    "description": "Helper text under a text field the certificate OCR filled in."
+  },
+  "certificateShowAllTooltip": "Show older certificates",
+  "@certificateShowAllTooltip": {
+    "description": "Turns off the latest-per-programme filter on the certificate list."
+  },
+  "certificateShowLatestOnlyTooltip": "Show latest only",
+  "@certificateShowLatestOnlyTooltip": {
+    "description": "Turns the latest-per-programme filter back on."
+  },
+  "certificateOlderHiddenLabel": "{count} older certificates hidden",
+  "@certificateOlderHiddenLabel": {
+    "description": "Tells the reader how many superseded certificates the filter is holding back.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "aiUsageFreeRemainingLabel": "{remaining} of {quota} free uses left this month",
   "@aiUsageFreeRemainingLabel": {
     "description": "Remaining-usage badge on the AI screens while free allowance is left.",

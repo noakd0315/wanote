@@ -1056,6 +1056,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String get historyCopyButtonLabel => 'Fill from a past record';
+
+  @override
+  String get historyCopyPickerTitle => 'Pick a record to copy';
+
+  @override
+  String get historyCopyPickerEmptyMessage =>
+      'There are no records to copy yet.';
+
+  @override
+  String get historyCopyAppliedMessage => 'Copied. The date is still today\'s.';
+
+  @override
+  String get ocrNeedsReviewLabel => 'Check';
+
+  @override
+  String get ocrNeedsReviewHelper => 'Check this: read from the certificate';
+
+  @override
+  String get certificateShowAllTooltip => 'Show older certificates';
+
+  @override
+  String get certificateShowLatestOnlyTooltip => 'Show latest only';
+
+  @override
+  String certificateOlderHiddenLabel(int count) {
+    return '$count older certificates hidden';
+  }
+
+  @override
   String aiUsageFreeRemainingLabel(int remaining, int quota) {
     return '$remaining of $quota free uses left this month';
   }

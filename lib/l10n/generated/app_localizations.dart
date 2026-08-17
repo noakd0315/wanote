@@ -2018,6 +2018,60 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Button on a new-record form that copies the content of an earlier record.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill from a past record'**
+  String get historyCopyButtonLabel;
+
+  /// Title of the sheet listing recent records to copy from.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a record to copy'**
+  String get historyCopyPickerTitle;
+
+  /// Shown in the copy sheet when the pet has no earlier records.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no records to copy yet.'**
+  String get historyCopyPickerEmptyMessage;
+
+  /// Confirmation after copying, making clear the date was deliberately not copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied. The date is still today\'s.'**
+  String get historyCopyAppliedMessage;
+
+  /// Short mark beside a field the certificate OCR filled in, meaning the value has not been confirmed by a person yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get ocrNeedsReviewLabel;
+
+  /// Helper text under a text field the certificate OCR filled in.
+  ///
+  /// In en, this message translates to:
+  /// **'Check this: read from the certificate'**
+  String get ocrNeedsReviewHelper;
+
+  /// Turns off the latest-per-programme filter on the certificate list.
+  ///
+  /// In en, this message translates to:
+  /// **'Show older certificates'**
+  String get certificateShowAllTooltip;
+
+  /// Turns the latest-per-programme filter back on.
+  ///
+  /// In en, this message translates to:
+  /// **'Show latest only'**
+  String get certificateShowLatestOnlyTooltip;
+
+  /// Tells the reader how many superseded certificates the filter is holding back.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} older certificates hidden'**
+  String certificateOlderHiddenLabel(int count);
+
   /// Remaining-usage badge on the AI screens while free allowance is left.
   ///
   /// In en, this message translates to:

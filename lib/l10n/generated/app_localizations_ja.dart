@@ -1020,6 +1020,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String get historyCopyButtonLabel => '過去の記録から入力';
+
+  @override
+  String get historyCopyPickerTitle => 'コピーする記録を選択';
+
+  @override
+  String get historyCopyPickerEmptyMessage => 'コピーできる記録がまだありません。';
+
+  @override
+  String get historyCopyAppliedMessage => '内容をコピーしました。日付は今日のままです。';
+
+  @override
+  String get ocrNeedsReviewLabel => '要確認';
+
+  @override
+  String get ocrNeedsReviewHelper => '要確認：読み取り結果です';
+
+  @override
+  String get certificateShowAllTooltip => '過去の証明書も表示';
+
+  @override
+  String get certificateShowLatestOnlyTooltip => '最新のみ表示';
+
+  @override
+  String certificateOlderHiddenLabel(int count) {
+    return '過去の証明書 $count件は非表示です';
+  }
+
+  @override
   String aiUsageFreeRemainingLabel(int remaining, int quota) {
     return '今月の無料利用 残り$remaining回／$quota回';
   }

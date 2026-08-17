@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/visit_repository.dart';
 import '../../domain/models/visit.dart';
+import '../widgets/history_copy_picker.dart';
 
 /// Create/edit screen for spec 5.1 (通院履歴). Pass [visit] to edit an
 /// existing entry, or omit it to create a new one.
@@ -112,6 +113,43 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
     }
   }
 
+  /// Fills the form from an earlier visit, keeping today's date.
+  ///
+  /// The same clinic and the same diagnosis come round again -- a recheck,
+  /// a repeat of a chronic problem. Only [Visit.visitedAt] and
+  /// [Visit.nextVisitDate] are left alone: copying those would record this
+  /// visit as having happened when the old one did.
+  Future<void> _copyFromHistory() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final chosen = await showHistoryCopyPicker<Visit>(
+      context: context,
+      options: widget.repository.watchVisits(widget.uid, widget.petId).map(
+        (visits) => visits
+            .map(
+              (visit) => HistoryCopyOption(
+                value: visit,
+                title: visit.hospitalName ?? l10n.visitFallbackTitle,
+                subtitle: [
+                  visit.visitedAt.toLocal().toString().split(' ').first,
+                  if (visit.diagnosis != null) visit.diagnosis!,
+                ].join(' - '),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (chosen == null || !mounted) return;
+    setState(() {
+      _hospitalController.text = chosen.hospitalName ?? '';
+      _diagnosisController.text = chosen.diagnosis ?? '';
+      _costController.text = chosen.cost?.toString() ?? '';
+    });
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.historyCopyAppliedMessage)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -128,6 +166,17 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // New records only. On an existing one this would overwrite
+            // what is being edited, which is not what "copy" means here.
+            if (widget.visit == null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: _copyFromHistory,
+                  icon: const Icon(Icons.content_copy, size: 18),
+                  label: Text(l10n.historyCopyButtonLabel),
+                ),
+              ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.visitedAtLabel),

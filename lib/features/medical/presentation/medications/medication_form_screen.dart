@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../data/medication_repository.dart';
 import '../../domain/models/medication.dart';
+import '../widgets/history_copy_picker.dart';
 
 /// Create/edit screen for spec 5.2 (薬の記録).
 class MedicationFormScreen extends StatefulWidget {
@@ -52,6 +53,52 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
     if (medication != null && medication.reminderTimes.isNotEmpty) {
       _reminderTimes = List.of(medication.reminderTimes);
     }
+  }
+
+  /// Fills the form from an earlier course of medication, keeping today's
+  /// start date.
+  ///
+  /// A repeat prescription is the same name and the same dose, starting
+  /// now. Copying the old start date would date this course to whenever the
+  /// last one began; copying the end date would end it before it starts.
+  Future<void> _copyFromHistory() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final chosen = await showHistoryCopyPicker<Medication>(
+      context: context,
+      options: widget.repository
+          .watchMedications(widget.uid, widget.petId)
+          .map(
+            (medications) => medications
+                .map(
+                  (medication) => HistoryCopyOption(
+                    value: medication,
+                    title: medication.name,
+                    subtitle: [
+                      medication.startDate
+                          .toLocal()
+                          .toString()
+                          .split(' ')
+                          .first,
+                      if (medication.dosage != null) medication.dosage!,
+                    ].join(' - '),
+                  ),
+                )
+                .toList(),
+          ),
+    );
+    if (chosen == null || !mounted) return;
+    setState(() {
+      _nameController.text = chosen.name;
+      _dosageController.text = chosen.dosage ?? '';
+      _reminderEnabled = chosen.reminderEnabled;
+      if (chosen.reminderTimes.isNotEmpty) {
+        _reminderTimes = List.of(chosen.reminderTimes);
+      }
+    });
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.historyCopyAppliedMessage)),
+    );
   }
 
   /// Adds a time, or replaces one when [replacing] is given.
@@ -158,6 +205,17 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // New records only -- on an existing one this would overwrite
+            // what is being edited.
+            if (widget.medication == null)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: _copyFromHistory,
+                  icon: const Icon(Icons.content_copy, size: 18),
+                  label: Text(l10n.historyCopyButtonLabel),
+                ),
+              ),
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(labelText: l10n.medicationNameLabel),

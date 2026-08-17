@@ -24,6 +24,7 @@ import '../../../../shared/utils/image_picking.dart';
 import '../../../../shared/app_messenger.dart';
 import '../../domain/models/medication.dart' show ReminderTime;
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
+import '../widgets/history_copy_picker.dart';
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -106,6 +107,19 @@ class _PreventionRecordFormScreenState
   double? _ocrConfidence;
   bool _ocrRunning = false;
   String? _ocrFallbackMessage;
+
+  /// Which fields currently hold a value the OCR put there, rather than one
+  /// the owner typed (PM request: OCRが入れた項目に要確認マークがほしい).
+  ///
+  /// A certificate scan is a good guess, not a reading -- a smudged 8 comes
+  /// back as a 3 and nothing about the filled-in form says which numbers
+  /// were guessed. Marks clear as soon as the field is touched: looking at
+  /// it and deciding it is right is the confirmation being asked for.
+  final Set<_OcrField> _needsReview = {};
+
+  void _clearReview(_OcrField field) {
+    if (_needsReview.remove(field)) setState(() {});
+  }
 
   /// Whether this screen has already spent its ad impression.
   ///
@@ -237,21 +251,26 @@ class _PreventionRecordFormScreenState
       final outcome = widget.ocrValidator.evaluate(result.confidence);
       if (outcome == OcrValidationOutcome.prefillForReview) {
         setState(() {
+          _needsReview.clear();
           if (result.administeredAt != null) {
             _administeredAt = result.administeredAt!;
+            _needsReview.add(_OcrField.administeredAt);
           }
           if (result.nextDueDate != null) {
             _nextDueDate = result.nextDueDate;
             _nextDueDateManuallyEdited = true;
+            _needsReview.add(_OcrField.nextDueDate);
           }
           if (result.hospitalName != null) {
             _hospitalController.text = result.hospitalName!;
+            _needsReview.add(_OcrField.hospitalName);
           }
           // The service has always extracted this; the form had nowhere to
           // put it until the vaccine-type / drug-name field existed, so it
           // was read off the certificate and thrown away (PM request).
           if (result.productName != null) {
             _productNameController.text = result.productName!;
+            _needsReview.add(_OcrField.productName);
           }
           _ocrFallbackMessage = null;
         });
@@ -412,6 +431,91 @@ class _PreventionRecordFormScreenState
     if (picked != null) onPicked(picked);
   }
 
+  /// Fills the form from an earlier dose of this same programme, keeping
+  /// today's date.
+  ///
+  /// Scoped to this programme rather than every prevention record: the
+  /// thing being repeated is the annual booster or the monthly heartworm
+  /// tablet, and the useful copy is always the last one of the same kind.
+  /// The dates are left alone -- the next-due date is recalculated from
+  /// today's, which is the entire reason the schedule exists.
+  Future<void> _copyFromHistory() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final chosen = await showHistoryCopyPicker<PreventionRecord>(
+      context: context,
+      options: widget.repository
+          .watchRecordsForProgram(
+            widget.uid,
+            widget.petId,
+            widget.program.programId,
+          )
+          .map(
+            (records) => records
+                .map(
+                  (record) => HistoryCopyOption(
+                    value: record,
+                    title: record.productName ?? widget.program.productName,
+                    subtitle: [
+                      record.administeredAt
+                          .toLocal()
+                          .toString()
+                          .split(' ')
+                          .first,
+                      if (record.hospitalName != null) record.hospitalName!,
+                    ].join(' - '),
+                  ),
+                )
+                .toList(),
+          ),
+    );
+    if (chosen == null || !mounted) return;
+    setState(() {
+      _productNameController.text =
+          chosen.productName ?? widget.program.productName;
+      _dosageController.text = chosen.dosage ?? '';
+      _hospitalController.text = chosen.hospitalName ?? '';
+      // Copied values are the owner's own from last time, not a machine's
+      // guess, so they carry no review marks.
+      _needsReview.clear();
+    });
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.historyCopyAppliedMessage)),
+    );
+  }
+
+  /// The mark itself, for fields whose value sits in a tile rather than an
+  /// InputDecoration. Empty (not hidden behind a conditional at each call
+  /// site) so the four uses read the same.
+  Widget _reviewChip(AppLocalizations l10n, _OcrField field) {
+    if (!_needsReview.contains(field)) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 14,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            l10n.ocrNeedsReviewLabel,
+            style: _reviewHelperStyle(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _reviewHelperText(AppLocalizations l10n, _OcrField field) =>
+      _needsReview.contains(field) ? l10n.ocrNeedsReviewHelper : null;
+
+  TextStyle? _reviewHelperStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.tertiary);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -438,17 +542,34 @@ class _PreventionRecordFormScreenState
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // New records only -- on an existing one this would overwrite
+              // what is being edited.
+              if (widget.record == null)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: _copyFromHistory,
+                    icon: const Icon(Icons.content_copy, size: 18),
+                    label: Text(l10n.historyCopyButtonLabel),
+                  ),
+                ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.administeredAtLabel),
-                subtitle: Text(
-                  _administeredAt.toLocal().toString().split(' ').first,
+                subtitle: Row(
+                  children: [
+                    Text(
+                      _administeredAt.toLocal().toString().split(' ').first,
+                    ),
+                    _reviewChip(l10n, _OcrField.administeredAt),
+                  ],
                 ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _pickDate(
                   initial: _administeredAt,
                   onPicked: (d) {
                     setState(() => _administeredAt = d);
+                    _needsReview.remove(_OcrField.administeredAt);
                     _recalculateNextDueDateIfNotManuallyEdited();
                   },
                 ),
@@ -459,10 +580,13 @@ class _PreventionRecordFormScreenState
               // company it keeps change (PM request).
               TextFormField(
                 controller: _productNameController,
+                onChanged: (_) => _clearReview(_OcrField.productName),
                 decoration: InputDecoration(
                   labelText: _isVaccine
                       ? l10n.preventionVaccineTypeLabel
                       : l10n.medicationNameLabel,
+                  helperText: _reviewHelperText(l10n, _OcrField.productName),
+                  helperStyle: _reviewHelperStyle(context),
                 ),
               ),
               // Dose is a medication idea. A vaccine is one shot of whatever
@@ -476,8 +600,11 @@ class _PreventionRecordFormScreenState
                 ),
               TextFormField(
                 controller: _hospitalController,
+                onChanged: (_) => _clearReview(_OcrField.hospitalName),
                 decoration: InputDecoration(
                   labelText: l10n.hospitalNameOptionalLabel,
+                  helperText: _reviewHelperText(l10n, _OcrField.hospitalName),
+                  helperStyle: _reviewHelperStyle(context),
                 ),
               ),
               SwitchListTile(
@@ -518,10 +645,15 @@ class _PreventionRecordFormScreenState
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.nextDueDateLabel),
-                subtitle: Text(
-                  _nextDueDate == null
-                      ? l10n.notSetLabel
-                      : _nextDueDate!.toLocal().toString().split(' ').first,
+                subtitle: Row(
+                  children: [
+                    Text(
+                      _nextDueDate == null
+                          ? l10n.notSetLabel
+                          : _nextDueDate!.toLocal().toString().split(' ').first,
+                    ),
+                    _reviewChip(l10n, _OcrField.nextDueDate),
+                  ],
                 ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _pickDate(
@@ -530,6 +662,7 @@ class _PreventionRecordFormScreenState
                     setState(() {
                       _nextDueDate = d;
                       _nextDueDateManuallyEdited = true;
+                      _needsReview.remove(_OcrField.nextDueDate);
                     });
                   },
                 ),
@@ -630,3 +763,7 @@ class _PreventionRecordFormScreenState
     );
   }
 }
+
+/// The fields the certificate OCR can fill in, for tracking which of them
+/// still hold a machine's guess.
+enum _OcrField { administeredAt, nextDueDate, hospitalName, productName }

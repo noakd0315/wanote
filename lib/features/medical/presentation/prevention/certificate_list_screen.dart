@@ -11,6 +11,7 @@ import '../../domain/models/prevention_record.dart';
 import 'prevention_program_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
+import '../../domain/latest_certificates.dart';
 
 /// Spec 5.3's certificate list requirement: "一覧から証明書を即座に確認できる
 /// ようにする（ペットホテル・ドッグラン・トリミング施設での提示を想定）",
@@ -22,7 +23,7 @@ import '../../../../shared/widgets/wanote_loading_indicator.dart';
 /// program's record list) -- but with no link between the two, a user
 /// landing on this empty tab has no way to discover where to actually add a
 /// certificate. The FAB/empty-state button below exists to bridge that gap.
-class CertificateListScreen extends StatelessWidget {
+class CertificateListScreen extends StatefulWidget {
   CertificateListScreen({
     super.key,
     required this.uid,
@@ -47,6 +48,27 @@ class CertificateListScreen extends StatelessWidget {
   final CertificateCacheService cacheService;
 
   @override
+  State<CertificateListScreen> createState() => _CertificateListScreenState();
+}
+
+class _CertificateListScreenState extends State<CertificateListScreen> {
+  /// Whether superseded certificates are showing as well as current ones.
+  ///
+  /// Off by default (PM request: 証明書は種別ごとに最新だけ). This screen is
+  /// used at a counter, where the question is always "is this dog's X up to
+  /// date" -- last year's certificate for the same programme is not an
+  /// answer to it, and after a few years of boosters the current one is
+  /// buried among them. Nothing is deleted; the older ones are one tap away.
+  bool _showAll = false;
+
+  String get uid => widget.uid;
+  String get petId => widget.petId;
+  PreventionRecordRepository get repository => widget.repository;
+  PreventionProgramRepository get programRepository =>
+      widget.programRepository;
+  CertificateCacheService get cacheService => widget.cacheService;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
@@ -54,7 +76,18 @@ class CertificateListScreen extends StatelessWidget {
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(l10n.certificateListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.certificateListTitle),
+        actions: [
+          IconButton(
+            tooltip: _showAll
+                ? l10n.certificateShowLatestOnlyTooltip
+                : l10n.certificateShowAllTooltip,
+            icon: Icon(_showAll ? Icons.filter_alt : Icons.filter_alt_outlined),
+            onPressed: () => setState(() => _showAll = !_showAll),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<PreventionRecord>>(
         stream: repository.watchRecords(uid, petId),
         builder: (context, snapshot) {
@@ -64,9 +97,14 @@ class CertificateListScreen extends StatelessWidget {
           if (!snapshot.hasData) {
             return WanoteLoadingIndicator.centered();
           }
-          final records = snapshot.data!
+          final withCertificates = snapshot.data!
               .where((r) => r.certificateFile != null)
               .toList();
+          final records = _showAll
+              ? (withCertificates
+                  ..sort((a, b) => b.administeredAt.compareTo(a.administeredAt)))
+              : latestCertificatePerProgram(withCertificates);
+          final hiddenCount = withCertificates.length - records.length;
           if (records.isEmpty) {
             return Center(
               child: Padding(
@@ -108,7 +146,33 @@ class CertificateListScreen extends StatelessWidget {
                 for (final program in programSnapshot.data ?? const [])
                   program.programId: program.productName,
               };
-              return GridView.builder(
+              // The grid is wrapped so the count of what is not shown can
+              // sit above it. Without this the screen looks the same whether
+              // a programme has one certificate or ten, and the filter is
+              // invisible until someone goes looking for a missing one.
+              return Column(
+                children: [
+                  if (hiddenCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n.certificateOlderHiddenLabel(hiddenCount),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.grey),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _showAll = true),
+                            child: Text(l10n.certificateShowAllTooltip),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Expanded(
+                    child: GridView.builder(
                 padding: const EdgeInsets.all(12),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -128,6 +192,9 @@ class CertificateListScreen extends StatelessWidget {
                     cacheService: cacheService,
                   );
                 },
+                    ),
+                  ),
+                ],
               );
             },
           );
