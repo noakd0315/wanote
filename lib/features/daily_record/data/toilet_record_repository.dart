@@ -17,14 +17,16 @@ abstract class ToiletRecordRepository {
   /// Creates a one-tap record. [recordedAt] defaults to `DateTime.now()` to
   /// match spec 4.2's "記録時刻は自動入力". [stoolCondition] is required when
   /// [type] is [ToiletType.stool] (asserted here) and ignored for
-  /// [ToiletType.urine]; [urineColor] is the reverse -- only stored when
-  /// [type] is [ToiletType.urine], ignored for [ToiletType.stool].
+  /// [ToiletType.urine]; [urineColor] and [urineVolume] are the reverse --
+  /// only stored when [type] is [ToiletType.urine], ignored for
+  /// [ToiletType.stool].
   Future<ToiletRecord> create({
     required String uid,
     required String petId,
     required ToiletType type,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
+    UrineVolume? urineVolume,
     Uint8List? photoBytes,
     DateTime? recordedAt,
     String? location,
@@ -35,6 +37,7 @@ abstract class ToiletRecordRepository {
     required ToiletRecord record,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
+    UrineVolume? urineVolume,
     Uint8List? newPhotoBytes,
     bool clearPhoto = false,
   });
@@ -96,6 +99,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     required ToiletType type,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
+    UrineVolume? urineVolume,
     Uint8List? photoBytes,
     DateTime? recordedAt,
     String? location,
@@ -115,6 +119,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
       type: type,
       stoolCondition: type == ToiletType.stool ? stoolCondition : null,
       urineColor: type == ToiletType.urine ? urineColor : null,
+      urineVolume: type == ToiletType.urine ? urineVolume : null,
       photo: photoUrl,
       location: location,
     );
@@ -128,6 +133,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     required ToiletRecord record,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
+    UrineVolume? urineVolume,
     Uint8List? newPhotoBytes,
     bool clearPhoto = false,
   }) async {
@@ -137,6 +143,7 @@ class FirestoreToiletRecordRepository implements ToiletRecordRepository {
     final updated = record.copyWith(
       stoolCondition: stoolCondition,
       urineColor: urineColor,
+      urineVolume: urineVolume,
       photo: photoUrl,
       clearPhoto: photoUrl == null,
     );

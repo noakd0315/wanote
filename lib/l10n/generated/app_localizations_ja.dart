@@ -1020,6 +1020,38 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String get toiletUrineVolumeLabel => '量';
+
+  @override
+  String toiletUrineVolumeSubtitle(String volume) {
+    return '量：$volume';
+  }
+
+  @override
+  String get toiletUrineDetailTitle => '排尿の詳細';
+
+  @override
+  String get toiletPeriodOneWeek => '1週間';
+
+  @override
+  String get toiletPeriodOneMonth => '1か月';
+
+  @override
+  String get toiletPeriodThreeMonths => '3か月';
+
+  @override
+  String get toiletPeriodAll => 'すべて';
+
+  @override
+  String get urineVolumeSmall => '少ない';
+
+  @override
+  String get urineVolumeNormal => '普通';
+
+  @override
+  String get urineVolumeLarge => '多い';
+
+  @override
   String get weightRecordTimelineTitle => '体重の記録';
 
   @override

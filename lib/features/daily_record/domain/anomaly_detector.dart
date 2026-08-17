@@ -14,6 +14,7 @@ import '../models/toilet_record.dart';
 class AnomalyDetector {
   const AnomalyDetector({
     this.diarrheaStreakThresholdDays = defaultDiarrheaStreakThresholdDays,
+    this.lookbackDays = defaultLookbackDays,
   });
 
   /// Spec 4.4 says only "下痢が◯日連続" without pinning down a number of
@@ -21,7 +22,17 @@ class AnomalyDetector {
   /// tune via the constructor parameter if product wants a different value.
   static const int defaultDiarrheaStreakThresholdDays = 3;
 
+  /// How far back a record may be and still raise a warning (PM request:
+  /// "トイレの警告は1か月以内の記録を対象にしてほしい").
+  ///
+  /// Without a window, a single blood-suspected stool raised the banner for
+  /// the rest of the pet's life: the condition was "a matching record
+  /// exists", which never stops being true. The banner is a prompt to go to
+  /// a vet now, so it has to be about now.
+  static const int defaultLookbackDays = 31;
+
   final int diarrheaStreakThresholdDays;
+  final int lookbackDays;
 
   /// Inspects [records] (expected to be one pet's recent toilet records) and
   /// returns the suggestions that should currently be shown.
@@ -42,18 +53,26 @@ class AnomalyDetector {
   }) {
     final suggestions = <ConsultationSuggestion>[];
 
+    final cutoff = now.subtract(Duration(days: lookbackDays));
+    // Future-dated records are kept: a record timed a few minutes ahead by
+    // clock skew is still today's, and dropping it would silently lose the
+    // one the owner just entered.
+    final recent = records
+        .where((r) => !r.recordedAt.isBefore(cutoff))
+        .toList();
+
     bool suppressedToday(ConsultationSuggestionReason reason) {
       final last = lastSuggestedAt[reason];
       return last != null && _isSameDay(last, now);
     }
 
-    final bloodSuggestion = _detectBloodInStool(records);
+    final bloodSuggestion = _detectBloodInStool(recent);
     if (bloodSuggestion != null &&
         !suppressedToday(ConsultationSuggestionReason.bloodInStoolSuspected)) {
       suggestions.add(bloodSuggestion);
     }
 
-    final diarrheaSuggestion = _detectProlongedDiarrhea(records);
+    final diarrheaSuggestion = _detectProlongedDiarrhea(recent);
     if (diarrheaSuggestion != null &&
         !suppressedToday(ConsultationSuggestionReason.prolongedDiarrhea)) {
       suggestions.add(diarrheaSuggestion);

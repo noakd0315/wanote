@@ -209,4 +209,63 @@ void main() {
       );
     });
   });
+
+  // PM request: "トイレの警告は1か月以内の記録を対象にしてほしい". Without a
+  // window the condition is "a matching record exists", which never stops
+  // being true -- one blood-suspected stool raised the banner forever.
+  group('the one-month lookback window', () {
+    test('a blood-suspected record older than the window is ignored', () {
+      final records = [
+        stool(
+          'old',
+          now.subtract(const Duration(days: 40)),
+          color: StoolColor.bloodSuspected,
+        ),
+      ];
+      expect(detector.detect(records: records, now: now), isEmpty);
+    });
+
+    test('a blood-suspected record inside the window still triggers', () {
+      final records = [
+        stool(
+          'recent',
+          now.subtract(const Duration(days: 20)),
+          color: StoolColor.bloodSuspected,
+        ),
+      ];
+      expect(
+        detector.detect(records: records, now: now).map((s) => s.reason),
+        contains(ConsultationSuggestionReason.bloodInStoolSuspected),
+      );
+    });
+
+    test('a diarrhea streak that ended over a month ago is ignored', () {
+      final start = now.subtract(const Duration(days: 60));
+      final records = [
+        stool('d1', start, hardness: StoolHardness.diarrhea),
+        stool(
+          'd2',
+          start.add(const Duration(days: 1)),
+          hardness: StoolHardness.diarrhea,
+        ),
+        stool(
+          'd3',
+          start.add(const Duration(days: 2)),
+          hardness: StoolHardness.diarrhea,
+        ),
+      ];
+      expect(detector.detect(records: records, now: now), isEmpty);
+    });
+
+    test('a record timed slightly in the future is kept, not dropped', () {
+      final records = [
+        stool(
+          'skewed',
+          now.add(const Duration(minutes: 5)),
+          color: StoolColor.bloodSuspected,
+        ),
+      ];
+      expect(detector.detect(records: records, now: now), isNotEmpty);
+    });
+  });
 }

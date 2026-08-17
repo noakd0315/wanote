@@ -1056,6 +1056,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String get toiletUrineVolumeLabel => 'Amount';
+
+  @override
+  String toiletUrineVolumeSubtitle(String volume) {
+    return 'Amount: $volume';
+  }
+
+  @override
+  String get toiletUrineDetailTitle => 'Urination details';
+
+  @override
+  String get toiletPeriodOneWeek => '1 week';
+
+  @override
+  String get toiletPeriodOneMonth => '1 month';
+
+  @override
+  String get toiletPeriodThreeMonths => '3 months';
+
+  @override
+  String get toiletPeriodAll => 'All';
+
+  @override
+  String get urineVolumeSmall => 'Small';
+
+  @override
+  String get urineVolumeNormal => 'Normal';
+
+  @override
+  String get urineVolumeLarge => 'Large';
+
+  @override
   String get weightRecordTimelineTitle => 'Weight records';
 
   @override

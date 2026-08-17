@@ -1382,6 +1382,51 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "toiletUrineVolumeLabel": "Amount",
+  "@toiletUrineVolumeLabel": {
+    "description": "Section heading above the urine volume choice chips."
+  },
+  "toiletUrineVolumeSubtitle": "Amount: {volume}",
+  "@toiletUrineVolumeSubtitle": {
+    "description": "Timeline row subtitle fragment for a urine record's volume.",
+    "placeholders": {
+      "volume": {
+        "type": "String"
+      }
+    }
+  },
+  "toiletUrineDetailTitle": "Urination details",
+  "@toiletUrineDetailTitle": {
+    "description": "AppBar title of the toilet detail screen for a urine record."
+  },
+  "toiletPeriodOneWeek": "1 week",
+  "@toiletPeriodOneWeek": {
+    "description": "Timeline period filter: the last week."
+  },
+  "toiletPeriodOneMonth": "1 month",
+  "@toiletPeriodOneMonth": {
+    "description": "Timeline period filter: the last month."
+  },
+  "toiletPeriodThreeMonths": "3 months",
+  "@toiletPeriodThreeMonths": {
+    "description": "Timeline period filter: the last three months."
+  },
+  "toiletPeriodAll": "All",
+  "@toiletPeriodAll": {
+    "description": "Timeline period filter: every record."
+  },
+  "urineVolumeSmall": "Small",
+  "@urineVolumeSmall": {
+    "description": "Display label for UrineVolume.small."
+  },
+  "urineVolumeNormal": "Normal",
+  "@urineVolumeNormal": {
+    "description": "Display label for UrineVolume.normal."
+  },
+  "urineVolumeLarge": "Large",
+  "@urineVolumeLarge": {
+    "description": "Display label for UrineVolume.large."
+  },
   "weightRecordTimelineTitle": "Weight records",
   "@weightRecordTimelineTitle": {
     "description": "AppBar title of the weight record chart/table screen."

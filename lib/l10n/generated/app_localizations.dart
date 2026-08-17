@@ -2018,6 +2018,66 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Section heading above the urine volume choice chips.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get toiletUrineVolumeLabel;
+
+  /// Timeline row subtitle fragment for a urine record's volume.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount: {volume}'**
+  String toiletUrineVolumeSubtitle(String volume);
+
+  /// AppBar title of the toilet detail screen for a urine record.
+  ///
+  /// In en, this message translates to:
+  /// **'Urination details'**
+  String get toiletUrineDetailTitle;
+
+  /// Timeline period filter: the last week.
+  ///
+  /// In en, this message translates to:
+  /// **'1 week'**
+  String get toiletPeriodOneWeek;
+
+  /// Timeline period filter: the last month.
+  ///
+  /// In en, this message translates to:
+  /// **'1 month'**
+  String get toiletPeriodOneMonth;
+
+  /// Timeline period filter: the last three months.
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get toiletPeriodThreeMonths;
+
+  /// Timeline period filter: every record.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get toiletPeriodAll;
+
+  /// Display label for UrineVolume.small.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get urineVolumeSmall;
+
+  /// Display label for UrineVolume.normal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get urineVolumeNormal;
+
+  /// Display label for UrineVolume.large.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get urineVolumeLarge;
+
   /// AppBar title of the weight record chart/table screen.
   ///
   /// In en, this message translates to:

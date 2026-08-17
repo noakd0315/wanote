@@ -70,6 +70,26 @@ enum UrineColor {
   }
 }
 
+/// How much was passed (PM request: "排尿に量（少ない・普通・多い）を
+/// 選べるようにしたい"). Like [UrineColor] this is a judged-by-eye 3-tier
+/// scale, not a measurement -- owners are not collecting and weighing it.
+/// Paired with colour it is the pair a vet asks about first: a lot of pale
+/// urine and a little dark urine point in opposite directions.
+enum UrineVolume {
+  small,
+  normal,
+  large;
+
+  String get wireName => name;
+
+  static UrineVolume fromWireName(String value) {
+    return UrineVolume.values.firstWhere(
+      (e) => e.wireName == value,
+      orElse: () => UrineVolume.normal,
+    );
+  }
+}
+
 /// The spec's data table (4.3) lists `stool_condition` as a single `enum`
 /// column, but the screen requirements (4.2) describe two independent
 /// dimensions (hardness and color) that combine, e.g. "軟便 + 血便疑い" is a
@@ -115,6 +135,7 @@ class ToiletRecord extends Equatable {
     required this.type,
     this.stoolCondition,
     this.urineColor,
+    this.urineVolume,
     this.photo,
     this.location,
   });
@@ -125,6 +146,10 @@ class ToiletRecord extends Equatable {
   final ToiletType type;
   final StoolCondition? stoolCondition;
   final UrineColor? urineColor;
+
+  /// Only meaningful when `type == ToiletType.urine`, same as [urineColor].
+  final UrineVolume? urineVolume;
+
   final String? photo;
 
   /// Optional free-text place the record happened (e.g. "庭", "散歩中") --
@@ -137,10 +162,12 @@ class ToiletRecord extends Equatable {
     ToiletType? type,
     StoolCondition? stoolCondition,
     UrineColor? urineColor,
+    UrineVolume? urineVolume,
     String? photo,
     String? location,
     bool clearStoolCondition = false,
     bool clearUrineColor = false,
+    bool clearUrineVolume = false,
     bool clearPhoto = false,
     bool clearLocation = false,
   }) {
@@ -153,6 +180,9 @@ class ToiletRecord extends Equatable {
           ? null
           : (stoolCondition ?? this.stoolCondition),
       urineColor: clearUrineColor ? null : (urineColor ?? this.urineColor),
+      urineVolume: clearUrineVolume
+          ? null
+          : (urineVolume ?? this.urineVolume),
       photo: clearPhoto ? null : (photo ?? this.photo),
       location: clearLocation ? null : (location ?? this.location),
     );
@@ -166,6 +196,7 @@ class ToiletRecord extends Equatable {
       'type': type.wireName,
       'stool_condition': stoolCondition?.toMap(),
       'urine_color': urineColor?.wireName,
+      'urine_volume': urineVolume?.wireName,
       'photo': photo,
       'location': location,
     };
@@ -178,6 +209,7 @@ class ToiletRecord extends Equatable {
         : DateTime.parse(rawRecordedAt as String);
     final rawStoolCondition = map['stool_condition'] as Map<String, dynamic>?;
     final rawUrineColor = map['urine_color'] as String?;
+    final rawUrineVolume = map['urine_volume'] as String?;
     return ToiletRecord(
       toiletId: map['toilet_id'] as String,
       petId: map['pet_id'] as String,
@@ -188,6 +220,9 @@ class ToiletRecord extends Equatable {
           : null,
       urineColor: rawUrineColor != null
           ? UrineColor.fromWireName(rawUrineColor)
+          : null,
+      urineVolume: rawUrineVolume != null
+          ? UrineVolume.fromWireName(rawUrineVolume)
           : null,
       photo: map['photo'] as String?,
       location: map['location'] as String?,
@@ -202,6 +237,7 @@ class ToiletRecord extends Equatable {
     type,
     stoolCondition,
     urineColor,
+    urineVolume,
     photo,
     location,
   ];

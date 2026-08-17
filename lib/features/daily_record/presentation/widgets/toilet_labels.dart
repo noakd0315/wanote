@@ -41,3 +41,12 @@ String urineColorLabel(BuildContext context, UrineColor color) {
     UrineColor.dark => l10n.urineColorDark,
   };
 }
+
+String urineVolumeLabel(BuildContext context, UrineVolume volume) {
+  final l10n = AppLocalizations.of(context)!;
+  return switch (volume) {
+    UrineVolume.small => l10n.urineVolumeSmall,
+    UrineVolume.normal => l10n.urineVolumeNormal,
+    UrineVolume.large => l10n.urineVolumeLarge,
+  };
+}

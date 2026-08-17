@@ -138,4 +138,45 @@ void main() {
       expect(cleared.location, isNull);
     });
   });
+
+  // PM request: "排尿に量（少ない・普通・多い）を選べるようにしたい".
+  group('urine volume', () {
+    test('survives a toMap/fromMap round trip', () {
+      final record = ToiletRecord(
+        toiletId: 't-1',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 17, 7, 30),
+        type: ToiletType.urine,
+        urineColor: UrineColor.dark,
+        urineVolume: UrineVolume.large,
+      );
+      final restored = ToiletRecord.fromMap(record.toMap());
+      expect(restored.urineVolume, UrineVolume.large);
+      expect(restored.urineColor, UrineColor.dark);
+    });
+
+    test('a record saved before the field existed reads back as null', () {
+      final record = ToiletRecord(
+        toiletId: 't-2',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 1),
+        type: ToiletType.urine,
+        urineColor: UrineColor.normal,
+      );
+      final map = record.toMap()..remove('urine_volume');
+      expect(ToiletRecord.fromMap(map).urineVolume, isNull);
+    });
+
+    test('an unrecognised stored value falls back to normal', () {
+      final record = ToiletRecord(
+        toiletId: 't-3',
+        petId: 'pet-1',
+        recordedAt: DateTime(2026, 8, 1),
+        type: ToiletType.urine,
+        urineVolume: UrineVolume.small,
+      );
+      final map = record.toMap()..['urine_volume'] = 'enormous';
+      expect(ToiletRecord.fromMap(map).urineVolume, UrineVolume.normal);
+    });
+  });
 }

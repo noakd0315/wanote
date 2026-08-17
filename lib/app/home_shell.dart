@@ -378,6 +378,8 @@ class _HomeShellState extends State<HomeShell>
         toiletRecordRepository: _toiletRecordRepository,
         onConsultationSuggested: (suggestion) =>
             _openConsultation(context, prefillRecords: [suggestion.reference]),
+        onConsultAboutRecord: (reference) =>
+            _openConsultation(context, prefillRecords: [reference]),
       ),
       MedicalHomeScreen(uid: uid, petId: petId, tabRequest: _medicalTabRequest),
       AiSection(

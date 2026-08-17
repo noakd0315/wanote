@@ -29,6 +29,7 @@ class DailyRecordSection extends StatefulWidget {
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
     this.onConsultationSuggested,
+    this.onConsultAboutRecord,
     this.tabRequest,
   });
 
@@ -48,6 +49,10 @@ class DailyRecordSection extends StatefulWidget {
   /// features/daily_record must not import features/ai itself.
   final void Function(ConsultationSuggestion suggestion)?
   onConsultationSuggested;
+
+  /// Forwarded to the toilet detail screen's AI-consultation button.
+  final void Function(ConsultationReferenceRecord reference)?
+  onConsultAboutRecord;
 
   @override
   State<DailyRecordSection> createState() => _DailyRecordSectionState();
@@ -136,6 +141,7 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
                 petId: widget.petId,
                 repository: widget.toiletRecordRepository,
                 onConsultationSuggested: widget.onConsultationSuggested,
+                onConsultAboutRecord: widget.onConsultAboutRecord,
               ),
             ],
           ),

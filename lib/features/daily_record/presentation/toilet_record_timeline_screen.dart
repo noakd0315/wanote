@@ -41,6 +41,7 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
     this.healthRecordRepository,
     this.anomalyDetector = const AnomalyDetector(),
     this.onConsultationSuggested,
+    this.onConsultAboutRecord,
   });
 
   final String uid;
@@ -54,6 +55,12 @@ class ToiletRecordTimelineScreen extends StatefulWidget {
   final void Function(ConsultationSuggestion suggestion)?
   onConsultationSuggested;
 
+  /// Passed to the detail screen's AI-consultation button. Separate from
+  /// [onConsultationSuggested] because nothing was detected here -- the
+  /// owner picked a record and asked about it.
+  final void Function(ConsultationReferenceRecord reference)?
+  onConsultAboutRecord;
+
   @override
   State<ToiletRecordTimelineScreen> createState() =>
       _ToiletRecordTimelineScreenState();
@@ -65,6 +72,11 @@ class _ToiletRecordTimelineScreenState
   /// persisted: unlike the weight screen's chart/table choice, this is a
   /// glance at a summary rather than a preferred way of reading the data.
   bool _showChart = false;
+
+  /// How far back the list reaches (PM request: "トイレ記録も期間で絞り込み
+  /// たい"). Records accumulate several a day, so within a month the list is
+  /// long enough that scrolling to last week is work.
+  _ToiletPeriod _period = _ToiletPeriod.oneMonth;
 
   /// Reasons the owner has put away in this session.
   ///
@@ -147,10 +159,14 @@ class _ToiletRecordTimelineScreenState
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                final records = snapshot.data ?? const <ToiletRecord>[];
+                final allRecords = snapshot.data ?? const <ToiletRecord>[];
                 final now = DateTime.now();
+                // The filter is the reader's window on the list. The
+                // detector keeps its own (one month, fixed): narrowing the
+                // list must not silently switch the warnings off.
+                final records = _period.filter(allRecords, now);
                 final currentSuggestions = widget.anomalyDetector.detect(
-                  records: records,
+                  records: allRecords,
                   now: now,
                   lastSuggestedAt: const {},
                 );
@@ -220,6 +236,30 @@ class _ToiletRecordTimelineScreenState
                         ],
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<_ToiletPeriod>(
+                          // Same reason as the weight chart's: the check
+                          // mark is laid out inside the segment, so it
+                          // widens whichever one is selected.
+                          showSelectedIcon: false,
+                          segments: _ToiletPeriod.values
+                              .map(
+                                (p) => ButtonSegment(
+                                  value: p,
+                                  label: Text(p.label(l10n)),
+                                ),
+                              )
+                              .toList(),
+                          selected: {_period},
+                          onSelectionChanged: (selection) =>
+                              setState(() => _period = selection.first),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Expanded(
                       child: records.isEmpty
                           ? Center(child: Text(l10n.commonNoRecordsYet))
@@ -235,6 +275,14 @@ class _ToiletRecordTimelineScreenState
                                         urineColorLabel(
                                           context,
                                           record.urineColor!,
+                                        ),
+                                      ),
+                                  if (isUrine)
+                                    if (record.urineVolume != null)
+                                      l10n.toiletUrineVolumeSubtitle(
+                                        urineVolumeLabel(
+                                          context,
+                                          record.urineVolume!,
                                         ),
                                       ),
                                   if (!isUrine)
@@ -258,23 +306,20 @@ class _ToiletRecordTimelineScreenState
                                     ),
                                 ];
                                 return ListTile(
-                                  // Stool only. A urine record holds nothing
-                                  // a list row does not already show, and
-                                  // carries no photo (PM: 排尿は写真不要),
-                                  // so a detail screen for it would open on
-                                  // the same three facts.
-                                  onTap: isUrine
-                                      ? null
-                                      : () => Navigator.of(context).push(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) =>
-                                                ToiletRecordDetailScreen(
-                                                  uid: widget.uid,
-                                                  record: record,
-                                                  repository: widget.repository,
-                                                ),
-                                          ),
-                                        ),
+                                  // Both types open now (PM request). The
+                                  // detail screen is also where a record can
+                                  // be taken to the AI, which is not
+                                  // something a list row can offer.
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => ToiletRecordDetailScreen(
+                                        uid: widget.uid,
+                                        record: record,
+                                        repository: widget.repository,
+                                        onConsultAi: widget.onConsultAboutRecord,
+                                      ),
+                                    ),
+                                  ),
                                   leading: Icon(
                                     isUrine ? Icons.water_drop : Icons.circle,
                                   ),
@@ -302,5 +347,36 @@ class _ToiletRecordTimelineScreenState
               },
             ),
     );
+  }
+}
+
+/// How far back the timeline list reaches.
+///
+/// Private to this screen rather than a domain type: it filters what is
+/// displayed and nothing else. The weight chart's [WeightTrendPeriod] is a
+/// different thing -- it feeds a calculation whose results depend on it.
+enum _ToiletPeriod {
+  oneWeek,
+  oneMonth,
+  threeMonths,
+  all;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    _ToiletPeriod.oneWeek => l10n.toiletPeriodOneWeek,
+    _ToiletPeriod.oneMonth => l10n.toiletPeriodOneMonth,
+    _ToiletPeriod.threeMonths => l10n.toiletPeriodThreeMonths,
+    _ToiletPeriod.all => l10n.toiletPeriodAll,
+  };
+
+  List<ToiletRecord> filter(List<ToiletRecord> records, DateTime now) {
+    final days = switch (this) {
+      _ToiletPeriod.oneWeek => 7,
+      _ToiletPeriod.oneMonth => 31,
+      _ToiletPeriod.threeMonths => 92,
+      _ToiletPeriod.all => null,
+    };
+    if (days == null) return records;
+    final cutoff = now.subtract(Duration(days: days));
+    return records.where((r) => !r.recordedAt.isBefore(cutoff)).toList();
   }
 }

@@ -69,6 +69,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   StoolHardness _hardness = StoolHardness.normal;
   StoolColor _color = StoolColor.normal;
   UrineColor _urineColor = UrineColor.normal;
+  UrineVolume _urineVolume = UrineVolume.normal;
 
   bool get _isUrine => widget.type == ToiletType.urine;
   Uint8List? _photoBytes;
@@ -199,6 +200,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             ? null
             : StoolCondition(hardness: _hardness, color: _color),
         urineColor: _isUrine ? _urineColor : null,
+        urineVolume: _isUrine ? _urineVolume : null,
         photoBytes: _photoBytes,
         recordedAt: _recordedAt,
         location: location.isEmpty ? null : location,
@@ -321,6 +323,21 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
                     label: Text(urineColorLabel(context, c)),
                     selected: _urineColor == c,
                     onSelected: (_) => setState(() => _urineColor = c),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.toiletUrineVolumeLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Wrap(
+                spacing: 8,
+                children: UrineVolume.values.map((v) {
+                  return ChoiceChip(
+                    label: Text(urineVolumeLabel(context, v)),
+                    selected: _urineVolume == v,
+                    onSelected: (_) => setState(() => _urineVolume = v),
                   );
                 }).toList(),
               ),

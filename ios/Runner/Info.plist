@@ -6,6 +6,23 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<!-- The languages iOS is told this app speaks.
+	     iOS localizes the UI it presents on the app's behalf -- the camera
+	     and photo pickers, the permission alerts, the share sheet -- into
+	     the device language, but only from this list. A Flutter app ships
+	     with Base.lproj alone, so without this key iOS reads the app as
+	     English-only and renders all of that in English even on a Japanese
+	     phone. That is what the PM saw when taking a photo from the iPhone
+	     (2026-08-17); Android has no equivalent gate, which is why it was
+	     already correct there.
+	     ja first: it is the fallback when the device language is neither.
+	     Declaring more than one also makes iOS offer a per-app 言語 setting
+	     under Settings > wanote. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ja</string>
+		<string>en</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>wanote</string>
 	<key>CFBundleExecutable</key>
