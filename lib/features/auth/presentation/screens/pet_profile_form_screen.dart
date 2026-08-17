@@ -48,6 +48,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _breedController;
   late final TextEditingController _weightController;
+  late final TextEditingController _neckGirthController;
+  late final TextEditingController _chestGirthController;
+  late final TextEditingController _backLengthController;
   late DateTime? _birthday;
   late PetSex _sex;
   late bool _neutered;
@@ -81,6 +84,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     // Filled in didChangeDependencies: the unit depends on the language,
     // and Localizations is not available yet in initState.
     _weightController = TextEditingController();
+    _neckGirthController = TextEditingController();
+    _chestGirthController = TextEditingController();
+    _backLengthController = TextEditingController();
     _birthday = pet?.birthday;
     _sex = pet?.sex ?? PetSex.male;
     _neutered = pet?.neutered ?? false;
@@ -102,6 +108,12 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     if (_weightPrefilled) return;
     _weightPrefilled = true;
     _weightController.text = weightInputText(context, widget.existingPet?.weightKg);
+    // Same reason the weight is prefilled here and not in initState: the
+    // unit depends on the locale, which needs a BuildContext.
+    final pet = widget.existingPet;
+    _neckGirthController.text = lengthInputText(context, pet?.neckGirthCm);
+    _chestGirthController.text = lengthInputText(context, pet?.chestGirthCm);
+    _backLengthController.text = lengthInputText(context, pet?.backLengthCm);
   }
 
   @override
@@ -109,6 +121,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     _nameController.dispose();
     _breedController.dispose();
     _weightController.dispose();
+    _neckGirthController.dispose();
+    _chestGirthController.dispose();
+    _backLengthController.dispose();
     super.dispose();
   }
 
@@ -281,6 +296,99 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     }
   }
 
+  /// One measurement input. The three differ only by label, and writing
+  /// them out three times is how one of them ends up parsing in the wrong
+  /// unit after an edit.
+  Widget _measurementField(
+    AppLocalizations l10n, {
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: '$label (${lengthInputUnit(context)})',
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) return null;
+        final parsed = double.tryParse(value.trim());
+        return (parsed == null || parsed <= 0)
+            ? l10n.petProfileFormMeasurementValidationError
+            : null;
+      },
+    );
+  }
+
+  /// Where to put the tape measure, as a picture.
+  ///
+  /// Three girths described in words are three things an owner can measure
+  /// in the wrong place -- 胴まわり in particular is the ribcage behind the
+  /// front legs, not the waist and not the body's length. The numbered
+  /// callouts in the diagram match the order of the fields.
+  void _showMeasurementGuide() {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.petProfileFormMeasurementGuideTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/dog_size.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _guideRow('1', l10n.petProfileFormNeckGirthLabel,
+                  l10n.petProfileFormNeckGirthHelp),
+              _guideRow('2', l10n.petProfileFormChestGirthLabel,
+                  l10n.petProfileFormChestGirthHelp),
+              _guideRow('3', l10n.petProfileFormBackLengthLabel,
+                  l10n.petProfileFormBackLengthHelp),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _guideRow(String number, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(radius: 12, child: Text(number)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(description),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit(AuthController controller) async {
     final l10n = AppLocalizations.of(context)!;
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -296,6 +404,14 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     final weightKg = weightText.isEmpty
         ? null
         : parseWeightToKilograms(context, weightText);
+    double? lengthOf(TextEditingController controller) {
+      final text = controller.text.trim();
+      return text.isEmpty ? null : parseLengthToCentimetres(context, text);
+    }
+
+    final neckGirthCm = lengthOf(_neckGirthController);
+    final chestGirthCm = lengthOf(_chestGirthController);
+    final backLengthCm = lengthOf(_backLengthController);
 
     try {
       PetProfile pet;
@@ -348,6 +464,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
       // pet keeps its framing too -- createPet() takes no framing arguments,
       // so doing it there silently dropped it.
       pet = pet.copyWith(
+        neckGirthCm: neckGirthCm,
+        chestGirthCm: chestGirthCm,
+        backLengthCm: backLengthCm,
         iconAlignmentX: _iconAlignmentX,
         iconAlignmentY: _iconAlignmentY,
         iconZoom: _iconZoom,
@@ -492,6 +611,49 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                                   ? l10n.petProfileFormWeightValidationError
                                   : null;
                             },
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.petProfileFormMeasurementsHeading,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleSmall,
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: _showMeasurementGuide,
+                                icon: const Icon(Icons.straighten, size: 18),
+                                label: Text(
+                                  l10n.petProfileFormMeasurementGuideButton,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            l10n.petProfileFormMeasurementsHint,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          _measurementField(
+                            l10n,
+                            controller: _neckGirthController,
+                            label: l10n.petProfileFormNeckGirthLabel,
+                          ),
+                          const SizedBox(height: 12),
+                          _measurementField(
+                            l10n,
+                            controller: _chestGirthController,
+                            label: l10n.petProfileFormChestGirthLabel,
+                          ),
+                          const SizedBox(height: 12),
+                          _measurementField(
+                            l10n,
+                            controller: _backLengthController,
+                            label: l10n.petProfileFormBackLengthLabel,
                           ),
                           const SizedBox(height: 24),
                           FilledButton(

@@ -1020,6 +1020,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String get petProfileFormMeasurementsHeading => 'サイズ（任意）';
+
+  @override
+  String get petProfileFormMeasurementsHint => '洋服やハーネスを選ぶときの目安になります。';
+
+  @override
+  String get petProfileFormMeasurementGuideButton => '測り方';
+
+  @override
+  String get petProfileFormMeasurementGuideTitle => 'サイズの測り方';
+
+  @override
+  String get petProfileFormNeckGirthLabel => '首まわり';
+
+  @override
+  String get petProfileFormNeckGirthHelp =>
+      '首輪をつける位置を一周します。指が1〜2本入るゆとりを持たせてください。';
+
+  @override
+  String get petProfileFormChestGirthLabel => '胴まわり';
+
+  @override
+  String get petProfileFormChestGirthHelp => '前足の後ろ、胸の一番太いところを一周します。';
+
+  @override
+  String get petProfileFormBackLengthLabel => '着丈';
+
+  @override
+  String get petProfileFormBackLengthHelp => '首の付け根から尻尾の付け根まで、背中に沿って測ります。';
+
+  @override
+  String get petProfileFormMeasurementValidationError => '正の数を入力してください';
+
+  @override
   String get toiletUrineVolumeLabel => '量';
 
   @override

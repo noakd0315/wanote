@@ -121,6 +121,7 @@ flutter:
     - assets/images/wanote_logo.png
     - assets/images/wanote_wordmark.png
     - assets/images/wanote_icon.png
+    - assets/images/dog_size.png
     - assets/images/dogs/
 
   # An image asset can refer to one or more resolution-specific "variants", see

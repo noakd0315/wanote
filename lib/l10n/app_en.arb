@@ -1382,6 +1382,50 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "petProfileFormMeasurementsHeading": "Measurements (optional)",
+  "@petProfileFormMeasurementsHeading": {
+    "description": "Section heading above the three body-measurement fields on the pet form."
+  },
+  "petProfileFormMeasurementsHint": "Used when picking clothing or a harness.",
+  "@petProfileFormMeasurementsHint": {
+    "description": "Sub-heading explaining why the measurements are collected."
+  },
+  "petProfileFormMeasurementGuideButton": "How to measure",
+  "@petProfileFormMeasurementGuideButton": {
+    "description": "Button that opens the measuring diagram."
+  },
+  "petProfileFormMeasurementGuideTitle": "How to measure",
+  "@petProfileFormMeasurementGuideTitle": {
+    "description": "Title of the measuring-guide bottom sheet."
+  },
+  "petProfileFormNeckGirthLabel": "Neck girth",
+  "@petProfileFormNeckGirthLabel": {
+    "description": "Label for the neck measurement. 'Neck girth' is the term used on dog apparel and harness sizing charts."
+  },
+  "petProfileFormNeckGirthHelp": "Around the neck where the collar sits, leaving room for one or two fingers.",
+  "@petProfileFormNeckGirthHelp": {
+    "description": "Instruction for measuring neck girth, shown beside callout 1 in the diagram."
+  },
+  "petProfileFormChestGirthLabel": "Chest girth",
+  "@petProfileFormChestGirthLabel": {
+    "description": "Label for the chest measurement. 'Chest girth' is the sizing-chart term; it is the ribcage circumference, not body length."
+  },
+  "petProfileFormChestGirthHelp": "Around the widest part of the chest, just behind the front legs.",
+  "@petProfileFormChestGirthHelp": {
+    "description": "Instruction for measuring chest girth, shown beside callout 2 in the diagram."
+  },
+  "petProfileFormBackLengthLabel": "Back length",
+  "@petProfileFormBackLengthLabel": {
+    "description": "Label for the back measurement. 'Back length' is the sizing-chart term for the topline."
+  },
+  "petProfileFormBackLengthHelp": "Along the back, from the base of the neck to the base of the tail.",
+  "@petProfileFormBackLengthHelp": {
+    "description": "Instruction for measuring back length, shown beside callout 3 in the diagram."
+  },
+  "petProfileFormMeasurementValidationError": "Enter a positive number",
+  "@petProfileFormMeasurementValidationError": {
+    "description": "Validation message when a measurement field holds something that is not a positive number."
+  },
   "toiletUrineVolumeLabel": "Amount",
   "@toiletUrineVolumeLabel": {
     "description": "Section heading above the urine volume choice chips."

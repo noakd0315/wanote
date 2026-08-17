@@ -2018,6 +2018,72 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Section heading above the three body-measurement fields on the pet form.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurements (optional)'**
+  String get petProfileFormMeasurementsHeading;
+
+  /// Sub-heading explaining why the measurements are collected.
+  ///
+  /// In en, this message translates to:
+  /// **'Used when picking clothing or a harness.'**
+  String get petProfileFormMeasurementsHint;
+
+  /// Button that opens the measuring diagram.
+  ///
+  /// In en, this message translates to:
+  /// **'How to measure'**
+  String get petProfileFormMeasurementGuideButton;
+
+  /// Title of the measuring-guide bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'How to measure'**
+  String get petProfileFormMeasurementGuideTitle;
+
+  /// Label for the neck measurement. 'Neck girth' is the term used on dog apparel and harness sizing charts.
+  ///
+  /// In en, this message translates to:
+  /// **'Neck girth'**
+  String get petProfileFormNeckGirthLabel;
+
+  /// Instruction for measuring neck girth, shown beside callout 1 in the diagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Around the neck where the collar sits, leaving room for one or two fingers.'**
+  String get petProfileFormNeckGirthHelp;
+
+  /// Label for the chest measurement. 'Chest girth' is the sizing-chart term; it is the ribcage circumference, not body length.
+  ///
+  /// In en, this message translates to:
+  /// **'Chest girth'**
+  String get petProfileFormChestGirthLabel;
+
+  /// Instruction for measuring chest girth, shown beside callout 2 in the diagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Around the widest part of the chest, just behind the front legs.'**
+  String get petProfileFormChestGirthHelp;
+
+  /// Label for the back measurement. 'Back length' is the sizing-chart term for the topline.
+  ///
+  /// In en, this message translates to:
+  /// **'Back length'**
+  String get petProfileFormBackLengthLabel;
+
+  /// Instruction for measuring back length, shown beside callout 3 in the diagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Along the back, from the base of the neck to the base of the tail.'**
+  String get petProfileFormBackLengthHelp;
+
+  /// Validation message when a measurement field holds something that is not a positive number.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive number'**
+  String get petProfileFormMeasurementValidationError;
+
   /// Section heading above the urine volume choice chips.
   ///
   /// In en, this message translates to:

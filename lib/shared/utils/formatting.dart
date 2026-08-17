@@ -80,6 +80,46 @@ double? parseWeightToKilograms(BuildContext context, String text) {
   return usesImperialWeight(context) ? poundsToKilograms(value) : value;
 }
 
+const double _centimetresPerInch = 2.54;
+
+double centimetresToInches(double cm) => cm / _centimetresPerInch;
+
+double inchesToCentimetres(double inches) => inches * _centimetresPerInch;
+
+/// A body measurement with its unit, converted for display. Centimetres are
+/// the stored unit, the same way kilograms are for weight.
+///
+/// Rides on [usesImperialWeight]: a reader who wants pounds wants inches,
+/// and dog-apparel sizing charts in English are given in inches throughout.
+String formatLength(BuildContext context, double centimetres) {
+  if (usesImperialWeight(context)) {
+    return '${centimetresToInches(centimetres).toStringAsFixed(1)} in';
+  }
+  return '${centimetres.toStringAsFixed(1)} cm';
+}
+
+String lengthInputUnit(BuildContext context) =>
+    usesImperialWeight(context) ? 'in' : 'cm';
+
+/// Reads a measurement the owner typed in whichever unit the field is
+/// showing, and returns centimetres. Null when the text is not positive.
+double? parseLengthToCentimetres(BuildContext context, String text) {
+  final value = double.tryParse(text.trim());
+  if (value == null || value <= 0) return null;
+  return usesImperialWeight(context) ? inchesToCentimetres(value) : value;
+}
+
+/// Renders stored centimetres into the unit the input field expects.
+/// The inverse of [parseLengthToCentimetres].
+String lengthInputText(BuildContext context, double? centimetres) {
+  if (centimetres == null) return '';
+  final shown = usesImperialWeight(context)
+      ? centimetresToInches(centimetres)
+      : centimetres;
+  final text = shown.toStringAsFixed(1);
+  return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
+}
+
 /// Renders a stored weight into the unit the input field expects, for
 /// pre-filling it. The inverse of [parseWeightToKilograms].
 String weightInputText(BuildContext context, double? kilograms) {

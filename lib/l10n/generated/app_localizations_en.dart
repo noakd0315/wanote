@@ -1056,6 +1056,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String get petProfileFormMeasurementsHeading => 'Measurements (optional)';
+
+  @override
+  String get petProfileFormMeasurementsHint =>
+      'Used when picking clothing or a harness.';
+
+  @override
+  String get petProfileFormMeasurementGuideButton => 'How to measure';
+
+  @override
+  String get petProfileFormMeasurementGuideTitle => 'How to measure';
+
+  @override
+  String get petProfileFormNeckGirthLabel => 'Neck girth';
+
+  @override
+  String get petProfileFormNeckGirthHelp =>
+      'Around the neck where the collar sits, leaving room for one or two fingers.';
+
+  @override
+  String get petProfileFormChestGirthLabel => 'Chest girth';
+
+  @override
+  String get petProfileFormChestGirthHelp =>
+      'Around the widest part of the chest, just behind the front legs.';
+
+  @override
+  String get petProfileFormBackLengthLabel => 'Back length';
+
+  @override
+  String get petProfileFormBackLengthHelp =>
+      'Along the back, from the base of the neck to the base of the tail.';
+
+  @override
+  String get petProfileFormMeasurementValidationError =>
+      'Enter a positive number';
+
+  @override
   String get toiletUrineVolumeLabel => 'Amount';
 
   @override

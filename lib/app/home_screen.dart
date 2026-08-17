@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/presentation/food_portion_screen.dart';
+import '../features/auth/presentation/screens/pet_profile_form_screen.dart';
 import '../features/daily_record/data/toilet_record_repository.dart';
 import '../features/daily_record/data/weight_record_repository.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -147,17 +148,50 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  child: Text(
-                    activePet.name,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      // Keeps the name legible over a bright photo now that
-                      // the full-screen black gradient scrim is gone (PM
-                      // request: "黒のグラデーションがかかっていますが、
-                      // 削除したい").
-                      shadows: const [
-                        Shadow(color: Colors.black54, blurRadius: 8),
+                  // The name opens the pet's own form (PM request: a
+                  // shortcut to editing the pet from Home). Put on the name
+                  // rather than added to HomeShortcutRow: that row is four
+                  // buttons wide already, and a fifth would shrink all of
+                  // them to fit something used once in a while. The pencil
+                  // is there because a tappable name over a photo does not
+                  // look tappable on its own.
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            PetProfileFormScreen(existingPet: activePet),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            activePet.name,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  // Keeps the name legible over a bright
+                                  // photo now that the full-screen black
+                                  // gradient scrim is gone (PM request:
+                                  // "黒のグラデーションがかかっていますが、
+                                  // 削除したい").
+                                  shadows: const [
+                                    Shadow(color: Colors.black54, blurRadius: 8),
+                                  ],
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.edit_outlined,
+                          color: Colors.white,
+                          size: 20,
+                          shadows: [
+                            Shadow(color: Colors.black54, blurRadius: 8),
+                          ],
+                        ),
                       ],
                     ),
                   ),

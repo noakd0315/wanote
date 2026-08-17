@@ -34,6 +34,9 @@ class PetProfile extends Equatable {
     required this.sex,
     required this.neutered,
     this.weightKg,
+    this.neckGirthCm,
+    this.chestGirthCm,
+    this.backLengthCm,
     this.photoUrl,
     this.iconPhotoUrl,
     this.iconAlignmentX = 0.0,
@@ -52,6 +55,23 @@ class PetProfile extends Equatable {
   final PetSex sex;
   final bool neutered;
   final double? weightKg;
+
+  /// The three measurements dog clothing and harnesses are sized by (PM
+  /// request: 首まわり・胴まわり・着丈). All optional -- an owner who never
+  /// buys their dog a coat never needs them, and a half-filled set is
+  /// still worth keeping.
+  ///
+  /// Stored in centimetres regardless of what the field displayed, the same
+  /// way [weightKg] is stored in kilograms. English-language sizing charts
+  /// are given in inches, so the input converts; the stored number must not.
+  ///
+  /// The English names are the ones the trade uses, so a chart can be read
+  /// straight across: 首まわり = neck girth, 胴まわり = chest girth (the
+  /// ribcage just behind the front legs, *not* body length), 着丈 = back
+  /// length (base of neck to base of tail).
+  final double? neckGirthCm;
+  final double? chestGirthCm;
+  final double? backLengthCm;
 
   /// Download URL for the pet's full-bleed background photo (Home screen),
   /// or null if none has been uploaded yet. Added after the initial spec
@@ -95,6 +115,9 @@ class PetProfile extends Equatable {
     PetSex? sex,
     bool? neutered,
     double? weightKg,
+    double? neckGirthCm,
+    double? chestGirthCm,
+    double? backLengthCm,
     String? photoUrl,
     String? iconPhotoUrl,
     double? iconAlignmentX,
@@ -115,6 +138,9 @@ class PetProfile extends Equatable {
       sex: sex ?? this.sex,
       neutered: neutered ?? this.neutered,
       weightKg: weightKg ?? this.weightKg,
+      neckGirthCm: neckGirthCm ?? this.neckGirthCm,
+      chestGirthCm: chestGirthCm ?? this.chestGirthCm,
+      backLengthCm: backLengthCm ?? this.backLengthCm,
       photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
       iconPhotoUrl: clearIconPhotoUrl
           ? null
@@ -138,6 +164,9 @@ class PetProfile extends Equatable {
       'sex': sex.wireName,
       'neutered': neutered,
       'weight_kg': weightKg,
+      'neck_girth_cm': neckGirthCm,
+      'chest_girth_cm': chestGirthCm,
+      'back_length_cm': backLengthCm,
       'photo_url': photoUrl,
       'icon_photo_url': iconPhotoUrl,
       'icon_alignment_x': iconAlignmentX,
@@ -163,6 +192,9 @@ class PetProfile extends Equatable {
       sex: PetSex.fromWireName(map['sex'] as String? ?? 'male'),
       neutered: map['neutered'] as bool? ?? false,
       weightKg: (map['weight_kg'] as num?)?.toDouble(),
+      neckGirthCm: (map['neck_girth_cm'] as num?)?.toDouble(),
+      chestGirthCm: (map['chest_girth_cm'] as num?)?.toDouble(),
+      backLengthCm: (map['back_length_cm'] as num?)?.toDouble(),
       photoUrl: map['photo_url'] as String?,
       iconPhotoUrl: map['icon_photo_url'] as String?,
       iconAlignmentX: (map['icon_alignment_x'] as num?)?.toDouble() ?? 0.0,
@@ -186,6 +218,9 @@ class PetProfile extends Equatable {
     sex,
     neutered,
     weightKg,
+    neckGirthCm,
+    chestGirthCm,
+    backLengthCm,
     photoUrl,
     iconPhotoUrl,
     iconAlignmentX,
