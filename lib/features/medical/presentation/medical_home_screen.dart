@@ -47,6 +47,9 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
   // each tab keeps its own state across switches, same as before.
   late final TabController _tabController;
 
+  /// 通院 / 薬 / 予防 / 証明書, in the order the TabBar below lists them.
+  static const int _preventionTabIndex = 2;
+
   @override
   void initState() {
     super.initState();
@@ -127,6 +130,11 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
                 child: CertificateListScreen(
                   uid: widget.uid,
                   petId: widget.petId,
+                  // The 予防 tab, not a pushed copy of it -- see that
+                  // callback's doc comment.
+                  onOpenPreventionTab: () => setState(
+                    () => _tabController.index = _preventionTabIndex,
+                  ),
                 ),
               ),
             ],

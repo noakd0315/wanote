@@ -32,6 +32,7 @@ class CertificateListScreen extends StatefulWidget {
     PreventionRecordRepository? repository,
     PreventionProgramRepository? programRepository,
     CertificateCacheService? cacheService,
+    this.onOpenPreventionTab,
   }) : repository = repository ?? FirestorePreventionRecordRepository(),
        programRepository =
            programRepository ?? FirestorePreventionProgramRepository(),
@@ -47,6 +48,16 @@ class CertificateListScreen extends StatefulWidget {
   /// you need when showing it at a counter.
   final PreventionProgramRepository programRepository;
   final CertificateCacheService cacheService;
+
+  /// Switches the 医療 section to its 予防 tab, rather than pushing that
+  /// screen on top of this one.
+  ///
+  /// Pushing arrived without the tab strip the section normally shows, so
+  /// the same screen looked different depending on how you got to it (PM
+  /// reported this once for the Home shortcuts and again here, 2026-08-18).
+  /// Null when this screen is built outside the section -- it falls back to
+  /// pushing, which is better than a button that does nothing.
+  final VoidCallback? onOpenPreventionTab;
 
   @override
   State<CertificateListScreen> createState() => _CertificateListScreenState();
@@ -213,6 +224,11 @@ class _CertificateListScreenState extends State<CertificateListScreen> {
   }
 
   void _openPreventionPrograms(BuildContext context) {
+    final switchTab = widget.onOpenPreventionTab;
+    if (switchTab != null) {
+      switchTab();
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => PatternedBackground(

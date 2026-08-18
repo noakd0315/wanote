@@ -92,6 +92,17 @@ class _HomeShellState extends State<HomeShell>
     ValueNotifier<int> tabRequest,
     int tabIndex,
   ) {
+    // Cleared first, so asking for the same tab twice still counts.
+    //
+    // A ValueNotifier only notifies when the value *changes*. Pressing the
+    // 証明書 shortcut set the request to 3; if the owner then moved to
+    // another tab by hand and pressed the same shortcut again, writing 3
+    // over 3 notified nobody and they stayed where they were -- the section
+    // opened on whichever tab it had been left on (PM report, 2026-08-18).
+    //
+    // -1 is not a tab, and the listener ignores out-of-range values, so
+    // this is a no-op that makes the next write a change.
+    tabRequest.value = -1;
     tabRequest.value = tabIndex;
     _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     setState(() => _selectedIndex = sectionIndex);
