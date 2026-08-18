@@ -440,11 +440,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           icon: const Icon(Icons.apple),
                           label: Text(l10n.signInWithApple),
                         ),
-                        if (controller.isLoading)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 24),
-                            child: WanoteLoadingIndicator.centered(),
-                          ),
                       ],
                     ),
                   ),
@@ -452,6 +447,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
           ),
+          // Signing in covers the whole screen rather than adding a
+          // widget under the buttons.
+          //
+          // It sat below them, so pressing Google or Apple pushed the mark
+          // and its label into the gap underneath and moved the layout
+          // while the browser was opening (PM report, 2026-08-18). Nothing
+          // on this screen is usable while a sign-in is running -- every
+          // control is already disabled -- so the honest shape is a cover,
+          // centred, not an extra row.
+          if (controller.isLoading)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.85),
+                child: WanoteLoadingIndicator.centered(size: 96),
+              ),
+            ),
         ],
       ),
     );

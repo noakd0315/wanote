@@ -127,7 +127,14 @@ class AdManager {
     // app (PM report, 2026-08-18: "中間レイヤーは発動しているので、その
     // あとの操作ができない").
     appearanceWatchdog = Timer(_appearanceTimeout, finish);
-    await ad.show();
+    // Started, not awaited.
+    //
+    // show() returning tells us nothing useful -- the callbacks above are
+    // what report the ad's life -- and awaiting it puts the SDK on the path
+    // between here and the line that waits for dismissal. When show() did
+    // not return, that line was never reached, so the caller waited on a
+    // future nothing would ever complete (PM: OCR still stuck, 2026-08-18).
+    unawaited(ad.show());
     // A callback that never fires would strand the caller mid-save, so the
     // wait has a ceiling. Generous: this is an upper bound on a stuck SDK,
     // not a limit on how long someone may look at an ad.

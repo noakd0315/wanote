@@ -379,7 +379,12 @@ class _ToiletRecordTimelineScreenState
                                   ),
                                   subtitle: subtitleParts.isEmpty
                                       ? null
-                                      : Text(subtitleParts.join(' ・ ')),
+                                      // One separator for the whole row.
+                                      // Colour and volume were joined with
+                                      // "/" while the location hung off the
+                                      // end with "・", so a single row used
+                                      // two (PM, 2026-08-18).
+                                      : Text(subtitleParts.join(' / ')),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete_outline),
                                     onPressed: () => _confirmDelete(record),

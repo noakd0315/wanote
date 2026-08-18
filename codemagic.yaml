@@ -177,14 +177,19 @@ workflows:
       # So it is derived here rather than maintained by hand: the file that
       # defines the scheme is the file it is read from, and the two cannot
       # drift apart again.
-      - name: Register the Google sign-in URL scheme
+      - name: Register the Google sign-in client id and URL scheme
         script: |
+          CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :CLIENT_ID" ios/Runner/GoogleService-Info.plist)
           REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/Runner/GoogleService-Info.plist)
-          [ -n "$REVERSED_CLIENT_ID" ] || {
-            echo "GoogleService-Info.plist has no REVERSED_CLIENT_ID. Is GOOGLE_SERVICE_INFO_PLIST_BASE64 the iOS app's plist?"
+          [ -n "$CLIENT_ID" ] && [ -n "$REVERSED_CLIENT_ID" ] || {
+            echo "GoogleService-Info.plist is missing CLIENT_ID or REVERSED_CLIENT_ID. Is GOOGLE_SERVICE_INFO_PLIST_BASE64 the iOS app's plist?"
             exit 1
           }
+          # Two separate things, and the app needs both: GIDClientID is who
+          # is asking, CFBundleURLSchemes is where the answer comes back.
+          /usr/libexec/PlistBuddy -c "Set :GIDClientID $CLIENT_ID" ios/Runner/Info.plist
           /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID" ios/Runner/Info.plist
+          echo "GIDClientID set to $CLIENT_ID"
           echo "URL scheme set to $REVERSED_CLIENT_ID"
 
       - name: Restore firebase_options.dart

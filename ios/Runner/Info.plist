@@ -7,17 +7,22 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<!-- The languages iOS is told this app speaks.
-	     iOS localizes the UI it presents on the app's behalf -- the camera
-	     and photo pickers, the permission alerts, the share sheet -- into
-	     the device language, but only from this list. A Flutter app ships
-	     with Base.lproj alone, so without this key iOS reads the app as
-	     English-only and renders all of that in English even on a Japanese
+
+	     iOS localizes the UI it presents on the app's behalf (the camera and
+	     photo pickers, the permission alerts, the share sheet) into the
+	     device language, but only from this list. A Flutter app ships with
+	     Base.lproj alone, so without this key iOS reads the app as
+	     English only and renders all of that in English even on a Japanese
 	     phone. That is what the PM saw when taking a photo from the iPhone
 	     (2026-08-17); Android has no equivalent gate, which is why it was
 	     already correct there.
+
 	     ja first: it is the fallback when the device language is neither.
-	     Declaring more than one also makes iOS offer a per-app 言語 setting
-	     under Settings > wanote. -->
+	     Declaring more than one also makes iOS offer a per-app language
+	     setting under Settings > wanote.
+
+	     (No two hyphens in a row anywhere in this file: they are not legal
+	     inside an XML comment, and this is a plist.) -->
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>ja</string>
@@ -101,6 +106,18 @@
 	     routes the callback by URL scheme, and the scheme is the reversed
 	     client id from GoogleService-Info.plist. Without this entry the
 	     browser opens, the person signs in, and nothing returns to the app. -->
+	<!-- Google sign-in needs the OAuth client id here, not just the
+	     callback scheme below. google_sign_in 7's iOS implementation reads
+	     GIDClientID from Info.plist; it does not look inside
+	     GoogleService-Info.plist. Without it the button failed on iPhone
+	     while Android, which reads google-services.json through an entirely
+	     different path, worked (PM report, 2026-08-18).
+
+	     This value is a placeholder from the repository's own
+	     GoogleService-Info.plist. CI overwrites both it and the scheme below
+	     from the real project's file, so the two cannot disagree. -->
+	<key>GIDClientID</key>
+	<string>715210245467-vo9nsm5e7b2oogavv92v2tovotko144c.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -52,7 +52,20 @@ class AdGate {
       return;
     }
     try {
-      await _manager.maybeShowInterstitial();
+      // Bounded, unconditionally.
+      //
+      // Call sites await this so the ad can play over their work -- an OCR
+      // scan, an AI answer -- and reveal the result once it is dismissed.
+      // That makes this future part of their control flow, so it has to be
+      // one that always completes. The layers below have their own
+      // ceilings; this is the one that does not depend on any of them
+      // being right.
+      await _manager.maybeShowInterstitial().timeout(_maxWait);
+    } on TimeoutException {
+      developer.log(
+        'Gave up waiting on an interstitial',
+        name: 'AdGate',
+      );
     } catch (error, stackTrace) {
       // Every call site sits next to something the owner actually wanted --
       // a saved record, an AI answer. An ad network having a bad day must
@@ -65,6 +78,10 @@ class AdGate {
       );
     }
   }
+
+  /// The longest a screen may be kept waiting on an ad. Longer than anyone
+  /// looks at an interstitial, so a real one is never cut off.
+  static const Duration _maxWait = Duration(minutes: 3);
 
   /// Fetches an ad in the background so one is ready when a trigger fires.
   /// Called on sign-in and when a screen that can trigger one opens.

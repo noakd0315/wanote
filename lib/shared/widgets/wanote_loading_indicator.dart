@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -25,15 +26,31 @@ import '../../l10n/generated/app_localizations.dart';
 /// stays a spinner -- the mark is unreadable at that size, and a pulsing
 /// blob in a button looks like a rendering fault.
 class WanoteLoadingIndicator extends StatefulWidget {
-  const WanoteLoadingIndicator({super.key, this.size});
+  const WanoteLoadingIndicator({super.key, this.size, this.delay = _default});
 
   /// Fixed width for the mark. Null lets it size itself to the available
   /// space, which is what the full-screen case wants.
   final double? size;
 
+  /// How long to wait before appearing at all.
+  ///
+  /// Most loads finish in well under this: a Firestore stream with warm
+  /// cache answers on the next frame or two. Showing the mark for those
+  /// makes it flash on and off as a screen opens, which reads as a glitch
+  /// rather than as loading (PM report, 2026-08-18: "画面が切り替わってから
+  /// 一瞬ロードが見えたりする").
+  ///
+  /// So nothing is drawn for this long. Either the content arrives first
+  /// and the indicator was never seen, or the wait is real and worth
+  /// showing. Pass [Duration.zero] where the wait is known to be long and
+  /// an immediate answer is wanted.
+  final Duration delay;
+
+  static const Duration _default = Duration(milliseconds: 300);
+
   /// The common case: centered in whatever space is available.
-  static Widget centered({double? size}) =>
-      Center(child: WanoteLoadingIndicator(size: size));
+  static Widget centered({double? size, Duration delay = _default}) =>
+      Center(child: WanoteLoadingIndicator(size: size, delay: delay));
 
   @override
   State<WanoteLoadingIndicator> createState() => _WanoteLoadingIndicatorState();
@@ -41,18 +58,37 @@ class WanoteLoadingIndicator extends StatefulWidget {
 
 class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1100),
-  )..repeat(reverse: true);
+  // Created in initState, not as a lazy field initialiser. While the
+  // indicator is inside its delay it never builds, so a lazy controller
+  // would first be touched by dispose() -- and constructing a ticker there
+  // looks up an ancestor on a deactivated element, which asserts.
+  late final AnimationController _controller;
+  late final Animation<double> _pulse;
 
-  late final Animation<double> _pulse = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeInOut,
-  );
+  /// False until [WanoteLoadingIndicator.delay] has passed.
+  bool _visible = false;
+  Timer? _delayTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat(reverse: true);
+    _pulse = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    if (widget.delay == Duration.zero) {
+      _visible = true;
+      return;
+    }
+    _delayTimer = Timer(widget.delay, () {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -79,6 +115,9 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    // Takes no space either, so a short load does not nudge the layout on
+    // its way past.
+    if (!_visible) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
