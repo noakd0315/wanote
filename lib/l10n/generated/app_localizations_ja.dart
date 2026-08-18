@@ -820,9 +820,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportAppBarTitle => 'AI健康レポート';
 
   @override
-  String get reportExportPdfTooltip => 'PDFで書き出す';
-
-  @override
   String reportPeriodLabel(String start, String end) {
     return '対象期間: $start 〜 $end';
   }
@@ -1018,13 +1015,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get urineColorDark => '濃い（濃縮尿）';
-
-  @override
-  String get reportPdfFontUnavailableMessage =>
-      '日本語フォントを取得できませんでした。通信状況をご確認の上、再度お試しください。';
-
-  @override
-  String get reportPdfFailedMessage => 'PDFを作成できませんでした。もう一度お試しください。';
 
   @override
   String get weightSortOldestFirstTooltip => '古い順に並べ替え';
@@ -1408,40 +1398,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reminderChannelDescription => '投薬とワクチン・フィラリア・ノミダニ予防のリマインダー通知';
-
-  @override
-  String reportPdfTitle(String petName) {
-    return '$petName 健康レポート';
-  }
-
-  @override
-  String get reportPdfDefaultPetName => 'ペット';
-
-  @override
-  String reportPdfPeriod(String start, String end) {
-    return '対象期間: $start 〜 $end';
-  }
-
-  @override
-  String get reportPdfSummaryHeading => 'AIサマリー';
-
-  @override
-  String get reportPdfNoSummary => '（このレポートにはAIサマリーは含まれていません）';
-
-  @override
-  String get reportPdfWeightHeading => '体重の推移';
-
-  @override
-  String get reportPdfToiletHeading => 'トイレ回数の推移';
-
-  @override
-  String get reportPdfDateColumn => '日付';
-
-  @override
-  String get reportPdfWeightColumn => '体重(kg)';
-
-  @override
-  String get reportPdfCountColumn => '回数';
 
   @override
   String get consultationHistoryDeleteButton => '削除';

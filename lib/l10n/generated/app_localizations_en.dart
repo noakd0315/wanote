@@ -855,9 +855,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportAppBarTitle => 'AI Health Report';
 
   @override
-  String get reportExportPdfTooltip => 'Export as PDF';
-
-  @override
   String reportPeriodLabel(String start, String end) {
     return 'Period: $start - $end';
   }
@@ -1054,14 +1051,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get urineColorDark => 'Dark (concentrated)';
-
-  @override
-  String get reportPdfFontUnavailableMessage =>
-      'Could not fetch the Japanese font. Check your connection and try again.';
-
-  @override
-  String get reportPdfFailedMessage =>
-      'Could not create the PDF. Please try again.';
 
   @override
   String get weightSortOldestFirstTooltip => 'Sort oldest first';
@@ -1468,40 +1457,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderChannelDescription =>
       'Reminders for medication and for vaccine, heartworm and flea/tick prevention.';
-
-  @override
-  String reportPdfTitle(String petName) {
-    return '$petName health report';
-  }
-
-  @override
-  String get reportPdfDefaultPetName => 'Pet';
-
-  @override
-  String reportPdfPeriod(String start, String end) {
-    return 'Period: $start to $end';
-  }
-
-  @override
-  String get reportPdfSummaryHeading => 'AI summary';
-
-  @override
-  String get reportPdfNoSummary => '(This report contains no AI summary.)';
-
-  @override
-  String get reportPdfWeightHeading => 'Weight';
-
-  @override
-  String get reportPdfToiletHeading => 'Toilet frequency';
-
-  @override
-  String get reportPdfDateColumn => 'Date';
-
-  @override
-  String get reportPdfWeightColumn => 'Weight (kg)';
-
-  @override
-  String get reportPdfCountColumn => 'Count';
 
   @override
   String get consultationHistoryDeleteButton => 'Delete';

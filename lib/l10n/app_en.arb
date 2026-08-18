@@ -1096,10 +1096,6 @@
   "@reportAppBarTitle": {
     "description": "AppBar title of the AI health report screen."
   },
-  "reportExportPdfTooltip": "Export as PDF",
-  "@reportExportPdfTooltip": {
-    "description": "Tooltip for the AppBar action that exports the report as a PDF."
-  },
   "reportPeriodLabel": "Period: {start} - {end}",
   "@reportPeriodLabel": {
     "description": "Shows the report's date range, each already formatted as yyyy/MM/dd.",
@@ -1381,14 +1377,6 @@
   "urineColorDark": "Dark (concentrated)",
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
-  },
-  "reportPdfFontUnavailableMessage": "Could not fetch the Japanese font. Check your connection and try again.",
-  "@reportPdfFontUnavailableMessage": {
-    "description": "Shown when the PDF export cannot download the CJK font it needs to draw the document."
-  },
-  "reportPdfFailedMessage": "Could not create the PDF. Please try again.",
-  "@reportPdfFailedMessage": {
-    "description": "Generic PDF export failure."
   },
   "weightSortOldestFirstTooltip": "Sort oldest first",
   "@weightSortOldestFirstTooltip": {
@@ -1931,59 +1919,6 @@
   "reminderChannelDescription": "Reminders for medication and for vaccine, heartworm and flea/tick prevention.",
   "@reminderChannelDescription": {
     "description": "Android notification channel description, shown in the system settings for this app."
-  },
-  "reportPdfTitle": "{petName} health report",
-  "@reportPdfTitle": {
-    "description": "Heading of the exported PDF. The PDF was written entirely in Japanese literals, so an English user exported a Japanese document.",
-    "placeholders": {
-      "petName": {
-        "type": "String"
-      }
-    }
-  },
-  "reportPdfDefaultPetName": "Pet",
-  "@reportPdfDefaultPetName": {
-    "description": "Used in the PDF heading when the pet has no name recorded."
-  },
-  "reportPdfPeriod": "Period: {start} to {end}",
-  "@reportPdfPeriod": {
-    "description": "Date range covered by the report.",
-    "placeholders": {
-      "start": {
-        "type": "String"
-      },
-      "end": {
-        "type": "String"
-      }
-    }
-  },
-  "reportPdfSummaryHeading": "AI summary",
-  "@reportPdfSummaryHeading": {
-    "description": "Section heading above the generated summary."
-  },
-  "reportPdfNoSummary": "(This report contains no AI summary.)",
-  "@reportPdfNoSummary": {
-    "description": "Shown in place of the summary when the report was exported without one."
-  },
-  "reportPdfWeightHeading": "Weight",
-  "@reportPdfWeightHeading": {
-    "description": "Section heading above the weight table."
-  },
-  "reportPdfToiletHeading": "Toilet frequency",
-  "@reportPdfToiletHeading": {
-    "description": "Section heading above the toilet count table."
-  },
-  "reportPdfDateColumn": "Date",
-  "@reportPdfDateColumn": {
-    "description": "Table column header."
-  },
-  "reportPdfWeightColumn": "Weight (kg)",
-  "@reportPdfWeightColumn": {
-    "description": "Table column header."
-  },
-  "reportPdfCountColumn": "Count",
-  "@reportPdfCountColumn": {
-    "description": "Table column header."
   },
   "consultationHistoryDeleteButton": "Delete",
   "@consultationHistoryDeleteButton": {

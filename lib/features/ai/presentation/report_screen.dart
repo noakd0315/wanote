@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/services/ai_usage_repository.dart';
-import '../data/report_pdf_exporter.dart';
 import '../data/report_repository.dart';
 import '../domain/monthly_report_generator.dart';
 import '../models/monthly_report_input_stats.dart';
@@ -32,7 +31,6 @@ class ReportScreen extends StatefulWidget {
     required this.reportRepository,
     required this.onRequestUpgrade,
     this.petName,
-    this.pdfExporter = const ReportPdfExporter(),
   });
 
   final String uid;
@@ -45,7 +43,6 @@ class ReportScreen extends StatefulWidget {
   /// Stub navigation hook for Agent E's subscription-upgrade UI.
   final VoidCallback onRequestUpgrade;
   final String? petName;
-  final ReportPdfExporter pdfExporter;
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -87,56 +84,6 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  /// True while the PDF is being built, so the export button can say so.
-  ///
-  /// The build is no longer instant from the screen's point of view: the
-  /// Japanese font is fetched before the preview opens rather than inside
-  /// it (see ReportPdfExporter.shareOrPrint). Without this the button would
-  /// look ignored for a few seconds on the first export.
-  bool _exportingPdf = false;
-
-  Future<void> _exportPdf() async {
-    if (_exportingPdf) return;
-    final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
-    setState(() => _exportingPdf = true);
-    try {
-      await widget.pdfExporter.shareOrPrint(
-        strings: ReportPdfStrings(
-          title: l10n.reportPdfTitle('{petName}'),
-          defaultPetName: l10n.reportPdfDefaultPetName,
-          period: l10n.reportPdfPeriod('{start}', '{end}'),
-          summaryHeading: l10n.reportPdfSummaryHeading,
-          noSummary: l10n.reportPdfNoSummary,
-          weightHeading: l10n.reportPdfWeightHeading,
-          toiletHeading: l10n.reportPdfToiletHeading,
-          dateColumn: l10n.reportPdfDateColumn,
-          weightColumn: l10n.reportPdfWeightColumn,
-          countColumn: l10n.reportPdfCountColumn,
-        ),
-        stats: widget.stats,
-        summaryText: _summaryText,
-        petName: widget.petName,
-      );
-    } on ReportPdfException catch (e) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            e.failure == ReportPdfFailure.fontUnavailable
-                ? l10n.reportPdfFontUnavailableMessage
-                : l10n.reportPdfFailedMessage,
-          ),
-        ),
-      );
-    } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.reportPdfFailedMessage)),
-      );
-    } finally {
-      if (mounted) setState(() => _exportingPdf = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -145,16 +92,7 @@ class _ReportScreenState extends State<ReportScreen> {
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(l10n.reportAppBarTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: l10n.reportExportPdfTooltip,
-            onPressed: _exportingPdf ? null : _exportPdf,
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.reportAppBarTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -1640,12 +1640,6 @@ abstract class AppLocalizations {
   /// **'AI Health Report'**
   String get reportAppBarTitle;
 
-  /// Tooltip for the AppBar action that exports the report as a PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Export as PDF'**
-  String get reportExportPdfTooltip;
-
   /// Shows the report's date range, each already formatted as yyyy/MM/dd.
   ///
   /// In en, this message translates to:
@@ -2017,18 +2011,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark (concentrated)'**
   String get urineColorDark;
-
-  /// Shown when the PDF export cannot download the CJK font it needs to draw the document.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not fetch the Japanese font. Check your connection and try again.'**
-  String get reportPdfFontUnavailableMessage;
-
-  /// Generic PDF export failure.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not create the PDF. Please try again.'**
-  String get reportPdfFailedMessage;
 
   /// Switches the weight table to ascending order.
   ///
@@ -2737,66 +2719,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reminders for medication and for vaccine, heartworm and flea/tick prevention.'**
   String get reminderChannelDescription;
-
-  /// Heading of the exported PDF. The PDF was written entirely in Japanese literals, so an English user exported a Japanese document.
-  ///
-  /// In en, this message translates to:
-  /// **'{petName} health report'**
-  String reportPdfTitle(String petName);
-
-  /// Used in the PDF heading when the pet has no name recorded.
-  ///
-  /// In en, this message translates to:
-  /// **'Pet'**
-  String get reportPdfDefaultPetName;
-
-  /// Date range covered by the report.
-  ///
-  /// In en, this message translates to:
-  /// **'Period: {start} to {end}'**
-  String reportPdfPeriod(String start, String end);
-
-  /// Section heading above the generated summary.
-  ///
-  /// In en, this message translates to:
-  /// **'AI summary'**
-  String get reportPdfSummaryHeading;
-
-  /// Shown in place of the summary when the report was exported without one.
-  ///
-  /// In en, this message translates to:
-  /// **'(This report contains no AI summary.)'**
-  String get reportPdfNoSummary;
-
-  /// Section heading above the weight table.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight'**
-  String get reportPdfWeightHeading;
-
-  /// Section heading above the toilet count table.
-  ///
-  /// In en, this message translates to:
-  /// **'Toilet frequency'**
-  String get reportPdfToiletHeading;
-
-  /// Table column header.
-  ///
-  /// In en, this message translates to:
-  /// **'Date'**
-  String get reportPdfDateColumn;
-
-  /// Table column header.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight (kg)'**
-  String get reportPdfWeightColumn;
-
-  /// Table column header.
-  ///
-  /// In en, this message translates to:
-  /// **'Count'**
-  String get reportPdfCountColumn;
 
   /// Removes a stored consultation. PM request: history should be the owner's to clear.
   ///

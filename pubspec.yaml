@@ -65,10 +65,8 @@ dependencies:
   cached_network_image: ^3.4.1
   path_provider: ^2.1.5
 
-  # Charts / PDF
+  # Charts
   fl_chart: ^1.2.0
-  pdf: ^3.11.1
-  printing: ^5.13.4
 
   # Billing / ads
   purchases_flutter: ^10.7.0
