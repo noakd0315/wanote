@@ -63,6 +63,14 @@
       {
         "source": "/privacy/en",
         "destination": "/privacy-en.html"
+      },
+      {
+        "source": "/delete-account",
+        "destination": "/delete-account.html"
+      },
+      {
+        "source": "/delete-account/en",
+        "destination": "/delete-account-en.html"
       }
     ]
   }
