@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
@@ -62,10 +63,12 @@ class AdManager {
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          _log('loaded and ready');
           _isLoadingInterstitial = false;
           _loadedInterstitial = ad;
         },
         onAdFailedToLoad: (error) {
+          _log('failed to load: $error');
           _isLoadingInterstitial = false;
           _loadedInterstitial = null;
         },
@@ -83,10 +86,25 @@ class AdManager {
   /// "saved" message was going. It was shown, and covered, and gone by the
   /// time the owner got back (PM: "一度も見れませんでした").
   Future<void> maybeShowInterstitial() async {
-    if (!_supported) return;
-    if (!_currentPolicy().shouldShowInterstitial) return;
+    if (!_supported) {
+      _log('skipped: platform has no ads');
+      return;
+    }
+    if (!_currentPolicy().shouldShowInterstitial) {
+      _log('skipped: policy says no ad right now');
+      return;
+    }
     final ad = _loadedInterstitial;
-    if (ad == null) return;
+    if (ad == null) {
+      // The most likely reason nothing appears. One interstitial is held at
+      // a time and the refill is a network fetch, so a second trigger
+      // shortly after the first finds the shelf empty.
+      _log(
+        'skipped: none loaded '
+        '(loading=$_isLoadingInterstitial)',
+      );
+      return;
+    }
 
     _loadedInterstitial = null;
     final dismissed = Completer<void>();
@@ -104,15 +122,18 @@ class AdManager {
       onAdShowedFullScreenContent: (ad) {
         // It is really on screen, so the backdrop is doing its job and the
         // only thing left to wait for is a person closing it.
+        _log('showed');
         appearanceWatchdog?.cancel();
         appearanceWatchdog = null;
       },
       onAdDismissedFullScreenContent: (ad) {
+        _log('dismissed');
         finish();
         ad.dispose();
         preloadInterstitial();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
+        _log('failed to show: $error');
         finish();
         ad.dispose();
         preloadInterstitial();
@@ -126,7 +147,10 @@ class AdManager {
     // missed impression, while a black sheet nobody can dismiss is a dead
     // app (PM report, 2026-08-18: "中間レイヤーは発動しているので、その
     // あとの操作ができない").
-    appearanceWatchdog = Timer(_appearanceTimeout, finish);
+    appearanceWatchdog = Timer(_appearanceTimeout, () {
+      _log('never appeared within $_appearanceTimeout; releasing the app');
+      finish();
+    });
     // Started, not awaited.
     //
     // show() returning tells us nothing useful -- the callbacks above are
@@ -151,6 +175,16 @@ class AdManager {
   /// trip. Long enough to absorb a slow frame, short enough that a failure
   /// reads as a flicker rather than a hang.
   static const Duration _appearanceTimeout = Duration(seconds: 3);
+
+  /// One tag for the whole ad path, so a device log filtered to `AdManager`
+  /// tells the whole story of an impression that did not happen.
+  ///
+  /// Ads fail silently by design here -- nothing about a missing one is
+  /// visible on screen -- which left "no ad appeared" indistinguishable
+  /// from a dozen different causes across three rounds of reports
+  /// (2026-08-18). These lines are what makes the next report answerable.
+  static void _log(String message) =>
+      developer.log(message, name: 'AdManager');
 
   void dispose() {
     _loadedInterstitial?.dispose();

@@ -141,6 +141,22 @@ class _PreventionRecordFormScreenState
   @override
   void initState() {
     super.initState();
+    // Get an ad on the shelf while the form is being filled in.
+    //
+    // Only one interstitial is held at a time and the refill is a network
+    // fetch, so a session that already spent its ad somewhere else finds
+    // nothing loaded when the scan starts -- and a missing ad is silent by
+    // design, which is why "広告が出ない" survived two rounds of fixes aimed
+    // at the showing code (PM, 2026-08-18). Preloading here uses the minute
+    // or so between opening this screen and pressing the shutter. No-ops if
+    // one is already loaded or the owner is premium.
+    //
+    // Scheduled rather than called inline: adGateOf reads an inherited
+    // widget, which initState cannot do.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(adGateOf(context)?.preload() ?? Future<void>.value());
+    });
     final record = widget.record;
     _administeredAt = record?.administeredAt ?? DateTime.now();
     _nextDueDate = record?.nextDueDate;

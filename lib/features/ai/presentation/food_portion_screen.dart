@@ -436,12 +436,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             onPressed: _calculate,
             child: Text(l10n.foodPortionCalculateButton),
           ),
-          // Under the button that spends it (PM, 2026-08-18).
-          AiUsageBadge(
-            uid: widget.uid,
-            usageRepository: widget.usageRepository,
-            refreshToken: _usageRefreshToken,
-          ),
           if (result != null) ...[
             const SizedBox(height: 24),
             const Divider(),
@@ -503,10 +497,26 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   Widget _buildAdviceSection(AppLocalizations l10n) {
     switch (_adviceState) {
       case _AdviceState.idle:
-        return OutlinedButton.icon(
-          onPressed: _requestAdvice,
-          icon: const Icon(Icons.smart_toy_outlined),
-          label: Text(l10n.foodPortionRequestAdviceButton),
+        // Under the AI button, not under 算出.
+        //
+        // 算出 is arithmetic done on the device and costs nothing; a
+        // remaining-AI-calls line beneath it read as though the sum itself
+        // were being charged for (PM report, 2026-08-18). This is the only
+        // button on the screen that spends one.
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _requestAdvice,
+              icon: const Icon(Icons.smart_toy_outlined),
+              label: Text(l10n.foodPortionRequestAdviceButton),
+            ),
+            AiUsageBadge(
+              uid: widget.uid,
+              usageRepository: widget.usageRepository,
+              refreshToken: _usageRefreshToken,
+            ),
+          ],
         );
       case _AdviceState.loading:
         return WanoteLoadingIndicator.centered();

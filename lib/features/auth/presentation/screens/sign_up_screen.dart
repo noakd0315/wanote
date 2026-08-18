@@ -253,220 +253,235 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        titleSpacing: 0,
-        title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
-        actions: const [LanguageIconButton()],
-      ),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: DogSilhouetteBackground()),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Important notices only, and this is the reason
-                        // announcements are readable without signing in: the
-                        // notice people most need is the one about an outage
-                        // they cannot get past this screen to read.
-                        AnnouncementBanner(
-                          repository: _announcementRepository,
-                          importantOnly: true,
-                        ),
-                        Text(
-                          _isSignUpMode
-                              ? l10n.createAccountTitle
-                              : l10n.signInTitle,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        // AutofillGroup + autofillHints let the *browser's*
-                        // password manager offer to save/fill these fields
-                        // securely -- see rememberedEmailPrefsKey's doc
-                        // comment for why the app itself only remembers the
-                        // email, never the password.
-                        AutofillGroup(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              TextFormField(
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                autofillHints: const [AutofillHints.email],
-                                decoration: InputDecoration(
-                                  labelText: l10n.emailLabel,
-                                ),
-                                validator: (value) {
-                                  if (value == null || !value.contains('@')) {
-                                    return l10n.emailValidationError;
-                                  }
-                                  return null;
-                                },
+    // The whole screen, AppBar included.
+    //
+    // The cover used to be a child of the Scaffold's body, so it began
+    // below the AppBar and the mark centred itself in what was left --
+    // which put it under the "or" divider rather than in the middle of the
+    // screen (PM report, 2026-08-18). Stacking outside the Scaffold is what
+    // makes "centred" mean centred.
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            titleSpacing: 0,
+            title: Image.asset('assets/images/wanote_wordmark.png', height: 28),
+            actions: const [LanguageIconButton()],
+          ),
+          body: Stack(
+            children: [
+              const Positioned.fill(child: DogSilhouetteBackground()),
+              SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Important notices only, and this is the reason
+                            // announcements are readable without signing in: the
+                            // notice people most need is the one about an outage
+                            // they cannot get past this screen to read.
+                            AnnouncementBanner(
+                              repository: _announcementRepository,
+                              importantOnly: true,
+                            ),
+                            Text(
+                              _isSignUpMode
+                                  ? l10n.createAccountTitle
+                                  : l10n.signInTitle,
+                              style: Theme.of(context).textTheme.headlineSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            // AutofillGroup + autofillHints let the *browser's*
+                            // password manager offer to save/fill these fields
+                            // securely -- see rememberedEmailPrefsKey's doc
+                            // comment for why the app itself only remembers the
+                            // email, never the password.
+                            AutofillGroup(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextFormField(
+                                    controller: _emailController,
+                                    keyboardType: TextInputType.emailAddress,
+                                    autofillHints: const [AutofillHints.email],
+                                    decoration: InputDecoration(
+                                      labelText: l10n.emailLabel,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          !value.contains('@')) {
+                                        return l10n.emailValidationError;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _passwordController,
+                                    obscureText: _obscurePassword,
+                                    autofillHints: [
+                                      _isSignUpMode
+                                          ? AutofillHints.newPassword
+                                          : AutofillHints.password,
+                                    ],
+                                    decoration: InputDecoration(
+                                      labelText: l10n.passwordLabel,
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _obscurePassword
+                                              ? Icons.visibility_outlined
+                                              : Icons.visibility_off_outlined,
+                                        ),
+                                        onPressed: () => setState(
+                                          () => _obscurePassword =
+                                              !_obscurePassword,
+                                        ),
+                                      ),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.length < 6) {
+                                        return l10n.passwordValidationError;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
                               ),
+                            ),
+                            if (!_isSignUpMode)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: controller.isLoading
+                                      ? null
+                                      : _forgotPassword,
+                                  child: Text(l10n.forgotPasswordLink),
+                                ),
+                              ),
+                            if (_isSignUpMode) ...[
                               const SizedBox(height: 12),
                               TextFormField(
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                autofillHints: [
-                                  _isSignUpMode
-                                      ? AutofillHints.newPassword
-                                      : AutofillHints.password,
-                                ],
+                                controller: _referralCodeController,
+                                textCapitalization:
+                                    TextCapitalization.characters,
                                 decoration: InputDecoration(
-                                  labelText: l10n.passwordLabel,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                    ),
-                                    onPressed: () => setState(
-                                      () =>
-                                          _obscurePassword = !_obscurePassword,
-                                    ),
+                                  labelText: l10n.referralCodeLabel,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            // Backing out of the provider sheet is a decision,
+                            // not a failure, and gets no red text.
+                            if (controller.errorCode != null &&
+                                controller.errorCode != 'cancelled')
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  _authErrorMessage(
+                                    l10n,
+                                    controller.errorCode!,
+                                  ),
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.length < 6) {
-                                    return l10n.passwordValidationError;
-                                  }
-                                  return null;
-                                },
                               ),
-                            ],
-                          ),
-                        ),
-                        if (!_isSignUpMode)
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
+                            const SizedBox(height: 8),
+                            FilledButton(
                               onPressed: controller.isLoading
                                   ? null
-                                  : _forgotPassword,
-                              child: Text(l10n.forgotPasswordLink),
-                            ),
-                          ),
-                        if (_isSignUpMode) ...[
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _referralCodeController,
-                            textCapitalization: TextCapitalization.characters,
-                            decoration: InputDecoration(
-                              labelText: l10n.referralCodeLabel,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                        // Backing out of the provider sheet is a decision,
-                        // not a failure, and gets no red text.
-                        if (controller.errorCode != null &&
-                            controller.errorCode != 'cancelled')
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              _authErrorMessage(l10n, controller.errorCode!),
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
+                                  : () => _submitEmailForm(controller),
+                              child: Text(
+                                _isSignUpMode
+                                    ? l10n.signUpButton
+                                    : l10n.signInButton,
                               ),
                             ),
-                          ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: controller.isLoading
-                              ? null
-                              : () => _submitEmailForm(controller),
-                          child: Text(
-                            _isSignUpMode
-                                ? l10n.signUpButton
-                                : l10n.signInButton,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: controller.isLoading
-                              ? null
-                              : () => setState(
-                                  () => _isSignUpMode = !_isSignUpMode,
-                                ),
-                          child: Text(
-                            _isSignUpMode
-                                ? l10n.switchToSignInLink
-                                : l10n.switchToSignUpLink,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            children: [
-                              const Expanded(child: Divider()),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Text(l10n.orDivider),
+                            TextButton(
+                              onPressed: controller.isLoading
+                                  ? null
+                                  : () => setState(
+                                      () => _isSignUpMode = !_isSignUpMode,
+                                    ),
+                              child: Text(
+                                _isSignUpMode
+                                    ? l10n.switchToSignInLink
+                                    : l10n.switchToSignUpLink,
                               ),
-                              const Expanded(child: Divider()),
-                            ],
-                          ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                children: [
+                                  const Expanded(child: Divider()),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Text(l10n.orDivider),
+                                  ),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: controller.isLoading
+                                  ? null
+                                  : () async {
+                                      await _stashReferralCodeIfProvided();
+                                      await controller.signInWithGoogle();
+                                    },
+                              icon: const Icon(Icons.g_mobiledata),
+                              label: Text(l10n.signInWithGoogle),
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton.icon(
+                              onPressed: controller.isLoading
+                                  ? null
+                                  : () async {
+                                      await _stashReferralCodeIfProvided();
+                                      await controller.signInWithApple();
+                                    },
+                              icon: const Icon(Icons.apple),
+                              label: Text(l10n.signInWithApple),
+                            ),
+                          ],
                         ),
-                        OutlinedButton.icon(
-                          onPressed: controller.isLoading
-                              ? null
-                              : () async {
-                                  await _stashReferralCodeIfProvided();
-                                  await controller.signInWithGoogle();
-                                },
-                          icon: const Icon(Icons.g_mobiledata),
-                          label: Text(l10n.signInWithGoogle),
-                        ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: controller.isLoading
-                              ? null
-                              : () async {
-                                  await _stashReferralCodeIfProvided();
-                                  await controller.signInWithApple();
-                                },
-                          icon: const Icon(Icons.apple),
-                          label: Text(l10n.signInWithApple),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+        // Signing in covers everything rather than adding a widget under
+        // the buttons.
+        //
+        // It sat below them, so pressing Google or Apple pushed the mark
+        // and its label into the gap underneath and moved the layout while
+        // the browser was opening. Nothing on this screen is usable while a
+        // sign-in is running -- every control is already disabled -- so the
+        // honest shape is a cover, centred, not an extra row.
+        if (controller.isLoading)
+          Positioned.fill(
+            child: ColoredBox(
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.9),
+              child: WanoteLoadingIndicator.centered(size: 96),
             ),
           ),
-          // Signing in covers the whole screen rather than adding a
-          // widget under the buttons.
-          //
-          // It sat below them, so pressing Google or Apple pushed the mark
-          // and its label into the gap underneath and moved the layout
-          // while the browser was opening (PM report, 2026-08-18). Nothing
-          // on this screen is usable while a sign-in is running -- every
-          // control is already disabled -- so the honest shape is a cover,
-          // centred, not an extra row.
-          if (controller.isLoading)
-            Positioned.fill(
-              child: ColoredBox(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.85),
-                child: WanoteLoadingIndicator.centered(size: 96),
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }
