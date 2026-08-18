@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../domain/ad_policy.dart';
@@ -46,7 +47,49 @@ class AdManager {
   /// Safe to call anywhere: does nothing on a platform without ads.
   static Future<void> initialize() async {
     if (!platformSupported) return;
+    await _requestTrackingAuthorizationIfNeeded();
     await MobileAds.instance.initialize();
+  }
+
+  /// Asks iOS for permission to use the advertising identifier.
+  ///
+  /// Required from iOS 14.5: without it the IDFA is simply unavailable, so
+  /// ads still show but are untargeted and worth less. `google_mobile_ads`
+  /// has no API for this -- it is a separate framework -- which is how the
+  /// call came to be missing while `NSUserTrackingUsageDescription`,
+  /// PLAN_ads.md's design and the privacy policy all assumed it was there
+  /// (found 2026-08-18 while checking the policy against the code).
+  ///
+  /// Immediately before initializing the ads SDK, per PLAN_ads.md: asking
+  /// at launch, before the owner has seen what the app is, gets refused.
+  ///
+  /// Asked once, ever. `notDetermined` is the only state where the system
+  /// will show anything; afterwards the answer lives in iOS Settings, and
+  /// calling again is a silent no-op rather than a second prompt.
+  ///
+  /// Refusal changes nothing about the app. It is not a gate: ads keep
+  /// working, and every feature stays available. So nothing here reports a
+  /// failure -- there is no decision anyone needs to take from it.
+  static Future<void> _requestTrackingAuthorizationIfNeeded() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return;
+    try {
+      final status =
+          await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status != TrackingStatus.notDetermined) {
+        _log('tracking authorization already answered: ${status.name}');
+        return;
+      }
+      final result =
+          await AppTrackingTransparency.requestTrackingAuthorization();
+      _log('tracking authorization: ${result.name}');
+    } catch (error, stackTrace) {
+      developer.log(
+        'Could not ask for tracking authorization',
+        name: 'AdManager',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   /// Pre-loads an interstitial so it's ready by the time
