@@ -2072,6 +2072,30 @@ abstract class AppLocalizations {
   /// **'All'**
   String get toiletFilterAll;
 
+  /// Confirmation before deleting one vet visit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this visit?'**
+  String get visitDeleteConfirmationMessage;
+
+  /// Confirmation before deleting one medication record.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this medication record?'**
+  String get medicationDeleteConfirmationMessage;
+
+  /// Confirmation before deleting a preventive care programme. Names the consequence, since the doses recorded under it are no longer reachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this preventive care programme? Its history and reminders go with it.'**
+  String get preventionProgramDeleteConfirmationMessage;
+
+  /// Confirmation before deleting one preventive care record.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this record? Its certificate image is deleted too.'**
+  String get preventionRecordDeleteConfirmationMessage;
+
   /// Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence.
   ///
   /// In en, this message translates to:

@@ -1423,6 +1423,22 @@
   "@toiletFilterAll": {
     "description": "Toilet timeline filter segment showing both urine and stool records."
   },
+  "visitDeleteConfirmationMessage": "Delete this visit?",
+  "@visitDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting one vet visit."
+  },
+  "medicationDeleteConfirmationMessage": "Delete this medication record?",
+  "@medicationDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting one medication record."
+  },
+  "preventionProgramDeleteConfirmationMessage": "Delete this preventive care programme? Its history and reminders go with it.",
+  "@preventionProgramDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting a preventive care programme. Names the consequence, since the doses recorded under it are no longer reachable."
+  },
+  "preventionRecordDeleteConfirmationMessage": "Delete this record? Its certificate image is deleted too.",
+  "@preventionRecordDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting one preventive care record."
+  },
   "commonLoadingLabel": "loading...",
   "@commonLoadingLabel": {
     "description": "Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence."

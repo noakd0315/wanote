@@ -1050,6 +1050,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toiletFilterAll => 'すべて';
 
   @override
+  String get visitDeleteConfirmationMessage => 'この通院の記録を削除しますか？';
+
+  @override
+  String get medicationDeleteConfirmationMessage => 'この薬の記録を削除しますか？';
+
+  @override
+  String get preventionProgramDeleteConfirmationMessage =>
+      'この予防プログラムを削除しますか？接種・投薬の履歴とリマインダーも見られなくなります。';
+
+  @override
+  String get preventionRecordDeleteConfirmationMessage =>
+      'この記録を削除しますか？証明書の画像も削除されます。';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override

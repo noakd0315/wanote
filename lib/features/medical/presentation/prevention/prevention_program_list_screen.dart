@@ -11,6 +11,7 @@ import 'prevention_record_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
 import '../../../../shared/widgets/patterned_background.dart';
+import '../widgets/confirm_delete.dart';
 
 /// Spec 5.3 program list ("何をどの頻度で行うか" settings). Tapping a program
 /// opens its administration history ([PreventionRecordListScreen]); long-press
@@ -158,18 +159,42 @@ class _PreventionProgramListScreenState
                   '${_scheduleLabel(l10n, program)}'
                   '${program.active ? '' : l10n.preventionProgramInactiveSuffix}',
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => PreventionProgramFormScreen(
-                        uid: widget.uid,
-                        petId: widget.petId,
-                        repository: widget.repository,
-                        program: program,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PreventionProgramFormScreen(
+                            uid: widget.uid,
+                            petId: widget.petId,
+                            repository: widget.repository,
+                            program: program,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    // The programme had no delete at all, on any screen --
+                    // it could be edited or deactivated and never removed
+                    // (PM, 2026-08-18). It belongs here, on the screen that
+                    // owns it, and nowhere else.
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () async {
+                        if (await confirmDelete(
+                          context,
+                          l10n.preventionProgramDeleteConfirmationMessage,
+                        )) {
+                          await widget.repository.delete(
+                            widget.uid,
+                            widget.petId,
+                            program.programId,
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(

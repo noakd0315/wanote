@@ -8,6 +8,7 @@ import '../../domain/models/prevention_record.dart';
 import 'prevention_record_form_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
+import '../widgets/confirm_delete.dart';
 
 /// Administration history for one [program] (spec 5.3's prevention_records).
 class PreventionRecordListScreen extends StatelessWidget {
@@ -83,40 +84,44 @@ class PreventionRecordListScreen extends StatelessWidget {
             itemCount: records.length,
             itemBuilder: (context, index) {
               final record = records[index];
-              return Dismissible(
-                key: ValueKey(record.recordId),
-                direction: DismissDirection.endToStart,
-                background: Container(color: Colors.red),
-                onDismissed: (_) =>
-                    repository.delete(uid, petId, record.recordId),
-                child: ListTile(
-                  leading: record.certificateFile != null
-                      ? const Icon(Icons.description)
-                      : null,
-                  title: Text(
-                    record.administeredAt.toLocal().toString().split(' ').first,
-                  ),
-                  subtitle: Text(
-                    record.nextDueDate == null
-                        ? (record.hospitalName ?? '')
-                        : l10n.nextDueDatePrefixLabel(
-                            record.nextDueDate!
-                                .toLocal()
-                                .toString()
-                                .split(' ')
-                                .first,
-                          ),
-                  ),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => PreventionRecordFormScreen(
-                        uid: uid,
-                        petId: petId,
-                        program: program,
-                        repository: repository,
-                        record: record,
-                        ocrService: ocrService,
-                      ),
+              return ListTile(
+                leading: record.certificateFile != null
+                    ? const Icon(Icons.description)
+                    : null,
+                title: Text(
+                  record.administeredAt.toLocal().toString().split(' ').first,
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    if (await confirmDelete(
+                      context,
+                      l10n.preventionRecordDeleteConfirmationMessage,
+                    )) {
+                      await repository.delete(uid, petId, record.recordId);
+                    }
+                  },
+                ),
+                subtitle: Text(
+                  record.nextDueDate == null
+                      ? (record.hospitalName ?? '')
+                      : l10n.nextDueDatePrefixLabel(
+                          record.nextDueDate!
+                              .toLocal()
+                              .toString()
+                              .split(' ')
+                              .first,
+                        ),
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => PreventionRecordFormScreen(
+                      uid: uid,
+                      petId: petId,
+                      program: program,
+                      repository: repository,
+                      record: record,
+                      ocrService: ocrService,
                     ),
                   ),
                 ),

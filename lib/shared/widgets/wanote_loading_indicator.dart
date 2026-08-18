@@ -93,6 +93,10 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
     super.dispose();
   }
 
+  /// The mark's height as a fraction of its width (900x614). Kept here
+  /// rather than read from the image, which is only known once it decodes.
+  static const double _markAspectRatio = 614 / 900;
+
   /// How big the mark can be here.
   ///
   /// Home shows the mark at 75% of the screen's width. This aims at the same
@@ -107,8 +111,11 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
       size = math.min(size, constraints.maxWidth * 0.8);
     }
     if (constraints.hasBoundedHeight) {
-      // Leaves room for the label and its gap.
-      size = math.min(size, math.max(constraints.maxHeight - 44, 24));
+      // `size` is a width, and the mark is wider than it is tall -- so the
+      // height it will actually occupy is the width times the aspect ratio.
+      // Leaves room for the label and its gap on top of that.
+      final heightForMark = math.max(constraints.maxHeight - 40, 24);
+      size = math.min(size, heightForMark / _markAspectRatio);
     }
     return size;
   }
@@ -137,17 +144,22 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
                     child: child,
                   ),
                 ),
+                // Width only. The mark is 900x614, so forcing it into a
+                // square box left empty space above and below the artwork
+                // -- and the label, sitting 8px under the *box*, ended up
+                // well clear of the picture (PM, 2026-08-18). Letting the
+                // height follow the aspect ratio puts the box back around
+                // the drawing.
                 child: Image.asset(
                   'assets/images/wanote_icon.png',
                   width: size,
-                  height: size,
                   // If the asset is ever missing, waiting must still look
                   // like waiting rather than like a broken image.
                   errorBuilder: (context, error, stackTrace) =>
-                      SizedBox.square(dimension: size),
+                      SizedBox(width: size, height: size * _markAspectRatio),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               // Excluded from semantics: the Semantics above already
               // announces this, and without this the label would be read
               // out twice.

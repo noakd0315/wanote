@@ -12,6 +12,7 @@ import '../prevention/prevention_record_list_screen.dart';
 import 'medication_form_screen.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
 import '../../../../shared/widgets/patterned_background.dart';
+import '../widgets/confirm_delete.dart';
 
 /// Spec 5.2 list screen, plus the preventive treatments that are also
 /// medication.
@@ -38,8 +39,7 @@ class MedicationListScreen extends StatelessWidget {
            preventionProgramRepository ??
            FirestorePreventionProgramRepository(),
        preventionRecordRepository =
-           preventionRecordRepository ??
-           FirestorePreventionRecordRepository();
+           preventionRecordRepository ?? FirestorePreventionRecordRepository();
 
   final String uid;
   final String petId;
@@ -132,32 +132,40 @@ class MedicationListScreen extends StatelessWidget {
     AppLocalizations l10n,
     Medication medication,
   ) {
-    return Dismissible(
-      key: ValueKey(medication.medicationId),
-      direction: DismissDirection.endToStart,
-      background: Container(color: Colors.red),
-      onDismissed: (_) =>
-          repository.delete(uid, petId, medication.medicationId),
-      child: ListTile(
-        title: Text(medication.name),
-        subtitle: Text(
-          medication.isOngoing
-              ? l10n.medicationOngoingLabel
-              : l10n.medicationEndDateSubtitle(
-                  medication.endDate!.toLocal().toString().split(' ').first,
-                ),
-        ),
-        trailing: medication.reminderEnabled
-            ? const Icon(Icons.notifications_active)
-            : null,
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => MedicationFormScreen(
-              uid: uid,
-              petId: petId,
-              repository: repository,
-              medication: medication,
-            ),
+    return ListTile(
+      title: Text(medication.name),
+      subtitle: Text(
+        medication.isOngoing
+            ? l10n.medicationOngoingLabel
+            : l10n.medicationEndDateSubtitle(
+                medication.endDate!.toLocal().toString().split(' ').first,
+              ),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (medication.reminderEnabled)
+            const Icon(Icons.notifications_active),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () async {
+              if (await confirmDelete(
+                context,
+                l10n.medicationDeleteConfirmationMessage,
+              )) {
+                await repository.delete(uid, petId, medication.medicationId);
+              }
+            },
+          ),
+        ],
+      ),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => MedicationFormScreen(
+            uid: uid,
+            petId: petId,
+            repository: repository,
+            medication: medication,
           ),
         ),
       ),
@@ -181,10 +189,10 @@ class MedicationListScreen extends StatelessWidget {
     // has always meant "show me this programme's doses". Editing the
     // programme itself stays on the 予防医療 tab, which owns it.
     //
-    // No Dismissible, deliberately. Swiping this row away would delete a
-    // preventive care programme from a screen that does not own it, taking
-    // its schedule and its reminders with it. Deletion stays where the
-    // record lives.
+    // No delete here, deliberately. Removing a preventive care programme
+    // from a screen that does not own it would take its schedule, its
+    // reminders and every dose recorded under it -- so deletion lives on
+    // the 予防医療 tab, next to the form that creates them.
     return ListTile(
       leading: const Icon(Icons.vaccines_outlined),
       title: Text(program.productName),

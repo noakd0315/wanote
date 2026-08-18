@@ -1086,6 +1086,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toiletFilterAll => 'All';
 
   @override
+  String get visitDeleteConfirmationMessage => 'Delete this visit?';
+
+  @override
+  String get medicationDeleteConfirmationMessage =>
+      'Delete this medication record?';
+
+  @override
+  String get preventionProgramDeleteConfirmationMessage =>
+      'Delete this preventive care programme? Its history and reminders go with it.';
+
+  @override
+  String get preventionRecordDeleteConfirmationMessage =>
+      'Delete this record? Its certificate image is deleted too.';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override
