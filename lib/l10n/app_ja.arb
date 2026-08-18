@@ -333,6 +333,8 @@
   "medicationDeleteConfirmationMessage": "この薬の記録を削除しますか？",
   "preventionProgramDeleteConfirmationMessage": "この予防プログラムを削除しますか？接種・投薬の履歴とリマインダーも見られなくなります。",
   "preventionRecordDeleteConfirmationMessage": "この記録を削除しますか？証明書の画像も削除されます。",
+  "anomalyBloodInStoolLabel": "血便疑い",
+  "anomalyProlongedDiarrheaLabel": "下痢が{days}日連続",
   "commonLoadingLabel": "loading...",
   "historyCopyButtonLabel": "過去の記録から入力",
   "historyCopyPickerTitle": "コピーする記録を選択",

@@ -2096,6 +2096,18 @@ abstract class AppLocalizations {
   /// **'Delete this record? Its certificate image is deleted too.'**
   String get preventionRecordDeleteConfirmationMessage;
 
+  /// Chip label for the record attached to a consultation started from the blood-in-stool warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood in stool suspected'**
+  String get anomalyBloodInStoolLabel;
+
+  /// Chip label for the record attached to a consultation started from the prolonged-diarrhea warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Diarrhea for {days} days running'**
+  String anomalyProlongedDiarrheaLabel(int days);
+
   /// Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence.
   ///
   /// In en, this message translates to:

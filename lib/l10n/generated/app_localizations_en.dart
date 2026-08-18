@@ -1101,6 +1101,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Delete this record? Its certificate image is deleted too.';
 
   @override
+  String get anomalyBloodInStoolLabel => 'Blood in stool suspected';
+
+  @override
+  String anomalyProlongedDiarrheaLabel(int days) {
+    return 'Diarrhea for $days days running';
+  }
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override

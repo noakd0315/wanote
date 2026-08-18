@@ -143,6 +143,41 @@ class _ToiletRecordTimelineScreenState
     );
   }
 
+  /// The same suggestion, with a label the reader can read.
+  ///
+  /// [AnomalyDetector] is framework-free and has no BuildContext, so the
+  /// label it attaches is written in one fixed language -- and that label
+  /// is displayed, as a chip on the consultation screen. An English user
+  /// was being shown 血便疑い (found 2026-08-18). The banner's own text has
+  /// always been rebuilt here for exactly this reason; the reference was
+  /// missed because it travels one screen further before anyone sees it.
+  ConsultationSuggestion _localized(
+    AppLocalizations l10n,
+    ConsultationSuggestion suggestion,
+  ) {
+    final reference = suggestion.reference;
+    return ConsultationSuggestion(
+      reason: suggestion.reason,
+      streakDayCount: suggestion.streakDayCount,
+      message: suggestion.message,
+      reference: ConsultationReferenceRecord(
+        recordId: reference.recordId,
+        recordType: reference.recordType,
+        petId: reference.petId,
+        recordedAt: reference.recordedAt,
+        label: switch (suggestion.reason) {
+          ConsultationSuggestionReason.bloodInStoolSuspected =>
+            l10n.anomalyBloodInStoolLabel,
+          ConsultationSuggestionReason.prolongedDiarrhea =>
+            l10n.anomalyProlongedDiarrheaLabel(
+              suggestion.streakDayCount ?? 0,
+            ),
+        },
+        tags: reference.tags,
+      ),
+    );
+  }
+
   /// The banner's wording, built here rather than carried on the
   /// suggestion. The detector has no BuildContext and cannot localize, which
   /// is how its Japanese literal ended up on the English screen.
@@ -231,7 +266,7 @@ class _ToiletRecordTimelineScreenState
                         actions: [
                           TextButton(
                             onPressed: () => widget.onConsultationSuggested
-                                ?.call(visibleSuggestion),
+                                ?.call(_localized(l10n, visibleSuggestion)),
                             child: Text(l10n.toiletConsultAiButtonLabel),
                           ),
                           TextButton(

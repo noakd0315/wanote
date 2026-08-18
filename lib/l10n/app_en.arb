@@ -1439,6 +1439,19 @@
   "@preventionRecordDeleteConfirmationMessage": {
     "description": "Confirmation before deleting one preventive care record."
   },
+  "anomalyBloodInStoolLabel": "Blood in stool suspected",
+  "@anomalyBloodInStoolLabel": {
+    "description": "Chip label for the record attached to a consultation started from the blood-in-stool warning."
+  },
+  "anomalyProlongedDiarrheaLabel": "Diarrhea for {days} days running",
+  "@anomalyProlongedDiarrheaLabel": {
+    "description": "Chip label for the record attached to a consultation started from the prolonged-diarrhea warning.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "commonLoadingLabel": "loading...",
   "@commonLoadingLabel": {
     "description": "Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence."

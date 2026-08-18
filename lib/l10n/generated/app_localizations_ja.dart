@@ -1064,6 +1064,14 @@ class AppLocalizationsJa extends AppLocalizations {
       'この記録を削除しますか？証明書の画像も削除されます。';
 
   @override
+  String get anomalyBloodInStoolLabel => '血便疑い';
+
+  @override
+  String anomalyProlongedDiarrheaLabel(int days) {
+    return '下痢が$days日連続';
+  }
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override

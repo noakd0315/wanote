@@ -15,8 +15,7 @@ import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 /// Display labels for [DogLifeStage], kept here (not on the enum itself)
 /// since the enum lives in the framework-free domain layer and can't call
-/// [AppLocalizations.of] -- see the model's `.label` getter, which is left
-/// in place for the non-UI AI-prompt use in [_FoodPortionScreenState._requestAdvice].
+/// [AppLocalizations.of].
 String _lifeStageLabel(AppLocalizations l10n, DogLifeStage stage) =>
     switch (stage) {
       DogLifeStage.puppy => l10n.dogLifeStagePuppyLabel,

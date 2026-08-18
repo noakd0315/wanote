@@ -6,11 +6,6 @@ import 'dart:math' as math;
 enum DogLifeStage {
   puppy,
   adult;
-
-  String get label => switch (this) {
-    DogLifeStage.puppy => '子犬（成長期）',
-    DogLifeStage.adult => '成犬',
-  };
 }
 
 /// Standard veterinary Body Condition Score, simplified to the 3 buckets
@@ -24,12 +19,6 @@ enum BodyCondition {
   underweight,
   ideal,
   overweight;
-
-  String get label => switch (this) {
-    BodyCondition.underweight => '痩せ気味',
-    BodyCondition.ideal => '標準',
-    BodyCondition.overweight => 'ぽっちゃり気味',
-  };
 }
 
 /// Exercise/energy-expenditure level -- independent of life stage, neutered
@@ -39,12 +28,6 @@ enum ActivityLevel {
   low,
   normal,
   high;
-
-  String get label => switch (this) {
-    ActivityLevel.low => '運動量少なめ',
-    ActivityLevel.normal => '普通',
-    ActivityLevel.high => '活発',
-  };
 }
 
 class FoodPortionResult {
