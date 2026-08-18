@@ -164,6 +164,29 @@ workflows:
           }
           echo $GOOGLE_SERVICE_INFO_PLIST_BASE64 | base64 --decode > ios/Runner/GoogleService-Info.plist
 
+      # Google sign-in comes back to the app through a custom URL scheme,
+      # and iOS only hands it over if Info.plist declares that exact scheme.
+      # The scheme is REVERSED_CLIENT_ID from GoogleService-Info.plist --
+      # which the step above just replaced with the real project's file,
+      # while Info.plist still carried the value hand-copied from whatever
+      # placeholder was in the repository. When the two disagree, Apple
+      # never returns and sign-in fails on iOS only; Android uses a
+      # different mechanism and is unaffected, which is exactly the split
+      # the PM reported (2026-08-18).
+      #
+      # So it is derived here rather than maintained by hand: the file that
+      # defines the scheme is the file it is read from, and the two cannot
+      # drift apart again.
+      - name: Register the Google sign-in URL scheme
+        script: |
+          REVERSED_CLIENT_ID=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/Runner/GoogleService-Info.plist)
+          [ -n "$REVERSED_CLIENT_ID" ] || {
+            echo "GoogleService-Info.plist has no REVERSED_CLIENT_ID. Is GOOGLE_SERVICE_INFO_PLIST_BASE64 the iOS app's plist?"
+            exit 1
+          }
+          /usr/libexec/PlistBuddy -c "Set :CFBundleURLTypes:0:CFBundleURLSchemes:0 $REVERSED_CLIENT_ID" ios/Runner/Info.plist
+          echo "URL scheme set to $REVERSED_CLIENT_ID"
+
       - name: Restore firebase_options.dart
         script: |
           [ -n "$FIREBASE_OPTIONS_DART_BASE64" ] || {

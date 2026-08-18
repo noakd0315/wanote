@@ -29,6 +29,33 @@ class AppConfig {
   const AppConfig._();
 
   // ---------------------------------------------------------------------
+  // Sign in with Apple (Android only)
+  // ---------------------------------------------------------------------
+
+  /// The Services ID registered on the Apple developer account, and where
+  /// Apple sends the browser back to.
+  ///
+  /// Needed only on Android. iOS asks the OS directly and never sees these;
+  /// every other platform runs Apple's web flow, which refuses to start
+  /// without a Services ID and a redirect URI it recognises. Missing them
+  /// is why "Appleでサインイン" failed on Android while working on iPhone
+  /// (PM report, 2026-08-18).
+  ///
+  /// Defaulted rather than left empty: they are public identifiers, not
+  /// secrets -- they travel through the user's own browser in the URL -- and
+  /// a build that forgets to define them would fail in a way only an
+  /// Android device shows.
+  static const String appleServicesId = String.fromEnvironment(
+    'APPLE_SERVICES_ID',
+    defaultValue: 'jp.wanote.app.signin',
+  );
+
+  static const String appleRedirectUri = String.fromEnvironment(
+    'APPLE_REDIRECT_URI',
+    defaultValue: 'https://wanote-7dca0.firebaseapp.com/__/auth/handler',
+  );
+
+  // ---------------------------------------------------------------------
   // Backend
   // ---------------------------------------------------------------------
 

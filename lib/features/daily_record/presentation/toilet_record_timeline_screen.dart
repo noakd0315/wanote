@@ -96,6 +96,35 @@ class _ToiletRecordTimelineScreenState
   /// the keyboard broke it the moment the location field was focused, and it
   /// left two different ways to enter the same kind of thing. PM decision:
   /// one screen, the same one stool uses.
+  /// Asks before removing a record.
+  ///
+  /// This button used to delete on the first tap. It sits at the end of
+  /// every row, next to a row that is itself tappable, and there is no
+  /// undo -- so the one tap it took to lose a record was the same tap it
+  /// took to open one. The weight list now shares this shape, and both ask
+  /// (PM: 統一してほしい, 2026-08-18).
+  Future<void> _confirmDelete(ToiletRecord record) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.toiletStoolDeleteConfirmationMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await widget.repository.delete(uid: widget.uid, record: record);
+  }
+
   /// Opens the record form, which asks which kind it is.
   ///
   /// The screen used to have a button per type, which was the only way in.
@@ -353,10 +382,7 @@ class _ToiletRecordTimelineScreenState
                                       : Text(subtitleParts.join(' ・ ')),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => widget.repository.delete(
-                                      uid: widget.uid,
-                                      record: record,
-                                    ),
+                                    onPressed: () => _confirmDelete(record),
                                   ),
                                 );
                               },

@@ -392,9 +392,12 @@ class _WeightRecordTable extends StatelessWidget {
         final delta = previous == null
             ? null
             : record.weightKg - previous.weightKg;
+        // Tap opens the record, a delete button sits at the end of the row
+        // -- the same shape the toilet timeline uses (PM: 統一してほしい,
+        // 2026-08-18). Delete was on a long-press, which is invisible: you
+        // have to already know it is there.
         return ListTile(
           onTap: () => onEdit(record),
-          onLongPress: () => onDelete(record),
           title: Text(formatDate(context, record.measuredAt)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -415,6 +418,10 @@ class _WeightRecordTable extends StatelessWidget {
                   ),
                 ),
               ],
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => onDelete(record),
+              ),
             ],
           ),
         );

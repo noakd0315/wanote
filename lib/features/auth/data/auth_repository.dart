@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../shared/models/auth_provider_type.dart';
+import '../../../shared/config/app_config.dart';
 
 /// Thin identity result returned by [AuthRepository]. Account-level fields
 /// that live in Firestore (biometric_enabled, etc.) are handled separately by
@@ -180,6 +181,19 @@ class FirebaseAuthRepository implements AuthRepository {
         AppleIDAuthorizationScopes.email,
         AppleIDAuthorizationScopes.fullName,
       ],
+      // Android has no Apple sign-in of its own, so the package runs
+      // Apple's web flow -- and that flow will not start without a Services
+      // ID and a redirect URI Apple recognises. Without this the button
+      // failed on Android while working on iPhone, which asks the OS
+      // directly and ignores all of this (PM report, 2026-08-18).
+      //
+      // Passed on every platform rather than behind a check: iOS does not
+      // read it, and a platform test here would be one more thing to get
+      // wrong on whatever platform is added next.
+      webAuthenticationOptions: WebAuthenticationOptions(
+        clientId: AppConfig.appleServicesId,
+        redirectUri: Uri.parse(AppConfig.appleRedirectUri),
+      ),
     );
     final oAuthCredential = fb.OAuthProvider('apple.com').credential(
       idToken: appleCredential.identityToken,
