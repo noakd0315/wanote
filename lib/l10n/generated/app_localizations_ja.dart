@@ -1051,6 +1051,15 @@ class AppLocalizationsJa extends AppLocalizations {
       '選んだタイミングごとに、次回予定日を基準として通知します（複数選択できます）。次回予定日は、次の記録を保存したときに更新されます。予定日を過ぎると通知は行われません。';
 
   @override
+  String get weightEditDialogTitle => '体重を修正';
+
+  @override
+  String get weightDeleteConfirmationMessage => 'この体重の記録を削除しますか？';
+
+  @override
+  String get toiletFilterAll => 'すべて';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override

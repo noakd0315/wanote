@@ -8,6 +8,7 @@ import '../features/daily_record/presentation/toilet_record_timeline_screen.dart
 import '../features/daily_record/presentation/weight_record_chart_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../shared/models/consultation_reference_record.dart';
+import '../shared/widgets/keep_alive_tab.dart';
 
 /// 日常記録 section of the app shell.
 ///
@@ -122,26 +123,32 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
           ),
         ),
         Expanded(
-          child: IndexedStack(
-            index: _tabController.index,
+          child: TabBarView(
+            controller: _tabController,
             children: [
-              HealthRecordTimelineScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.healthRecordRepository,
+              KeepAliveTab(
+                child: HealthRecordTimelineScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                  repository: widget.healthRecordRepository,
+                ),
               ),
-              WeightRecordChartScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.weightRecordRepository,
+              KeepAliveTab(
+                child: WeightRecordChartScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                  repository: widget.weightRecordRepository,
+                ),
               ),
-              ToiletRecordTimelineScreen(
-                healthRecordRepository: widget.healthRecordRepository,
-                uid: widget.uid,
-                petId: widget.petId,
-                repository: widget.toiletRecordRepository,
-                onConsultationSuggested: widget.onConsultationSuggested,
-                onConsultAboutRecord: widget.onConsultAboutRecord,
+              KeepAliveTab(
+                child: ToiletRecordTimelineScreen(
+                  healthRecordRepository: widget.healthRecordRepository,
+                  uid: widget.uid,
+                  petId: widget.petId,
+                  repository: widget.toiletRecordRepository,
+                  onConsultationSuggested: widget.onConsultationSuggested,
+                  onConsultAboutRecord: widget.onConsultAboutRecord,
+                ),
               ),
             ],
           ),

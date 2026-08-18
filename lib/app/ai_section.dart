@@ -17,6 +17,7 @@ import '../shared/services/ai_usage_repository.dart';
 import '../shared/utils/calendar_period.dart';
 import '../shared/widgets/stream_error_view.dart';
 import '../shared/widgets/wanote_loading_indicator.dart';
+import '../shared/widgets/keep_alive_tab.dart';
 
 /// AI相談 section of the app shell: combines Agent D's [ConsultationScreen]
 /// and [ReportScreen] behind a small local segmented control, since neither
@@ -102,27 +103,31 @@ class _AiSectionState extends State<AiSection>
           ),
         ),
         Expanded(
-          child: IndexedStack(
-            index: _tabController.index,
+          child: TabBarView(
+            controller: _tabController,
             children: [
-              ConsultationScreen(
-                uid: widget.uid,
-                petId: widget.petId,
-                usageRepository: widget.usageRepository,
-                backendClient: widget.backendClient,
-                consultationRepository: widget.consultationRepository,
-                onRequestUpgrade: widget.onRequestUpgrade,
+              KeepAliveTab(
+                child: ConsultationScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                  usageRepository: widget.usageRepository,
+                  backendClient: widget.backendClient,
+                  consultationRepository: widget.consultationRepository,
+                  onRequestUpgrade: widget.onRequestUpgrade,
+                ),
               ),
-              _MonthlyReportTab(
-                uid: widget.uid,
-                petId: widget.petId,
-                petName: widget.petName,
-                usageRepository: widget.usageRepository,
-                reportRepository: widget.reportRepository,
-                reportGenerator: widget.reportGenerator,
-                weightRecordRepository: widget.weightRecordRepository,
-                toiletRecordRepository: widget.toiletRecordRepository,
-                onRequestUpgrade: widget.onRequestUpgrade,
+              KeepAliveTab(
+                child: _MonthlyReportTab(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                  petName: widget.petName,
+                  usageRepository: widget.usageRepository,
+                  reportRepository: widget.reportRepository,
+                  reportGenerator: widget.reportGenerator,
+                  weightRecordRepository: widget.weightRecordRepository,
+                  toiletRecordRepository: widget.toiletRecordRepository,
+                  onRequestUpgrade: widget.onRequestUpgrade,
+                ),
               ),
             ],
           ),

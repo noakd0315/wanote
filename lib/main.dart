@@ -99,6 +99,21 @@ class WanoteApp extends StatelessWidget {
           locale: localeController.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          // Tapping away from a field dismisses the keyboard, everywhere
+          // (PM request, 2026-08-18: the keyboard could not be hidden).
+          //
+          // Done once here rather than per screen: it is the same gesture
+          // on every form, and the app has a dozen of them. onTapOutside on
+          // each field would be the other option, and a dozen places to
+          // forget.
+          //
+          // Translucent, so it never eats a tap meant for something else:
+          // it only fires for taps nothing else claimed.
+          builder: (context, child) => GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: child,
+          ),
           home: LaunchGateScreen(
             homeBuilder: (context) {
               final controller = context.watch<AuthController>();

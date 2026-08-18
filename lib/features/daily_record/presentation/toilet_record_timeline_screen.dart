@@ -79,6 +79,9 @@ class _ToiletRecordTimelineScreenState
   /// long enough that scrolling to last week is work.
   _ToiletPeriod _period = _ToiletPeriod.oneMonth;
 
+  /// Which kind of record the list is showing (PM request, 2026-08-18).
+  _TypeFilter _typeFilter = _TypeFilter.all;
+
   /// Reasons the owner has put away in this session.
   ///
   /// The banner used to reappear on every visit with no way to dismiss it,
@@ -93,14 +96,19 @@ class _ToiletRecordTimelineScreenState
   /// the keyboard broke it the moment the location field was focused, and it
   /// left two different ways to enter the same kind of thing. PM decision:
   /// one screen, the same one stool uses.
-  void _recordUrine() {
+  /// Opens the record form, which asks which kind it is.
+  ///
+  /// The screen used to have a button per type, which was the only way in.
+  /// Choosing on the form keeps the entry point single, the way every other
+  /// list screen works.
+  void _recordToilet() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ToiletRecordFormScreen(
           uid: widget.uid,
           petId: widget.petId,
           repository: widget.repository,
-          type: ToiletType.urine,
+          healthRecordRepository: widget.healthRecordRepository,
         ),
       ),
     );
@@ -165,7 +173,9 @@ class _ToiletRecordTimelineScreenState
                 // The filter is the reader's window on the list. The
                 // detector keeps its own (one month, fixed): narrowing the
                 // list must not silently switch the warnings off.
-                final records = _period.filter(allRecords, now);
+                final records = _typeFilter.filter(
+                  _period.filter(allRecords, now),
+                );
                 final currentSuggestions = widget.anomalyDetector.detect(
                   records: allRecords,
                   now: now,
@@ -203,40 +213,32 @@ class _ToiletRecordTimelineScreenState
                           ),
                         ],
                       ),
+                    // Filter, not "add". The two full-width buttons that
+                    // used to sit here were the only way in, and they read
+                    // as a filter anyway -- a pair of segments above a list
+                    // is what filtering looks like (PM, 2026-08-18).
+                    // Recording moved to the FAB, like every other screen.
                     Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: _recordUrine,
-                              icon: const Icon(Icons.water_drop),
-                              label: Text(l10n.toiletUrineLabel),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => ToiletRecordFormScreen(
-                                      uid: widget.uid,
-                                      petId: widget.petId,
-                                      repository: widget.repository,
-                                      healthRecordRepository:
-                                          widget.healthRecordRepository,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.circle),
-                              label: Text(l10n.toiletStoolLabel),
-                            ),
-                          ),
-                        ],
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<_TypeFilter>(
+                          showSelectedIcon: false,
+                          segments: _TypeFilter.values
+                              .map(
+                                (f) => ButtonSegment(
+                                  value: f,
+                                  label: Text(f.label(l10n)),
+                                ),
+                              )
+                              .toList(),
+                          selected: {_typeFilter},
+                          onSelectionChanged: (selection) =>
+                              setState(() => _typeFilter = selection.first),
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: SizedBox(
@@ -364,6 +366,15 @@ class _ToiletRecordTimelineScreenState
                 );
               },
             ),
+      // One "+", like every other list screen. Which kind is chosen on the
+      // form itself, so the two records are entered the same way rather
+      // than one through a dedicated button and one through a screen.
+      floatingActionButton: _showChart
+          ? null
+          : FloatingActionButton(
+              onPressed: _recordToilet,
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }
@@ -397,4 +408,28 @@ enum _ToiletPeriod {
     final cutoff = now.subtract(Duration(days: days));
     return records.where((r) => !r.recordedAt.isBefore(cutoff)).toList();
   }
+}
+
+
+/// Which kind of record the timeline shows.
+enum _TypeFilter {
+  all,
+  urine,
+  stool;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    _TypeFilter.all => l10n.toiletFilterAll,
+    _TypeFilter.urine => l10n.toiletUrineLabel,
+    _TypeFilter.stool => l10n.toiletStoolLabel,
+  };
+
+  List<ToiletRecord> filter(List<ToiletRecord> records) => switch (this) {
+    _TypeFilter.all => records,
+    _TypeFilter.urine => records
+        .where((r) => r.type == ToiletType.urine)
+        .toList(),
+    _TypeFilter.stool => records
+        .where((r) => r.type == ToiletType.stool)
+        .toList(),
+  };
 }

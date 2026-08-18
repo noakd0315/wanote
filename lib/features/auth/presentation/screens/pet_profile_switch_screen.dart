@@ -63,7 +63,20 @@ class PetProfileSwitchScreen extends StatelessWidget {
                     final isActive = pet.petId == activePetId;
                     return ListTile(
                       leading: PetIconAvatar(pet: pet),
-                      title: Text(pet.name),
+                      // The name opens the pet's form, the way it does on
+                      // Home (PM request, 2026-08-18). The rest of the row
+                      // still switches -- that is what this screen is for
+                      // -- so the two live side by side rather than one
+                      // replacing the other.
+                      title: GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                PetProfileFormScreen(existingPet: pet),
+                          ),
+                        ),
+                        child: Text(pet.name),
+                      ),
                       subtitle: Text(pet.breed),
                       selected: isActive,
                       trailing: Row(

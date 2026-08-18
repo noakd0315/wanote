@@ -1423,6 +1423,18 @@
   "@preventionReminderExplanation": {
     "description": "Explains when prevention reminders fire and how the next due date is maintained."
   },
+  "weightEditDialogTitle": "Edit weight",
+  "@weightEditDialogTitle": {
+    "description": "Title of the weight dialog when correcting a saved measurement."
+  },
+  "weightDeleteConfirmationMessage": "Delete this weight record?",
+  "@weightDeleteConfirmationMessage": {
+    "description": "Confirmation before deleting one weight measurement."
+  },
+  "toiletFilterAll": "All",
+  "@toiletFilterAll": {
+    "description": "Toilet timeline filter segment showing both urine and stool records."
+  },
   "commonLoadingLabel": "loading...",
   "@commonLoadingLabel": {
     "description": "Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence."

@@ -2072,6 +2072,24 @@ abstract class AppLocalizations {
   /// **'You get one notification per selected timing, counted back from the next due date. The next due date updates when you save the next record; once it has passed, no reminder is sent.'**
   String get preventionReminderExplanation;
 
+  /// Title of the weight dialog when correcting a saved measurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit weight'**
+  String get weightEditDialogTitle;
+
+  /// Confirmation before deleting one weight measurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this weight record?'**
+  String get weightDeleteConfirmationMessage;
+
+  /// Toilet timeline filter segment showing both urine and stool records.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get toiletFilterAll;
+
   /// Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence.
   ///
   /// In en, this message translates to:

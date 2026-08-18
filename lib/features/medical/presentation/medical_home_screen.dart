@@ -5,6 +5,7 @@ import 'medications/medication_list_screen.dart';
 import 'prevention/certificate_list_screen.dart';
 import 'prevention/prevention_program_list_screen.dart';
 import 'visits/visit_list_screen.dart';
+import '../../../shared/widgets/keep_alive_tab.dart';
 
 /// Entry point for the medical feature. Spec 5.5: "通院履歴・薬・予防医療は
 /// 互いに独立したエンティティとして持たせるが、UI上は「医療情報」としてまとめ
@@ -104,13 +105,30 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
           ),
         ),
         Expanded(
-          child: IndexedStack(
-            index: _tabController.index,
+          child: TabBarView(
+            controller: _tabController,
             children: [
-              VisitListScreen(uid: widget.uid, petId: widget.petId),
-              MedicationListScreen(uid: widget.uid, petId: widget.petId),
-              PreventionProgramListScreen(uid: widget.uid, petId: widget.petId),
-              CertificateListScreen(uid: widget.uid, petId: widget.petId),
+              KeepAliveTab(
+                child: VisitListScreen(uid: widget.uid, petId: widget.petId),
+              ),
+              KeepAliveTab(
+                child: MedicationListScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                ),
+              ),
+              KeepAliveTab(
+                child: PreventionProgramListScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                ),
+              ),
+              KeepAliveTab(
+                child: CertificateListScreen(
+                  uid: widget.uid,
+                  petId: widget.petId,
+                ),
+              ),
             ],
           ),
         ),

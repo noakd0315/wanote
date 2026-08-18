@@ -71,7 +71,16 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
   UrineColor _urineColor = UrineColor.normal;
   UrineVolume _urineVolume = UrineVolume.normal;
 
-  bool get _isUrine => widget.type == ToiletType.urine;
+  /// Which kind is being recorded.
+  ///
+  /// State rather than a fixed constructor argument, because the timeline
+  /// now offers one "+" instead of a button per type and the choice is made
+  /// here (PM request, 2026-08-18). [ToiletRecordFormScreen.type] is the
+  /// starting value, still honoured by callers that know which one they
+  /// want.
+  late ToiletType _type = widget.type;
+
+  bool get _isUrine => _type == ToiletType.urine;
   Uint8List? _photoBytes;
 
   /// Off by default, deliberately. Most bowel movements are unremarkable,
@@ -195,7 +204,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
       final saved = await widget.repository.create(
         uid: widget.uid,
         petId: widget.petId,
-        type: widget.type,
+        type: _type,
         stoolCondition: _isUrine
             ? null
             : StoolCondition(hardness: _hardness, color: _color),
@@ -296,6 +305,26 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<ToiletType>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: ToiletType.urine,
+                    label: Text(l10n.toiletUrineLabel),
+                  ),
+                  ButtonSegment(
+                    value: ToiletType.stool,
+                    label: Text(l10n.toiletStoolLabel),
+                  ),
+                ],
+                selected: {_type},
+                onSelectionChanged: (selection) =>
+                    setState(() => _type = selection.first),
+              ),
+            ),
+            const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.commonDateLabel),

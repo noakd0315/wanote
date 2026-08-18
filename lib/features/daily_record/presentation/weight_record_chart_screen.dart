@@ -130,6 +130,51 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
     }
   }
 
+  /// Opens a saved measurement for correction (PM request, 2026-08-18).
+  ///
+  /// A weight is typed in a hurry beside a wriggling dog, and a wrong one
+  /// distorts every delta and the whole chart after it. Until now the only
+  /// way to correct it was to add another record for the same date, which
+  /// left the wrong number in the history.
+  Future<void> _editEntry(WeightRecord record) async {
+    final result = await showDialog<({DateTime date, double weightKg})>(
+      context: context,
+      builder: (context) => _WeightEntryDialog(existing: record),
+    );
+    if (result == null) return;
+    await widget.repository.update(
+      widget.uid,
+      WeightRecord(
+        weightId: record.weightId,
+        petId: record.petId,
+        measuredAt: result.date,
+        weightKg: result.weightKg,
+      ),
+    );
+  }
+
+  Future<void> _deleteEntry(WeightRecord record) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.weightDeleteConfirmationMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await widget.repository.delete(widget.uid, record);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -242,6 +287,8 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                     ? _WeightRecordTable(
                         series: trend.series,
                         newestFirst: _newestFirst,
+                        onEdit: _editEntry,
+                        onDelete: _deleteEntry,
                       )
                     : Padding(
                         padding: const EdgeInsets.all(16),
@@ -314,10 +361,17 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
 /// same period-filtered [WeightTrendCalculator] output as the chart, so
 /// both views always agree.
 class _WeightRecordTable extends StatelessWidget {
-  const _WeightRecordTable({required this.series, required this.newestFirst});
+  const _WeightRecordTable({
+    required this.series,
+    required this.newestFirst,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   final List<WeightRecord> series;
   final bool newestFirst;
+  final void Function(WeightRecord record) onEdit;
+  final void Function(WeightRecord record) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -339,6 +393,8 @@ class _WeightRecordTable extends StatelessWidget {
             ? null
             : record.weightKg - previous.weightKg;
         return ListTile(
+          onTap: () => onEdit(record),
+          onLongPress: () => onDelete(record),
           title: Text(formatDate(context, record.measuredAt)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -396,15 +452,33 @@ class _DeltaBadge extends StatelessWidget {
 }
 
 class _WeightEntryDialog extends StatefulWidget {
-  const _WeightEntryDialog();
+  const _WeightEntryDialog({this.existing});
+
+  /// The record being edited, or null when adding a new one.
+  final WeightRecord? existing;
 
   @override
   State<_WeightEntryDialog> createState() => _WeightEntryDialogState();
 }
 
 class _WeightEntryDialogState extends State<_WeightEntryDialog> {
-  DateTime _date = DateTime.now();
+  late DateTime _date = widget.existing?.measuredAt ?? DateTime.now();
   final _weightController = TextEditingController();
+
+  bool _prefilled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Prefilled here rather than in initState: the field is labelled in the
+    // reader's unit, and working out which one needs a BuildContext.
+    if (_prefilled) return;
+    _prefilled = true;
+    _weightController.text = weightInputText(
+      context,
+      widget.existing?.weightKg,
+    );
+  }
 
   @override
   void dispose() {
@@ -416,7 +490,11 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(l10n.weightEntryDialogTitle),
+      title: Text(
+        widget.existing == null
+            ? l10n.weightEntryDialogTitle
+            : l10n.weightEditDialogTitle,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

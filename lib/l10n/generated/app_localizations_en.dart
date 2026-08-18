@@ -1088,6 +1088,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'You get one notification per selected timing, counted back from the next due date. The next due date updates when you save the next record; once it has passed, no reminder is sent.';
 
   @override
+  String get weightEditDialogTitle => 'Edit weight';
+
+  @override
+  String get weightDeleteConfirmationMessage => 'Delete this weight record?';
+
+  @override
+  String get toiletFilterAll => 'All';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override
