@@ -94,6 +94,8 @@ void main() {
     });
     when(adManager.maybeShowInterstitial).thenAnswer((_) async {
       calls.add('ad');
+      // Reports that it reached the screen, so the gate does not retry.
+      return true;
     });
     when(adManager.preloadInterstitial).thenAnswer((_) async {});
   });

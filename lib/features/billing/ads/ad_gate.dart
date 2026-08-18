@@ -60,7 +60,19 @@ class AdGate {
       // one that always completes. The layers below have their own
       // ceilings; this is the one that does not depend on any of them
       // being right.
-      await _manager.maybeShowInterstitial().timeout(_maxWait);
+      final shown = await _manager.maybeShowInterstitial().timeout(_maxWait);
+      if (!shown) {
+        // One retry, because the reasons a presentation is refused are
+        // usually momentary: the screen was still finishing a transition,
+        // or the refill had not landed yet. The certificate scan hit both
+        // (PM, 2026-08-18) and a lost impression is invisible, so nothing
+        // would ever have reported it.
+        //
+        // Exactly one. A loop here would turn a premium account or a dead
+        // ad network into a retry storm for no possible gain.
+        await Future<void>.delayed(_retryDelay);
+        await _manager.maybeShowInterstitial().timeout(_maxWait);
+      }
     } on TimeoutException {
       developer.log(
         'Gave up waiting on an interstitial',
@@ -82,6 +94,11 @@ class AdGate {
   /// The longest a screen may be kept waiting on an ad. Longer than anyone
   /// looks at an interstitial, so a real one is never cut off.
   static const Duration _maxWait = Duration(minutes: 3);
+
+  /// Long enough for a screen transition to finish and for a refill to
+  /// arrive; short enough to still land while the work it plays over is
+  /// running.
+  static const Duration _retryDelay = Duration(seconds: 2);
 
   /// Fetches an ad in the background so one is ready when a trigger fires.
   /// Called on sign-in and when a screen that can trigger one opens.

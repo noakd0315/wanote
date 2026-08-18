@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     manager = MockAdManager();
-    when(manager.maybeShowInterstitial).thenAnswer((_) async {});
+    when(manager.maybeShowInterstitial).thenAnswer((_) async => true);
     when(manager.preloadInterstitial).thenAnswer((_) async {});
   });
 
@@ -112,6 +112,45 @@ void main() {
       );
 
       expect(found, isNull);
+    });
+  });
+
+  // PM, 2026-08-18: the certificate scan showed no ad on iOS. Presentation
+  // there is refused while the screen is still finishing a transition, and
+  // a lost impression is invisible -- so nothing would ever have reported
+  // it. The reasons are momentary, so one more attempt is usually enough.
+  group('a presentation that did not reach the screen', () {
+    test('is attempted once more', () async {
+      when(manager.maybeShowInterstitial).thenAnswer((_) async => false);
+
+      await buildGate().maybeShow(AdTrigger.certificateCapture);
+
+      verify(manager.maybeShowInterstitial).called(2);
+    });
+
+    test('is not retried when the first attempt succeeded', () async {
+      await buildGate().maybeShow(AdTrigger.certificateCapture);
+
+      verify(manager.maybeShowInterstitial).called(1);
+    });
+
+    test('retries at most once, however many times it fails', () async {
+      when(manager.maybeShowInterstitial).thenAnswer((_) async => false);
+
+      await buildGate().maybeShow(AdTrigger.certificateCapture);
+
+      // A loop here would turn a dead ad network into a retry storm.
+      verify(manager.maybeShowInterstitial).called(2);
+    });
+
+    test('a premium user is not retried at either step', () async {
+      when(manager.maybeShowInterstitial).thenAnswer((_) async => false);
+
+      await buildGate(
+        status: PremiumStatus.active,
+      ).maybeShow(AdTrigger.certificateCapture);
+
+      verifyNever(manager.maybeShowInterstitial);
     });
   });
 }

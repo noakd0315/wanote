@@ -85,14 +85,18 @@ class AdManager {
   /// next line ran behind a full-screen ad -- and that is exactly where the
   /// "saved" message was going. It was shown, and covered, and gone by the
   /// time the owner got back (PM: "一度も見れませんでした").
-  Future<void> maybeShowInterstitial() async {
+  /// Returns whether an ad actually reached the screen, so a caller can
+  /// decide whether the attempt is worth repeating. False covers every
+  /// reason alike: premium, nothing loaded, or a presentation the OS
+  /// refused.
+  Future<bool> maybeShowInterstitial() async {
     if (!_supported) {
       _log('skipped: platform has no ads');
-      return;
+      return false;
     }
     if (!_currentPolicy().shouldShowInterstitial) {
       _log('skipped: policy says no ad right now');
-      return;
+      return false;
     }
     final ad = _loadedInterstitial;
     if (ad == null) {
@@ -103,10 +107,11 @@ class AdManager {
         'skipped: none loaded '
         '(loading=$_isLoadingInterstitial)',
       );
-      return;
+      return false;
     }
 
     _loadedInterstitial = null;
+    var reachedTheScreen = false;
     final dismissed = Completer<void>();
     // Armed below. Cancelled the moment the ad reports itself on screen, so
     // a watched ad is never cut short.
@@ -123,6 +128,7 @@ class AdManager {
         // It is really on screen, so the backdrop is doing its job and the
         // only thing left to wait for is a person closing it.
         _log('showed');
+        reachedTheScreen = true;
         appearanceWatchdog?.cancel();
         appearanceWatchdog = null;
       },
@@ -166,6 +172,7 @@ class AdManager {
       const Duration(minutes: 2),
       onTimeout: finish,
     );
+    return reachedTheScreen;
   }
 
   /// How long an ad gets to appear before the backdrop gives up on it.

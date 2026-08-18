@@ -253,9 +253,25 @@ class _PreventionRecordFormScreenState
     // impression, which the previous order avoided. Retrying is still
     // free, and that is the part worth keeping -- rescanning a certificate
     // that did not read is the owner fixing our failure.
+    // Started after the picker has finished going away, not the instant it
+    // returns.
+    //
+    // This is the only trigger in the app that fires straight out of a
+    // modal picker; every other one waits for a save or an AI call, by
+    // which time the camera is long gone. On iOS an interstitial is
+    // presented by the view controller, and asking one to present while it
+    // is still dismissing the picker fails -- so the ad never appeared,
+    // on iPhone only, while Android's activity-based presentation shrugged
+    // it off (PM: Android fixed, iOS not, 2026-08-18).
+    //
+    // The wait costs nothing: it runs against the scan, which takes far
+    // longer than this.
     final adFuture = _adAlreadyShown
         ? null
-        : adGate?.maybeShow(AdTrigger.certificateCapture);
+        : Future<void>.delayed(
+            _pickerDismissSettle,
+            () => adGate?.maybeShow(AdTrigger.certificateCapture),
+          );
     if (adFuture != null) _adAlreadyShown = true;
 
     try {
@@ -472,6 +488,14 @@ class _PreventionRecordFormScreenState
     );
     if (picked != null) onPicked(picked);
   }
+
+  /// How long to let the image picker finish dismissing before asking iOS
+  /// to present something else.
+  ///
+  /// A modal dismissal is roughly a third of a second; this leaves room
+  /// either side of that without being noticeable inside a scan that takes
+  /// seconds.
+  static const Duration _pickerDismissSettle = Duration(milliseconds: 700);
 
   /// The lead times offered. Not free numeric entry: these are the ones
   /// that correspond to something real -- the day itself, the day before,
