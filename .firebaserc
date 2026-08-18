@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "demo-wanote"
+    "default": "demo-wanote",
+    "prod": "wanote-7dca0"
   }
 }

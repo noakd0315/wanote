@@ -46,5 +46,24 @@
         }
       }
     }
+  },
+  "hosting": {
+    "public": "site",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/privacy",
+        "destination": "/privacy-ja.html"
+      },
+      {
+        "source": "/privacy/en",
+        "destination": "/privacy-en.html"
+      }
+    ]
   }
 }
