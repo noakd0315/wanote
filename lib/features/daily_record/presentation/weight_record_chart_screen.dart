@@ -42,6 +42,14 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
 
   WeightTrendPeriod _period = WeightTrendPeriod.threeMonths;
   bool _showTable = true;
+
+  /// Newest row at the top, or oldest (PM request, 2026-08-18).
+  ///
+  /// Newest-first answers "what is it now", which is the usual question, so
+  /// it stays the default. Oldest-first answers "how has it gone", which is
+  /// the question the moment someone picks すべて -- and until now there was
+  /// no way to ask it without scrolling to the bottom.
+  bool _newestFirst = true;
   static const _calculator = WeightTrendCalculator();
 
   @override
@@ -142,6 +150,16 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
             ),
             onPressed: () => _setShowTable(!_showTable),
           ),
+          if (_showTable)
+            IconButton(
+              tooltip: _newestFirst
+                  ? l10n.weightSortOldestFirstTooltip
+                  : l10n.weightSortNewestFirstTooltip,
+              icon: Icon(
+                _newestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+              ),
+              onPressed: () => setState(() => _newestFirst = !_newestFirst),
+            ),
         ],
       ),
       body: StreamBuilder<List<WeightRecord>>(
@@ -221,7 +239,10 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
                 child: trend.series.isEmpty
                     ? Center(child: Text(l10n.weightNoRecordsForPeriod))
                     : _showTable
-                    ? _WeightRecordTable(series: trend.series)
+                    ? _WeightRecordTable(
+                        series: trend.series,
+                        newestFirst: _newestFirst,
+                      )
                     : Padding(
                         padding: const EdgeInsets.all(16),
                         child: LineChart(
@@ -293,22 +314,27 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
 /// same period-filtered [WeightTrendCalculator] output as the chart, so
 /// both views always agree.
 class _WeightRecordTable extends StatelessWidget {
-  const _WeightRecordTable({required this.series});
+  const _WeightRecordTable({required this.series, required this.newestFirst});
 
   final List<WeightRecord> series;
+  final bool newestFirst;
 
   @override
   Widget build(BuildContext context) {
-    final rows = series.reversed.toList();
+    // series arrives ascending by date, which is what the chart plots.
+    final rows = newestFirst ? series.reversed.toList() : series;
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: rows.length,
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final record = rows[index];
-        // series is ascending by date; the row below (in display order) is
-        // the chronologically-previous measurement.
-        final previous = index + 1 < rows.length ? rows[index + 1] : null;
+        // The delta is always "against the previous measurement", so which
+        // neighbouring row that is depends on the direction being read.
+        final previousIndex = newestFirst ? index + 1 : index - 1;
+        final previous = (previousIndex >= 0 && previousIndex < rows.length)
+            ? rows[previousIndex]
+            : null;
         final delta = previous == null
             ? null
             : record.weightKg - previous.weightKg;

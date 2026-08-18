@@ -22,19 +22,33 @@ class ReportPdfExporter {
   /// Returns null if it cannot be fetched. A Latin-only document is a poor
   /// result, but it is a result -- the alternative is the export hanging,
   /// which is what it did before.
-  static Future<pw.ThemeData?> _japaneseTheme() async {
+  static Future<pw.ThemeData> _japaneseTheme() async {
     try {
-      final regular = await PdfGoogleFonts.notoSansJPRegular();
-      final bold = await PdfGoogleFonts.notoSansJPBold();
+      final regular = await PdfGoogleFonts.notoSansJPRegular().timeout(
+        _fontFetchTimeout,
+      );
+      final bold = await PdfGoogleFonts.notoSansJPBold().timeout(
+        _fontFetchTimeout,
+      );
       return pw.ThemeData.withFont(
         base: regular,
         bold: bold,
         fontFallback: [regular],
       );
-    } catch (_) {
-      return null;
+    } catch (error) {
+      // Deliberately fatal rather than falling back to Helvetica. Without a
+      // CJK font the very next step throws anyway, one layer deeper, where
+      // the printing plugin swallows it and the preview simply never
+      // appears (PM report, 2026-08-18). A caller that knows the font is
+      // missing can say so.
+      throw ReportPdfException(ReportPdfFailure.fontUnavailable, error);
     }
   }
+
+  /// The font is a few megabytes over the network on first export. Long
+  /// enough for a slow connection, short enough that a dead one is reported
+  /// rather than waited on.
+  static const Duration _fontFetchTimeout = Duration(seconds: 20);
 
   /// [strings] carries the localized headings. The exporter is const and
   /// has no BuildContext -- the screen that triggers the export resolves the
@@ -119,14 +133,21 @@ class ReportPdfExporter {
     String? summaryText,
     String? petName,
   }) async {
-    await Printing.layoutPdf(
-      onLayout: (format) => buildPdfBytes(
-        stats: stats,
-        strings: strings,
-        summaryText: summaryText,
-        petName: petName,
-      ),
+    // Built *before* the preview opens, not inside its callback.
+    //
+    // onLayout runs while the print dialog is already on screen, and
+    // anything it throws is swallowed there -- the dialog just sits at
+    // "generating" forever, which is exactly what the PM saw. Doing the
+    // work first means a failure is a thrown exception the screen can put
+    // in front of someone, and the dialog only ever opens with finished
+    // bytes in hand.
+    final bytes = await buildPdfBytes(
+      stats: stats,
+      strings: strings,
+      summaryText: summaryText,
+      petName: petName,
     );
+    await Printing.layoutPdf(onLayout: (format) async => bytes);
   }
 
   static String _dateOnly(DateTime d) =>
@@ -170,4 +191,22 @@ class ReportPdfStrings {
 
   String periodFor(String start, String end) =>
       period.replaceAll('{start}', start).replaceAll('{end}', end);
+}
+
+
+/// Why a report could not be turned into a PDF.
+enum ReportPdfFailure {
+  /// The Japanese font could not be fetched, so the document cannot be
+  /// drawn at all. Almost always the network.
+  fontUnavailable,
+}
+
+class ReportPdfException implements Exception {
+  const ReportPdfException(this.failure, [this.cause]);
+
+  final ReportPdfFailure failure;
+  final Object? cause;
+
+  @override
+  String toString() => 'ReportPdfException(${failure.name}): $cause';
 }

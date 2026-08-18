@@ -342,12 +342,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AiUsageBadge(
-            uid: widget.uid,
-            usageRepository: widget.usageRepository,
-            refreshToken: _usageRefreshToken,
-          ),
-          const SizedBox(height: 8),
           TextField(
             controller: _weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -441,6 +435,12 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           FilledButton(
             onPressed: _calculate,
             child: Text(l10n.foodPortionCalculateButton),
+          ),
+          // Under the button that spends it (PM, 2026-08-18).
+          AiUsageBadge(
+            uid: widget.uid,
+            usageRepository: widget.usageRepository,
+            refreshToken: _usageRefreshToken,
           ),
           if (result != null) ...[
             const SizedBox(height: 24),

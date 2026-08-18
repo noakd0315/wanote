@@ -2018,6 +2018,36 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Shown when the PDF export cannot download the CJK font it needs to draw the document.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch the Japanese font. Check your connection and try again.'**
+  String get reportPdfFontUnavailableMessage;
+
+  /// Generic PDF export failure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the PDF. Please try again.'**
+  String get reportPdfFailedMessage;
+
+  /// Switches the weight table to ascending order.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort oldest first'**
+  String get weightSortOldestFirstTooltip;
+
+  /// Switches the weight table back to descending order.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort newest first'**
+  String get weightSortNewestFirstTooltip;
+
+  /// Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'loading...'**
+  String get commonLoadingLabel;
+
   /// Button on a new-record form that copies the content of an earlier record.
   ///
   /// In en, this message translates to:
@@ -2167,6 +2197,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount'**
   String get toiletUrineVolumeLabel;
+
+  /// Timeline row subtitle for a urine record carrying both colour and volume, joined the same way the stool row joins hardness and colour.
+  ///
+  /// In en, this message translates to:
+  /// **'Color: {color} / Amount: {volume}'**
+  String toiletUrineConditionSubtitle(String color, String volume);
 
   /// Timeline row subtitle fragment for a urine record's volume.
   ///

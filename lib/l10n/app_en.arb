@@ -1382,6 +1382,26 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "reportPdfFontUnavailableMessage": "Could not fetch the Japanese font. Check your connection and try again.",
+  "@reportPdfFontUnavailableMessage": {
+    "description": "Shown when the PDF export cannot download the CJK font it needs to draw the document."
+  },
+  "reportPdfFailedMessage": "Could not create the PDF. Please try again.",
+  "@reportPdfFailedMessage": {
+    "description": "Generic PDF export failure."
+  },
+  "weightSortOldestFirstTooltip": "Sort oldest first",
+  "@weightSortOldestFirstTooltip": {
+    "description": "Switches the weight table to ascending order."
+  },
+  "weightSortNewestFirstTooltip": "Sort newest first",
+  "@weightSortNewestFirstTooltip": {
+    "description": "Switches the weight table back to descending order."
+  },
+  "commonLoadingLabel": "loading...",
+  "@commonLoadingLabel": {
+    "description": "Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence."
+  },
   "historyCopyButtonLabel": "Fill from a past record",
   "@historyCopyButtonLabel": {
     "description": "Button on a new-record form that copies the content of an earlier record."
@@ -1505,6 +1525,18 @@
   "toiletUrineVolumeLabel": "Amount",
   "@toiletUrineVolumeLabel": {
     "description": "Section heading above the urine volume choice chips."
+  },
+  "toiletUrineConditionSubtitle": "Color: {color} / Amount: {volume}",
+  "@toiletUrineConditionSubtitle": {
+    "description": "Timeline row subtitle for a urine record carrying both colour and volume, joined the same way the stool row joins hardness and colour.",
+    "placeholders": {
+      "color": {
+        "type": "String"
+      },
+      "volume": {
+        "type": "String"
+      }
+    }
   },
   "toiletUrineVolumeSubtitle": "Amount: {volume}",
   "@toiletUrineVolumeSubtitle": {

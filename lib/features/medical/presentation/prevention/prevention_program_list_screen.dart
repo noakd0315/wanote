@@ -10,6 +10,7 @@ import 'prevention_program_form_screen.dart';
 import 'prevention_record_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
+import '../../../../shared/widgets/patterned_background.dart';
 
 /// Spec 5.3 program list ("何をどの頻度で行うか" settings). Tapping a program
 /// opens its administration history ([PreventionRecordListScreen]); long-press
@@ -172,10 +173,12 @@ class _PreventionProgramListScreenState
                 ),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => PreventionRecordListScreen(
-                      uid: widget.uid,
-                      petId: widget.petId,
-                      program: program,
+                    builder: (_) => PatternedBackground(
+                      child: PreventionRecordListScreen(
+                        uid: widget.uid,
+                        petId: widget.petId,
+                        program: program,
+                      ),
                     ),
                   ),
                 ),

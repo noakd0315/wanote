@@ -11,6 +11,7 @@ import '../prevention/prevention_record_form_screen.dart';
 import '../prevention/prevention_record_list_screen.dart';
 import 'medication_form_screen.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
+import '../../../../shared/widgets/patterned_background.dart';
 
 /// Spec 5.2 list screen, plus the preventive treatments that are also
 /// medication.
@@ -204,11 +205,13 @@ class MedicationListScreen extends StatelessWidget {
       ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => PreventionRecordListScreen(
-            uid: uid,
-            petId: petId,
-            program: program,
-            repository: preventionRecordRepository,
+          builder: (_) => PatternedBackground(
+            child: PreventionRecordListScreen(
+              uid: uid,
+              petId: petId,
+              program: program,
+              repository: preventionRecordRepository,
+            ),
           ),
         ),
       ),

@@ -10,6 +10,7 @@ import '../shared/services/locale_controller.dart';
 import '../shared/widgets/language_picker.dart';
 import '../shared/widgets/pet_icon_avatar.dart';
 import 'announcements_screen.dart';
+import '../shared/widgets/patterned_background.dart';
 
 /// 設定・課金 section of the app shell.
 ///
@@ -64,8 +65,9 @@ class SettingsSection extends StatelessWidget {
           subtitle: Text(l10n.upgradePlanMenuSubtitle),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) =>
-                  PaywallScreen(billingRepository: billingRepository),
+              builder: (_) => PatternedBackground(
+                child: PaywallScreen(billingRepository: billingRepository),
+              ),
             ),
           ),
         ),

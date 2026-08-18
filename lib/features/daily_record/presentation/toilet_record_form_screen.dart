@@ -410,8 +410,7 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _copyToDailyLog,
-                onChanged: (value) =>
-                    setState(() => _copyToDailyLog = value),
+                onChanged: (value) => setState(() => _copyToDailyLog = value),
                 title: Text(l10n.toiletCopyToDailyLogLabel),
                 subtitle: Text(l10n.toiletCopyToDailyLogDescription),
               ),
@@ -419,7 +418,13 @@ class _ToiletRecordFormScreenState extends State<ToiletRecordFormScreen> {
             FilledButton(
               onPressed: _saving ? null : _save,
               child: _saving
-                  ? const CircularProgressIndicator()
+                  ? const SizedBox.square(
+                      // Bounded, or the indicator takes the whole
+                      // button and reads as a stray spinning icon
+                      // rather than a busy button (PM, 2026-08-18).
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : Text(l10n.commonSave),
             ),
           ],

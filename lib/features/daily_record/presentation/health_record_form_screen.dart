@@ -56,7 +56,6 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
   /// them twice for one action -- the failure was not theirs (PM request).
   bool _adAlreadyShown = false;
 
-
   int get _totalPhotoCount => _retainedPhotoUrls.length + _newPhotoBytes.length;
 
   @override
@@ -112,8 +111,9 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
     // Read before the first await; used after the save completes.
     final adGate = adGateOf(context);
     final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
-    final saveFailedMessage =
-        AppLocalizations.of(context)!.saveFailedRetryMessage;
+    final saveFailedMessage = AppLocalizations.of(
+      context,
+    )!.saveFailedRetryMessage;
     final hasNewPhotos = _newPhotoBytes.isNotEmpty;
     try {
       // Ad first, write behind it -- see toilet_record_form_screen.dart for
@@ -356,7 +356,13 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             FilledButton(
               onPressed: _saving ? null : _save,
               child: _saving
-                  ? const CircularProgressIndicator()
+                  ? const SizedBox.square(
+                      // Bounded, or the indicator takes the whole
+                      // button and reads as a stray spinning icon
+                      // rather than a busy button (PM, 2026-08-18).
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : Text(l10n.commonSave),
             ),
           ],

@@ -87,25 +87,54 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
+  /// True while the PDF is being built, so the export button can say so.
+  ///
+  /// The build is no longer instant from the screen's point of view: the
+  /// Japanese font is fetched before the preview opens rather than inside
+  /// it (see ReportPdfExporter.shareOrPrint). Without this the button would
+  /// look ignored for a few seconds on the first export.
+  bool _exportingPdf = false;
+
   Future<void> _exportPdf() async {
+    if (_exportingPdf) return;
     final l10n = AppLocalizations.of(context)!;
-    await widget.pdfExporter.shareOrPrint(
-      strings: ReportPdfStrings(
-        title: l10n.reportPdfTitle('{petName}'),
-        defaultPetName: l10n.reportPdfDefaultPetName,
-        period: l10n.reportPdfPeriod('{start}', '{end}'),
-        summaryHeading: l10n.reportPdfSummaryHeading,
-        noSummary: l10n.reportPdfNoSummary,
-        weightHeading: l10n.reportPdfWeightHeading,
-        toiletHeading: l10n.reportPdfToiletHeading,
-        dateColumn: l10n.reportPdfDateColumn,
-        weightColumn: l10n.reportPdfWeightColumn,
-        countColumn: l10n.reportPdfCountColumn,
-      ),
-      stats: widget.stats,
-      summaryText: _summaryText,
-      petName: widget.petName,
-    );
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _exportingPdf = true);
+    try {
+      await widget.pdfExporter.shareOrPrint(
+        strings: ReportPdfStrings(
+          title: l10n.reportPdfTitle('{petName}'),
+          defaultPetName: l10n.reportPdfDefaultPetName,
+          period: l10n.reportPdfPeriod('{start}', '{end}'),
+          summaryHeading: l10n.reportPdfSummaryHeading,
+          noSummary: l10n.reportPdfNoSummary,
+          weightHeading: l10n.reportPdfWeightHeading,
+          toiletHeading: l10n.reportPdfToiletHeading,
+          dateColumn: l10n.reportPdfDateColumn,
+          weightColumn: l10n.reportPdfWeightColumn,
+          countColumn: l10n.reportPdfCountColumn,
+        ),
+        stats: widget.stats,
+        summaryText: _summaryText,
+        petName: widget.petName,
+      );
+    } on ReportPdfException catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            e.failure == ReportPdfFailure.fontUnavailable
+                ? l10n.reportPdfFontUnavailableMessage
+                : l10n.reportPdfFailedMessage,
+          ),
+        ),
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.reportPdfFailedMessage)),
+      );
+    } finally {
+      if (mounted) setState(() => _exportingPdf = false);
+    }
   }
 
   @override
@@ -122,7 +151,7 @@ class _ReportScreenState extends State<ReportScreen> {
           IconButton(
             icon: const Icon(Icons.picture_as_pdf_outlined),
             tooltip: l10n.reportExportPdfTooltip,
-            onPressed: _exportPdf,
+            onPressed: _exportingPdf ? null : _exportPdf,
           ),
         ],
       ),

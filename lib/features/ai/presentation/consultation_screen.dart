@@ -207,11 +207,6 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          AiUsageBadge(
-            uid: widget.uid,
-            usageRepository: widget.usageRepository,
-            refreshToken: _usageRefreshToken,
-          ),
           const DisclaimerBanner(),
           const SizedBox(height: 16),
           if (prefill.isNotEmpty) ...[
@@ -283,6 +278,14 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                 ),
               ],
             ],
+          ),
+          // Under the button that spends it (PM, 2026-08-18). At the top of
+          // the screen it was a fact about the account; here it is the
+          // price of the thing being pressed.
+          AiUsageBadge(
+            uid: widget.uid,
+            usageRepository: widget.usageRepository,
+            refreshToken: _usageRefreshToken,
           ),
           const SizedBox(height: 16),
           _buildResult(l10n),

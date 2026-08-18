@@ -1056,6 +1056,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String get reportPdfFontUnavailableMessage =>
+      'Could not fetch the Japanese font. Check your connection and try again.';
+
+  @override
+  String get reportPdfFailedMessage =>
+      'Could not create the PDF. Please try again.';
+
+  @override
+  String get weightSortOldestFirstTooltip => 'Sort oldest first';
+
+  @override
+  String get weightSortNewestFirstTooltip => 'Sort newest first';
+
+  @override
+  String get commonLoadingLabel => 'loading...';
+
+  @override
   String get historyCopyButtonLabel => 'Fill from a past record';
 
   @override
@@ -1142,6 +1159,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toiletUrineVolumeLabel => 'Amount';
+
+  @override
+  String toiletUrineConditionSubtitle(String color, String volume) {
+    return 'Color: $color / Amount: $volume';
+  }
 
   @override
   String toiletUrineVolumeSubtitle(String volume) {

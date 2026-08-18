@@ -270,16 +270,33 @@ class _ToiletRecordTimelineScreenState
                                 final record = records[index];
                                 final isUrine = record.type == ToiletType.urine;
                                 final subtitleParts = [
+                                  // Colour and volume read as one line
+                                  // joined by "/", the way stool's hardness
+                                  // and colour already do (PM, 2026-08-18).
+                                  // They were two separate parts, so a
+                                  // urine row was punctuated differently
+                                  // from the stool row above it.
                                   if (isUrine)
-                                    if (record.urineColor != null)
+                                    if (record.urineColor != null &&
+                                        record.urineVolume != null)
+                                      l10n.toiletUrineConditionSubtitle(
+                                        urineColorLabel(
+                                          context,
+                                          record.urineColor!,
+                                        ),
+                                        urineVolumeLabel(
+                                          context,
+                                          record.urineVolume!,
+                                        ),
+                                      )
+                                    else if (record.urineColor != null)
                                       l10n.toiletUrineColorSubtitle(
                                         urineColorLabel(
                                           context,
                                           record.urineColor!,
                                         ),
-                                      ),
-                                  if (isUrine)
-                                    if (record.urineVolume != null)
+                                      )
+                                    else if (record.urineVolume != null)
                                       l10n.toiletUrineVolumeSubtitle(
                                         urineVolumeLabel(
                                           context,

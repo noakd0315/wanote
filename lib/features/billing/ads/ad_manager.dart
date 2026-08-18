@@ -90,12 +90,23 @@ class AdManager {
 
     _loadedInterstitial = null;
     final dismissed = Completer<void>();
+    // Armed below. Cancelled the moment the ad reports itself on screen, so
+    // a watched ad is never cut short.
+    Timer? appearanceWatchdog;
     void finish() {
+      appearanceWatchdog?.cancel();
+      appearanceWatchdog = null;
       _backdrop.hide();
       if (!dismissed.isCompleted) dismissed.complete();
     }
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        // It is really on screen, so the backdrop is doing its job and the
+        // only thing left to wait for is a person closing it.
+        appearanceWatchdog?.cancel();
+        appearanceWatchdog = null;
+      },
       onAdDismissedFullScreenContent: (ad) {
         finish();
         ad.dispose();
@@ -108,6 +119,14 @@ class AdManager {
       },
     );
     _backdrop.show();
+    // The backdrop absorbs every touch -- that is what makes it a backdrop.
+    // So it must never be able to outlive the ad it is backing. If the ad
+    // has not reported itself on screen shortly after show(), assume it is
+    // not coming and let the app go: an ad that failed to appear is a
+    // missed impression, while a black sheet nobody can dismiss is a dead
+    // app (PM report, 2026-08-18: "中間レイヤーは発動しているので、その
+    // あとの操作ができない").
+    appearanceWatchdog = Timer(_appearanceTimeout, finish);
     await ad.show();
     // A callback that never fires would strand the caller mid-save, so the
     // wait has a ceiling. Generous: this is an upper bound on a stuck SDK,
@@ -117,6 +136,14 @@ class AdManager {
       onTimeout: finish,
     );
   }
+
+  /// How long an ad gets to appear before the backdrop gives up on it.
+  ///
+  /// Presentation is local -- the creative is already downloaded -- so this
+  /// is the SDK handing a view controller to the OS, not a network round
+  /// trip. Long enough to absorb a slow frame, short enough that a failure
+  /// reads as a flicker rather than a hang.
+  static const Duration _appearanceTimeout = Duration(seconds: 3);
 
   void dispose() {
     _loadedInterstitial?.dispose();

@@ -8,6 +8,7 @@ import 'health_record_form_screen.dart';
 import 'widgets/health_record_labels.dart';
 import '../../../shared/utils/formatting.dart';
 import '../../../shared/widgets/wanote_loading_indicator.dart';
+import '../../../shared/widgets/patterned_background.dart';
 
 /// How far back the timeline shows.
 enum HealthRecordPeriod {
@@ -215,10 +216,12 @@ class _HealthRecordTimelineScreenState
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => HealthRecordDetailScreen(
-                        uid: widget.uid,
-                        record: record,
-                        repository: widget.repository,
+                      builder: (_) => PatternedBackground(
+                        child: HealthRecordDetailScreen(
+                          uid: widget.uid,
+                          record: record,
+                          repository: widget.repository,
+                        ),
                       ),
                     ),
                   );

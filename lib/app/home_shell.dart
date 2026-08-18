@@ -40,6 +40,7 @@ import 'settings_section.dart';
 import '../features/medical/domain/reminder_strings.dart';
 import '../features/medical/domain/reminder_scheduler.dart';
 import '../features/medical/domain/medication_reminder_scheduler.dart';
+import '../shared/widgets/patterned_background.dart';
 
 /// The real app shell, handed to [LaunchGateScreen] as its `homeBuilder`
 /// from main.dart once a signed-in user has at least one pet.
@@ -339,7 +340,9 @@ class _HomeShellState extends State<HomeShell>
   void _openPaywall(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PaywallScreen(billingRepository: _billingRepository),
+        builder: (_) => PatternedBackground(
+          child: PaywallScreen(billingRepository: _billingRepository),
+        ),
       ),
     );
   }

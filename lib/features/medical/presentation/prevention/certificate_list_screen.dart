@@ -12,6 +12,7 @@ import 'prevention_program_list_screen.dart';
 import '../../../../shared/widgets/stream_error_view.dart';
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
 import '../../domain/latest_certificates.dart';
+import '../../../../shared/widgets/patterned_background.dart';
 
 /// Spec 5.3's certificate list requirement: "一覧から証明書を即座に確認できる
 /// ようにする（ペットホテル・ドッグラン・トリミング施設での提示を想定）",
@@ -214,7 +215,9 @@ class _CertificateListScreenState extends State<CertificateListScreen> {
   void _openPreventionPrograms(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PreventionProgramListScreen(uid: uid, petId: petId),
+        builder: (_) => PatternedBackground(
+          child: PreventionProgramListScreen(uid: uid, petId: petId),
+        ),
       ),
     );
   }

@@ -1020,6 +1020,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String get reportPdfFontUnavailableMessage =>
+      '日本語フォントを取得できませんでした。通信状況をご確認の上、再度お試しください。';
+
+  @override
+  String get reportPdfFailedMessage => 'PDFを作成できませんでした。もう一度お試しください。';
+
+  @override
+  String get weightSortOldestFirstTooltip => '古い順に並べ替え';
+
+  @override
+  String get weightSortNewestFirstTooltip => '新しい順に並べ替え';
+
+  @override
+  String get commonLoadingLabel => 'loading...';
+
+  @override
   String get historyCopyButtonLabel => '過去の記録から入力';
 
   @override
@@ -1102,8 +1118,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toiletUrineVolumeLabel => '量';
 
   @override
+  String toiletUrineConditionSubtitle(String color, String volume) {
+    return '色: $color / 量: $volume';
+  }
+
+  @override
   String toiletUrineVolumeSubtitle(String volume) {
-    return '量：$volume';
+    return '量: $volume';
   }
 
   @override
