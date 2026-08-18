@@ -409,7 +409,8 @@ class _WeightRecordTable extends StatelessWidget {
               if (delta != null) ...[
                 const SizedBox(width: 12),
                 Text(
-                  '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)}',
+                  '${delta >= 0 ? '+' : ''}'
+                  '${delta.toStringAsFixed(weightDecimalPlaces)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: delta > 0

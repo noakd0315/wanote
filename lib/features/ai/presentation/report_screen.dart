@@ -238,7 +238,7 @@ class _ReportScreenState extends State<ReportScreen> {
               showTitles: true,
               reservedSize: 36,
               getTitlesWidget: (value, meta) => Text(
-                '${value.toStringAsFixed(1)}kg',
+                '${value.toStringAsFixed(weightDecimalPlaces)}kg',
                 style: const TextStyle(fontSize: 9),
               ),
             ),

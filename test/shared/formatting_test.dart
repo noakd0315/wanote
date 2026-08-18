@@ -30,10 +30,10 @@ void main() {
 
   testWidgets('weights read in the reader\'s unit', (tester) async {
     final ja = await pumpWithLocale(tester, const Locale('ja'));
-    expect(formatWeight(ja, 12.0), '12.0 kg');
+    expect(formatWeight(ja, 12.0), '12.00 kg');
 
     final en = await pumpWithLocale(tester, const Locale('en'));
-    expect(formatWeight(en, 12.0), '26.5 lb');
+    expect(formatWeight(en, 12.0), '26.46 lb');
   });
 
   testWidgets('a weight typed in pounds is stored in kilograms', (
@@ -51,7 +51,7 @@ void main() {
   testWidgets('the field is prefilled in the unit it asks for', (tester) async {
     final en = await pumpWithLocale(tester, const Locale('en'));
     expect(weightInputUnit(en), 'lb');
-    expect(weightInputText(en, 12.0), '26.5');
+    expect(weightInputText(en, 12.0), '26.46');
 
     final ja = await pumpWithLocale(tester, const Locale('ja'));
     expect(weightInputUnit(ja), 'kg');
@@ -91,5 +91,46 @@ void main() {
 
     final en = await pumpWithLocale(tester, const Locale('en'));
     expect(formatFoodQuantity(en, 200), '7.1 oz');
+  });
+
+  // PM decision, 2026-08-18: two places. One was enough for a labrador and
+  // not for a chihuahua -- at 2.4kg a tenth is 4% of the dog.
+  group('weights carry two decimal places', () {
+    testWidgets('a hundredth survives being typed and read back', (
+      tester,
+    ) async {
+      final ja = await pumpWithLocale(tester, const Locale('ja'));
+      final stored = parseWeightToKilograms(ja, '5.28');
+      expect(stored, 5.28);
+      expect(formatWeight(ja, stored!), '5.28 kg');
+      expect(weightInputText(ja, stored), '5.28');
+    });
+
+    testWidgets('a third decimal is rounded away rather than hidden', (
+      tester,
+    ) async {
+      // Storing 5.123 and showing 5.12 means the next edit prefills 5.12
+      // and saving it silently changes the record.
+      final ja = await pumpWithLocale(tester, const Locale('ja'));
+      expect(parseWeightToKilograms(ja, '5.123'), 5.12);
+      expect(parseWeightToKilograms(ja, '5.126'), 5.13);
+    });
+
+    testWidgets('the prefill drops zeros the owner does not need', (
+      tester,
+    ) async {
+      final ja = await pumpWithLocale(tester, const Locale('ja'));
+      expect(weightInputText(ja, 12.0), '12');
+      expect(weightInputText(ja, 12.5), '12.5');
+      expect(weightInputText(ja, 12.05), '12.05');
+    });
+
+    testWidgets('pounds typed to two places come back as they were typed', (
+      tester,
+    ) async {
+      final en = await pumpWithLocale(tester, const Locale('en'));
+      final stored = parseWeightToKilograms(en, '11.47');
+      expect(weightInputText(en, stored!), '11.47');
+    });
   });
 }

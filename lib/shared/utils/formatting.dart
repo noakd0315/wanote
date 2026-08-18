@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -49,10 +51,22 @@ double poundsToKilograms(double lb) => lb / _poundsPerKilogram;
 
 double gramsToOunces(double grams) => grams * _ouncesPerGram;
 
+/// How many decimal places a weight is written to.
+///
+/// Two (PM decision, 2026-08-18). One was enough for a labrador and not for
+/// a chihuahua: at 2.4kg a tenth is 4% of the dog, and the change worth
+/// noticing is smaller than the rounding. Kitchen and pet scales read to
+/// 10g, so this is the precision the owner actually has.
+const int weightDecimalPlaces = 2;
+
 /// A weight with its unit, converted for display.
 ///
 /// [kilograms] is always the stored value; what comes back may be pounds.
-String formatWeight(BuildContext context, double kilograms, {int digits = 1}) {
+String formatWeight(
+  BuildContext context,
+  double kilograms, {
+  int digits = weightDecimalPlaces,
+}) {
   if (usesImperialWeight(context)) {
     return '${kilogramsToPounds(kilograms).toStringAsFixed(digits)} lb';
   }
@@ -77,7 +91,23 @@ String weightInputUnit(BuildContext context) =>
 double? parseWeightToKilograms(BuildContext context, String text) {
   final value = double.tryParse(text.trim());
   if (value == null || value <= 0) return null;
-  return usesImperialWeight(context) ? poundsToKilograms(value) : value;
+  // Rounded to the precision the app displays, in the unit it was typed in.
+  //
+  // Otherwise a third decimal is stored and then never shown again: the
+  // list says 5.12 while the record holds 5.123, the next edit prefills
+  // 5.12, and saving that silently changes the number. Rounding here means
+  // what is stored is what was read back.
+  //
+  // In kilograms after conversion, a pound typed to two places lands on an
+  // untidy number of kilograms -- that is arithmetic, not lost precision,
+  // and converting back gives the pounds that were typed.
+  final rounded = _roundTo(value, weightDecimalPlaces);
+  return usesImperialWeight(context) ? poundsToKilograms(rounded) : rounded;
+}
+
+double _roundTo(double value, int places) {
+  final factor = math.pow(10, places);
+  return (value * factor).round() / factor;
 }
 
 const double _centimetresPerInch = 2.54;
@@ -127,8 +157,19 @@ String weightInputText(BuildContext context, double? kilograms) {
   final shown = usesImperialWeight(context)
       ? kilogramsToPounds(kilograms)
       : kilograms;
-  // Trailing zeros removed: "12" reads better than "12.0" in a field the
-  // owner is about to edit.
-  final text = shown.toStringAsFixed(1);
-  return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
+  // Trailing zeros removed: "12" reads better than "12.00" in a field the
+  // owner is about to edit, and "12.5" better than "12.50".
+  return _trimTrailingZeros(shown.toStringAsFixed(weightDecimalPlaces));
+}
+
+/// Drops zeros the reader does not need, and the point with them.
+/// "12.00" -> "12", "12.50" -> "12.5", "12.05" -> "12.05".
+String _trimTrailingZeros(String text) {
+  if (!text.contains('.')) return text;
+  var end = text.length;
+  while (end > 0 && text[end - 1] == '0') {
+    end--;
+  }
+  if (end > 0 && text[end - 1] == '.') end--;
+  return text.substring(0, end);
 }

@@ -274,7 +274,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       final questionText =
           // Stored units, not the display ones: the prompt is not read by
           // the owner, and mixing units into it would only invite mistakes.
-          'Weight ${weightKg?.toStringAsFixed(1)}kg, ${_lifeStage.name}'
+          'Weight ${weightKg?.toStringAsFixed(weightDecimalPlaces)}kg, '
+          '${_lifeStage.name}'
           '${isAdult ? ' (${widget.neutered ? 'neutered' : 'not neutered'}, '
                 'body condition: ${_bodyCondition.name}, '
                 'activity: ${_activityLevel.name})' : ''}. '
