@@ -274,6 +274,21 @@ class _PreventionRecordFormScreenState
       _ocrConfidence = result.confidence;
 
       final outcome = widget.ocrValidator.evaluate(result.confidence);
+      // The confidence decides whether anything is prefilled at all, and
+      // nothing on screen says what it was -- so a scan that reads fine to
+      // a person but scores 0.55 looks like the feature is broken (PM:
+      // 要確認マークが見られなかった, 2026-08-18). Logged so the threshold
+      // can be tuned against what real certificates actually score, rather
+      // than against the guess it was set from.
+      developer.log(
+        'OCR confidence=${result.confidence} -> ${outcome.name} '
+        '(threshold ${OcrResultValidator.defaultConfidenceThreshold}); '
+        'fields: administeredAt=${result.administeredAt != null} '
+        'nextDueDate=${result.nextDueDate != null} '
+        'hospitalName=${result.hospitalName != null} '
+        'productName=${result.productName != null}',
+        name: 'CertificateOcr',
+      );
       if (outcome == OcrValidationOutcome.prefillForReview) {
         setState(() {
           _needsReview.clear();

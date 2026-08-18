@@ -478,7 +478,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: Theme.of(
                 context,
               ).colorScheme.surface.withValues(alpha: 0.9),
-              child: WanoteLoadingIndicator.centered(size: 96),
+              // No explicit size: every other full-screen wait in the app
+              // sizes itself from the screen, and pinning this one at 96
+              // made the sign-in cover visibly smaller than the very next
+              // screen's (PM, 2026-08-18).
+              child: WanoteLoadingIndicator.centered(),
             ),
           ),
       ],
