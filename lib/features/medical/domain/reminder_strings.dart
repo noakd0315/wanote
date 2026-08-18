@@ -18,6 +18,7 @@ class ReminderStrings {
     required this.preventionTitle,
     required this.preventionVaccineBody,
     required this.preventionMedicationBody,
+    required this.preventionDueTodayBody,
     required this.channelName,
     required this.channelDescription,
   });
@@ -31,6 +32,7 @@ class ReminderStrings {
     preventionTitle: _productPlaceholder,
     preventionVaccineBody: _daysPlaceholder,
     preventionMedicationBody: 'The next dose is due soon.',
+    preventionDueTodayBody: 'This is due today.',
     channelName: 'Reminders',
     channelDescription: 'Medication and prevention reminders.',
   );
@@ -52,6 +54,10 @@ class ReminderStrings {
   final String preventionVaccineBody;
 
   final String preventionMedicationBody;
+
+  /// Used when the owner asked to be reminded on the due date itself, where
+  /// "due within 0 days" would be nonsense.
+  final String preventionDueTodayBody;
   final String channelName;
   final String channelDescription;
 

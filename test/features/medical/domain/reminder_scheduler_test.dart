@@ -169,4 +169,79 @@ void main() {
       expect(result, hasLength(2));
     });
   });
+
+  // PM request (2026-08-18): the fixed lead time did not fit every
+  // treatment. A monthly heartworm tablet the owner already has is better
+  // remembered on the day than three days early.
+  group('owner-chosen lead times', () {
+    test('one notification per chosen lead time', () {
+      final reminders = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'heartworm',
+            type: PreventionType.medication,
+            productName: 'フィラリア薬',
+            nextDueDate: DateTime(2026, 9, 1),
+            leadDays: const [0, 3],
+          ),
+        ],
+        now: DateTime(2026, 8, 1),
+      );
+      expect(reminders, hasLength(2));
+      expect(
+        reminders.map((r) => r.fireAt).toSet(),
+        {DateTime(2026, 9, 1, 9), DateTime(2026, 8, 29, 9)},
+      );
+    });
+
+    test('each lead time gets its own notification id', () {
+      final reminders = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'heartworm',
+            type: PreventionType.medication,
+            productName: 'フィラリア薬',
+            nextDueDate: DateTime(2026, 9, 1),
+            leadDays: const [0, 3, 7],
+          ),
+        ],
+        now: DateTime(2026, 8, 1),
+      );
+      // Sharing an id would mean each reschedule overwrote the last, and
+      // only one of the three would ever arrive.
+      expect(reminders.map((r) => r.notificationId).toSet(), hasLength(3));
+    });
+
+    test('a same-day reminder fires on the due date itself', () {
+      final reminders = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'heartworm',
+            type: PreventionType.medication,
+            productName: 'フィラリア薬',
+            nextDueDate: DateTime(2026, 9, 1),
+            leadDays: const [0],
+          ),
+        ],
+        now: DateTime(2026, 8, 1),
+      );
+      expect(reminders.single.fireAt, DateTime(2026, 9, 1, 9));
+    });
+
+    test('no chosen lead time falls back to the type default', () {
+      final reminders = scheduler.computeReminders(
+        records: [
+          ReminderCandidate(
+            recordId: 'rabies',
+            type: PreventionType.vaccine,
+            productName: '狂犬病ワクチン',
+            nextDueDate: DateTime(2026, 9, 1),
+          ),
+        ],
+        now: DateTime(2026, 8, 1),
+      );
+      // 7 days for a vaccine, unchanged from before this was configurable.
+      expect(reminders.single.fireAt, DateTime(2026, 8, 25, 9));
+    });
+  });
 }

@@ -2042,6 +2042,36 @@ abstract class AppLocalizations {
   /// **'Sort newest first'**
   String get weightSortNewestFirstTooltip;
 
+  /// Reminder body when the owner chose to be reminded on the due date itself, where a 'due within N days' wording would read as zero days.
+  ///
+  /// In en, this message translates to:
+  /// **'This is due today.'**
+  String get reminderPreventionDueTodayBody;
+
+  /// Heading above the lead-time chips on the prevention record form.
+  ///
+  /// In en, this message translates to:
+  /// **'When to notify'**
+  String get preventionReminderLeadLabel;
+
+  /// Lead-time chip meaning the due date itself.
+  ///
+  /// In en, this message translates to:
+  /// **'On the day'**
+  String get preventionReminderLeadSameDay;
+
+  /// Lead-time chip for a number of days ahead of the due date.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days before'**
+  String preventionReminderLeadDaysBefore(int days);
+
+  /// Explains when prevention reminders fire and how the next due date is maintained.
+  ///
+  /// In en, this message translates to:
+  /// **'You get one notification per selected timing, counted back from the next due date. The next due date updates when you save the next record; once it has passed, no reminder is sent.'**
+  String get preventionReminderExplanation;
+
   /// Word shown under the wanote mark while a screen is loading. Deliberately the same lowercase English in both languages -- the PM specified this literal wording, and it reads as part of the mark rather than as a sentence.
   ///
   /// In en, this message translates to:

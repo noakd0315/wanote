@@ -16,6 +16,7 @@ class ReminderCandidate extends Equatable {
     required this.nextDueDate,
     this.reminderEnabled = true,
     this.reminderTime,
+    this.leadDays = const [],
   });
 
   final String recordId;
@@ -32,13 +33,26 @@ class ReminderCandidate extends Equatable {
   /// not left to a constant.
   final ReminderTime? reminderTime;
 
+  /// How many days before [nextDueDate] to remind, one notification each.
+  /// Empty falls back to the type's default lead time.
+  ///
+  /// PM (2026-08-18): a monthly heartworm tablet is better remembered on
+  /// the day than three days early, and some owners want both.
+  final List<int> leadDays;
+
   /// `prevention_records.next_due_date`. `null` means no reminder can be
   /// computed (e.g. a `single`-schedule vaccine whose next date wasn't
   /// entered) — the no-due-date edge case.
   final DateTime? nextDueDate;
 
   @override
-  List<Object?> get props => [recordId, type, productName, nextDueDate];
+  List<Object?> get props => [
+    recordId,
+    type,
+    productName,
+    nextDueDate,
+    leadDays,
+  ];
 }
 
 /// One notification the caller should (re)schedule with
@@ -147,9 +161,9 @@ class ReminderScheduler {
         continue;
       }
 
-      final leadDays = record.type == PreventionType.vaccine
-          ? vaccineLeadDays
-          : recurringLeadDays;
+      final leadDaysForRecord = record.leadDays.isNotEmpty
+          ? record.leadDays
+          : [defaultLeadDaysFor(record.type)];
 
       final dueAt = DateTime(
         nextDueDate.year,
@@ -164,31 +178,50 @@ class ReminderScheduler {
         continue;
       }
 
-      var fireAt = dueAt.subtract(Duration(days: leadDays));
-      if (fireAt.isBefore(now)) {
-        // We're already inside the lead window (e.g. app wasn't opened for
-        // a while) — fire the catch-up reminder right away instead of
-        // silently dropping it.
-        fireAt = now;
-      }
+      // One notification per chosen lead time. The ids are namespaced by
+      // lead time as well as record, or the second would overwrite the
+      // first and only the last one asked for would ever arrive.
+      for (final leadDays in leadDaysForRecord) {
+        var fireAt = dueAt.subtract(Duration(days: leadDays));
+        if (fireAt.isBefore(now)) {
+          // We're already inside the lead window (e.g. app wasn't opened
+          // for a while) — fire the catch-up reminder right away instead of
+          // silently dropping it. With several lead times this can collapse
+          // two of them onto now; they share a moment, not an id, so the
+          // later one still lands.
+          fireAt = now;
+        }
 
-      reminders.add(
-        ScheduledReminder(
-          notificationId: _stableNotificationId(record.recordId),
-          recordId: record.recordId,
-          fireAt: fireAt,
-          title: _titleFor(record),
-          body: _bodyFor(record, leadDays),
-        ),
-      );
+        reminders.add(
+          ScheduledReminder(
+            notificationId: stableNotificationId(
+              '${record.recordId}#lead$leadDays',
+            ),
+            recordId: record.recordId,
+            fireAt: fireAt,
+            title: _titleFor(record),
+            body: _bodyFor(record, leadDays),
+          ),
+        );
+      }
     }
     return reminders;
   }
+
+  /// The lead time used when a record names none of its own.
+  ///
+  /// Vaccines are infrequent and need an appointment, so a week. Routine
+  /// monthly doses get a nearer nudge.
+  int defaultLeadDaysFor(PreventionType type) =>
+      type == PreventionType.vaccine ? vaccineLeadDays : recurringLeadDays;
 
   String _titleFor(ReminderCandidate record) =>
       strings.preventionTitleFor(record.productName);
 
   String _bodyFor(ReminderCandidate record, int leadDays) {
+    // "Due within 0 days" is not a sentence. A reminder set for the due
+    // date says so instead.
+    if (leadDays == 0) return strings.preventionDueTodayBody;
     switch (record.type) {
       case PreventionType.vaccine:
         return strings.preventionVaccineBodyFor(leadDays);
@@ -197,8 +230,6 @@ class ReminderScheduler {
     }
   }
 
-  static int _stableNotificationId(String recordId) =>
-      stableNotificationId(recordId);
 }
 
 /// FNV-1a 32-bit hash of [key], masked to a positive 31-bit int so it always

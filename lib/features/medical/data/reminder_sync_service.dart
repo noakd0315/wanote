@@ -201,6 +201,7 @@ class ReminderSyncService {
           nextDueDate: record.nextDueDate,
           reminderEnabled: record.reminderEnabled,
           reminderTime: record.reminderTime,
+          leadDays: record.reminderLeadDays,
         ),
       );
     }

@@ -180,6 +180,7 @@ class _HomeShellState extends State<HomeShell>
       preventionVaccineBody: l10n.reminderPreventionVaccineBody(0)
           .replaceFirst('0', '{days}'),
       preventionMedicationBody: l10n.reminderPreventionMedicationBody,
+      preventionDueTodayBody: l10n.reminderPreventionDueTodayBody,
       channelName: l10n.reminderChannelName,
       channelDescription: l10n.reminderChannelDescription,
     );

@@ -19,6 +19,7 @@ class PreventionRecord extends Equatable {
     this.nextDueDate,
     this.reminderEnabled = false,
     this.reminderTime,
+    this.reminderLeadDays = const [],
     this.certificateFile,
     this.ocrExtractedData,
     this.ocrConfidence,
@@ -69,6 +70,20 @@ class PreventionRecord extends Equatable {
   /// owner's to choose rather than a constant.
   final ReminderTime? reminderTime;
 
+  /// How many days before the due date to remind, one entry per
+  /// notification (PM request, 2026-08-18).
+  ///
+  /// A list, because one moment does not fit every treatment: a booster
+  /// wants a week's warning to book the appointment, while a monthly
+  /// heartworm tablet the owner already has in the cupboard is better
+  /// remembered *on the day* -- three days early and it gets dismissed and
+  /// forgotten. `0` means the due date itself.
+  ///
+  /// Empty means "whatever this type defaults to", so records saved before
+  /// this existed keep the behaviour they had (7 days for vaccines, 3 for
+  /// medication -- see [ReminderScheduler]).
+  final List<int> reminderLeadDays;
+
   /// Download URL for the certificate image/PDF in Firebase Storage.
   final String? certificateFile;
 
@@ -87,6 +102,7 @@ class PreventionRecord extends Equatable {
     bool clearNextDueDate = false,
     bool? reminderEnabled,
     ReminderTime? reminderTime,
+    List<int>? reminderLeadDays,
     String? certificateFile,
     Map<String, dynamic>? ocrExtractedData,
     double? ocrConfidence,
@@ -100,6 +116,7 @@ class PreventionRecord extends Equatable {
       dosage: dosage ?? this.dosage,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
+      reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
       visitId: visitId ?? this.visitId,
       hospitalName: hospitalName ?? this.hospitalName,
       nextDueDate: clearNextDueDate ? null : (nextDueDate ?? this.nextDueDate),
@@ -124,6 +141,7 @@ class PreventionRecord extends Equatable {
       'dosage': dosage,
       'reminder_enabled': reminderEnabled,
       'reminder_time': reminderTime?.wireValue,
+      'reminder_lead_days': reminderLeadDays,
       'certificate_file': certificateFile,
       'ocr_extracted_data': ocrExtractedData,
       'ocr_confidence': ocrConfidence,
@@ -146,6 +164,7 @@ class PreventionRecord extends Equatable {
       // notification for every due date found was more than they asked for.
       reminderEnabled: map['reminder_enabled'] as bool? ?? false,
       reminderTime: ReminderTime.tryParse(map['reminder_time']),
+      reminderLeadDays: _leadDaysFrom(map['reminder_lead_days']),
       certificateFile: map['certificate_file'] as String?,
       ocrExtractedData: (map['ocr_extracted_data'] as Map?)
           ?.cast<String, dynamic>(),
@@ -160,6 +179,23 @@ class PreventionRecord extends Equatable {
     return null;
   }
 
+  /// Reads the stored lead days defensively: duplicates collapse (two
+  /// notifications at the same moment are one notification), negatives are
+  /// dropped (a reminder after the due date is not a reminder), and the
+  /// result is sorted so the soonest-scheduled is always last.
+  static List<int> _leadDaysFrom(Object? raw) {
+    if (raw is! List) return const [];
+    final days =
+        raw
+            .whereType<num>()
+            .map((e) => e.toInt())
+            .where((days) => days >= 0)
+            .toSet()
+            .toList()
+          ..sort();
+    return List.unmodifiable(days);
+  }
+
   @override
   List<Object?> get props => [
     recordId,
@@ -170,6 +206,7 @@ class PreventionRecord extends Equatable {
     dosage,
     reminderEnabled,
     reminderTime,
+    reminderLeadDays,
     visitId,
     hospitalName,
     nextDueDate,

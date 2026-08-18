@@ -25,6 +25,7 @@ import '../../../../shared/app_messenger.dart';
 import '../../domain/models/medication.dart' show ReminderTime;
 import '../../../../shared/widgets/wanote_loading_indicator.dart';
 import '../widgets/history_copy_picker.dart';
+import '../../domain/reminder_scheduler.dart';
 
 /// Create/edit screen for a `prevention_records` entry (spec 5.3), including
 /// the AI-OCR capture-and-review flow (spec 5.4).
@@ -95,6 +96,13 @@ class _PreventionRecordFormScreenState
   /// PM: a reminder just after midnight is no use to anyone, so the hour is
   /// the owner's to choose.
   ReminderTime _reminderTime = const ReminderTime(9, 0);
+
+  /// Which "how far ahead" reminders the owner wants, in days before the
+  /// due date. 0 is the due date itself.
+  ///
+  /// Empty means the type's default (a week for vaccines, three days for
+  /// medication). Kept as a set: the same lead time twice is one reminder.
+  Set<int> _reminderLeadDays = <int>{};
   late DateTime _administeredAt;
   DateTime? _nextDueDate;
   bool _nextDueDateManuallyEdited = false;
@@ -146,6 +154,7 @@ class _PreventionRecordFormScreenState
     _dosageController.text = record?.dosage ?? '';
     _reminderEnabled = record?.reminderEnabled ?? false;
     _reminderTime = record?.reminderTime ?? const ReminderTime(9, 0);
+    _reminderLeadDays = {...?record?.reminderLeadDays};
     _existingCertificateUrl = record?.certificateFile;
     _ocrExtractedData = record?.ocrExtractedData;
     _ocrConfidence = record?.ocrConfidence;
@@ -353,6 +362,7 @@ class _PreventionRecordFormScreenState
           nextDueDate: _nextDueDate,
           reminderEnabled: _reminderEnabled,
           reminderTime: _reminderTime,
+          reminderLeadDays: _reminderLeadDays.toList()..sort(),
           ocrExtractedData: _ocrExtractedData,
           ocrConfidence: _ocrConfidence,
         );
@@ -392,6 +402,7 @@ class _PreventionRecordFormScreenState
             clearNextDueDate: _nextDueDate == null,
             reminderEnabled: _reminderEnabled,
             reminderTime: _reminderTime,
+            reminderLeadDays: _reminderLeadDays.toList()..sort(),
             certificateFile: certificateUrl,
             ocrExtractedData: _ocrExtractedData,
             ocrConfidence: _ocrConfidence,
@@ -430,6 +441,19 @@ class _PreventionRecordFormScreenState
     );
     if (picked != null) onPicked(picked);
   }
+
+  /// The lead times offered. Not free numeric entry: these are the ones
+  /// that correspond to something real -- the day itself, the day before,
+  /// a few days to notice, a week to book an appointment, two for a course
+  /// that needs ordering in.
+  static const List<int> _leadDayChoices = [0, 1, 3, 7, 14];
+
+  int get _defaultLeadDays =>
+      const ReminderScheduler().defaultLeadDaysFor(widget.program.type);
+
+  String _leadDayLabel(AppLocalizations l10n, int days) => days == 0
+      ? l10n.preventionReminderLeadSameDay
+      : l10n.preventionReminderLeadDaysBefore(days);
 
   /// Fills the form from an earlier dose of this same programme, keeping
   /// today's date.
@@ -614,7 +638,42 @@ class _PreventionRecordFormScreenState
                     setState(() => _reminderEnabled = value),
                 title: Text(l10n.medicationReminderSwitchLabel),
               ),
-              if (_reminderEnabled)
+              if (_reminderEnabled) ...[
+                Text(
+                  l10n.preventionReminderLeadLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Wrap(
+                  spacing: 8,
+                  children: _leadDayChoices.map((days) {
+                    final selected = _reminderLeadDays.isEmpty
+                        ? days == _defaultLeadDays
+                        : _reminderLeadDays.contains(days);
+                    return FilterChip(
+                      label: Text(_leadDayLabel(l10n, days)),
+                      selected: selected,
+                      onSelected: (isOn) => setState(() {
+                        // The first touch turns the implicit default into
+                        // an explicit choice, so unticking it means "not
+                        // that one" rather than "back to the default".
+                        if (_reminderLeadDays.isEmpty) {
+                          _reminderLeadDays = {_defaultLeadDays};
+                        }
+                        if (isOn) {
+                          _reminderLeadDays.add(days);
+                        } else {
+                          _reminderLeadDays.remove(days);
+                        }
+                        // Nothing selected would mean "remind me, but
+                        // never" -- fall back rather than store a silent
+                        // no-op.
+                        if (_reminderLeadDays.isEmpty) {
+                          _reminderLeadDays = {_defaultLeadDays};
+                        }
+                      }),
+                    );
+                  }).toList(),
+                ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.medicationReminderTimeLabel),
@@ -642,6 +701,20 @@ class _PreventionRecordFormScreenState
                     );
                   },
                 ),
+                // The rules are not guessable from the controls, and both
+                // halves have surprised the PM: the notification arrives
+                // *before* the due date, and the due date only moves when
+                // the next dose is recorded (PM asked, 2026-08-18).
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    l10n.preventionReminderExplanation,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.nextDueDateLabel),

@@ -1033,6 +1033,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get weightSortNewestFirstTooltip => '新しい順に並べ替え';
 
   @override
+  String get reminderPreventionDueTodayBody => '本日が予定日です。';
+
+  @override
+  String get preventionReminderLeadLabel => '通知するタイミング';
+
+  @override
+  String get preventionReminderLeadSameDay => '当日';
+
+  @override
+  String preventionReminderLeadDaysBefore(int days) {
+    return '$days日前';
+  }
+
+  @override
+  String get preventionReminderExplanation =>
+      '選んだタイミングごとに、次回予定日を基準として通知します（複数選択できます）。次回予定日は、次の記録を保存したときに更新されます。予定日を過ぎると通知は行われません。';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override

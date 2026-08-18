@@ -1070,6 +1070,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weightSortNewestFirstTooltip => 'Sort newest first';
 
   @override
+  String get reminderPreventionDueTodayBody => 'This is due today.';
+
+  @override
+  String get preventionReminderLeadLabel => 'When to notify';
+
+  @override
+  String get preventionReminderLeadSameDay => 'On the day';
+
+  @override
+  String preventionReminderLeadDaysBefore(int days) {
+    return '$days days before';
+  }
+
+  @override
+  String get preventionReminderExplanation =>
+      'You get one notification per selected timing, counted back from the next due date. The next due date updates when you save the next record; once it has passed, no reminder is sent.';
+
+  @override
   String get commonLoadingLabel => 'loading...';
 
   @override
