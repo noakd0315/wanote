@@ -2010,6 +2010,34 @@
   "@medicationAddReminderTimeButton": {
     "description": "Adds another reminder time to a medication. PM request: some courses are several doses a day, and a single time could only describe a once-daily medicine."
   },
+  "reportHistoryTitle": "Report history",
+  "@reportHistoryTitle": {
+    "description": "Heading above the list of previously generated health reports, on the report screen itself."
+  },
+  "reportHistoryEmptyMessage": "No reports yet.",
+  "@reportHistoryEmptyMessage": {
+    "description": "Shown under the report history heading when none has been generated."
+  },
+  "reportHistoryDetailTitle": "Past report",
+  "@reportHistoryDetailTitle": {
+    "description": "Title of the dialog that shows one past report in full."
+  },
+  "reportHistoryPeriodLabel": "Period",
+  "@reportHistoryPeriodLabel": {
+    "description": "Label above the period a past report covers, in its detail dialog."
+  },
+  "reportHistorySummaryLabel": "Summary",
+  "@reportHistorySummaryLabel": {
+    "description": "Label above the AI summary text in a past report's detail dialog."
+  },
+  "reportHistoryDeleteButton": "Delete",
+  "@reportHistoryDeleteButton": {
+    "description": "Deletes one past report."
+  },
+  "reportHistoryDeleteConfirmation": "Delete this report?",
+  "@reportHistoryDeleteConfirmation": {
+    "description": "Confirmation asked before a past report is deleted."
+  },
   "consultationHistoryFoodPortionPrefix": "[Food portion] ",
   "@consultationHistoryFoodPortionPrefix": {
     "description": "Marks a history entry that came from the food-portion calculator rather than a typed question. PM asked for the two to be distinguishable in the list."

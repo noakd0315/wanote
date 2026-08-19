@@ -1529,6 +1529,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get medicationAddReminderTimeButton => 'Add a time';
 
   @override
+  String get reportHistoryTitle => 'Report history';
+
+  @override
+  String get reportHistoryEmptyMessage => 'No reports yet.';
+
+  @override
+  String get reportHistoryDetailTitle => 'Past report';
+
+  @override
+  String get reportHistoryPeriodLabel => 'Period';
+
+  @override
+  String get reportHistorySummaryLabel => 'Summary';
+
+  @override
+  String get reportHistoryDeleteButton => 'Delete';
+
+  @override
+  String get reportHistoryDeleteConfirmation => 'Delete this report?';
+
+  @override
   String get consultationHistoryFoodPortionPrefix => '[Food portion] ';
 
   @override

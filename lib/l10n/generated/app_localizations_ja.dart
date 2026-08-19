@@ -1468,6 +1468,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get medicationAddReminderTimeButton => '時刻を追加';
 
   @override
+  String get reportHistoryTitle => 'レポート履歴';
+
+  @override
+  String get reportHistoryEmptyMessage => 'レポートはまだありません。';
+
+  @override
+  String get reportHistoryDetailTitle => '過去のレポート';
+
+  @override
+  String get reportHistoryPeriodLabel => '対象期間';
+
+  @override
+  String get reportHistorySummaryLabel => '要約';
+
+  @override
+  String get reportHistoryDeleteButton => '削除';
+
+  @override
+  String get reportHistoryDeleteConfirmation => 'このレポートを削除しますか？';
+
+  @override
   String get consultationHistoryFoodPortionPrefix => '【餌の量】';
 
   @override

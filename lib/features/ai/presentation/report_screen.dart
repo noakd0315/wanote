@@ -6,10 +6,12 @@ import '../../../shared/widgets/ai_answer_text.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/report_repository.dart';
 import '../domain/monthly_report_generator.dart';
+import '../models/monthly_report.dart';
 import '../models/monthly_report_input_stats.dart';
 import 'widgets/disclaimer_banner.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
+import '../../../shared/widgets/stream_error_view.dart';
 import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 enum _SummaryState { idle, loading, ready, needsUpgrade, error }
@@ -128,8 +130,146 @@ class _ReportScreenState extends State<ReportScreen> {
           const DisclaimerBanner(),
           const SizedBox(height: 12),
           _buildSummarySection(l10n),
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 8),
+          Text(
+            l10n.reportHistoryTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          _buildHistory(l10n),
         ],
       ),
+    );
+  }
+
+  /// Past reports, listed on the screen that produced them.
+  ///
+  /// They were being written to Firestore and never read back -- nothing
+  /// called `watchReports`, so a report was visible once and then gone (PM,
+  /// 2026-08-19). They belong here rather than in the consultation history:
+  /// the report is a premium feature and that list is not, so mixing them
+  /// puts a locked feature's output among a free one's (PM, 2026-08-20).
+  ///
+  /// Same shape as the consultation history deliberately (PM request): a
+  /// card per entry, truncated preview, tap for the whole thing, delete on
+  /// the row.
+  Widget _buildHistory(AppLocalizations l10n) {
+    return StreamBuilder<List<MonthlyReport>>(
+      stream: widget.reportRepository.watchReports(widget.uid, widget.petId),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return StreamErrorView(error: snapshot.error!);
+        }
+        if (!snapshot.hasData) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: WanoteLoadingIndicator.centered(),
+          );
+        }
+        final reports = snapshot.data!;
+        if (reports.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(l10n.reportHistoryEmptyMessage),
+          );
+        }
+        return Column(
+          children: reports
+              .map(
+                (report) => Card(
+                  child: ListTile(
+                    onTap: () => _showReport(report),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: l10n.reportHistoryDeleteButton,
+                      onPressed: () => _confirmDelete(report),
+                    ),
+                    title: Text(_periodLabel(report)),
+                    subtitle: Text(
+                      // Plain, not rendered: a heading at heading size
+                      // inside a three-line snippet reads worse, but the
+                      // markers should not show either.
+                      aiAnswerPlainText(report.summaryText),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+
+  String _periodLabel(MonthlyReport report) =>
+      '${_fullDateLabel(report.periodStart)} - '
+      '${_fullDateLabel(report.periodEnd)}';
+
+  Future<void> _showReport(MonthlyReport report) {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.reportHistoryDetailTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.reportHistoryPeriodLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              SelectableText(_periodLabel(report)),
+              const SizedBox(height: 16),
+              Text(
+                l10n.reportHistorySummaryLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              // Selectable for the same reason as a consultation answer:
+              // something worth keeping is worth copying to the clinic.
+              AiAnswerText(report.summaryText, selectable: true),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.commonClose),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(MonthlyReport report) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(l10n.reportHistoryDeleteConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.reportHistoryDeleteButton),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await widget.reportRepository.delete(
+      uid: widget.uid,
+      petId: widget.petId,
+      reportId: report.reportId,
     );
   }
 

@@ -2840,6 +2840,48 @@ abstract class AppLocalizations {
   /// **'Add a time'**
   String get medicationAddReminderTimeButton;
 
+  /// Heading above the list of previously generated health reports, on the report screen itself.
+  ///
+  /// In en, this message translates to:
+  /// **'Report history'**
+  String get reportHistoryTitle;
+
+  /// Shown under the report history heading when none has been generated.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports yet.'**
+  String get reportHistoryEmptyMessage;
+
+  /// Title of the dialog that shows one past report in full.
+  ///
+  /// In en, this message translates to:
+  /// **'Past report'**
+  String get reportHistoryDetailTitle;
+
+  /// Label above the period a past report covers, in its detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get reportHistoryPeriodLabel;
+
+  /// Label above the AI summary text in a past report's detail dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get reportHistorySummaryLabel;
+
+  /// Deletes one past report.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get reportHistoryDeleteButton;
+
+  /// Confirmation asked before a past report is deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this report?'**
+  String get reportHistoryDeleteConfirmation;
+
   /// Marks a history entry that came from the food-portion calculator rather than a typed question. PM asked for the two to be distinguishable in the list.
   ///
   /// In en, this message translates to:

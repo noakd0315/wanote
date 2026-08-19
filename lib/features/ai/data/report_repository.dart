@@ -16,6 +16,12 @@ abstract class ReportRepository {
     required DateTime periodEnd,
     required String summaryText,
   });
+
+  Future<void> delete({
+    required String uid,
+    required String petId,
+    required String reportId,
+  });
 }
 
 class FirestoreReportRepository implements ReportRepository {
@@ -59,5 +65,17 @@ class FirestoreReportRepository implements ReportRepository {
         .doc(report.reportId)
         .set(report.toMap());
     return report;
+  }
+
+  @override
+  Future<void> delete({
+    required String uid,
+    required String petId,
+    required String reportId,
+  }) async {
+    await _firestore
+        .collection(FirestorePaths.reports(uid, petId))
+        .doc(reportId)
+        .delete();
   }
 }
