@@ -745,6 +745,14 @@
   "@preventionProgramInactiveSuffix": {
     "description": "Suffix appended to a prevention program list entry's subtitle when the program is inactive."
   },
+  "preventionNextDueLabel": "Next due",
+  "@preventionNextDueLabel": {
+    "description": "Label for the next scheduled date shown on a prevention program in the list."
+  },
+  "preventionNextDueOverdueSuffix": " (overdue)",
+  "@preventionNextDueOverdueSuffix": {
+    "description": "Suffix appended to a prevention program's next due date when that date has already passed."
+  },
   "savingInProgressMessage": "Saving, please wait",
   "@savingInProgressMessage": {
     "description": "Snackbar shown when the user tries to leave the prevention record form while a save is still in progress."

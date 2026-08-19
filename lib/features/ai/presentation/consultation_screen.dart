@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../billing/ads/ad_gate.dart';
 import '../../billing/domain/ad_trigger.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/ai_answer_text.dart';
 import '../../../shared/models/consultation_reference_record.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
@@ -354,7 +355,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
               const SizedBox(height: 4),
               // Selectable: advice worth keeping is worth copying into a
               // message to the clinic.
-              SelectableText(consultation.aiResponse),
+              AiAnswerText(consultation.aiResponse, selectable: true),
             ],
           ),
         ),
@@ -394,7 +395,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(_resultText ?? ''),
+          child: AiAnswerText(_resultText ?? '', selectable: true),
         );
     }
   }
@@ -447,7 +448,10 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      c.aiResponse,
+                      // Plain, not rendered: a heading at heading size
+                      // inside a three-line snippet reads worse, but the
+                      // markers should not show either.
+                      aiAnswerPlainText(c.aiResponse),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),

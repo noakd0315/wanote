@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../billing/ads/ad_gate.dart';
 import '../../billing/domain/ad_trigger.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/ai_answer_text.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/ai_backend_client.dart';
 import '../domain/food_portion_calculator.dart';
@@ -552,7 +553,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(_adviceText ?? ''),
+          child: AiAnswerText(_adviceText ?? ''),
         );
     }
   }

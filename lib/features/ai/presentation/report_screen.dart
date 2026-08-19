@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/ai_answer_text.dart';
 import '../../../shared/services/ai_usage_repository.dart';
 import '../data/report_repository.dart';
 import '../domain/monthly_report_generator.dart';
@@ -170,7 +171,7 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(_summaryText ?? ''),
+          child: AiAnswerText(_summaryText ?? ''),
         );
     }
   }

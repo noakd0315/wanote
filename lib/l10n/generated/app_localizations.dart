@@ -1178,6 +1178,18 @@ abstract class AppLocalizations {
   /// **' (inactive)'**
   String get preventionProgramInactiveSuffix;
 
+  /// Label for the next scheduled date shown on a prevention program in the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Next due'**
+  String get preventionNextDueLabel;
+
+  /// Suffix appended to a prevention program's next due date when that date has already passed.
+  ///
+  /// In en, this message translates to:
+  /// **' (overdue)'**
+  String get preventionNextDueOverdueSuffix;
+
   /// Snackbar shown when the user tries to leave the prevention record form while a save is still in progress.
   ///
   /// In en, this message translates to:

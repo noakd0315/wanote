@@ -180,6 +180,8 @@
   "scheduleTypeSingleBadge": "単発",
   "scheduleIntervalDaysLabel": "{days}日ごと",
   "preventionProgramInactiveSuffix": "（無効）",
+  "preventionNextDueLabel": "次回予定日",
+  "preventionNextDueOverdueSuffix": "（期限切れ）",
   "savingInProgressMessage": "保存中です。しばらくお待ちください",
   "preventionRecordFormAddTitle": "投与記録を追加",
   "preventionRecordFormEditTitle": "投与記録を編集",

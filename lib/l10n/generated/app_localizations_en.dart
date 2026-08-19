@@ -588,6 +588,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preventionProgramInactiveSuffix => ' (inactive)';
 
   @override
+  String get preventionNextDueLabel => 'Next due';
+
+  @override
+  String get preventionNextDueOverdueSuffix => ' (overdue)';
+
+  @override
   String get savingInProgressMessage => 'Saving, please wait';
 
   @override

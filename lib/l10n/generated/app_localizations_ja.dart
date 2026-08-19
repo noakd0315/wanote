@@ -566,6 +566,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionProgramInactiveSuffix => '（無効）';
 
   @override
+  String get preventionNextDueLabel => '次回予定日';
+
+  @override
+  String get preventionNextDueOverdueSuffix => '（期限切れ）';
+
+  @override
   String get savingInProgressMessage => '保存中です。しばらくお待ちください';
 
   @override
