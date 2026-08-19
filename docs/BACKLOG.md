@@ -343,7 +343,7 @@ AI の回答が**記法のまま**画面に出る。実際に出た文字列:
 
 ---
 
-# ホームのショートカットが反応しないことがある（調査中）
+# ~~ホームのショートカットが反応しないことがある~~ → **原因特定・修正済み（2026-08-19）**
 
 登録: 2026-08-19（PM報告。**再現には成功、原因未特定**）
 
@@ -381,8 +381,48 @@ failures: 6      ← 画面がホームのまま（差分 0.0 = 完全一致）
 | B | `IndexedStack` の各セクションが初期化を終えるまで、`tabRequest` が届いても反映されない | `_applyTabRequest` は `initState` でも呼ばれるが、`TabController` 生成前後の順序は未確認 |
 | C | `didChangeAppLifecycleState` の resumed リセットが遅れて届く | 1回のresumeで6回失敗する説明にはならず、**単独では不十分** |
 
-## 次にやること
+## 原因（確定）
 
-1. `flutter run` で繋いだ状態で同じ32回テストを流し、**失敗時のログを取る**
-   （`_openSectionTab` と `_applyTabRequest` に一時的な `developer.log` を入れる）
-2. 失敗回に `AdBackdrop` が居るかを確認する
+**PM の見立てどおり、スワイプ対応で埋め込まれた。**
+
+`keep_alive_tab.dart` のコメントに経緯が残っている:
+
+> The sections used an IndexedStack ... Swapping to TabBarView is what
+> makes the tabs swipeable (PM request, 2026-08-18).
+
+`_openSectionTab` は**タブを指定してから**セクションを表示していた。
+
+```dart
+tabRequest.value = tabIndex;          // ← まだ Home が映っている
+setState(() => _selectedIndex = ...); // ← ここで初めて表示される
+```
+
+**IndexedStack のころはこれで動いた。** 同期的に子を差し替えるだけで、
+描画されているかどうかを問わないため。
+
+**TabBarView は PageController を介してアニメーションする。**
+Home の裏に隠れたままの TabBarView に「隣のタブへ動け」と言っても動かず、
+表示された時点では元のタブのまま。だから**そのタブを以前に開いていた
+ときだけ**失敗する（開いていなければ移動が不要なので成功に見える）。
+
+**PM 報告の再現手順**
+
+```
+健康の記録を表示 → ホーム → 体重（ショートカット） → 健康の記録が出る
+通院履歴を表示   → ホーム → 証明書（ショートカット） → 通院履歴が出る
+```
+
+**「トイレの方が正しく動くことが多い」も説明がつく。**
+Flutter は隣接タブを animate、離れたタブを jump してから animate する。
+**jump だけは画面外でも効く**ため、距離のあるタブほど成功しやすい。
+
+**iOS 固有ではない。** Android の32回テストで6回再現している。
+
+## 修正
+
+`_openSectionTab` の順序を入れ替え、**セクションを表示してから**
+`addPostFrameCallback` でタブを要求するようにした（`home_shell.dart`）。
+
+あわせて `daily_record_section.dart` と `medical_home_screen.dart` に
+残っていた「content switching still goes through IndexedStack」という
+**嘘になっていたコメント**を実態に合わせた。この記述が調査を遠回りさせた。

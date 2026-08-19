@@ -42,9 +42,10 @@ class _MedicalHomeScreenState extends State<MedicalHomeScreen>
   // being reverted here. Non-scrollable (the TabBar default) so all 4 tabs
   // split the width evenly, matching DailyRecordSection/AiSection's tab
   // bars (PM request: "タブサイズを均等に割り当ててください"). The
-  // controller only drives the TabBar's own visuals/gestures; actual
-  // content switching still goes through IndexedStack (see build below) so
-  // each tab keeps its own state across switches, same as before.
+  // controller drives both the TabBar's visuals and the TabBarView below.
+  // Content used to switch through an IndexedStack; swipe support replaced
+  // that with a TabBarView, and KeepAliveTab is what preserves each tab's
+  // state across switches (see keep_alive_tab.dart).
   late final TabController _tabController;
 
   /// 通院 / 薬 / 予防 / 証明書, in the order the TabBar below lists them.

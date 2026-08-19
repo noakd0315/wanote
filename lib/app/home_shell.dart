@@ -92,20 +92,41 @@ class _HomeShellState extends State<HomeShell>
     ValueNotifier<int> tabRequest,
     int tabIndex,
   ) {
-    // Cleared first, so asking for the same tab twice still counts.
-    //
-    // A ValueNotifier only notifies when the value *changes*. Pressing the
-    // 証明書 shortcut set the request to 3; if the owner then moved to
-    // another tab by hand and pressed the same shortcut again, writing 3
-    // over 3 notified nobody and they stayed where they were -- the section
-    // opened on whichever tab it had been left on (PM report, 2026-08-18).
-    //
-    // -1 is not a tab, and the listener ignores out-of-range values, so
-    // this is a no-op that makes the next write a change.
-    tabRequest.value = -1;
-    tabRequest.value = tabIndex;
     _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     setState(() => _selectedIndex = sectionIndex);
+
+    // The section is switched to *first*, and the inner tab is asked for
+    // only once it is on screen.
+    //
+    // This order matters since the sections gained swipe (2026-08-18):
+    // their content moved from an IndexedStack to a TabBarView. An
+    // IndexedStack switches children synchronously and does not care
+    // whether it is being painted, so setting the tab before the section
+    // was visible worked. A TabBarView drives a PageController and
+    // *animates*, and asking a TabBarView that is still hidden behind the
+    // Home tab to move left it where it was -- the owner pressed 体重 and
+    // got 健康の記録, the tab they had been on before (PM report,
+    // 2026-08-19: "健康の記録を表示→ホーム→体重→健康の記録").
+    //
+    // Non-adjacent tabs failed less often, which is the tell: Flutter warps
+    // adjacent tabs by animating and distant ones by jumping first, and
+    // only the jump survives being off screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Cleared first, so asking for the same tab twice still counts.
+      //
+      // A ValueNotifier only notifies when the value *changes*. Pressing the
+      // 証明書 shortcut set the request to 3; if the owner then moved to
+      // another tab by hand and pressed the same shortcut again, writing 3
+      // over 3 notified nobody and they stayed where they were -- the
+      // section opened on whichever tab it had been left on (PM report,
+      // 2026-08-18).
+      //
+      // -1 is not a tab, and the listener ignores out-of-range values, so
+      // this is a no-op that makes the next write a change.
+      tabRequest.value = -1;
+      tabRequest.value = tabIndex;
+    });
   }
 
   late final HealthRecordRepository _healthRecordRepository;

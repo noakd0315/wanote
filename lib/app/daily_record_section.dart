@@ -64,9 +64,10 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
   // TabBar (not SegmentedButton) per the PM's request -- the segmented
   // button's icon+label segments could overflow/wrap on narrower widths,
   // which is exactly the "内部メニューが崩れる" breakage being reverted here.
-  // The controller only drives the TabBar's own visuals/gestures; actual
-  // content switching still goes through IndexedStack (see build below) so
-  // each tab keeps its own state across switches, same as before.
+  // The controller drives both the TabBar's visuals and the TabBarView
+  // below. Content used to switch through an IndexedStack; swipe support
+  // replaced that with a TabBarView, and KeepAliveTab is what preserves
+  // each tab's state across switches (see keep_alive_tab.dart).
   late final TabController _tabController;
 
   @override
