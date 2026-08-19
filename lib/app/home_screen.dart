@@ -91,14 +91,29 @@ class HomeScreen extends StatelessWidget {
     // FoodPortionScreen can be pre-filled -- it takes a plain double rather
     // than the repository itself, mirroring how ReportScreen receives
     // MonthlyReportInputStats instead of reaching into daily_record itself.
-    final records = await weightRecordRepository
-        .watchAll(uid, activePet.petId)
-        .first;
-    final latestWeightKg = records.isEmpty
-        ? activePet.weightKg
-        : records
-              .reduce((a, b) => a.measuredAt.isAfter(b.measuredAt) ? a : b)
-              .weightKg;
+    //
+    // Bounded, and never fatal. This used to `await ... .first` bare: with
+    // no network and nothing cached, that future does not complete, so the
+    // tap opened nothing at all and gave no sign why -- the owner pressed
+    // 餌の量 and stayed on Home (PM report, 2026-08-19). The three shortcuts
+    // beside it switch sections synchronously and always respond, so this
+    // one has to as well. A prefilled weight is a convenience; failing to
+    // read it is not a reason to withhold the screen.
+    var latestWeightKg = activePet.weightKg;
+    try {
+      final records = await weightRecordRepository
+          .watchAll(uid, activePet.petId)
+          .first
+          .timeout(const Duration(seconds: 3));
+      if (records.isNotEmpty) {
+        latestWeightKg = records
+            .reduce((a, b) => a.measuredAt.isAfter(b.measuredAt) ? a : b)
+            .weightKg;
+      }
+    } on Object {
+      // Falls back to the profile's weight, which the owner can edit on the
+      // screen itself.
+    }
     if (!context.mounted) return;
 
     Navigator.of(context).push(

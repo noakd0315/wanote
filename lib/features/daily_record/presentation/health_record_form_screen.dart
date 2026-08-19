@@ -13,6 +13,7 @@ import '../../../shared/widgets/image_source_sheet.dart';
 import '../data/health_record_repository.dart';
 import '../models/health_record.dart';
 import 'widgets/health_record_labels.dart';
+import '../../../shared/utils/formatting.dart';
 import '../../../shared/utils/image_picking.dart';
 import '../../../shared/app_messenger.dart';
 
@@ -214,7 +215,7 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.healthRecordDateTimeLabel),
-              subtitle: Text(_recordedAt.toString()),
+              subtitle: Text(formatDateTime(context, _recordedAt)),
               trailing: const Icon(Icons.edit_calendar),
               onTap: () async {
                 final date = await showDatePicker(
@@ -223,7 +224,20 @@ class _HealthRecordFormScreenState extends State<HealthRecordFormScreen> {
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2100),
                 );
-                if (date != null) setState(() => _recordedAt = date);
+                if (date != null) {
+                  // Keep the time of day: showDatePicker returns midnight,
+                  // and assigning it wholesale silently moved a record
+                  // recorded at 19:30 to 00:00.
+                  setState(
+                    () => _recordedAt = DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      _recordedAt.hour,
+                      _recordedAt.minute,
+                    ),
+                  );
+                }
               },
             ),
             const SizedBox(height: 8),

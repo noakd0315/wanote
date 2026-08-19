@@ -141,6 +141,13 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
                   opacity: 0.45 + (_pulse.value * 0.55),
                   child: Transform.scale(
                     scale: 0.92 + (_pulse.value * 0.08),
+                    // Anchored at the bottom, not the centre. Scaling about
+                    // the centre lifts the artwork's bottom edge off the
+                    // box every time the pulse shrinks, so the gap to the
+                    // label breathes between 4px and ~12px and reads as
+                    // "離れすぎ" at the low end (PM, 2026-08-19). Pinning the
+                    // bottom keeps the gap at exactly the SizedBox below.
+                    alignment: Alignment.bottomCenter,
                     child: child,
                   ),
                 ),
@@ -159,7 +166,7 @@ class _WanoteLoadingIndicatorState extends State<WanoteLoadingIndicator>
                       SizedBox(width: size, height: size * _markAspectRatio),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               // Excluded from semantics: the Semantics above already
               // announces this, and without this the label would be read
               // out twice.
