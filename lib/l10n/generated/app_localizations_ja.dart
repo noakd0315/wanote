@@ -1494,6 +1494,18 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get consultationHistoryReportPrefix => '【健康レポート】';
+
+  @override
+  String reportHistorySummary(
+    String period,
+    String weightCount,
+    String toiletCount,
+  ) {
+    return '$period／体重の記録 $weightCount件、トイレの記録 $toiletCount件';
+  }
+
+  @override
   String foodPortionHistoryCurrentAmount(String amount) {
     return '／現在 $amount';
   }

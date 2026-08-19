@@ -2041,6 +2041,19 @@
       "density": { "type": "String" }
     }
   },
+  "consultationHistoryReportPrefix": "[Health report] ",
+  "@consultationHistoryReportPrefix": {
+    "description": "Prefix marking a consultation-history entry that came from the monthly health report rather than a typed question."
+  },
+  "reportHistorySummary": "{period} / {weightCount} weight records, {toiletCount} toilet records",
+  "@reportHistorySummary": {
+    "description": "What the report screen writes into the consultation history. A second rendering of the same figures, not the English prompt: this one is read by the owner months later.",
+    "placeholders": {
+      "period": { "type": "String" },
+      "weightCount": { "type": "String" },
+      "toiletCount": { "type": "String" }
+    }
+  },
   "foodPortionHistoryCurrentAmount": " / currently {amount}",
   "@foodPortionHistoryCurrentAmount": {
     "description": "Appended to foodPortionHistorySummary when the owner entered what they feed now.",

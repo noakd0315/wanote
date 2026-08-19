@@ -2882,6 +2882,22 @@ abstract class AppLocalizations {
     String density,
   );
 
+  /// Prefix marking a consultation-history entry that came from the monthly health report rather than a typed question.
+  ///
+  /// In en, this message translates to:
+  /// **'[Health report] '**
+  String get consultationHistoryReportPrefix;
+
+  /// What the report screen writes into the consultation history. A second rendering of the same figures, not the English prompt: this one is read by the owner months later.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} / {weightCount} weight records, {toiletCount} toilet records'**
+  String reportHistorySummary(
+    String period,
+    String weightCount,
+    String toiletCount,
+  );
+
   /// Appended to foodPortionHistorySummary when the owner entered what they feed now.
   ///
   /// In en, this message translates to:

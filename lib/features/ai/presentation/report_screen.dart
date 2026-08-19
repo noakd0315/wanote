@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/ai_answer_text.dart';
 import '../../../shared/services/ai_usage_repository.dart';
+import '../data/consultation_repository.dart';
 import '../data/report_repository.dart';
 import '../domain/monthly_report_generator.dart';
 import '../models/monthly_report_input_stats.dart';
@@ -30,6 +31,7 @@ class ReportScreen extends StatefulWidget {
     required this.usageRepository,
     required this.reportGenerator,
     required this.reportRepository,
+    required this.consultationRepository,
     required this.onRequestUpgrade,
     this.petName,
   });
@@ -40,6 +42,15 @@ class ReportScreen extends StatefulWidget {
   final AiUsageRepository usageRepository;
   final MonthlyReportGenerator reportGenerator;
   final ReportRepository reportRepository;
+
+  /// The report is also written to the consultation history.
+  ///
+  /// reportRepository already stored it, but nothing ever read that back --
+  /// `watchReports` has no caller, so a generated report was visible once
+  /// and then gone (PM, 2026-08-19). The history is where owners already
+  /// look for what the AI told them, and the food-portion advice is
+  /// filed there for exactly the same reason.
+  final ConsultationRepository consultationRepository;
 
   /// Stub navigation hook for Agent E's subscription-upgrade UI.
   final VoidCallback onRequestUpgrade;
@@ -53,10 +64,32 @@ class _ReportScreenState extends State<ReportScreen> {
   _SummaryState _state = _SummaryState.idle;
   String? _summaryText;
 
+  /// What goes into the consultation history for a generated report.
+  ///
+  /// The period and how much it was based on -- enough to tell two months'
+  /// reports apart in a list, without repeating the summary that sits right
+  /// underneath it.
+  String _historyText(BuildContext context, AppLocalizations l10n) {
+    final stats = widget.stats;
+    return l10n.reportHistorySummary(
+      '${formatDate(context, stats.periodStart)}'
+      ' - '
+      '${formatDate(context, stats.periodEnd)}',
+      stats.weightSamples.length.toString(),
+      stats.toiletCountsByDay
+          .fold<int>(0, (sum, day) => sum + day.count)
+          .toString(),
+    );
+  }
+
   Future<void> _generateSummary() async {
     // Captured before the first await: reading it from the
     // BuildContext afterwards would be a use-after-dispose hazard.
     final languageCode = Localizations.localeOf(context).languageCode;
+    // Both read before the first await, for the same reason as the language.
+    final l10n = AppLocalizations.of(context)!;
+    final historyPrefix = l10n.consultationHistoryReportPrefix;
+    final historyText = _historyText(context, l10n);
     setState(() => _state = _SummaryState.loading);
     try {
       final status = await widget.usageRepository.getStatus(widget.uid);
@@ -76,6 +109,19 @@ class _ReportScreenState extends State<ReportScreen> {
         periodEnd: widget.stats.periodEnd,
         summaryText: summary,
       );
+      if (mounted) {
+        await widget.consultationRepository.save(
+          uid: widget.uid,
+          petId: widget.petId,
+          // NOT the prompt. The prompt is English, carries stored units and
+          // ends in instructions to the model; none of that belongs in
+          // something the owner opens months later. The duplication is
+          // deliberate (PM decision, 2026-08-15).
+          questionText: '$historyPrefix$historyText',
+          aiResponse: summary,
+          referencedRecordIds: const [],
+        );
+      }
       setState(() {
         _summaryText = summary;
         _state = _SummaryState.ready;

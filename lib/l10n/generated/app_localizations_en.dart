@@ -1556,6 +1556,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get consultationHistoryReportPrefix => '[Health report] ';
+
+  @override
+  String reportHistorySummary(
+    String period,
+    String weightCount,
+    String toiletCount,
+  ) {
+    return '$period / $weightCount weight records, $toiletCount toilet records';
+  }
+
+  @override
   String foodPortionHistoryCurrentAmount(String amount) {
     return ' / currently $amount';
   }

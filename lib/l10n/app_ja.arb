@@ -458,6 +458,8 @@
   "petProfileFormWeightLabelWithUnit": "体重（{unit}）・任意",
   "medicationAddReminderTimeButton": "時刻を追加",
   "consultationHistoryFoodPortionPrefix": "【餌の量】",
+  "consultationHistoryReportPrefix": "【健康レポート】",
+  "reportHistorySummary": "{period}／体重の記録 {weightCount}件、トイレの記録 {toiletCount}件",
   "preventionRecordFormAddTitleVaccine": "接種記録を追加",
   "preventionRecordFormEditTitleVaccine": "接種記録を編集",
   "preventionRecordFormAddTitleMedication": "投薬記録を追加",
