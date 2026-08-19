@@ -123,7 +123,6 @@ class _AiSectionState extends State<AiSection>
                   petName: widget.petName,
                   usageRepository: widget.usageRepository,
                   reportRepository: widget.reportRepository,
-                  consultationRepository: widget.consultationRepository,
                   reportGenerator: widget.reportGenerator,
                   weightRecordRepository: widget.weightRecordRepository,
                   toiletRecordRepository: widget.toiletRecordRepository,
@@ -160,7 +159,6 @@ class _MonthlyReportTab extends StatefulWidget {
     required this.petName,
     required this.usageRepository,
     required this.reportRepository,
-    required this.consultationRepository,
     required this.reportGenerator,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
@@ -172,10 +170,6 @@ class _MonthlyReportTab extends StatefulWidget {
   final String petName;
   final AiUsageRepository usageRepository;
   final ReportRepository reportRepository;
-
-  /// Forwarded to ReportScreen: a generated report is filed in the
-  /// consultation history, same as the food-portion advice.
-  final ConsultationRepository consultationRepository;
   final MonthlyReportGenerator reportGenerator;
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
@@ -264,7 +258,6 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
           usageRepository: widget.usageRepository,
           reportGenerator: widget.reportGenerator,
           reportRepository: widget.reportRepository,
-          consultationRepository: widget.consultationRepository,
           onRequestUpgrade: widget.onRequestUpgrade,
         );
       },
