@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart'
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../../shared/config/app_config.dart';
 import '../domain/ad_policy.dart';
 import 'ad_backdrop.dart';
 import 'ad_unit_ids.dart';
@@ -47,6 +48,19 @@ class AdManager {
   /// Safe to call anywhere: does nothing on a platform without ads.
   static Future<void> initialize() async {
     if (!platformSupported) return;
+    // AppConfig.isUsingTestAdUnits existed but nothing ever read it, so the
+    // one guard against shipping with Google's test units did nothing
+    // (found 2026-08-20). Shipping like that serves ads that earn nothing,
+    // and the running app looks completely normal -- there is no other sign.
+    //
+    // A log, not a dialog or a banner: it has to be findable when someone
+    // goes looking, without putting anything in front of the owner.
+    if (AppConfig.isUsingTestAdUnits) {
+      _log(
+        'USING GOOGLE TEST AD UNITS -- ads will earn no revenue. '
+        'Set ADMOB_* in config/prod.json before a production release.',
+      );
+    }
     await _requestTrackingAuthorizationIfNeeded();
     await MobileAds.instance.initialize();
   }
