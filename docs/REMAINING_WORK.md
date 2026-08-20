@@ -31,13 +31,40 @@
 
 ### 無くてもできること／できないこと
 
+> 🔴 **2026-08-20 訂正。** 以前ここに「テスト購入は契約前でもできる」と
+> 書いていたが**誤り**。実機で確認して判明した。
+
 | | 契約なし | 契約あり |
 |---|---|---|
 | 商品の登録 | ✅ できる | ✅ |
-| **テスト購入**（Sandbox / ライセンステスト） | ✅ **できる** | ✅ |
-| **実販売** | 🔴 **できない** | ✅ |
+| **RevenueCat への取り込み** | ✅ できる | ✅ |
+| **アプリでの商品取得** | 🔴 **できない** | ✅ |
+| **テスト購入** | 🔴 **できない** | ✅ |
+| **実販売** | 🔴 できない | ✅ |
 
-**テストは契約前でも進められる。** ここで止まる必要はない。
+**契約が無いと、Apple は商品を1つも返さない。**
+
+> Even if products and metadata are correct, **RevenueCat won't fetch
+> offerings if the Paid Apps Agreement isn't accepted** in App Store Connect.
+> Until this agreement is fully completed, **Apple won't allow in-app
+> purchases** and RevenueCat won't fetch any offerings.
+
+**実際に起きたこと（2026-08-20）**
+
+iOS の TestFlight でプラン画面を開くと「プランの読み込みに失敗しました」。
+切り分けた結果、以下がすべて正しいのに商品が取れなかった。
+
+| 確認済み | 状態 |
+|---|---|
+| RevenueCat の公開キー | ✅ 効いている（未設定なら「準備中」と出る） |
+| Offering `default` | ✅ Current になっている |
+| App Store Connect の商品 | ✅ 全部「提出準備中」 |
+| **有料App契約** | 🔴 **未締結** |
+
+**設定ミスではなく、前提条件の欠落だった。**
+
+**したがって B-1 は「実販売のブロッカー」ではなく「課金テストのブロッカー」。**
+優先度は当初の想定より高い。
 
 ### Apple 側が未締結だと分かる兆候
 
