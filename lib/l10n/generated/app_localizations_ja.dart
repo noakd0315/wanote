@@ -563,6 +563,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventionProgramActiveSwitchLabel => '有効';
 
   @override
+  String get filterPeriodOneWeek => '1週間';
+
+  @override
+  String get filterPeriodOneMonth => '1か月';
+
+  @override
+  String get filterPeriodThreeMonths => '3か月';
+
+  @override
+  String get filterPeriodOneYear => '1年';
+
+  @override
+  String get filterPeriodAll => 'すべて';
+
+  @override
+  String get medicationFilterAll => 'すべて';
+
+  @override
+  String get medicationFilterOngoing => '継続中';
+
+  @override
+  String get medicationFilterFinished => '終了';
+
+  @override
+  String get filterNoMatchMessage => '条件に合う記録がありません。';
+
+  @override
   String get preventionProgramListTitle => '予防医療';
 
   @override
@@ -1263,6 +1290,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get weightNoRecordsForPeriod => 'この期間の記録がありません';
+
+  @override
+  String get weightAlsoUpdateProfile => '愛犬情報の体重も更新する';
+
+  @override
+  String get weightProfileUpdateFailed => '記録は保存しましたが、愛犬情報の体重を更新できませんでした。';
 
   @override
   String get weightEntryDialogTitle => '体重を記録';

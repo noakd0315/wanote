@@ -20,10 +20,20 @@ class WeightRecordChartScreen extends StatefulWidget {
     required this.uid,
     required this.petId,
     required this.repository,
+    this.onUpdateProfileWeight,
   });
 
   final String uid;
   final String petId;
+
+  /// Writes a new weight onto the pet's own profile, if the app shell
+  /// supplied a way to.
+  ///
+  /// A callback rather than a repository: the profile belongs to
+  /// features/auth, and features/daily_record must not reach into it
+  /// (wanote/.claude/CLAUDE.md). The shell owns both and does the wiring,
+  /// exactly as it already does for the AI-consultation hand-off.
+  final Future<void> Function(double weightKg)? onUpdateProfileWeight;
   final WeightRecordRepository repository;
 
   @override
@@ -73,7 +83,8 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   }
 
   Future<void> _addEntry() async {
-    final result = await showDialog<({DateTime date, double weightKg})>(
+    final result =
+        await showDialog<({DateTime date, double weightKg, bool updateProfile})>(
       context: context,
       builder: (context) => const _WeightEntryDialog(),
     );
@@ -128,6 +139,28 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         weightKg: result.weightKg,
       );
     }
+    await _updateProfileWeightIfAsked(result.updateProfile, result.weightKg);
+  }
+
+  /// Copies the weight onto the pet's profile, when the owner asked for it.
+  ///
+  /// Runs after the record is stored, and its failure never fails the save:
+  /// the measurement is the thing that must not be lost, and the profile
+  /// figure can be corrected on the pet's own form. Saying which half
+  /// succeeded is better than a bare error over a record that is safely
+  /// written.
+  Future<void> _updateProfileWeightIfAsked(bool asked, double weightKg) async {
+    final update = widget.onUpdateProfileWeight;
+    if (!asked || update == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await update(weightKg);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.weightProfileUpdateFailed)),
+      );
+    }
   }
 
   /// Opens a saved measurement for correction (PM request, 2026-08-18).
@@ -137,7 +170,8 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   /// way to correct it was to add another record for the same date, which
   /// left the wrong number in the history.
   Future<void> _editEntry(WeightRecord record) async {
-    final result = await showDialog<({DateTime date, double weightKg})>(
+    final result =
+        await showDialog<({DateTime date, double weightKg, bool updateProfile})>(
       context: context,
       builder: (context) => _WeightEntryDialog(existing: record),
     );
@@ -151,6 +185,7 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
         weightKg: result.weightKg,
       ),
     );
+    await _updateProfileWeightIfAsked(result.updateProfile, result.weightKg);
   }
 
   Future<void> _deleteEntry(WeightRecord record) async {
@@ -488,6 +523,12 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
     );
   }
 
+  /// Off by default (PM, 2026-08-21). A record is a measurement on a date;
+  /// the profile weight is the figure the feeding calculator and the AI use.
+  /// Correcting an old entry, or logging a weigh-in at the clinic that is
+  /// not today's, should not silently move it.
+  bool _updateProfile = false;
+
   @override
   void dispose() {
     _weightController.dispose();
@@ -530,6 +571,14 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
               ),
             ),
           ),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            dense: true,
+            value: _updateProfile,
+            onChanged: (v) => setState(() => _updateProfile = v ?? false),
+            title: Text(l10n.weightAlsoUpdateProfile),
+          ),
         ],
       ),
       actions: [
@@ -548,7 +597,11 @@ class _WeightEntryDialogState extends State<_WeightEntryDialog> {
               _weightController.text,
             );
             if (weight == null) return;
-            Navigator.of(context).pop((date: _date, weightKg: weight));
+            Navigator.of(context).pop((
+              date: _date,
+              weightKg: weight,
+              updateProfile: _updateProfile,
+            ));
           },
           child: Text(l10n.commonSave),
         ),

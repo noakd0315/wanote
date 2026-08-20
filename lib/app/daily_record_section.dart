@@ -32,11 +32,16 @@ class DailyRecordSection extends StatefulWidget {
     this.onConsultationSuggested,
     this.onConsultAboutRecord,
     this.tabRequest,
+    this.onUpdateProfileWeight,
   });
 
   /// Set by HomeShell when a Home shortcut asks for a specific tab.
   /// Null when the section is used on its own.
   final ValueNotifier<int>? tabRequest;
+
+  /// Forwarded to the weight screen. The pet profile belongs to
+  /// features/auth, so the shell does the writing.
+  final Future<void> Function(double weightKg)? onUpdateProfileWeight;
 
   final String uid;
   final String petId;
@@ -139,6 +144,7 @@ class _DailyRecordSectionState extends State<DailyRecordSection>
                   uid: widget.uid,
                   petId: widget.petId,
                   repository: widget.weightRecordRepository,
+                  onUpdateProfileWeight: widget.onUpdateProfileWeight,
                 ),
               ),
               KeepAliveTab(

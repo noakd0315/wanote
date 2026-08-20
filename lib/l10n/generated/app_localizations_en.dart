@@ -585,6 +585,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preventionProgramActiveSwitchLabel => 'Active';
 
   @override
+  String get filterPeriodOneWeek => '1 week';
+
+  @override
+  String get filterPeriodOneMonth => '1 month';
+
+  @override
+  String get filterPeriodThreeMonths => '3 months';
+
+  @override
+  String get filterPeriodOneYear => '1 year';
+
+  @override
+  String get filterPeriodAll => 'All';
+
+  @override
+  String get medicationFilterAll => 'All';
+
+  @override
+  String get medicationFilterOngoing => 'Ongoing';
+
+  @override
+  String get medicationFilterFinished => 'Finished';
+
+  @override
+  String get filterNoMatchMessage => 'Nothing matches the current filter.';
+
+  @override
   String get preventionProgramListTitle => 'Prevention programs';
 
   @override
@@ -1309,6 +1336,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weightNoRecordsForPeriod => 'No records for this period';
+
+  @override
+  String get weightAlsoUpdateProfile => 'Also update the profile weight';
+
+  @override
+  String get weightProfileUpdateFailed =>
+      'Saved the record, but could not update the profile weight.';
 
   @override
   String get weightEntryDialogTitle => 'Record weight';

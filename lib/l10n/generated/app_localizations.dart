@@ -1166,6 +1166,60 @@ abstract class AppLocalizations {
   /// **'Active'**
   String get preventionProgramActiveSwitchLabel;
 
+  /// Period filter option shared by the visit list.
+  ///
+  /// In en, this message translates to:
+  /// **'1 week'**
+  String get filterPeriodOneWeek;
+
+  /// Period filter option shared by the visit list.
+  ///
+  /// In en, this message translates to:
+  /// **'1 month'**
+  String get filterPeriodOneMonth;
+
+  /// Period filter option shared by the visit list.
+  ///
+  /// In en, this message translates to:
+  /// **'3 months'**
+  String get filterPeriodThreeMonths;
+
+  /// Period filter option shared by the visit list.
+  ///
+  /// In en, this message translates to:
+  /// **'1 year'**
+  String get filterPeriodOneYear;
+
+  /// Period filter option meaning no date limit.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterPeriodAll;
+
+  /// Medication list filter: show every record.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get medicationFilterAll;
+
+  /// Medication list filter: only medicines still being given.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get medicationFilterOngoing;
+
+  /// Medication list filter: only medicines whose course has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get medicationFilterFinished;
+
+  /// Shown when records exist but none match the chosen filter, so an empty list does not read as no data at all.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches the current filter.'**
+  String get filterNoMatchMessage;
+
   /// AppBar title of the prevention program list screen.
   ///
   /// In en, this message translates to:
@@ -2461,6 +2515,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No records for this period'**
   String get weightNoRecordsForPeriod;
+
+  /// Opt-in checkbox in the weight entry dialog. Off by default: a record is a measurement on a date, while the profile weight is the figure the feeding calculator uses, and not every measurement should move it.
+  ///
+  /// In en, this message translates to:
+  /// **'Also update the profile weight'**
+  String get weightAlsoUpdateProfile;
+
+  /// Shown when the record saved but the follow-up profile update failed, so the owner knows which half succeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved the record, but could not update the profile weight.'**
+  String get weightProfileUpdateFailed;
 
   /// Title of the dialog used to add a new weight entry.
   ///

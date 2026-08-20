@@ -26,7 +26,7 @@ import '../widgets/confirm_delete.dart';
 /// `PreventionType.medication` already existed (heartworm and flea_tick were
 /// merged into it), so telling which programmes qualify needed no new field
 /// and no migration.
-class MedicationListScreen extends StatelessWidget {
+class MedicationListScreen extends StatefulWidget {
   MedicationListScreen({
     super.key,
     required this.uid,
@@ -51,6 +51,19 @@ class MedicationListScreen extends StatelessWidget {
   final PreventionRecordRepository preventionRecordRepository;
 
   @override
+  State<MedicationListScreen> createState() => _MedicationListScreenState();
+}
+
+class _MedicationListScreenState extends State<MedicationListScreen> {
+  /// Which medicines the list shows (PM request, 2026-08-21).
+  ///
+  /// Not a period filter like the visit list: a course of medicine is a span
+  /// rather than an event, so "still being given" is the question actually
+  /// being asked. Starts at ongoing -- a list opened to check what the dog
+  /// is on today should not begin with everything it has ever been on.
+  _MedicationFilter _filter = _MedicationFilter.ongoing;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
@@ -60,7 +73,7 @@ class MedicationListScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(l10n.medicationListTitle)),
       body: StreamBuilder<List<Medication>>(
-        stream: repository.watchMedications(uid, petId),
+        stream: widget.repository.watchMedications(widget.uid, widget.petId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return StreamErrorView(error: snapshot.error!);
@@ -75,9 +88,9 @@ class MedicationListScreen extends StatelessWidget {
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => MedicationFormScreen(
-              uid: uid,
-              petId: petId,
-              repository: repository,
+              uid: widget.uid,
+              petId: widget.petId,
+              repository: widget.repository,
             ),
           ),
         ),
@@ -92,7 +105,10 @@ class MedicationListScreen extends StatelessWidget {
     List<Medication> medications,
   ) {
     return StreamBuilder<List<PreventionProgram>>(
-      stream: preventionProgramRepository.watchPrograms(uid, petId),
+      stream: widget.preventionProgramRepository.watchPrograms(
+        widget.uid,
+        widget.petId,
+      ),
       builder: (context, snapshot) {
         // Preventive care failing must not take the medication list down
         // with it: these rows are an addition to this screen, not its
@@ -106,11 +122,40 @@ class MedicationListScreen extends StatelessWidget {
           return Center(child: Text(l10n.medicationListEmptyMessage));
         }
 
+        final shown = _filter.apply(medications, DateTime.now());
+        // The prevention rows are the programmes the dog is currently on, so
+        // they belong under "ongoing" and under "all", and nowhere else.
+        final showPrograms = _filter != _MedicationFilter.finished;
+
         return ListView(
           children: [
-            for (final medication in medications)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SegmentedButton<_MedicationFilter>(
+                  segments: [
+                    for (final filter in _MedicationFilter.values)
+                      ButtonSegment(
+                        value: filter,
+                        label: Text(filter.label(l10n)),
+                      ),
+                  ],
+                  selected: {_filter},
+                  showSelectedIcon: false,
+                  onSelectionChanged: (selection) =>
+                      setState(() => _filter = selection.first),
+                ),
+              ),
+            ),
+            if (shown.isEmpty && !(showPrograms && programs.isNotEmpty))
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Center(child: Text(l10n.filterNoMatchMessage)),
+              ),
+            for (final medication in shown)
               _buildMedication(context, l10n, medication),
-            if (programs.isNotEmpty) ...[
+            if (showPrograms && programs.isNotEmpty) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
                 child: Text(
@@ -153,7 +198,11 @@ class MedicationListScreen extends StatelessWidget {
                 context,
                 l10n.medicationDeleteConfirmationMessage,
               )) {
-                await repository.delete(uid, petId, medication.medicationId);
+                await widget.repository.delete(
+                  widget.uid,
+                  widget.petId,
+                  medication.medicationId,
+                );
               }
             },
           ),
@@ -162,9 +211,9 @@ class MedicationListScreen extends StatelessWidget {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => MedicationFormScreen(
-            uid: uid,
-            petId: petId,
-            repository: repository,
+            uid: widget.uid,
+            petId: widget.petId,
+            repository: widget.repository,
             medication: medication,
           ),
         ),
@@ -203,10 +252,10 @@ class MedicationListScreen extends StatelessWidget {
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => PreventionRecordFormScreen(
-              uid: uid,
-              petId: petId,
+              uid: widget.uid,
+              petId: widget.petId,
               program: program,
-              repository: preventionRecordRepository,
+              repository: widget.preventionRecordRepository,
             ),
           ),
         ),
@@ -215,14 +264,41 @@ class MedicationListScreen extends StatelessWidget {
         MaterialPageRoute<void>(
           builder: (_) => PatternedBackground(
             child: PreventionRecordListScreen(
-              uid: uid,
-              petId: petId,
+              uid: widget.uid,
+              petId: widget.petId,
               program: program,
-              repository: preventionRecordRepository,
+              repository: widget.preventionRecordRepository,
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+/// Which medicines the list shows.
+enum _MedicationFilter {
+  ongoing,
+  finished,
+  all;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    _MedicationFilter.ongoing => l10n.medicationFilterOngoing,
+    _MedicationFilter.finished => l10n.medicationFilterFinished,
+    _MedicationFilter.all => l10n.medicationFilterAll,
+  };
+
+  /// A course with no end date is ongoing; one whose end date has passed is
+  /// finished. An end date still in the future counts as ongoing -- the dog
+  /// is on it today, which is what the word means to the owner.
+  List<Medication> apply(List<Medication> medications, DateTime now) {
+    bool isOngoing(Medication m) =>
+        m.endDate == null || !m.endDate!.isBefore(DateUtils.dateOnly(now));
+    return switch (this) {
+      _MedicationFilter.all => medications,
+      _MedicationFilter.ongoing => medications.where(isOngoing).toList(),
+      _MedicationFilter.finished =>
+        medications.where((m) => !isOngoing(m)).toList(),
+    };
   }
 }

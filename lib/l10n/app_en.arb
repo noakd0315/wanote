@@ -733,6 +733,24 @@
   "@preventionProgramActiveSwitchLabel": {
     "description": "SwitchListTile title toggling whether the prevention program is active."
   },
+  "filterPeriodOneWeek": "1 week",
+  "@filterPeriodOneWeek": { "description": "Period filter option shared by the visit list." },
+  "filterPeriodOneMonth": "1 month",
+  "@filterPeriodOneMonth": { "description": "Period filter option shared by the visit list." },
+  "filterPeriodThreeMonths": "3 months",
+  "@filterPeriodThreeMonths": { "description": "Period filter option shared by the visit list." },
+  "filterPeriodOneYear": "1 year",
+  "@filterPeriodOneYear": { "description": "Period filter option shared by the visit list." },
+  "filterPeriodAll": "All",
+  "@filterPeriodAll": { "description": "Period filter option meaning no date limit." },
+  "medicationFilterAll": "All",
+  "@medicationFilterAll": { "description": "Medication list filter: show every record." },
+  "medicationFilterOngoing": "Ongoing",
+  "@medicationFilterOngoing": { "description": "Medication list filter: only medicines still being given." },
+  "medicationFilterFinished": "Finished",
+  "@medicationFilterFinished": { "description": "Medication list filter: only medicines whose course has ended." },
+  "filterNoMatchMessage": "Nothing matches the current filter.",
+  "@filterNoMatchMessage": { "description": "Shown when records exist but none match the chosen filter, so an empty list does not read as no data at all." },
   "preventionProgramListTitle": "Prevention programs",
   "@preventionProgramListTitle": {
     "description": "AppBar title of the prevention program list screen."
@@ -1725,6 +1743,14 @@
   "weightNoRecordsForPeriod": "No records for this period",
   "@weightNoRecordsForPeriod": {
     "description": "Empty-state message when the selected trend period has no weight records."
+  },
+  "weightAlsoUpdateProfile": "Also update the profile weight",
+  "@weightAlsoUpdateProfile": {
+    "description": "Opt-in checkbox in the weight entry dialog. Off by default: a record is a measurement on a date, while the profile weight is the figure the feeding calculator uses, and not every measurement should move it."
+  },
+  "weightProfileUpdateFailed": "Saved the record, but could not update the profile weight.",
+  "@weightProfileUpdateFailed": {
+    "description": "Shown when the record saved but the follow-up profile update failed, so the owner knows which half succeeded."
   },
   "weightEntryDialogTitle": "Record weight",
   "@weightEntryDialogTitle": {

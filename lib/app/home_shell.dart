@@ -415,6 +415,16 @@ class _HomeShellState extends State<HomeShell>
         uid: uid,
         petId: petId,
         tabRequest: _dailyRecordTabRequest,
+        // The weight screen can offer to copy a measurement onto the pet's
+        // own profile, but the profile belongs to features/auth -- so the
+        // write happens here, where both are already in scope.
+        onUpdateProfileWeight: (weightKg) async {
+          final controller = _authController;
+          if (controller == null) return;
+          await controller.updatePet(
+            widget.activePet.copyWith(weightKg: weightKg),
+          );
+        },
         healthRecordRepository: _healthRecordRepository,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
