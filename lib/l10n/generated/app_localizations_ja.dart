@@ -169,7 +169,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiTickets15Label => 'AI相談チケット x15';
 
   @override
-  String get campaignCodeSectionTitle => 'プロモーションコードをお持ちですか？';
+  String get campaignCodeSectionTitle => 'キャンペーンコードをお持ちですか？';
 
   @override
   String get campaignCodeSignInRequired => 'サインインしてからお試しください。';

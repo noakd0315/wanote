@@ -208,9 +208,9 @@
   "@aiTickets15Label": {
     "description": "Product label for the 15-pack AI consultation ticket package."
   },
-  "campaignCodeSectionTitle": "Have a promo code?",
+  "campaignCodeSectionTitle": "Have a campaign code?",
   "@campaignCodeSectionTitle": {
-    "description": "Heading of the promo/referral code redemption section on the paywall screen."
+    "description": "Heading of the campaign/referral code redemption section on the paywall screen. Deliberately not \"promo code\": Google Play has a feature of that name (Play promotional codes) and this is not it -- these codes are ours, redeemed in-app and granted through RevenueCat."
   },
   "campaignCodeSignInRequired": "Please sign in before trying this.",
   "@campaignCodeSignInRequired": {

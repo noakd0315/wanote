@@ -410,10 +410,10 @@ abstract class AppLocalizations {
   /// **'AI consultation tickets x15'**
   String get aiTickets15Label;
 
-  /// Heading of the promo/referral code redemption section on the paywall screen.
+  /// Heading of the campaign/referral code redemption section on the paywall screen. Deliberately not "promo code": Google Play has a feature of that name (Play promotional codes) and this is not it -- these codes are ours, redeemed in-app and granted through RevenueCat.
   ///
   /// In en, this message translates to:
-  /// **'Have a promo code?'**
+  /// **'Have a campaign code?'**
   String get campaignCodeSectionTitle;
 
   /// Error shown when trying to redeem a campaign code while signed out.

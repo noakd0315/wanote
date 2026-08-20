@@ -179,7 +179,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiTickets15Label => 'AI consultation tickets x15';
 
   @override
-  String get campaignCodeSectionTitle => 'Have a promo code?';
+  String get campaignCodeSectionTitle => 'Have a campaign code?';
 
   @override
   String get campaignCodeSignInRequired => 'Please sign in before trying this.';
