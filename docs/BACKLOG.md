@@ -695,3 +695,67 @@ iOS アプリの設定に **Apple Server Notification URL** が表示されて�
 
 **低い。テスト購入はこの設定なしで成立する。**
 RevenueCat 側の表記も "Optionally"。**公開前に片付ければよい。**
+
+---
+
+# 【後回し】RevenueCat の Android 側 任意項目と、手数料プログラムの確認
+
+登録: 2026-08-20
+
+## 後回しにした2項目（どちらも購入処理に無関係）
+
+### Financial reports bucket ID
+
+Play の売上レポートが置かれた Google Cloud Storage のバケットID
+（`pubsite_prod_...` の形）。RevenueCat が**実際の入金額**を表示するために使う。
+
+**お支払いプロファイルが未完了だとレポート自体が生成されない**ので、
+**B-1 待ち**。契約後に入れれば足りる。
+
+### Google Apps Experience / Games Level Up Program
+
+> Both reduce the service fee on non-recurring purchases **above $1M**
+
+**$1M 超の非継続課金**が対象。当面まったく該当しない。空欄のままでよい。
+
+---
+
+## 🔴 確認が必要: Google の手数料は登録が要るのか
+
+**2026-06-30 から Google Play のサービス手数料が変わっている。**
+
+> "the service fee starts at **10%** on your first $1M (USD) in annual earnings"
+> "This 10% service fee **also applies to all auto-renewing subscriptions**"
+> "This starts on June 30, 2026, beginning with the United States,
+> European Economic Area, and United Kingdom."
+>
+> — [Android Developers Blog, 2026-06](https://android-developers.googleblog.com/2026/06/play-expanded-billing.html)
+
+**問題は「自動適用か、登録が必要か」。公式ブログに明記が無い。**
+二次情報では「Play Console で減額プログラムに登録し、Account Group を
+設定する必要がある」とされているが、**断定できない。**
+
+**10% と 30% では3倍の差**なので、必ず確認すること。
+
+```
+Play Console → 設定 → お支払いプロファイル / アカウントの詳細
+  → サービス手数料 / 減額手数料プログラムの記載
+```
+
+**B-1（お支払いプロファイル）が終わらないと確認できない可能性が高い。**
+
+### Apple 側との違い（重要）
+
+| | Apple | Google |
+|---|---|---|
+| 制度 | Small Business Program | 減額サービス手数料（10%） |
+| 手数料 | 30% → **15%** | 30% → **10%** |
+| 登録 | **必須**（申請しないと 30% のまま） | **要確認** |
+| 適用開始 | 承認月の末日から15日後 | 未確認 |
+
+**Apple 側は申請が必須で、遅れるほど 30% を払い続ける。**
+詳細は `REMAINING_WORK.md` の B-1。
+
+> 日本が対象地域に入っているかも未確認。ブログの記載は
+> 「United States, European Economic Area, and United Kingdom から開始」。
+> 日本での適用時期は別途確認が要る。
