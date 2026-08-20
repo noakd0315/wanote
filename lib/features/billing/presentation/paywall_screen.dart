@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/utils/formatting.dart';
+import '../domain/billing_models.dart';
 import '../data/billing_repository.dart';
 import '../data/campaign_code_repository.dart';
 import '../domain/campaign_code_models.dart';
@@ -180,6 +183,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       ),
       body: Column(
         children: [
+          _PremiumStatusBanner(billingRepository: widget.billingRepository),
           Expanded(
             child: FutureBuilder<Offerings>(
               future: _offeringsFuture,
@@ -242,9 +246,62 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           ),
           const Divider(height: 1),
-          _CampaignCodeSection(repository: widget.campaignCodeRepository),
+          _CampaignCodeSection(
+            repository: widget.campaignCodeRepository,
+            billingRepository: widget.billingRepository,
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Says, at the top of the paywall, that the account already has access --
+/// and until when.
+///
+/// A free month delivered by a campaign or referral code otherwise ends
+/// without warning: the owner is told "one month" once, in a snackbar, and
+/// afterwards has nowhere to look (PM, 2026-08-21). A subscriber gets the
+/// same line, which also stops the paywall reading as if they had bought
+/// nothing.
+class _PremiumStatusBanner extends StatelessWidget {
+  const _PremiumStatusBanner({required this.billingRepository});
+
+  final BillingRepository billingRepository;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return StreamBuilder<PremiumStatus>(
+      stream: billingRepository.premiumStatusChanges(),
+      initialData: billingRepository.currentPremiumStatus,
+      builder: (context, snapshot) {
+        final status = snapshot.data ?? PremiumStatus.unknown;
+        // Nothing while the answer is still coming, and nothing once it is
+        // known to be inactive -- the plans below are the message then.
+        if (!status.isActive) return const SizedBox.shrink();
+        final expiresAt = status.expiresAt;
+        final scheme = Theme.of(context).colorScheme;
+        return Container(
+          width: double.infinity,
+          color: scheme.primaryContainer,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(Icons.verified, size: 18, color: scheme.onPrimaryContainer),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  expiresAt == null
+                      ? l10n.premiumActiveNoExpiry
+                      : l10n.premiumActiveUntil(formatDate(context, expiresAt)),
+                  style: TextStyle(color: scheme.onPrimaryContainer),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -300,9 +357,16 @@ class _PackageTile extends StatelessWidget {
 /// button. Deliberately minimal (no dedicated screen, no visual polish) --
 /// the PM explicitly scoped this as a placeholder for a later design pass.
 class _CampaignCodeSection extends StatefulWidget {
-  const _CampaignCodeSection({required this.repository});
+  const _CampaignCodeSection({
+    required this.repository,
+    required this.billingRepository,
+  });
 
   final CampaignCodeRepository repository;
+
+  /// Only used to re-read the entitlement after a code is accepted --
+  /// see BillingRepository.refreshCustomerInfo.
+  final BillingRepository billingRepository;
 
   @override
   State<_CampaignCodeSection> createState() => _CampaignCodeSectionState();
@@ -358,6 +422,13 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
           _statusIsError = false;
           _statusMessage = l10n.campaignCodeRedeemedMessage;
           _codeController.clear();
+          // The grant happened on the server, so the SDK still believes the
+          // account is not premium: ads keep showing and the report screen
+          // stays locked while the free month is already running (PM report,
+          // 2026-08-21). Fire-and-forget -- the message above is already
+          // correct, and the entitlement will also resolve on next launch if
+          // this fails.
+          unawaited(widget.billingRepository.refreshCustomerInfo());
         case CampaignCodeRedemptionRejected(reason: final reason):
           _statusIsError = true;
           _statusMessage = _messageForReason(l10n, reason);

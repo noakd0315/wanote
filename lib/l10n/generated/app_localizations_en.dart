@@ -140,6 +140,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallAppBarTitle => 'Premium & AI tickets';
 
   @override
+  String premiumActiveUntil(String date) {
+    return 'Every feature is available until $date';
+  }
+
+  @override
+  String get premiumActiveNoExpiry => 'Every feature is available';
+
+  @override
   String get restorePurchasesButton => 'Restore purchases';
 
   @override
@@ -186,7 +194,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get campaignCodeRedeemedMessage =>
-      'You\'ve been granted 1 month of Premium. Thank you!';
+      'Code applied. Every feature is free for one month.';
 
   @override
   String get campaignCodeUnknownError => 'This code could not be found.';
@@ -270,7 +278,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get referralCodeAppliedMessage =>
-      'Applied your referral code and granted 1 month of Premium.';
+      'Referral code applied. Every feature is free for one month.';
 
   @override
   String get imageSourceCameraOption => 'Take a photo';
@@ -1404,6 +1412,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listLoadFailedRetryButton => 'Retry';
+
+  @override
+  String get consultationAlreadyAnsweredButton => 'Answered';
 
   @override
   String get consultationClearButton => 'Clear';

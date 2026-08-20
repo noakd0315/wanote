@@ -132,6 +132,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get paywallAppBarTitle => 'プレミアム & AIチケット';
 
   @override
+  String premiumActiveUntil(String date) {
+    return '$dateまで、すべての機能をご利用いただけます';
+  }
+
+  @override
+  String get premiumActiveNoExpiry => 'すべての機能をご利用いただけます';
+
+  @override
   String get restorePurchasesButton => '購入を復元';
 
   @override
@@ -175,7 +183,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get campaignCodeSignInRequired => 'サインインしてからお試しください。';
 
   @override
-  String get campaignCodeRedeemedMessage => 'プレミアムを1ヶ月分付与しました。ありがとうございます！';
+  String get campaignCodeRedeemedMessage =>
+      'コードを適用しました。1ヶ月間、すべての機能を無料でお使いいただけます。';
 
   @override
   String get campaignCodeUnknownError => 'このコードは見つかりませんでした。';
@@ -255,7 +264,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navSettingsLabel => '設定';
 
   @override
-  String get referralCodeAppliedMessage => '紹介コードを適用し、プレミアムを1ヶ月分付与しました。';
+  String get referralCodeAppliedMessage =>
+      '紹介コードを適用しました。1ヶ月間、すべての機能を無料でお使いいただけます。';
 
   @override
   String get imageSourceCameraOption => 'カメラで撮影';
@@ -1347,6 +1357,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get listLoadFailedRetryButton => '再試行';
+
+  @override
+  String get consultationAlreadyAnsweredButton => '相談済み';
 
   @override
   String get consultationClearButton => 'クリア';

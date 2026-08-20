@@ -70,7 +70,9 @@ class _AiUsageBadgeState extends State<AiUsageBadge> {
         // alarming about something that does not block anything.
         if (status == null) return const SizedBox.shrink();
 
-        final (label, isEmpty) = _label(l10n, status);
+        final labelled = _label(l10n, status);
+        if (labelled == null) return const SizedBox.shrink();
+        final (label, isEmpty) = labelled;
         final scheme = Theme.of(context).colorScheme;
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -95,10 +97,14 @@ class _AiUsageBadgeState extends State<AiUsageBadge> {
     );
   }
 
-  (String, bool) _label(AppLocalizations l10n, AiUsageStatus status) {
-    if (status.hasUnlimitedSubscription) {
-      return (l10n.aiUsageUnlimitedLabel, false);
-    }
+  /// The badge's text, or null when there is nothing worth saying.
+  ///
+  /// Null while the allowance is unlimited. The badge exists to answer "how
+  /// many do I have left?", and there is no answer when the count does not
+  /// move -- "使い放題プラン" sat where a number used to be and read as a
+  /// status line nobody asked for (PM, 2026-08-21).
+  (String, bool)? _label(AppLocalizations l10n, AiUsageStatus status) {
+    if (status.hasUnlimitedSubscription) return null;
     final free = status.freeConsultationsRemainingThisMonth;
     final tickets = status.ticketsRemaining;
 

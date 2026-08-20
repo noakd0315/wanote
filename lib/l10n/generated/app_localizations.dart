@@ -338,6 +338,18 @@ abstract class AppLocalizations {
   /// **'Premium & AI tickets'**
   String get paywallAppBarTitle;
 
+  /// Banner at the top of the paywall while the premium entitlement is active and has an end date, so a free month granted by a code does not run out unannounced.
+  ///
+  /// In en, this message translates to:
+  /// **'Every feature is available until {date}'**
+  String premiumActiveUntil(String date);
+
+  /// Same banner when the entitlement has no end date.
+  ///
+  /// In en, this message translates to:
+  /// **'Every feature is available'**
+  String get premiumActiveNoExpiry;
+
   /// AppBar action button that restores previous purchases.
   ///
   /// In en, this message translates to:
@@ -425,7 +437,7 @@ abstract class AppLocalizations {
   /// Success message shown after a campaign code is redeemed.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve been granted 1 month of Premium. Thank you!'**
+  /// **'Code applied. Every feature is free for one month.'**
   String get campaignCodeRedeemedMessage;
 
   /// Error shown when a redeemed campaign code doesn't exist.
@@ -581,7 +593,7 @@ abstract class AppLocalizations {
   /// Snackbar shown when a pending referral code from sign-up is auto-redeemed on app shell startup.
   ///
   /// In en, this message translates to:
-  /// **'Applied your referral code and granted 1 month of Premium.'**
+  /// **'Referral code applied. Every feature is free for one month.'**
   String get referralCodeAppliedMessage;
 
   /// Bottom sheet option that opens the camera to take a photo.
@@ -2629,6 +2641,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get listLoadFailedRetryButton;
+
+  /// Replaces the submit button's label, disabled, while the answer on screen belongs to the question still in the box -- pressing again would spend a second AI call on the same question.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get consultationAlreadyAnsweredButton;
 
   /// Empties the question field and the answer. PM report: the last question and its answer stayed on screen after asking, so the next visit opened onto stale content.
   ///

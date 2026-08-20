@@ -297,11 +297,17 @@ class _HomeShellState extends State<HomeShell>
         code: code,
         uid: widget.uid,
       );
-      if (result is CampaignCodeRedeemed && mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.referralCodeAppliedMessage)),
-        );
+      if (result is CampaignCodeRedeemed) {
+        // Same reason as the paywall's redemption path: the grant happened
+        // on the server, and until the SDK is asked the app still shows ads
+        // and locks the report screen while the free month runs.
+        unawaited(_billingRepository.refreshCustomerInfo());
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.referralCodeAppliedMessage)),
+          );
+        }
       }
     } catch (_) {
       // Best-effort only -- the user can still redeem manually from the

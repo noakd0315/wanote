@@ -85,6 +85,19 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   _ResultKind _resultKind = _ResultKind.none;
   String? _resultText;
 
+  /// The question the answer on screen belongs to.
+  ///
+  /// The submit button looked identical before and after an answer arrived,
+  /// and the answer appears *below* it -- so the natural next move was to
+  /// press it again, spending a second call on the same question (PM,
+  /// 2026-08-21). Cleared as soon as the text changes, so asking something
+  /// else is never blocked.
+  String? _answeredQuestion;
+
+  bool get _alreadyAnswered =>
+      _answeredQuestion != null &&
+      _controller.text.trim() == _answeredQuestion;
+
   /// Empties the question and the answer together. Clearing one and
   /// leaving the other would read as an answer to a question that is no
   /// longer there.
@@ -93,11 +106,23 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     setState(() {
       _resultKind = _ResultKind.none;
       _resultText = null;
+      _answeredQuestion = null;
     });
   }
 
   @override
+  void initState() {
+    super.initState();
+    // The row below reads _controller.text to decide what to show, and a
+    // TextField's own edits do not rebuild this widget on their own.
+    _controller.addListener(_onQuestionChanged);
+  }
+
+  void _onQuestionChanged() => setState(() {});
+
+  @override
   void dispose() {
+    _controller.removeListener(_onQuestionChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -181,6 +206,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       setState(() {
         _resultKind = _ResultKind.response;
         _resultText = responseText;
+        _answeredQuestion = questionText;
       });
     } catch (_) {
       setState(() {
@@ -255,14 +281,20 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
             children: [
               Expanded(
                 child: FilledButton(
-                  onPressed: _submitting ? null : _submit,
+                  onPressed: _submitting || _alreadyAnswered ? null : _submit,
                   child: _submitting
                       ? const SizedBox(
                           height: 16,
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(l10n.consultationSubmitButton),
+                      // Says why it is disabled. A greyed-out button with
+                      // its original label reads as a fault.
+                      : Text(
+                          _alreadyAnswered
+                              ? l10n.consultationAlreadyAnsweredButton
+                              : l10n.consultationSubmitButton,
+                        ),
                 ),
               ),
               // The question and its answer used to stay on screen with no

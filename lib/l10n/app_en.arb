@@ -160,6 +160,15 @@
   "@paywallAppBarTitle": {
     "description": "AppBar title of the paywall/upgrade screen."
   },
+  "premiumActiveUntil": "Every feature is available until {date}",
+  "@premiumActiveUntil": {
+    "description": "Banner at the top of the paywall while the premium entitlement is active and has an end date, so a free month granted by a code does not run out unannounced.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "premiumActiveNoExpiry": "Every feature is available",
+  "@premiumActiveNoExpiry": {
+    "description": "Same banner when the entitlement has no end date."
+  },
   "restorePurchasesButton": "Restore purchases",
   "@restorePurchasesButton": {
     "description": "AppBar action button that restores previous purchases."
@@ -216,7 +225,7 @@
   "@campaignCodeSignInRequired": {
     "description": "Error shown when trying to redeem a campaign code while signed out."
   },
-  "campaignCodeRedeemedMessage": "You've been granted 1 month of Premium. Thank you!",
+  "campaignCodeRedeemedMessage": "Code applied. Every feature is free for one month.",
   "@campaignCodeRedeemedMessage": {
     "description": "Success message shown after a campaign code is redeemed."
   },
@@ -325,7 +334,7 @@
   "@navSettingsLabel": {
     "description": "Bottom navigation bar label for the settings & billing tab."
   },
-  "referralCodeAppliedMessage": "Applied your referral code and granted 1 month of Premium.",
+  "referralCodeAppliedMessage": "Referral code applied. Every feature is free for one month.",
   "@referralCodeAppliedMessage": {
     "description": "Snackbar shown when a pending referral code from sign-up is auto-redeemed on app shell startup."
   },
@@ -1836,6 +1845,10 @@
   "listLoadFailedRetryButton": "Retry",
   "@listLoadFailedRetryButton": {
     "description": "Rebuilds the list screen so the query is attempted again."
+  },
+  "consultationAlreadyAnsweredButton": "Answered",
+  "@consultationAlreadyAnsweredButton": {
+    "description": "Replaces the submit button's label, disabled, while the answer on screen belongs to the question still in the box -- pressing again would spend a second AI call on the same question."
   },
   "consultationClearButton": "Clear",
   "@consultationClearButton": {

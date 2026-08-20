@@ -87,19 +87,38 @@ class FirestoreHealthRecordRepository implements HealthRecordRepository {
     required List<Uint8List> photoBytes,
     required int startIndex,
   }) async {
-    final urls = <String>[];
-    for (var i = 0; i < photoBytes.length; i++) {
-      final compressed = await _photoCompressor.compress(photoBytes[i]);
-      final ref = _storage.ref(
-        'users/$uid/pets/$petId/health_records/$recordId/${startIndex + i}.jpg',
-      );
-      await ref.putData(
-        compressed,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-      urls.add(await ref.getDownloadURL());
-    }
-    return urls;
+    // In parallel, not one after another. A record holds up to six photos,
+    // and each one is a compress, an upload and a getDownloadURL round trip;
+    // done in sequence the owner waits for the sum of all of them. Uploads
+    // are the slow part and they are I/O, so overlapping them costs nothing
+    // but shortens the wait to roughly the slowest single photo.
+    //
+    // This became visible only once ads stopped covering it: the interstitial
+    // used to play over exactly this window (PM, 2026-08-21, testing with a
+    // code applied -- premium accounts see no ad and so see the real wait).
+    //
+    // Future.wait keeps the results in the order they were requested, which
+    // matters -- the index is part of the storage path and of the order the
+    // photos are shown in.
+    return Future.wait([
+      for (var i = 0; i < photoBytes.length; i++)
+        _compressAndUpload(
+          bytes: photoBytes[i],
+          path:
+              'users/$uid/pets/$petId/health_records/$recordId/'
+              '${startIndex + i}.jpg',
+        ),
+    ]);
+  }
+
+  Future<String> _compressAndUpload({
+    required Uint8List bytes,
+    required String path,
+  }) async {
+    final compressed = await _photoCompressor.compress(bytes);
+    final ref = _storage.ref(path);
+    await ref.putData(compressed, SettableMetadata(contentType: 'image/jpeg'));
+    return ref.getDownloadURL();
   }
 
   @override

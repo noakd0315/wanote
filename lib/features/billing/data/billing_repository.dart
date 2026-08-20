@@ -64,6 +64,20 @@ abstract class BillingRepository {
 
   Future<void> restorePurchases();
 
+  /// Re-reads the entitlement state from RevenueCat.
+  ///
+  /// The SDK only learns about a purchase it made itself. A promotional
+  /// entitlement granted server-side -- which is how a campaign or referral
+  /// code delivers its free month -- arrives nowhere until something asks.
+  /// Until then the app still believes the account is not premium: it shows
+  /// ads, and the report screen stays locked, while the free month is
+  /// already running (PM report, 2026-08-21).
+  ///
+  /// Not [restorePurchases]: that means "find purchases made on another
+  /// device" and on iOS can prompt for an Apple Account password. This only
+  /// re-reads what RevenueCat already holds.
+  Future<void> refreshCustomerInfo();
+
   /// Last-known premium status. [PremiumStatus.unknown] until the first
   /// CustomerInfo snapshot has been received.
   PremiumStatus get currentPremiumStatus;
@@ -136,6 +150,12 @@ class RevenueCatBillingRepository implements BillingRepository {
     await Purchases.logIn(uid);
     final customerInfo = await Purchases.getCustomerInfo();
     _onCustomerInfoUpdate(customerInfo);
+  }
+
+  @override
+  Future<void> refreshCustomerInfo() async {
+    if (!BillingConfig.isConfigured) return;
+    _onCustomerInfoUpdate(await Purchases.getCustomerInfo());
   }
 
   @override
@@ -237,7 +257,15 @@ class RevenueCatBillingRepository implements BillingRepository {
   void _onCustomerInfoUpdate(CustomerInfo customerInfo) {
     final entitlement = customerInfo.entitlements.all[EntitlementIds.premium];
     final isActive = entitlement?.isActive ?? false;
-    final newStatus = isActive ? PremiumStatus.active : PremiumStatus.inactive;
+    // RevenueCat hands the date back as an ISO 8601 string, and omits it for
+    // a lifetime grant. A value we cannot parse is treated as absent rather
+    // than guessed at -- the screen simply says nothing about the end date.
+    final expiresAt = isActive
+        ? DateTime.tryParse(entitlement?.expirationDate ?? '')
+        : null;
+    final newStatus = isActive
+        ? PremiumStatus(EntitlementState.active, expiresAt: expiresAt)
+        : PremiumStatus.inactive;
     final changed = newStatus != _lastPremiumStatus;
     _lastPremiumStatus = newStatus;
     _premiumStatusController.add(newStatus);
