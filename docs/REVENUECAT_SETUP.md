@@ -720,9 +720,50 @@ https://appstoreconnect.apple.com
 
 ## A-4. Sandbox テスターを登録
 
+> **急ぎません。** TestFlight のビルドは**自動的に Sandbox 環境で動く**ので、
+> 「購入が通るか」を見るだけなら Sandbox アカウントは要りません。
+> 解約・更新・失敗といった**シナリオを試したくなってから**で足ります。
+
 1. **ユーザーとアクセス** → **Sandbox** → **テスター**
-2. テスト用のメールアドレスで追加（実在しないアドレスでも作れます）
-3. iPhone の **設定 → App Store → サンドボックスアカウント** でサインイン
+2. **まだ Apple Account になっていないメールアドレス**で追加します
+   - **第三者のアドレスである必要はありません。** プラス記法が使えます
+
+     ```
+     （普段のアドレス）+sandbox@gmail.com
+     ```
+
+     Gmail は元の受信箱に配信しますが、Apple は別アドレスとして扱います
+3. iPhone の **設定 → App Store → Sandbox Account** でサインイン
+   - > **通常の Apple Account からサインアウトしないでください。**
+   >   Sandbox 用は別枠で、普段のアカウントはそのまま維持されます
+
+### ⚠️ Sandbox アカウントと wanote のアカウントは別物です
+
+混同しやすいので明記します。**Sandbox のアドレスで wanote に登録する必要は
+ありません。**
+
+| | Sandbox Apple Account | wanote のアカウント |
+|---|---|---|
+| 何のため | **支払いの処理** | **アプリへのログイン** |
+| どこで | iOS 設定 → App Store | アプリのサインイン画面 |
+| アドレス | Apple 未登録のもの | 何でもよい |
+
+RevenueCat は **Firebase の uid で顧客を識別**しています
+（`billing_repository.dart` の `Purchases.logIn(uid)`）。つまり「誰が買ったか」を
+決めるのは wanote のログインで、Apple Account は支払い手段にすぎません。
+
+**購入後に wanote を別アカウントでサインインし直すと、プレミアムは
+引き継がれません。** 設計どおりの動作です。テスト中に「買ったのに
+プレミアムにならない」ときは、**wanote のログイン先**をまず疑ってください。
+
+### ⚠️ Sandbox では更新が高速化されます
+
+> "the renewal rate is accelerated. Each subscription is renewed **daily,
+> up to 6 times within a 1-week period**, regardless of the subscription's
+> duration."
+
+**1か月プランでも1日で更新**され、1週間で6回まで更新して自動終了します。
+**故障ではありません。** キャンペーンコードの「1か月無料」も同様に短縮されます。
 
 > Apple 側は**アップロード不要**で商品を作れます（Google と違う点です）。
 
@@ -731,6 +772,54 @@ https://appstoreconnect.apple.com
 # 第3部　RevenueCat
 
 https://app.revenuecat.com
+
+> **画面はすべて英語です。日本語表示はありません。**
+> 用語の対訳を R-0 の末尾に置いてあるので、詰まったらそこを見てください。
+
+## R-0. アカウントを作る
+
+**料金は当面かかりません。** 月間トラッキング売上（Monthly Tracked Revenue）
+**$2,500 まで無料**で、それを超えた分に 1% です。内部テストの段階では
+当然かかりませんし、公開後もしばらくは無料の範囲に収まります。
+
+### 手順
+
+1. https://app.revenuecat.com/signup を開く
+2. **Sign up with Google** が使えます。**GitHub でも構いません**
+   - > どのアカウントで入ったかを控えておいてください。ここも
+   >   「どのアカウントで作ったか分からない」が起きやすい場所です
+3. 登録後、**オンボーディングのウィザード**が始まります。
+   ここで作るものは R-1 と同じなので、**ウィザードに従って進めて構いません**
+   （後から `Project settings` でやり直せます）
+
+### 入力欄の対訳
+
+| 英語 | 意味 | 入れる値 |
+|---|---|---|
+| Project name | プロジェクト名 | `wanote` |
+| What are you building? | 用途の質問 | 該当するもの（回答は設定に影響しません） |
+| App name | アプリの表示名 | `wanote (iOS)` / `wanote (Android)` |
+| Bundle ID / Package name | アプリの識別子 | **`jp.wanote.app`**（両方とも同じ） |
+
+### 用語の対訳（詰まったらここ）
+
+| 英語 | このプロジェクトでの意味 |
+|---|---|
+| **Project** | wanote 全体。iOS と Android の両方を束ねる入れ物 |
+| **App** | プラットフォームごとの登録。iOS 用と Android 用で2つ作る |
+| **Product** | ストアで作った商品そのもの。`premium_monthly` など |
+| **Entitlement** | 「プレミアムである」という**権利**。商品と1対1ではない。<br>月額でも年額でも同じ `premium` を与える（R-3） |
+| **Offering** | プラン画面に出す**売り場**。どの商品をどの順で見せるか |
+| **Package** | Offering の中の1枠。`$rc_monthly` などの決まった名前がある |
+| **Customer** | 利用者1人。wanote では **Firebase の uid** で識別される |
+| **App User ID** | その識別子そのもの。`Purchases.logIn(uid)` で渡している |
+| **Public SDK key** | アプリに埋め込む鍵。`appl_` / `goog_` で始まる |
+| **Secret key** | サーバー専用の鍵。**`sk_` で始まる。アプリに入れてはいけない** |
+| **Sandbox** | テスト環境。課金は発生しない |
+| **Promotional entitlement** | 支払いなしで特典を与える機能。<br>キャンペーンコードの「1か月無料」がこれ |
+
+> 🔒 **`sk_` で始まるシークレットキーは、私（Claude）に共有しないでください。**
+> `wrangler secret put REVENUECAT_SECRET_KEY` で PM が直接登録します（R-6）。
 
 ## R-1. プロジェクトとアプリ
 
