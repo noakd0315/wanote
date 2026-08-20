@@ -625,7 +625,7 @@ UI が日本語・英語のみで、サポートも日英しかできない。
 
 ---
 
-# 【公開前に確認】App Store Server Notifications が設定できていない
+# 【公開前に確認】リアルタイム通知が両ストアとも未設定
 
 登録: 2026-08-20（**画面に項目が見当たらず保留**。テストはブロックしない）
 
@@ -759,3 +759,89 @@ Play Console → 設定 → お支払いプロファイル / アカウントの�
 > 日本が対象地域に入っているかも未確認。ブログの記載は
 > 「United States, European Economic Area, and United Kingdom から開始」。
 > 日本での適用時期は別途確認が要る。
+
+
+---
+
+# 【公開前に確認】Android のリアルタイム開発者通知（RTDN）が未設定
+
+登録: 2026-08-20（**③の手順が分からず保留**。テストはブロックしない）
+
+**上の App Store Server Notifications と同じ位置づけ。** あちらが Apple 側、
+こちらが Google 側で、どちらも「契約状態の変化をリアルタイムに知る」ための設定。
+
+## 症状
+
+RevenueCat の Android アプリ設定に、こう出ている。
+
+```
+Your Google service account credentials do not have permissions to
+access the Google Cloud Pub/Sub API.
+```
+
+**原因は明らか。** サービスアカウント（2026-08-18 作成）を作るとき、
+Google Cloud 側のロールを**何も付けなかった**（権限は Play Console 側から
+与える設計だったため）。Pub/Sub には別途ロールが要る。
+
+## 必須ではない
+
+> Setting up real-time developer notifications is still **strongly recommended**
+>
+> — RevenueCat のドキュメント
+
+**購入処理はこの設定なしで動く。** 影響するのは、
+
+- 解約・返金・更新失敗を**リアルタイムに知れるか**
+- **ワンタイム購入（チケット）の返金**の自動追跡
+
+## 手順
+
+### ① Pub/Sub API を有効にする【Google Cloud】
+
+```
+https://console.cloud.google.com/flows/enableapi?apiid=pubsub
+```
+
+プロジェクト `wanote-7dca0` を選んで有効化する。
+
+### ② ロールを付与する【Google Cloud】
+
+**権限を与える相手が2つある。ここを間違えやすい。**
+
+| 相手 | ロール |
+|---|---|
+| `revenuecat@wanote-7dca0.iam.gserviceaccount.com`（自分で作ったもの） | **Pub/Sub 編集者** |
+| **`google-play-developer-notifications@system.gserviceaccount.com`** | **Pub/Sub パブリッシャー** |
+
+**2つ目は Google 側のアカウント。** Play が通知を publish するために必要で、
+これを忘れると通知が流れない。
+
+```
+Google Cloud → IAM と管理 → IAM → アクセスを許可
+```
+
+### ③ トピック名を Play Console に登録【Play Console】🔴 ここが未確認
+
+```
+Play Console → wanote → 収益化 → 収益化のセットアップ
+  → リアルタイム デベロッパー通知
+  → 「トピック名」欄
+```
+
+**貼る値は RevenueCat の画面に表示されている**はず。
+`projects/{プロジェクトID}/topics/{トピック名}` の形。
+
+**2026-08-20 時点で、この手順を実画面で確認できていない。**
+①②を先にやると RevenueCat 側の表示が変わる可能性があるので、
+**①②を済ませてから③の画面を見ること。**
+
+RevenueCat のドキュメントの記載:
+
+> Google Play Homepage ➡️ App Dashboard ➡️ 'Monetize' section of sidebar
+> ➡️ Monetization Setup ➡️ Real-time developer notifications section
+> ➡️ Topic name
+
+## 優先度
+
+**低い。** テスト購入はこの設定なしで成立する。**公開前に片付ければよい。**
+①②③をまとめて15分程度の作業。
