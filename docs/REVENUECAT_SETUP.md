@@ -463,38 +463,25 @@ RevenueCat が Google に「この購入は本物か」を問い合わせるた�
 11. **「保存」**
 12. 一覧に戻り、その行を **「有効化」**
 
-### 🔴 ここを間違えると動きません
+### 購入オプションIDについて（2026-08-20 に実物で確認済み）
 
-**アプリは商品IDを完全一致で判定しています。**
+**チケットには接尾辞が付きませんでした。**
 
-```dart
-// lib/features/billing/domain/purchase_event_handler.dart
-switch (productId) {
-  case AppConfig.aiTickets5ProductId:   // 既定値 'ai_tickets_5'
-```
+RevenueCat に取り込んだ結果、両ストアの識別子はこうなりました。
 
-購入オプションが増えたことで、識別子が `ai_tickets_5:buy` の形になる
-可能性があります。**そうなるとこの switch が一致せず、購入してもチケットが
-付与されません。**
+| 商品 | Apple | Play |
+|---|---|---|
+| `ai_tickets_5` | `ai_tickets_5` | **`ai_tickets_5`** |
+| `ai_tickets_15` | `ai_tickets_15` | **`ai_tickets_15`** |
+| `premium_monthly` | `premium_monthly` | **`premium_monthly:monthly`** |
+| `premium_yearly` | `premium_yearly` | **`premium_yearly:yearly`** |
 
-**対策は2段構えです。**
+**接尾辞が付くのは定期購入だけ**で、アプリ内アイテムには付いていません。
+したがって `config/prod.json` での上書きは**不要**です。
 
-1. **購入オプションを「下位互換性あり」にする。**
-   これが有効なら、従来どおり `ai_tickets_5` だけで購入でき、RevenueCat も
-   自動で取り込みます。無効だと手動インポートが必要になります
-2. **それでも識別子に `:buy` が付く場合**は、RevenueCat のダッシュボードで
-   実際の識別子を確認し、ビルド時に上書きします。**コード修正は不要です**
-
-   ```
-   --dart-define=PRODUCT_AI_TICKETS_5=ai_tickets_5:buy
-   --dart-define=PRODUCT_AI_TICKETS_15=ai_tickets_15:buy
-   ```
-
-   （`config/prod.json` に書く形でも構いません）
-
-**RevenueCat に取り込んだ直後に、表示されている識別子を必ず確認してください。**
-定期購入は `premium_monthly:monthly` の形になることが分かっていますが、
-アプリ内アイテム側は公式ドキュメントに明記がなく、実物を見るまで確定しません。
+なお**アプリ側は接尾辞が付いても動くように直してあります**
+（`ProductIds.baseId`。`:` の前だけを見て比較します）。将来 Play が
+アプリ内アイテムにも接尾辞を付け始めても、チケットの付与は壊れません。
 
 ### 2つ目
 

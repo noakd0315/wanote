@@ -261,7 +261,9 @@ class _PackageTile extends StatelessWidget {
   final VoidCallback onPurchase;
 
   String _label(AppLocalizations l10n) {
-    final productId = package.storeProduct.identifier;
+    // Normalised: Play appends the base plan (`premium_monthly:monthly`)
+    // and Apple does not, so the raw string only ever matched on iOS.
+    final productId = ProductIds.baseId(package.storeProduct.identifier);
     return switch (productId) {
       ProductIds.premiumMonthly => l10n.premiumMonthlyLabel,
       ProductIds.premiumYearly => l10n.premiumYearlyLabel,

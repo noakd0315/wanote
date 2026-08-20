@@ -183,7 +183,11 @@ class RevenueCatBillingRepository implements BillingRepository {
     // Consumables (ai_tickets_5/15) aren't modeled as entitlements at all in
     // RevenueCat, so a CustomerInfo diff would never surface them — we know
     // what was just bought because we initiated the purchase ourselves.
-    final productId = package.storeProduct.identifier;
+    // Normalised before both the test and the event: Play may append a
+    // base-plan/purchase-option suffix that Apple does not, and the handler
+    // downstream matches on the bare id. Crediting is the one place where a
+    // mismatch costs the owner money for nothing.
+    final productId = ProductIds.baseId(package.storeProduct.identifier);
     if (ProductIds.consumables.contains(productId)) {
       _purchaseEventController.add(ConsumableProductPurchased(productId));
     }
