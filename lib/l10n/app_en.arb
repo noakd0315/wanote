@@ -385,6 +385,26 @@
   "@biometricSetupDescription": {
     "description": "Explanatory body text on the biometric setup screen."
   },
+  "biometricSettingTitle": "Biometric unlock",
+  "@biometricSettingTitle": {
+    "description": "Settings row that turns biometric unlock on or off after sign-up."
+  },
+  "biometricSettingSubtitleOn": "Face ID / Touch ID / fingerprint unlocks wanote",
+  "@biometricSettingSubtitleOn": {
+    "description": "Subtitle of the biometric settings row when the toggle is on."
+  },
+  "biometricSettingSubtitleOff": "You will be asked to sign in again when the session expires",
+  "@biometricSettingSubtitleOff": {
+    "description": "Subtitle of the biometric settings row when the toggle is off."
+  },
+  "biometricSettingUnavailable": "This device has no biometrics set up",
+  "@biometricSettingUnavailable": {
+    "description": "Subtitle shown, with the toggle disabled, when the device cannot do biometrics."
+  },
+  "biometricSettingUpdateFailed": "Could not change the setting. Please try again.",
+  "@biometricSettingUpdateFailed": {
+    "description": "Snackbar shown when saving the biometric preference fails."
+  },
   "biometricSetupEnableButton": "Enable",
   "@biometricSetupEnableButton": {
     "description": "Button that enables biometric login on the biometric setup screen."

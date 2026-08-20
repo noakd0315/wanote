@@ -52,6 +52,40 @@ class SettingsSection extends StatelessWidget {
             title: Text(user.email),
           ),
         const Divider(),
+        // Offered at sign-up and never again, so an owner who declined then
+        // -- or who signed in on a second device afterwards -- had no way
+        // back (PM, 2026-08-20). The flag lives on the account in Firestore,
+        // so changing it here applies everywhere they are signed in.
+        SwitchListTile(
+          secondary: const Icon(Icons.fingerprint),
+          title: Text(l10n.biometricSettingTitle),
+          subtitle: Text(
+            !controller.biometricAvailable
+                ? l10n.biometricSettingUnavailable
+                : (user?.biometricEnabled ?? false)
+                ? l10n.biometricSettingSubtitleOn
+                : l10n.biometricSettingSubtitleOff,
+          ),
+          value: (user?.biometricEnabled ?? false) &&
+              controller.biometricAvailable,
+          // Disabled rather than hidden when the device has no biometrics:
+          // hiding it would read as "this app cannot do that", when the
+          // truth is "this phone has nothing enrolled yet".
+          onChanged: !controller.biometricAvailable || user == null
+              ? null
+              : (enabled) async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final failed = l10n.biometricSettingUpdateFailed;
+                  try {
+                    await controller.setBiometricEnabled(enabled);
+                  } catch (_) {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text(failed)),
+                    );
+                  }
+                },
+        ),
+        const Divider(),
         ListTile(
           leading: const Icon(Icons.swap_horiz),
           title: Text(l10n.switchPetMenuTitle),

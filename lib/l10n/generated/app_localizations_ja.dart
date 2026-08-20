@@ -302,6 +302,22 @@ class AppLocalizationsJa extends AppLocalizations {
       '次回からパスワードを入力する代わりに、Face ID／Touch ID／指紋認証でwanoteのロックを解除できます。生体認証データ自体がこの端末の外に送信されることはありません。';
 
   @override
+  String get biometricSettingTitle => '生体認証でロック解除';
+
+  @override
+  String get biometricSettingSubtitleOn =>
+      'Face ID／Touch ID／指紋認証でwanoteのロックを解除します';
+
+  @override
+  String get biometricSettingSubtitleOff => 'セッションが切れたときに、サインインし直しが必要になります';
+
+  @override
+  String get biometricSettingUnavailable => 'この端末では生体認証が設定されていません';
+
+  @override
+  String get biometricSettingUpdateFailed => '設定を変更できませんでした。もう一度お試しください。';
+
+  @override
   String get biometricSetupEnableButton => '有効にする';
 
   @override

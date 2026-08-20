@@ -668,6 +668,36 @@ abstract class AppLocalizations {
   /// **'Use Face ID / Touch ID / fingerprint to unlock wanote next time instead of typing your password. Your biometric data itself never leaves this device.'**
   String get biometricSetupDescription;
 
+  /// Settings row that turns biometric unlock on or off after sign-up.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric unlock'**
+  String get biometricSettingTitle;
+
+  /// Subtitle of the biometric settings row when the toggle is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Face ID / Touch ID / fingerprint unlocks wanote'**
+  String get biometricSettingSubtitleOn;
+
+  /// Subtitle of the biometric settings row when the toggle is off.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be asked to sign in again when the session expires'**
+  String get biometricSettingSubtitleOff;
+
+  /// Subtitle shown, with the toggle disabled, when the device cannot do biometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no biometrics set up'**
+  String get biometricSettingUnavailable;
+
+  /// Snackbar shown when saving the biometric preference fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not change the setting. Please try again.'**
+  String get biometricSettingUpdateFailed;
+
   /// Button that enables biometric login on the biometric setup screen.
   ///
   /// In en, this message translates to:

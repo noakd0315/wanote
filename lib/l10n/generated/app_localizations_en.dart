@@ -318,6 +318,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use Face ID / Touch ID / fingerprint to unlock wanote next time instead of typing your password. Your biometric data itself never leaves this device.';
 
   @override
+  String get biometricSettingTitle => 'Biometric unlock';
+
+  @override
+  String get biometricSettingSubtitleOn =>
+      'Face ID / Touch ID / fingerprint unlocks wanote';
+
+  @override
+  String get biometricSettingSubtitleOff =>
+      'You will be asked to sign in again when the session expires';
+
+  @override
+  String get biometricSettingUnavailable =>
+      'This device has no biometrics set up';
+
+  @override
+  String get biometricSettingUpdateFailed =>
+      'Could not change the setting. Please try again.';
+
+  @override
   String get biometricSetupEnableButton => 'Enable';
 
   @override
