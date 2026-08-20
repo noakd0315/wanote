@@ -43,21 +43,23 @@ workflows:
       # build per push and pays for all of them, when only the last one's
       # result is ever looked at.
       cancel_previous_builds: true
-      when:
-        changeset:
-          includes:
-            - '.'
-          # Documentation cannot break the analyzer, the tests or the
-          # Android build, so building it is pure cost. Most of this repo's
-          # commits are docs -- the store/RevenueCat setup notes are large
-          # and change often -- and they are what exhausted the free build
-          # minutes on 2026-08-20.
-          #
-          # codemagic.yaml itself is always in the changeset regardless, so
-          # a change to this file still triggers a build.
-          excludes:
-            - 'docs/'
-            - '**/*.md'
+    # Sibling of `triggering`, not a child of it -- nesting it there is
+    # rejected with "extra fields not permitted".
+    #
+    # Documentation cannot break the analyzer, the tests or the Android
+    # build, so building it is pure cost. Most of this repo's commits are
+    # docs -- the store/RevenueCat setup notes are large and change often --
+    # and they are what exhausted the free build minutes on 2026-08-20.
+    #
+    # codemagic.yaml itself is always in the changeset regardless, so a
+    # change to this file still triggers a build.
+    when:
+      changeset:
+        includes:
+          - '.'
+        excludes:
+          - 'docs/'
+          - '**/*.md'
     scripts:
       - name: Fetch packages
         script: flutter pub get
