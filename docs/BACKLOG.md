@@ -845,3 +845,87 @@ RevenueCat のドキュメントの記載:
 
 **低い。** テスト購入はこの設定なしで成立する。**公開前に片付ければよい。**
 ①②③をまとめて15分程度の作業。
+
+---
+
+# 【解決済】Codemagic の無料ビルド分を使い切った
+
+発生・対処: 2026-08-20
+
+## 症状
+
+```
+You have run out of build minutes on your personal account and cannot
+start new builds. Please enable billing to run new builds.
+```
+
+**iOS のビルドが止まる。** Android はローカルでビルドしているため影響なし。
+
+## 原因
+
+**`verify` ワークフローが push のたびに自動実行されていた。**
+
+```yaml
+verify:
+  triggering:
+    events:
+      - push          # ← ここ
+      - pull_request
+```
+
+`ios` ワークフローにはトリガー設定が無く手動のみなので、消費していたのは
+`verify` の方。**PM の体感（そんなにビルドしていない）は正しく、iOS を手で
+回した回数の話ではなかった。**
+
+**直接の引き金は Claude の頻繁な push。** ストア/RevenueCat の手順書は大きく、
+更新が多い。2026-08-20 だけで10回以上 push しており、その大半が `docs/` の
+変更だけだった。**ドキュメントは analyzer もテストも Android ビルドも壊さない**
+ので、走らせる意味がなかった。
+
+## 対処（`codemagic.yaml`）
+
+```yaml
+triggering:
+  events:
+    - push
+    - pull_request
+  cancel_previous_builds: true
+  when:
+    changeset:
+      includes: ['.']
+      excludes:
+        - 'docs/'
+        - '**/*.md'
+```
+
+- **docs だけの変更ではビルドしない**
+- **連続 push では古い実行を打ち切る**（キューに積んで全部課金するのを防ぐ）
+
+> `codemagic.yaml` 自体は常に changeset に含まれるので、この設定を変えたときは
+> ちゃんとビルドが走る。
+
+## 料金と枠（2026-08 時点）
+
+| | |
+|---|---|
+| 無料枠 | **macOS M2 で月500分**。**毎月1日にリセット** |
+| 超過分 | **$0.095/分**（M2）、$0.045/分（Linux） |
+| 請求 | 翌月1日にまとめて |
+| 注意 | **Linux と Windows には無料枠が無い**。無料枠は macOS のみ |
+
+課金を有効にしても**500分の無料枠は維持される**。超えた分だけの支払い。
+
+iOS ビルド1回20分として**約$2（300円弱）**。
+
+## 【後日検討】Xcode Cloud への移行
+
+**Apple Developer Program の会員には、毎月25時間の Xcode Cloud が
+無料で付いている**（年会費に込み。追加費用ゼロ）。
+
+Codemagic の500分＝8.3時間に対し、**3倍**。
+
+ただし移行は軽くない。設定は Xcode（Mac）から行うのが基本で、Windows のみの
+環境では App Store Connect の Web UI から。証明書とプロビジョニングの扱いも
+変わる。**Codemagic は既に動いており、証明書も .p8 も設定済み。**
+
+**締切前に CI を入れ替えるのは、得るものより失うものが大きい。公開後に検討する。**
