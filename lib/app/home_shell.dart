@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,8 @@ import '../features/billing/ads/ad_preparer.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/data/campaign_code_repository.dart';
 import '../features/billing/domain/ad_policy.dart';
+import '../features/billing/domain/billing_models.dart';
+import '../features/billing/domain/purchase_event_handler.dart';
 import '../features/billing/domain/campaign_code_models.dart';
 import '../features/billing/presentation/paywall_screen.dart';
 import '../features/daily_record/data/health_record_repository.dart';
@@ -142,6 +145,11 @@ class _HomeShellState extends State<HomeShell>
   ReminderSyncService? _reminderSyncService;
   late final AdManager _adManager;
   late final AdGate _adGate;
+
+  /// Applies what a purchase means to the account: tickets credited, the
+  /// unlimited flag raised or lowered.
+  late final PurchaseEventHandler _purchaseEventHandler;
+  StreamSubscription<PurchaseEvent>? _purchaseEventSubscription;
   final AnnouncementRepository _announcementRepository =
       FirestoreAnnouncementRepository();
 
@@ -163,6 +171,9 @@ class _HomeShellState extends State<HomeShell>
     _reportRepository = FirestoreReportRepository();
     _reportGenerator = BackendMonthlyReportGenerator(_aiBackendClient);
     _billingRepository = RevenueCatBillingRepository();
+    _purchaseEventHandler = PurchaseEventHandler(
+      aiUsageRepository: _aiUsageRepository,
+    );
     _campaignCodeRepository = FirestoreCampaignCodeRepository();
     // Reads the billing repository's *current* status on every check rather
     // than capturing it: the answer changes the moment RevenueCat replies,
@@ -272,6 +283,31 @@ class _HomeShellState extends State<HomeShell>
     // insurance so a future change to that no-op behavior can never take
     // down the rest of the app shell.
     try {
+      // Subscribed *before* configure(), so the first CustomerInfo -- which
+      // logIn() delivers synchronously after it resolves -- is not missed.
+      //
+      // Nothing was listening at all until now (found 2026-08-21). The
+      // stream existed, PurchaseEventHandler existed and was unit-tested,
+      // and the two were never joined: buying a ticket credited nothing,
+      // and going premium never flipped the flag the AI limit and the
+      // report screen read. Money in, nothing out.
+      _purchaseEventSubscription = _billingRepository.purchaseEvents().listen(
+        (event) => unawaited(
+          _purchaseEventHandler
+              .handle(uid: widget.uid, event: event)
+              .catchError((Object error, StackTrace stackTrace) {
+                // A failure here loses a credit the owner has paid for, so
+                // it is worth a log even though there is nothing the app can
+                // usefully do about it in the moment.
+                developer.log(
+                  'failed to apply purchase event',
+                  name: 'HomeShell',
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+              }),
+        ),
+      );
       await _billingRepository.configure();
       await _billingRepository.logIn(widget.uid);
     } catch (_) {
@@ -321,6 +357,7 @@ class _HomeShellState extends State<HomeShell>
     _adManager.dispose();
     _authController?.removeListener(_onPetsChanged);
     unawaited(_reminderSyncService?.stop() ?? Future<void>.value());
+    unawaited(_purchaseEventSubscription?.cancel() ?? Future<void>.value());
     _billingRepository.dispose();
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();
