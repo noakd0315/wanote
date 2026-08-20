@@ -833,6 +833,73 @@ https://app.revenuecat.com
    - App name: `wanote (Android)` / **Package name: `jp.wanote.app`**
    - **Service Account credentials JSON**: G-3 の JSON をアップロード
 
+## R-1b. iOS アプリの設定欄（2026-08-20 に実画面で確認）
+
+R-1 で App Store のアプリを作ると、設定画面に紛らわしい欄が並びます。
+
+### 🔴 `.p8` は3種類あり、用途がすべて違う
+
+**同じ形式なので、貼っても弾かれません。だから気づけません。**
+
+| 鍵 | 誰が使う | 何のため |
+|---|---|---|
+| **In-App Purchase Key** | RevenueCat | **購入の検証**（StoreKit） |
+| **App Store Connect API Key** | RevenueCat | **商品と価格の取り込み** |
+| **App Store Connect API Key** | **Codemagic** | TestFlight へのアップロード |
+
+**下2つは同じ種類ですが、使い回さないでください。**
+
+1. **権限が足りない可能性がある。** RevenueCat は `App Manager` 以上を要求する。
+   Codemagic 用が `Developer` だと商品の取り込みに失敗する
+2. **片方を失効させると、もう片方が黙って壊れる。** 原因の特定が難しい
+3. **権限が過剰。** RevenueCat にビルドのアップロード権限まで渡すことになる
+
+**RevenueCat 専用に新しく作ること。** Codemagic の鍵は**失効させないこと**
+（iOS のビルドが通らなくなります）。
+
+```
+ユーザーとアクセス → 統合 → App Store Connect API → ＋
+  名前: RevenueCat / アクセス: App Manager
+```
+
+### Issuer ID と Key ID は何度でも確認できる
+
+**1度きりなのは `.p8` ファイルだけ。**
+
+```
+ユーザーとアクセス → 統合 → App内課金   ← ページ上部に Issuer ID
+```
+
+> "If you do not see an Issuer ID at the top of the page,
+> **create an App Store Connect API key**."
+
+App内課金のキーしか作っていないと Issuer ID が出ないことがある。
+上の RevenueCat 用 API キーを作れば表示される。
+
+### App-specific shared secret — **設定すること**
+
+wanote の `IPHONEOS_DEPLOYMENT_TARGET` は **15.0**。RevenueCat の注意書きは
+「iOS 15 以下を対象にしている場合は必須」で、これに該当する。
+
+StoreKit 2 は iOS 15+ で動くが、**RevenueCat の SDK は iOS 15 の端末では
+StoreKit 1 にフォールバック**し、その経路ではこの secret が要る。
+**設定しないと iOS 15 の利用者だけ購入が検証されない。**
+
+```
+App Store Connect → マイApp → wanote → App情報
+  → App用共有シークレット → 管理 → 生成してコピー
+```
+
+> 🔒 この値は Claude に共有しない。
+
+> 対象を iOS 16 以上に上げれば不要になるが、対応端末が減り、iOS の
+> ビルドもやり直しになる。**secret を1つ設定するほうが安い。**
+
+### Vendor number / Small Business Program
+
+どちらも**任意で、購入処理には影響しない**（売上レポートの計算用）。
+**有料App契約が済んでから**入れれば足りる。詳細は `REMAINING_WORK.md` の B-1。
+
 ## R-2. 商品を取り込む
 
 1. 左メニュー **Product catalog** → **Products**
