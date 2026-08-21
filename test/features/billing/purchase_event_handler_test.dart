@@ -20,7 +20,11 @@ void main() {
     // Stub every method mocktail might be asked to verify, with permissive
     // default returns, so unrelated calls in a test don't throw MissingStub.
     when(
-      () => aiUsageRepository.creditTickets(any(), any()),
+      () => aiUsageRepository.creditTickets(
+        any(),
+        any(),
+        transactionId: any(named: 'transactionId'),
+      ),
     ).thenAnswer((_) async {});
     when(
       () => aiUsageRepository.setUnlimitedSubscription(any(), any()),
@@ -31,11 +35,15 @@ void main() {
     test('ai_tickets_5 purchase credits 5 tickets', () async {
       await handler.handle(
         uid: uid,
-        event: const ConsumableProductPurchased(ProductIds.aiTickets5),
+        event: const ConsumableProductPurchased(ProductIds.aiTickets5, 'txn-1'),
       );
 
-      verify(() => aiUsageRepository.creditTickets(uid, 5)).called(1);
-      verifyNever(() => aiUsageRepository.creditTickets(uid, 15));
+      verify(
+        () => aiUsageRepository.creditTickets(uid, 5, transactionId: 'txn-1'),
+      ).called(1);
+      verifyNever(
+        () => aiUsageRepository.creditTickets(uid, 15, transactionId: 'txn-1'),
+      );
       verifyNever(
         () => aiUsageRepository.setUnlimitedSubscription(any(), any()),
       );
@@ -44,11 +52,18 @@ void main() {
     test('ai_tickets_15 purchase credits 15 tickets', () async {
       await handler.handle(
         uid: uid,
-        event: const ConsumableProductPurchased(ProductIds.aiTickets15),
+        event: const ConsumableProductPurchased(
+          ProductIds.aiTickets15,
+          'txn-1',
+        ),
       );
 
-      verify(() => aiUsageRepository.creditTickets(uid, 15)).called(1);
-      verifyNever(() => aiUsageRepository.creditTickets(uid, 5));
+      verify(
+        () => aiUsageRepository.creditTickets(uid, 15, transactionId: 'txn-1'),
+      ).called(1);
+      verifyNever(
+        () => aiUsageRepository.creditTickets(uid, 5, transactionId: 'txn-1'),
+      );
       verifyNever(
         () => aiUsageRepository.setUnlimitedSubscription(any(), any()),
       );
@@ -68,7 +83,13 @@ void main() {
         verify(
           () => aiUsageRepository.setUnlimitedSubscription(uid, true),
         ).called(1);
-        verifyNever(() => aiUsageRepository.creditTickets(any(), any()));
+        verifyNever(
+          () => aiUsageRepository.creditTickets(
+            any(),
+            any(),
+            transactionId: any(named: 'transactionId'),
+          ),
+        );
       },
     );
 
@@ -86,7 +107,13 @@ void main() {
         verify(
           () => aiUsageRepository.setUnlimitedSubscription(uid, false),
         ).called(1);
-        verifyNever(() => aiUsageRepository.creditTickets(any(), any()));
+        verifyNever(
+          () => aiUsageRepository.creditTickets(
+            any(),
+            any(),
+            transactionId: any(named: 'transactionId'),
+          ),
+        );
       },
     );
 
@@ -95,10 +122,16 @@ void main() {
       () async {
         await handler.handle(
           uid: uid,
-          event: const ConsumableProductPurchased('some_future_sku'),
+          event: const ConsumableProductPurchased('some_future_sku', 'txn-1'),
         );
 
-        verifyNever(() => aiUsageRepository.creditTickets(any(), any()));
+        verifyNever(
+          () => aiUsageRepository.creditTickets(
+            any(),
+            any(),
+            transactionId: any(named: 'transactionId'),
+          ),
+        );
         verifyNever(
           () => aiUsageRepository.setUnlimitedSubscription(any(), any()),
         );
@@ -119,7 +152,13 @@ void main() {
         verifyNever(
           () => aiUsageRepository.setUnlimitedSubscription(any(), any()),
         );
-        verifyNever(() => aiUsageRepository.creditTickets(any(), any()));
+        verifyNever(
+          () => aiUsageRepository.creditTickets(
+            any(),
+            any(),
+            transactionId: any(named: 'transactionId'),
+          ),
+        );
       },
     );
   });

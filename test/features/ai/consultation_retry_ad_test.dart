@@ -48,7 +48,11 @@ class _StubUsageRepository implements AiUsageRepository {
   Future<void> recordConsultationUsed(String uid) async => recordedUses++;
 
   @override
-  Future<void> creditTickets(String uid, int count) async {}
+  Future<void> creditTickets(
+    String uid,
+    int count, {
+    required String transactionId,
+  }) async {}
 
   @override
   Future<void> setUnlimitedSubscription(String uid, bool active) async {}

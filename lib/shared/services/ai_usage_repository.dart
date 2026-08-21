@@ -75,8 +75,19 @@ abstract class AiUsageRepository {
   /// [AiUsageStatus.canStartConsultation] was false.
   Future<void> recordConsultationUsed(String uid);
 
-  /// Called by features/billing after a consumable ticket-pack purchase.
-  Future<void> creditTickets(String uid, int count);
+  /// Called by features/billing for a consumable ticket-pack purchase.
+  ///
+  /// Idempotent, keyed on [transactionId]: crediting the same purchase
+  /// twice adds nothing the second time. That is what lets billing tell us
+  /// about every purchase it knows of, every time it hears from the store,
+  /// instead of having to catch each one exactly once -- and a credit that
+  /// never landed is picked up on the next launch (PM, 2026-08-21: 4回
+  /// 購入して登録されたのは1回).
+  Future<void> creditTickets(
+    String uid,
+    int count, {
+    required String transactionId,
+  });
 
   /// Called by features/billing when the premium subscription's active
   /// state changes (RevenueCat entitlement callback).
@@ -165,11 +176,35 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
   }
 
   @override
-  Future<void> creditTickets(String uid, int count) async {
-    await _doc(uid).set({
-      'tickets_remaining': FieldValue.increment(count),
-    }, SetOptions(merge: true));
+  Future<void> creditTickets(
+    String uid,
+    int count, {
+    required String transactionId,
+  }) async {
+    // One transaction over one document, so the check and the increment
+    // cannot be separated. An increment guarded by a separate read would
+    // credit twice whenever two tellings arrive together -- which is now
+    // the normal case, since a purchase is reported both by the call that
+    // made it and by the customer info that comes back with it.
+    final doc = _doc(uid);
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(doc);
+      final credited =
+          (snapshot.data()?[_creditedField] as List<dynamic>? ?? const [])
+              .cast<String>();
+      if (credited.contains(transactionId)) return;
+      transaction.set(doc, {
+        'tickets_remaining': FieldValue.increment(count),
+        _creditedField: FieldValue.arrayUnion([transactionId]),
+      }, SetOptions(merge: true));
+    });
   }
+
+  /// Purchases already paid out. Kept forever, and deliberately: RevenueCat
+  /// keeps reporting a transaction for the life of the account, so a list
+  /// that forgot old ones would start crediting them again. A ticket pack
+  /// is bought a handful of times at most, so the list stays small.
+  static const String _creditedField = 'credited_transactions';
 
   @override
   Future<void> setUnlimitedSubscription(String uid, bool active) async {

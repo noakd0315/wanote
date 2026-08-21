@@ -60,17 +60,28 @@ sealed class PurchaseEvent {
   const PurchaseEvent();
 }
 
-/// A consumable (non-subscription) product finished purchasing. RevenueCat
-/// doesn't model consumables as entitlements, so this is raised directly
-/// from the purchase() call site in the repository rather than from a
-/// CustomerInfo diff.
+/// A consumable (non-subscription) product was bought. RevenueCat doesn't
+/// model consumables as entitlements, so this cannot come from an
+/// entitlement diff.
+///
+/// Raised for every ticket purchase RevenueCat knows about, every time the
+/// customer info is read -- not once, at the moment of buying. Crediting
+/// used to hang on that single moment: the store took the money, the app
+/// emitted this, and whatever happened next had one chance to land. Four
+/// purchases credited one (PM, 2026-08-21). What makes repeating it safe is
+/// [transactionId] -- the credit is recorded against it, so the second
+/// telling changes nothing, and the first one that never landed is picked
+/// up on the next launch.
 class ConsumableProductPurchased extends PurchaseEvent {
-  const ConsumableProductPurchased(this.productId);
+  const ConsumableProductPurchased(this.productId, this.transactionId);
 
   final String productId;
 
+  /// Identifies this one purchase, for as long as RevenueCat remembers it.
+  final String transactionId;
+
   @override
-  String toString() => 'ConsumableProductPurchased($productId)';
+  String toString() => 'ConsumableProductPurchased($productId, $transactionId)';
 }
 
 /// The named entitlement's active flag flipped (new purchase, renewal,

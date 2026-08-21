@@ -30,21 +30,31 @@ class PurchaseEventHandler {
 
   Future<void> handle({required String uid, required PurchaseEvent event}) {
     return switch (event) {
-      ConsumableProductPurchased(:final productId) => _handleConsumable(
-        uid,
-        productId,
-      ),
+      ConsumableProductPurchased(:final productId, :final transactionId) =>
+        _handleConsumable(uid, productId, transactionId),
       EntitlementStateChanged(:final entitlementId, :final isActive) =>
         _handleEntitlement(uid, entitlementId, isActive),
     };
   }
 
-  Future<void> _handleConsumable(String uid, String productId) {
+  Future<void> _handleConsumable(
+    String uid,
+    String productId,
+    String transactionId,
+  ) {
     switch (productId) {
       case ProductIds.aiTickets5:
-        return _aiUsageRepository.creditTickets(uid, 5);
+        return _aiUsageRepository.creditTickets(
+          uid,
+          5,
+          transactionId: transactionId,
+        );
       case ProductIds.aiTickets15:
-        return _aiUsageRepository.creditTickets(uid, 15);
+        return _aiUsageRepository.creditTickets(
+          uid,
+          15,
+          transactionId: transactionId,
+        );
       default:
         // Unknown/unrelated consumable product id: no-op, not an error.
         return Future<void>.value();

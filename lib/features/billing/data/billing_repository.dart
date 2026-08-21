@@ -204,19 +204,52 @@ class RevenueCatBillingRepository implements BillingRepository {
     // (customerInfo + the store transaction) instead of the CustomerInfo
     // directly.
     final result = await Purchases.purchase(PurchaseParams.package(package));
+    // Reported from the transaction we were just handed, as well as from
+    // the customer info below. The two normally say the same thing, and the
+    // credit is keyed on the transaction id either way -- but the store has
+    // just taken money, and this is not the moment to depend on the
+    // customer info having caught up.
+    _reportIfConsumable(result.storeTransaction);
     _onCustomerInfoUpdate(result.customerInfo);
+  }
 
-    // Consumables (ai_tickets_5/15) aren't modeled as entitlements at all in
-    // RevenueCat, so a CustomerInfo diff would never surface them — we know
-    // what was just bought because we initiated the purchase ourselves.
-    // Normalised before both the test and the event: Play may append a
-    // base-plan/purchase-option suffix that Apple does not, and the handler
-    // downstream matches on the bare id. Crediting is the one place where a
-    // mismatch costs the owner money for nothing.
-    final productId = ProductIds.baseId(package.storeProduct.identifier);
-    if (ProductIds.consumables.contains(productId)) {
-      _purchaseEventController.add(ConsumableProductPurchased(productId));
+  /// Raises [ConsumableProductPurchased] if [transaction] is a ticket pack.
+  ///
+  /// Normalised first: Play may append a base-plan/purchase-option suffix
+  /// that Apple does not, and the handler downstream matches on the bare
+  /// id. Crediting is the one place where a mismatch costs the owner money
+  /// for nothing.
+  void _reportIfConsumable(StoreTransaction transaction) {
+    final productId = ProductIds.baseId(transaction.productIdentifier);
+    if (!ProductIds.consumables.contains(productId)) return;
+    final id = _transactionKey(transaction);
+    // Nothing to credit against. Reporting it anyway would either credit
+    // once per customer-info read, forever, or need a rule that guesses
+    // which reading was the real one. RevenueCat has always supplied an
+    // identifier; this is the case that should not happen.
+    if (id.isEmpty) {
+      developer.log(
+        'a ticket purchase arrived with no identifier and was not credited: '
+        '${transaction.productIdentifier}',
+        name: 'BillingRepository',
+      );
+      return;
     }
+    _purchaseEventController.add(ConsumableProductPurchased(productId, id));
+  }
+
+  /// What the credit is recorded against.
+  ///
+  /// The store's own transaction id, which is stable for the life of the
+  /// account. The date-based fallback is for a payload that arrives without
+  /// one: still stable across launches, still unique per purchase, so a
+  /// repeat telling is still recognised as the same purchase.
+  static String _transactionKey(StoreTransaction transaction) {
+    if (transaction.transactionIdentifier.isNotEmpty) {
+      return transaction.transactionIdentifier;
+    }
+    if (transaction.purchaseDate.isEmpty) return '';
+    return '${transaction.productIdentifier}@${transaction.purchaseDate}';
   }
 
   Package? _findPackage(Offerings offerings, String packageIdentifier) {
@@ -261,6 +294,22 @@ class RevenueCatBillingRepository implements BillingRepository {
   }
 
   void _onCustomerInfoUpdate(CustomerInfo customerInfo) {
+    // Every ticket purchase RevenueCat holds, every time we hear from it.
+    //
+    // Consumables are not entitlements, so nothing about them ever changes
+    // state -- there is no diff to watch. Crediting therefore used to rest
+    // on catching the one moment a purchase was made, and a moment that is
+    // missed is missed for good: the owner has paid, the tickets are not
+    // there, and restorePurchases() does not bring consumables back. Four
+    // purchases credited one (PM, 2026-08-21).
+    //
+    // Repeating the whole list costs nothing, because the credit is keyed
+    // on the transaction. It also means a credit lost to a closed app or a
+    // failed write lands at the next sign-in instead of never.
+    for (final transaction in customerInfo.nonSubscriptionTransactions) {
+      _reportIfConsumable(transaction);
+    }
+
     final entitlement = customerInfo.entitlements.all[EntitlementIds.premium];
     final isActive = entitlement?.isActive ?? false;
     // RevenueCat hands the date back as an ISO 8601 string, and omits it for
