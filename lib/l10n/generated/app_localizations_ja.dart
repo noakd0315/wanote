@@ -1191,6 +1191,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String aiUsageTicketsOnlyLabel(int tickets) {
+    return 'チケット $tickets枚';
+  }
+
+  @override
   String get aiUsageUnlimitedLabel => '使い放題プラン';
 
   @override

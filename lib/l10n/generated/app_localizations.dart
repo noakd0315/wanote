@@ -2324,6 +2324,12 @@ abstract class AppLocalizations {
   /// **'{remaining} of {quota} free uses left this month · {tickets} tickets'**
   String aiUsageFreeAndTicketsLabel(int remaining, int quota, int tickets);
 
+  /// Shown while the allowance is unlimited but the owner also holds tickets they paid for. The free count is meaningless then, but the tickets are not -- they were bought, they do not expire, and they still matter once the unlimited period ends.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets: {tickets}'**
+  String aiUsageTicketsOnlyLabel(int tickets);
+
   /// Remaining-usage badge for a subscriber, who has no count to show.
   ///
   /// In en, this message translates to:

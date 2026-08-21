@@ -371,6 +371,7 @@
   "certificateOlderHiddenLabel": "過去の証明書 {count}件は非表示です",
   "aiUsageFreeRemainingLabel": "今月の無料利用 残り{remaining}回／{quota}回",
   "aiUsageFreeAndTicketsLabel": "今月の無料利用 残り{remaining}回／{quota}回 ・ チケット {tickets}枚",
+  "aiUsageTicketsOnlyLabel": "チケット {tickets}枚",
   "aiUsageUnlimitedLabel": "使い放題プラン",
   "aiUsageNoneRemainingLabel": "残り0回（チケットまたはプランが必要です）",
   "petProfileFormMeasurementsHeading": "サイズ（任意）",

@@ -99,14 +99,25 @@ class _AiUsageBadgeState extends State<AiUsageBadge> {
 
   /// The badge's text, or null when there is nothing worth saying.
   ///
-  /// Null while the allowance is unlimited. The badge exists to answer "how
-  /// many do I have left?", and there is no answer when the count does not
-  /// move -- "使い放題プラン" sat where a number used to be and read as a
-  /// status line nobody asked for (PM, 2026-08-21).
+  /// Null while the allowance is unlimited *and* nothing was paid for. The
+  /// badge exists to answer "how many do I have left?", and there is no
+  /// answer when the count does not move -- "使い放題プラン" sat where a
+  /// number used to be and read as a status line nobody asked for (PM,
+  /// 2026-08-21).
+  ///
+  /// Tickets are the exception. They were bought, they do not expire, and
+  /// they still matter once the unlimited period ends -- hiding them made a
+  /// purchase look like it had gone missing (PM, 2026-08-21: チケット課金
+  /// したら残回数が出なくなった).
   (String, bool)? _label(AppLocalizations l10n, AiUsageStatus status) {
-    if (status.hasUnlimitedSubscription) return null;
     final free = status.freeConsultationsRemainingThisMonth;
     final tickets = status.ticketsRemaining;
+    if (status.hasUnlimitedSubscription) {
+      if (tickets <= 0) return null;
+      // Tickets only: the free count is not being spent either, so showing
+      // it beside them would just be another number that never moves.
+      return (l10n.aiUsageTicketsOnlyLabel(tickets), false);
+    }
 
     // Both counts whenever tickets are held (PM request), not just the one
     // being spent next. Someone who has bought tickets wants to see they

@@ -98,6 +98,15 @@ class _HomeShellState extends State<HomeShell>
   /// Where AiSection sits in the section list built by _buildSections.
   static const int _aiSectionIndex = 3;
 
+  /// When the app was last backgrounded, for the reset below.
+  DateTime? _backgroundedAt;
+
+  /// How long away counts as "reopened later" rather than "stepped out".
+  ///
+  /// Taking a photo or watching an interstitial is a detour of seconds;
+  /// coming back to the app another time is minutes at least.
+  static const Duration _awayLongEnoughToReset = Duration(minutes: 5);
+
   /// Jumps to [sectionIndex] with its inner tab set, exactly as if the user
   /// had used the bottom nav bar and then the tab strip.
   ///
@@ -402,8 +411,27 @@ class _HomeShellState extends State<HomeShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      _backgroundedAt = DateTime.now();
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
     if (!mounted || _selectedIndex == 0) return;
+    // Only when the app was actually away, not when it stepped out and came
+    // straight back.
+    //
+    // The camera, the photo picker and an interstitial all background the
+    // app, and the resume they produce can arrive *after* the form that was
+    // open has already saved and popped -- so the canPop guard below is
+    // false by then and the owner lands on Home instead of the list they
+    // were in (PM report, 2026-08-21: Android で明細を保存するとホームに
+    // 戻る。iOS では起きない -- the two platforms deliver the event with
+    // different timing, which is exactly why a guard on "was anything
+    // pushed" cannot be the whole answer).
+    final awayFor = DateTime.now().difference(
+      _backgroundedAt ?? DateTime.now(),
+    );
+    if (awayFor < _awayLongEnoughToReset) return;
     // Not while the owner is in the middle of something.
     //
     // The camera and the photo picker background the app, so returning from

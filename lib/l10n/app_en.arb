@@ -1591,6 +1591,11 @@
       }
     }
   },
+  "aiUsageTicketsOnlyLabel": "Tickets: {tickets}",
+  "@aiUsageTicketsOnlyLabel": {
+    "description": "Shown while the allowance is unlimited but the owner also holds tickets they paid for. The free count is meaningless then, but the tickets are not -- they were bought, they do not expire, and they still matter once the unlimited period ends.",
+    "placeholders": { "tickets": { "type": "int" } }
+  },
   "aiUsageUnlimitedLabel": "Unlimited plan",
   "@aiUsageUnlimitedLabel": {
     "description": "Remaining-usage badge for a subscriber, who has no count to show."

@@ -1233,6 +1233,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String aiUsageTicketsOnlyLabel(int tickets) {
+    return 'Tickets: $tickets';
+  }
+
+  @override
   String get aiUsageUnlimitedLabel => 'Unlimited plan';
 
   @override
