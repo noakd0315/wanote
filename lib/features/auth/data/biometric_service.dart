@@ -81,8 +81,9 @@ class LocalAuthBiometricService implements BiometricService {
         // Hardware present but nothing registered, or the OS refuses on a
         // device with no passcode. Neither is an error the owner can fix
         // from inside this app -- they are told to set it up in Settings.
-        'NotEnrolled' || 'PasscodeNotSet' || 'NotAvailable' =>
-          BiometricPromptResult.notAvailable,
+        'NotEnrolled' ||
+        'PasscodeNotSet' ||
+        'NotAvailable' => BiometricPromptResult.notAvailable,
         _ => BiometricPromptResult.error,
       };
     } on Exception catch (e) {

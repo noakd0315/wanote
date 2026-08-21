@@ -423,38 +423,43 @@ class AuthController extends ChangeNotifier {
     // read as "no pets" -- that is what put the first-pet form in front of
     // returning owners for an instant on every sign-in.
     _petsResolved = false;
-    _petsSub = _petProfileRepository.watchPets(uid).listen((pets) async {
-      _pets = pets;
-      _petsResolved = true;
-      final prefs = await _prefsFuture;
-      final previousActiveId =
-          _activePet?.petId ?? prefs.getString(_lastActivePetIdPrefsKey);
-      final resolvedId = _activePetResolver.resolve(
-        petIds: pets.map((p) => p.petId).toList(),
-        previousActiveId: previousActiveId,
-      );
-      if (resolvedId == null) {
-        _activePet = null;
-      } else {
-        final match = pets.where((p) => p.petId == resolvedId);
-        _activePet = match.isEmpty ? null : match.first;
-        await prefs.setString(_lastActivePetIdPrefsKey, resolvedId);
-      }
-      notifyListeners();
-    }, onError: (Object error, StackTrace stackTrace) {
-      // Without this the app would sit on the waiting screen forever if the
-      // pet list never arrives -- offline, or rules refusing the read. Far
-      // better to carry on with what we have: the owner reaches a screen
-      // they can act on, and the stream delivers if it recovers.
-      developer.log(
-        'Could not watch pets',
-        name: 'AuthController',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      _petsResolved = true;
-      notifyListeners();
-    });
+    _petsSub = _petProfileRepository
+        .watchPets(uid)
+        .listen(
+          (pets) async {
+            _pets = pets;
+            _petsResolved = true;
+            final prefs = await _prefsFuture;
+            final previousActiveId =
+                _activePet?.petId ?? prefs.getString(_lastActivePetIdPrefsKey);
+            final resolvedId = _activePetResolver.resolve(
+              petIds: pets.map((p) => p.petId).toList(),
+              previousActiveId: previousActiveId,
+            );
+            if (resolvedId == null) {
+              _activePet = null;
+            } else {
+              final match = pets.where((p) => p.petId == resolvedId);
+              _activePet = match.isEmpty ? null : match.first;
+              await prefs.setString(_lastActivePetIdPrefsKey, resolvedId);
+            }
+            notifyListeners();
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            // Without this the app would sit on the waiting screen forever if the
+            // pet list never arrives -- offline, or rules refusing the read. Far
+            // better to carry on with what we have: the owner reaches a screen
+            // they can act on, and the stream delivers if it recovers.
+            developer.log(
+              'Could not watch pets',
+              name: 'AuthController',
+              error: error,
+              stackTrace: stackTrace,
+            );
+            _petsResolved = true;
+            notifyListeners();
+          },
+        );
   }
 
   Future<void> _runAuthAction(Future<AuthIdentity> Function() action) async {

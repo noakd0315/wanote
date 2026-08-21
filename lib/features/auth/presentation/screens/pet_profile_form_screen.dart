@@ -107,7 +107,10 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
     super.didChangeDependencies();
     if (_weightPrefilled) return;
     _weightPrefilled = true;
-    _weightController.text = weightInputText(context, widget.existingPet?.weightKg);
+    _weightController.text = weightInputText(
+      context,
+      widget.existingPet?.weightKg,
+    );
     // Same reason the weight is prefilled here and not in initState: the
     // unit depends on the locale, which needs a BuildContext.
     final pet = widget.existingPet;
@@ -351,12 +354,21 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _guideRow('1', l10n.petProfileFormNeckGirthLabel,
-                  l10n.petProfileFormNeckGirthHelp),
-              _guideRow('2', l10n.petProfileFormChestGirthLabel,
-                  l10n.petProfileFormChestGirthHelp),
-              _guideRow('3', l10n.petProfileFormBackLengthLabel,
-                  l10n.petProfileFormBackLengthHelp),
+              _guideRow(
+                '1',
+                l10n.petProfileFormNeckGirthLabel,
+                l10n.petProfileFormNeckGirthHelp,
+              ),
+              _guideRow(
+                '2',
+                l10n.petProfileFormChestGirthLabel,
+                l10n.petProfileFormChestGirthHelp,
+              ),
+              _guideRow(
+                '3',
+                l10n.petProfileFormBackLengthLabel,
+                l10n.petProfileFormBackLengthHelp,
+              ),
             ],
           ),
         ),
@@ -598,10 +610,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                               decimal: true,
                             ),
                             decoration: InputDecoration(
-                              labelText: l10n
-                                  .petProfileFormWeightLabelWithUnit(
-                                    weightInputUnit(context),
-                                  ),
+                              labelText: l10n.petProfileFormWeightLabelWithUnit(
+                                weightInputUnit(context),
+                              ),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -618,9 +629,7 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                               Expanded(
                                 child: Text(
                                   l10n.petProfileFormMeasurementsHeading,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleSmall,
+                                  style: Theme.of(context).textTheme.titleSmall,
                                 ),
                               ),
                               TextButton.icon(
@@ -634,8 +643,9 @@ class _PetProfileFormScreenState extends State<PetProfileFormScreen> {
                           ),
                           Text(
                             l10n.petProfileFormMeasurementsHint,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                           ),
                           const SizedBox(height: 8),
                           _measurementField(

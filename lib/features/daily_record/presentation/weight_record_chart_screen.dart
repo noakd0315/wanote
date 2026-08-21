@@ -84,10 +84,9 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
 
   Future<void> _addEntry() async {
     final result =
-        await showDialog<({DateTime date, double weightKg, bool updateProfile})>(
-      context: context,
-      builder: (context) => const _WeightEntryDialog(),
-    );
+        await showDialog<
+          ({DateTime date, double weightKg, bool updateProfile})
+        >(context: context, builder: (context) => const _WeightEntryDialog());
     if (result == null) return;
 
     final existing = await widget.repository.findForDate(
@@ -157,9 +156,9 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
       await update(weightKg);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.weightProfileUpdateFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.weightProfileUpdateFailed)));
     }
   }
 
@@ -171,10 +170,12 @@ class _WeightRecordChartScreenState extends State<WeightRecordChartScreen> {
   /// left the wrong number in the history.
   Future<void> _editEntry(WeightRecord record) async {
     final result =
-        await showDialog<({DateTime date, double weightKg, bool updateProfile})>(
-      context: context,
-      builder: (context) => _WeightEntryDialog(existing: record),
-    );
+        await showDialog<
+          ({DateTime date, double weightKg, bool updateProfile})
+        >(
+          context: context,
+          builder: (context) => _WeightEntryDialog(existing: record),
+        );
     if (result == null) return;
     await widget.repository.update(
       widget.uid,

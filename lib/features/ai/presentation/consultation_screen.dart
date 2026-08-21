@@ -104,8 +104,7 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   String? _answeredQuestion;
 
   bool get _alreadyAnswered =>
-      _answeredQuestion != null &&
-      _controller.text.trim() == _answeredQuestion;
+      _answeredQuestion != null && _controller.text.trim() == _answeredQuestion;
 
   /// Empties the question and the answer together. Clearing one and
   /// leaving the other would read as an answer to a question that is no

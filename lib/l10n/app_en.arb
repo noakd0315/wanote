@@ -1441,6 +1441,10 @@
   "@urineColorDark": {
     "description": "Display label for UrineColor.dark."
   },
+  "sortOldestFirstTooltip": "Sort oldest first",
+  "@sortOldestFirstTooltip": { "description": "Sort toggle shared by the health, toilet, visit and medication lists. Same wording as the weight table's, which came first." },
+  "sortNewestFirstTooltip": "Sort newest first",
+  "@sortNewestFirstTooltip": { "description": "Sort toggle shared by the health, toilet, visit and medication lists." },
   "weightSortOldestFirstTooltip": "Sort oldest first",
   "@weightSortOldestFirstTooltip": {
     "description": "Switches the weight table to ascending order."

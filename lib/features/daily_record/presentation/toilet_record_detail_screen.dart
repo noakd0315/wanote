@@ -75,7 +75,10 @@ class ToiletRecordDetailScreen extends StatelessWidget {
   /// Built here rather than taken from any stored string: the label is shown
   /// back to the owner in the consultation history, and a fixed-language one
   /// is how the warning banner ended up Japanese in the English app.
-  ConsultationReferenceRecord _reference(AppLocalizations l10n, BuildContext c) {
+  ConsultationReferenceRecord _reference(
+    AppLocalizations l10n,
+    BuildContext c,
+  ) {
     final tags = <String>[];
     final details = <String>[];
     if (_isUrine) {
@@ -99,9 +102,7 @@ class ToiletRecordDetailScreen extends StatelessWidget {
       recordType: ConsultationRecordType.toiletRecord,
       petId: record.petId,
       recordedAt: record.recordedAt,
-      label: details.isEmpty
-          ? typeLabel
-          : '$typeLabel（${details.join('・')}）',
+      label: details.isEmpty ? typeLabel : '$typeLabel（${details.join('・')}）',
       tags: tags,
     );
   }

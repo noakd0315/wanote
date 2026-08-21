@@ -32,6 +32,10 @@ class _VisitListScreenState extends State<VisitListScreen> {
   /// everything -- unlike the toilet list, where a month is already long.
   _VisitPeriod _period = _VisitPeriod.all;
 
+  /// Newest first, like every other list in the app (PM request,
+  /// 2026-08-21).
+  bool _newestFirst = true;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -40,7 +44,20 @@ class _VisitListScreenState extends State<VisitListScreen> {
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(l10n.visitListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.visitListTitle),
+        actions: [
+          IconButton(
+            tooltip: _newestFirst
+                ? l10n.sortOldestFirstTooltip
+                : l10n.sortNewestFirstTooltip,
+            icon: Icon(
+              _newestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+            ),
+            onPressed: () => setState(() => _newestFirst = !_newestFirst),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Visit>>(
         stream: widget.repository.watchVisits(widget.uid, widget.petId),
         builder: (context, snapshot) {
@@ -54,7 +71,12 @@ class _VisitListScreenState extends State<VisitListScreen> {
           if (allVisits.isEmpty) {
             return Center(child: Text(l10n.visitListEmptyMessage));
           }
-          final visits = _period.filter(allVisits, DateTime.now());
+          final visits = _period.filter(allVisits, DateTime.now())
+            ..sort(
+              (a, b) => _newestFirst
+                  ? b.visitedAt.compareTo(a.visitedAt)
+                  : a.visitedAt.compareTo(b.visitedAt),
+            );
           return Column(
             children: [
               Padding(

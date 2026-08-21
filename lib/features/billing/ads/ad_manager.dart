@@ -87,8 +87,7 @@ class AdManager {
   static Future<void> _requestTrackingAuthorizationIfNeeded() async {
     if (defaultTargetPlatform != TargetPlatform.iOS) return;
     try {
-      final status =
-          await AppTrackingTransparency.trackingAuthorizationStatus;
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
       if (status != TrackingStatus.notDetermined) {
         _log('tracking authorization already answered: ${status.name}');
         return;
@@ -247,8 +246,7 @@ class AdManager {
   /// visible on screen -- which left "no ad appeared" indistinguishable
   /// from a dozen different causes across three rounds of reports
   /// (2026-08-18). These lines are what makes the next report answerable.
-  static void _log(String message) =>
-      developer.log(message, name: 'AdManager');
+  static void _log(String message) => developer.log(message, name: 'AdManager');
 
   void dispose() {
     _loadedInterstitial?.dispose();

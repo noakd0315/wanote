@@ -1088,6 +1088,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get urineColorDark => '濃い（濃縮尿）';
 
   @override
+  String get sortOldestFirstTooltip => '古い順に並べ替え';
+
+  @override
+  String get sortNewestFirstTooltip => '新しい順に並べ替え';
+
+  @override
   String get weightSortOldestFirstTooltip => '古い順に並べ替え';
 
   @override

@@ -74,10 +74,7 @@ class AdGate {
         await _manager.maybeShowInterstitial().timeout(_maxWait);
       }
     } on TimeoutException {
-      developer.log(
-        'Gave up waiting on an interstitial',
-        name: 'AdGate',
-      );
+      developer.log('Gave up waiting on an interstitial', name: 'AdGate');
     } catch (error, stackTrace) {
       // Every call site sits next to something the owner actually wanted --
       // a saved record, an AI answer. An ad network having a bad day must

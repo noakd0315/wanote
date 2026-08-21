@@ -46,10 +46,8 @@ class AdBackdrop {
     final entry = OverlayEntry(
       // Not opaque: an opaque overlay stops the routes beneath it building,
       // and the screen underneath has to be intact the moment the ad closes.
-      builder: (_) => const ColoredBox(
-        color: Color(0xFF000000),
-        child: SizedBox.expand(),
-      ),
+      builder: (_) =>
+          const ColoredBox(color: Color(0xFF000000), child: SizedBox.expand()),
     );
     overlay.insert(entry);
     _entry = entry;

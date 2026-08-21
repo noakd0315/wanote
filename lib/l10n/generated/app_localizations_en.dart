@@ -1128,6 +1128,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get urineColorDark => 'Dark (concentrated)';
 
   @override
+  String get sortOldestFirstTooltip => 'Sort oldest first';
+
+  @override
+  String get sortNewestFirstTooltip => 'Sort newest first';
+
+  @override
   String get weightSortOldestFirstTooltip => 'Sort oldest first';
 
   @override

@@ -3,10 +3,7 @@ import 'dart:math' as math;
 /// Life stage -- auto-derivable from the pet's birthday (see
 /// [FoodPortionCalculator.suggestDefaultLifeStage]), but still shown as an
 /// overridable dropdown in case the birthday on file is wrong or approximate.
-enum DogLifeStage {
-  puppy,
-  adult;
-}
+enum DogLifeStage { puppy, adult }
 
 /// Standard veterinary Body Condition Score, simplified to the 3 buckets
 /// that actually change the calculation (the real WSAVA scale is 1-9, but
@@ -15,20 +12,12 @@ enum DogLifeStage {
 /// Unlike life stage/neutered status, this can't be inferred from any data
 /// already on file -- it requires a physical assessment (rib/waist
 /// palpation), so it's always a direct user input.
-enum BodyCondition {
-  underweight,
-  ideal,
-  overweight;
-}
+enum BodyCondition { underweight, ideal, overweight }
 
 /// Exercise/energy-expenditure level -- independent of life stage, neutered
 /// status, and body condition, and (unlike those) something only the owner
 /// can judge.
-enum ActivityLevel {
-  low,
-  normal,
-  high;
-}
+enum ActivityLevel { low, normal, high }
 
 class FoodPortionResult {
   const FoodPortionResult({

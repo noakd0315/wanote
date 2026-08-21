@@ -63,6 +63,11 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
   /// is on today should not begin with everything it has ever been on.
   _MedicationFilter _filter = _MedicationFilter.ongoing;
 
+  /// Newest first, like every other list in the app (PM request,
+  /// 2026-08-21). Sorted on the start date -- when the course began is what
+  /// a medicine is filed under.
+  bool _newestFirst = true;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -71,7 +76,20 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(l10n.medicationListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.medicationListTitle),
+        actions: [
+          IconButton(
+            tooltip: _newestFirst
+                ? l10n.sortOldestFirstTooltip
+                : l10n.sortNewestFirstTooltip,
+            icon: Icon(
+              _newestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+            ),
+            onPressed: () => setState(() => _newestFirst = !_newestFirst),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Medication>>(
         stream: widget.repository.watchMedications(widget.uid, widget.petId),
         builder: (context, snapshot) {
@@ -122,7 +140,12 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
           return Center(child: Text(l10n.medicationListEmptyMessage));
         }
 
-        final shown = _filter.apply(medications, DateTime.now());
+        final shown = _filter.apply(medications, DateTime.now())
+          ..sort(
+            (a, b) => _newestFirst
+                ? b.startDate.compareTo(a.startDate)
+                : a.startDate.compareTo(b.startDate),
+          );
         // The prevention rows are the programmes the dog is currently on, so
         // they belong under "ongoing" and under "all", and nowhere else.
         final showPrograms = _filter != _MedicationFilter.finished;

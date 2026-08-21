@@ -74,6 +74,11 @@ class _ToiletRecordTimelineScreenState
   /// glance at a summary rather than a preferred way of reading the data.
   bool _showChart = false;
 
+  /// Newest first, like every other list in the app (PM request,
+  /// 2026-08-21). Not persisted -- a way of reading the list right now,
+  /// not a preference.
+  bool _newestFirst = true;
+
   /// How far back the list reaches (PM request: "トイレ記録も期間で絞り込み
   /// たい"). Records accumulate several a day, so within a month the list is
   /// long enough that scrolling to last week is work.
@@ -169,9 +174,7 @@ class _ToiletRecordTimelineScreenState
           ConsultationSuggestionReason.bloodInStoolSuspected =>
             l10n.anomalyBloodInStoolLabel,
           ConsultationSuggestionReason.prolongedDiarrhea =>
-            l10n.anomalyProlongedDiarrheaLabel(
-              suggestion.streakDayCount ?? 0,
-            ),
+            l10n.anomalyProlongedDiarrheaLabel(suggestion.streakDayCount ?? 0),
         },
         tags: reference.tags,
       ),
@@ -206,6 +209,16 @@ class _ToiletRecordTimelineScreenState
               : l10n.toiletRecordTimelineTitle,
         ),
         actions: [
+          if (!_showChart)
+            IconButton(
+              tooltip: _newestFirst
+                  ? l10n.sortOldestFirstTooltip
+                  : l10n.sortNewestFirstTooltip,
+              icon: Icon(
+                _newestFirst ? Icons.arrow_downward : Icons.arrow_upward,
+              ),
+              onPressed: () => setState(() => _newestFirst = !_newestFirst),
+            ),
           // Swaps the body in place instead of pushing the chart as its own
           // screen. Pushing replaced this AppBar with one that had no
           // actions, so the button that got you there disappeared (PM
@@ -237,9 +250,12 @@ class _ToiletRecordTimelineScreenState
                 // The filter is the reader's window on the list. The
                 // detector keeps its own (one month, fixed): narrowing the
                 // list must not silently switch the warnings off.
-                final records = _typeFilter.filter(
-                  _period.filter(allRecords, now),
-                );
+                final records =
+                    _typeFilter.filter(_period.filter(allRecords, now))..sort(
+                      (a, b) => _newestFirst
+                          ? b.recordedAt.compareTo(a.recordedAt)
+                          : a.recordedAt.compareTo(b.recordedAt),
+                    );
                 final currentSuggestions = widget.anomalyDetector.detect(
                   records: allRecords,
                   now: now,
@@ -400,7 +416,8 @@ class _ToiletRecordTimelineScreenState
                                         uid: widget.uid,
                                         record: record,
                                         repository: widget.repository,
-                                        onConsultAi: widget.onConsultAboutRecord,
+                                        onConsultAi:
+                                            widget.onConsultAboutRecord,
                                       ),
                                     ),
                                   ),
@@ -476,7 +493,6 @@ enum _ToiletPeriod {
   }
 }
 
-
 /// Which kind of record the timeline shows.
 enum _TypeFilter {
   all,
@@ -491,11 +507,9 @@ enum _TypeFilter {
 
   List<ToiletRecord> filter(List<ToiletRecord> records) => switch (this) {
     _TypeFilter.all => records,
-    _TypeFilter.urine => records
-        .where((r) => r.type == ToiletType.urine)
-        .toList(),
-    _TypeFilter.stool => records
-        .where((r) => r.type == ToiletType.stool)
-        .toList(),
+    _TypeFilter.urine =>
+      records.where((r) => r.type == ToiletType.urine).toList(),
+    _TypeFilter.stool =>
+      records.where((r) => r.type == ToiletType.stool).toList(),
   };
 }

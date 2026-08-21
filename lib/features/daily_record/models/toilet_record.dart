@@ -180,9 +180,7 @@ class ToiletRecord extends Equatable {
           ? null
           : (stoolCondition ?? this.stoolCondition),
       urineColor: clearUrineColor ? null : (urineColor ?? this.urineColor),
-      urineVolume: clearUrineVolume
-          ? null
-          : (urineVolume ?? this.urineVolume),
+      urineVolume: clearUrineVolume ? null : (urineVolume ?? this.urineVolume),
       photo: clearPhoto ? null : (photo ?? this.photo),
       location: clearLocation ? null : (location ?? this.location),
     );

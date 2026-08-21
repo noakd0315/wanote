@@ -140,7 +140,8 @@ class AiBackendClient {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? message;
       try {
-        final decoded = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
+        final decoded =
+            jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
         message = decoded['error'] as String?;
       } catch (_) {
         // Body wasn't JSON; fall back to the generic message below.

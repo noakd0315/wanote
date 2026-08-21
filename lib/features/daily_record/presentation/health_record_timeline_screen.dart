@@ -67,6 +67,19 @@ class _HealthRecordTimelineScreenState
         HealthRecordPeriod.lastYear => l10n.healthRecordFilterLastYear,
       };
 
+  /// Newest first, like every other list in the app (PM request,
+  /// 2026-08-21: 4画面にソートを付ける). Not persisted -- it is a way of
+  /// reading the list right now, not a preference.
+  bool _newestFirst = true;
+
+  Widget _sortAction(AppLocalizations l10n) => IconButton(
+    tooltip: _newestFirst
+        ? l10n.sortOldestFirstTooltip
+        : l10n.sortNewestFirstTooltip,
+    icon: Icon(_newestFirst ? Icons.arrow_downward : Icons.arrow_upward),
+    onPressed: () => setState(() => _newestFirst = !_newestFirst),
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -75,7 +88,10 @@ class _HealthRecordTimelineScreenState
       // its Navigator) shows through this tab-root screen, per the PM's
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(l10n.healthRecordTimelineTitle)),
+      appBar: AppBar(
+        title: Text(l10n.healthRecordTimelineTitle),
+        actions: [_sortAction(l10n)],
+      ),
       body: StreamBuilder<List<HealthRecord>>(
         stream: widget.repository.watchTimeline(widget.uid, widget.petId),
         builder: (context, snapshot) {
@@ -86,7 +102,11 @@ class _HealthRecordTimelineScreenState
           // watchTimeline already orders by recorded_at descending, but sort
           // defensively in case a caller passes a differently-ordered fake.
           final sorted = [...records]
-            ..sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+            ..sort(
+              (a, b) => _newestFirst
+                  ? b.recordedAt.compareTo(a.recordedAt)
+                  : a.recordedAt.compareTo(b.recordedAt),
+            );
           if (sorted.isEmpty) {
             return Center(child: Text(l10n.commonNoRecordsYet));
           }
@@ -172,9 +192,7 @@ class _HealthRecordTimelineScreenState
               value: _tag,
               onChanged: (value) => setState(() => _tag = value),
               items: [
-                DropdownMenuItem(
-                  child: Text(l10n.healthRecordFilterAllTags),
-                ),
+                DropdownMenuItem(child: Text(l10n.healthRecordFilterAllTags)),
                 for (final tag in HealthRecordTag.values)
                   DropdownMenuItem(
                     value: tag,
@@ -194,40 +212,38 @@ class _HealthRecordTimelineScreenState
     List<HealthRecord> shown,
   ) {
     return ListView.builder(
-            itemCount: shown.length,
-            itemBuilder: (context, index) {
-              final record = shown[index];
-              return ListTile(
-                leading: record.photos.isNotEmpty
-                    ? const Icon(Icons.photo)
-                    : const Icon(Icons.notes),
-                title: Text(
-                  formatDateTime(context, record.recordedAt),
+      itemCount: shown.length,
+      itemBuilder: (context, index) {
+        final record = shown[index];
+        return ListTile(
+          leading: record.photos.isNotEmpty
+              ? const Icon(Icons.photo)
+              : const Icon(Icons.notes),
+          title: Text(formatDateTime(context, record.recordedAt)),
+          subtitle: Text(
+            record.tags.isEmpty
+                ? (record.memo ?? '')
+                : record.tags
+                      .map((t) => healthRecordTagLabel(context, t))
+                      .join(', '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => PatternedBackground(
+                  child: HealthRecordDetailScreen(
+                    uid: widget.uid,
+                    record: record,
+                    repository: widget.repository,
+                  ),
                 ),
-                subtitle: Text(
-                  record.tags.isEmpty
-                      ? (record.memo ?? '')
-                      : record.tags
-                            .map((t) => healthRecordTagLabel(context, t))
-                            .join(', '),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => PatternedBackground(
-                        child: HealthRecordDetailScreen(
-                          uid: widget.uid,
-                          record: record,
-                          repository: widget.repository,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

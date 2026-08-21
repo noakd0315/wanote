@@ -2144,6 +2144,18 @@ abstract class AppLocalizations {
   /// **'Dark (concentrated)'**
   String get urineColorDark;
 
+  /// Sort toggle shared by the health, toilet, visit and medication lists. Same wording as the weight table's, which came first.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort oldest first'**
+  String get sortOldestFirstTooltip;
+
+  /// Sort toggle shared by the health, toilet, visit and medication lists.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort newest first'**
+  String get sortNewestFirstTooltip;
+
   /// Switches the weight table to ascending order.
   ///
   /// In en, this message translates to:

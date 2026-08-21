@@ -95,7 +95,6 @@ class AccountBackendException implements Exception {
 
   @override
   String toString() => 'AccountBackendException($statusCode): $message';
-
 }
 
 /// JSON is UTF-8 by definition (RFC 8259). `response.body` instead picks its
