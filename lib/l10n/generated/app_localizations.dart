@@ -398,6 +398,30 @@ abstract class AppLocalizations {
   /// **'Purchases aren\'t available yet. Please check back soon.'**
   String get billingUnavailableMessage;
 
+  /// Plan description shown on the paywall. Ours, not the store's: the store returns whatever the account's own region and language resolve to, which left Japanese text in an English app and vice versa (PM, 2026-08-21).
+  ///
+  /// In en, this message translates to:
+  /// **'No ads and unlimited AI consultations'**
+  String get premiumMonthlyDescription;
+
+  /// Plan description shown on the paywall.
+  ///
+  /// In en, this message translates to:
+  /// **'No ads and unlimited AI. Billed yearly'**
+  String get premiumYearlyDescription;
+
+  /// Ticket pack description shown on the paywall.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds 5 AI consultations. Never expires'**
+  String get aiTickets5Description;
+
+  /// Ticket pack description shown on the paywall.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds 15 AI consultations. Never expires'**
+  String get aiTickets15Description;
+
   /// Product label for the monthly premium subscription package.
   ///
   /// In en, this message translates to:

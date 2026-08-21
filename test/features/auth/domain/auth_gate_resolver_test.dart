@@ -24,19 +24,47 @@ void main() {
       );
     });
 
+    // Biometrics replace signing in again; they are not an extra step on
+    // top of a session that is still valid. Asking whenever they were
+    // enabled started a scan on the way to Home right after a password had
+    // just been typed (PM report, 2026-08-21).
+    test('live session, biometric enabled and available -> enterApp', () {
+      expect(
+        resolver.resolve(
+          hasActiveSession: true,
+          biometricEnabled: true,
+          biometricAvailable: true,
+        ),
+        AuthGateAction.enterApp,
+      );
+    });
+
     test(
-      'active session, biometric enabled and available -> requireBiometric',
+      'expired session, biometric enabled and available -> requireBiometric',
       () {
         expect(
           resolver.resolve(
             hasActiveSession: true,
             biometricEnabled: true,
             biometricAvailable: true,
+            sessionExpired: true,
           ),
           AuthGateAction.requireBiometric,
         );
       },
     );
+
+    test('expired session with no biometric to fall back on -> sign in', () {
+      expect(
+        resolver.resolve(
+          hasActiveSession: true,
+          biometricEnabled: true,
+          biometricAvailable: false,
+          sessionExpired: true,
+        ),
+        AuthGateAction.requireSignIn,
+      );
+    });
 
     test(
       'active session, biometric enabled but device unavailable -> enterApp',

@@ -201,6 +201,14 @@
   "@billingUnavailableMessage": {
     "description": "Message shown on the paywall when the app was built without a RevenueCat API key, so the store cannot be reached at all."
   },
+  "premiumMonthlyDescription": "No ads and unlimited AI consultations",
+  "@premiumMonthlyDescription": { "description": "Plan description shown on the paywall. Ours, not the store's: the store returns whatever the account's own region and language resolve to, which left Japanese text in an English app and vice versa (PM, 2026-08-21)." },
+  "premiumYearlyDescription": "No ads and unlimited AI. Billed yearly",
+  "@premiumYearlyDescription": { "description": "Plan description shown on the paywall." },
+  "aiTickets5Description": "Adds 5 AI consultations. Never expires",
+  "@aiTickets5Description": { "description": "Ticket pack description shown on the paywall." },
+  "aiTickets15Description": "Adds 15 AI consultations. Never expires",
+  "@aiTickets15Description": { "description": "Ticket pack description shown on the paywall." },
   "premiumMonthlyLabel": "Premium (monthly)",
   "@premiumMonthlyLabel": {
     "description": "Product label for the monthly premium subscription package."

@@ -14,9 +14,7 @@ import 'reminder_strings.dart';
 /// The medication fields have been stored since the form screen was built,
 /// but nothing ever read them -- these reminders had never fired.
 class MedicationReminderScheduler {
-  const MedicationReminderScheduler({
-    this.strings = ReminderStrings.fallback,
-  });
+  const MedicationReminderScheduler({this.strings = ReminderStrings.fallback});
 
   /// The wording for the notifications this builds. See [ReminderStrings].
   final ReminderStrings strings;

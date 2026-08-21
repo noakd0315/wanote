@@ -37,6 +37,7 @@ class AiSection extends StatefulWidget {
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
     required this.onRequestUpgrade,
+    this.opened,
   });
 
   final String uid;
@@ -50,6 +51,10 @@ class AiSection extends StatefulWidget {
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
   final VoidCallback onRequestUpgrade;
+
+  /// Ticks each time this section is opened. Forwarded to the consultation
+  /// screen so it can clear the previous answer.
+  final ValueNotifier<int>? opened;
 
   @override
   State<AiSection> createState() => _AiSectionState();
@@ -108,6 +113,7 @@ class _AiSectionState extends State<AiSection>
             children: [
               KeepAliveTab(
                 child: ConsultationScreen(
+                  opened: widget.opened,
                   uid: widget.uid,
                   petId: widget.petId,
                   usageRepository: widget.usageRepository,

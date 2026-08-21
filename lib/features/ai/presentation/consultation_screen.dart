@@ -42,6 +42,7 @@ class ConsultationScreen extends StatefulWidget {
     this.prefillRecords,
     this.emergencyDetector = const EmergencyKeywordDetector(),
     this.usageLimitPolicy = const UsageLimitPolicy(),
+    this.opened,
   });
 
   final String uid;
@@ -57,6 +58,14 @@ class ConsultationScreen extends StatefulWidget {
   /// Stub navigation hook for Agent E's ticket-purchase / subscription
   /// upgrade UI.
   final VoidCallback onRequestUpgrade;
+
+  /// Ticks each time the AI section is opened.
+  ///
+  /// The screen is kept alive inside an IndexedStack, so coming back to it
+  /// does not rebuild anything -- the previous question and answer were
+  /// still on screen (PM report, 2026-08-21). The answer is already in the
+  /// history below, so nothing is lost by clearing it.
+  final ValueNotifier<int>? opened;
 
   final EmergencyKeywordDetector emergencyDetector;
   final UsageLimitPolicy usageLimitPolicy;
@@ -116,12 +125,31 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
     // The row below reads _controller.text to decide what to show, and a
     // TextField's own edits do not rebuild this widget on their own.
     _controller.addListener(_onQuestionChanged);
+    widget.opened?.addListener(_clearOnReopen);
+  }
+
+  /// Drops the last conversation when the section is opened again.
+  ///
+  /// Not on every notification blindly: a question half-typed and not yet
+  /// sent is the owner's work, and throwing that away would be worse than
+  /// the stale answer this exists to remove.
+  void _clearOnReopen() {
+    if (!mounted) return;
+    if (_submitting) return;
+    if (_resultKind == _ResultKind.none) return;
+    setState(() {
+      _resultKind = _ResultKind.none;
+      _resultText = null;
+      _answeredQuestion = null;
+      _controller.clear();
+    });
   }
 
   void _onQuestionChanged() => setState(() {});
 
   @override
   void dispose() {
+    widget.opened?.removeListener(_clearOnReopen);
     _controller.removeListener(_onQuestionChanged);
     _controller.dispose();
     super.dispose();

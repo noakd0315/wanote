@@ -32,6 +32,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
   DateTime? _endDate;
   bool _ongoing = true;
   bool _reminderEnabled = false;
+
   /// Every time of day this medicine is due, in order.
   ///
   /// A list because a course is often more than once a day -- morning and
@@ -48,7 +49,7 @@ class _MedicationFormScreenState extends State<MedicationFormScreen> {
     _dosageController.text = medication?.dosage ?? '';
     _startDate = medication?.startDate ?? DateTime.now();
     _endDate = medication?.endDate;
-    _ongoing = medication == null ? true : medication.isOngoing;
+    _ongoing = medication == null ? true : medication.hasNoEndDate;
     _reminderEnabled = medication?.reminderEnabled ?? false;
     if (medication != null && medication.reminderTimes.isNotEmpty) {
       _reminderTimes = List.of(medication.reminderTimes);

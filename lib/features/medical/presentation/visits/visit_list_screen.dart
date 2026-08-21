@@ -59,20 +59,24 @@ class _VisitListScreenState extends State<VisitListScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SegmentedButton<_VisitPeriod>(
-                    segments: [
-                      for (final period in _VisitPeriod.values)
-                        ButtonSegment(
-                          value: period,
-                          label: Text(period.label(l10n)),
-                        ),
-                    ],
-                    selected: {_period},
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selection) =>
-                        setState(() => _period = selection.first),
+                // Centred: the bar is narrower than the screen and sat hard
+                // against the left edge (PM, 2026-08-21).
+                child: Center(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SegmentedButton<_VisitPeriod>(
+                      segments: [
+                        for (final period in _VisitPeriod.values)
+                          ButtonSegment(
+                            value: period,
+                            label: Text(period.label(l10n)),
+                          ),
+                      ],
+                      selected: {_period},
+                      showSelectedIcon: false,
+                      onSelectionChanged: (selection) =>
+                          setState(() => _period = selection.first),
+                    ),
                   ),
                 ),
               ),

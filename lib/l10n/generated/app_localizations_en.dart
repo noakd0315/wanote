@@ -175,6 +175,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Purchases aren\'t available yet. Please check back soon.';
 
   @override
+  String get premiumMonthlyDescription =>
+      'No ads and unlimited AI consultations';
+
+  @override
+  String get premiumYearlyDescription =>
+      'No ads and unlimited AI. Billed yearly';
+
+  @override
+  String get aiTickets5Description => 'Adds 5 AI consultations. Never expires';
+
+  @override
+  String get aiTickets15Description =>
+      'Adds 15 AI consultations. Never expires';
+
+  @override
   String get premiumMonthlyLabel => 'Premium (monthly)';
 
   @override

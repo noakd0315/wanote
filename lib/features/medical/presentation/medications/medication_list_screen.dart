@@ -131,20 +131,24 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SegmentedButton<_MedicationFilter>(
-                  segments: [
-                    for (final filter in _MedicationFilter.values)
-                      ButtonSegment(
-                        value: filter,
-                        label: Text(filter.label(l10n)),
-                      ),
-                  ],
-                  selected: {_filter},
-                  showSelectedIcon: false,
-                  onSelectionChanged: (selection) =>
-                      setState(() => _filter = selection.first),
+              // Centred: the bar is narrower than the screen and sat hard
+              // against the left edge (PM, 2026-08-21).
+              child: Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SegmentedButton<_MedicationFilter>(
+                    segments: [
+                      for (final filter in _MedicationFilter.values)
+                        ButtonSegment(
+                          value: filter,
+                          label: Text(filter.label(l10n)),
+                        ),
+                    ],
+                    selected: {_filter},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (selection) =>
+                        setState(() => _filter = selection.first),
+                  ),
                 ),
               ),
             ),
@@ -180,7 +184,7 @@ class _MedicationListScreenState extends State<MedicationListScreen> {
     return ListTile(
       title: Text(medication.name),
       subtitle: Text(
-        medication.isOngoing
+        medication.isOngoingAt(DateTime.now())
             ? l10n.medicationOngoingLabel
             : l10n.medicationEndDateSubtitle(
                 medication.endDate!.toLocal().toString().split(' ').first,
@@ -292,13 +296,12 @@ enum _MedicationFilter {
   /// finished. An end date still in the future counts as ongoing -- the dog
   /// is on it today, which is what the word means to the owner.
   List<Medication> apply(List<Medication> medications, DateTime now) {
-    bool isOngoing(Medication m) =>
-        m.endDate == null || !m.endDate!.isBefore(DateUtils.dateOnly(now));
     return switch (this) {
       _MedicationFilter.all => medications,
-      _MedicationFilter.ongoing => medications.where(isOngoing).toList(),
+      _MedicationFilter.ongoing =>
+        medications.where((m) => m.isOngoingAt(now)).toList(),
       _MedicationFilter.finished =>
-        medications.where((m) => !isOngoing(m)).toList(),
+        medications.where((m) => !m.isOngoingAt(now)).toList(),
     };
   }
 }

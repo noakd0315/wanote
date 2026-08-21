@@ -61,8 +61,7 @@ class ReminderStrings {
   final String channelName;
   final String channelDescription;
 
-  String medicationBodyFor(String? dosage) =>
-      (dosage == null || dosage.isEmpty)
+  String medicationBodyFor(String? dosage) => (dosage == null || dosage.isEmpty)
       ? medicationBody
       : medicationBodyWithDosage.replaceAll('{dosage}', dosage);
 

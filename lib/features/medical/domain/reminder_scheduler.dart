@@ -229,7 +229,6 @@ class ReminderScheduler {
         return strings.preventionMedicationBody;
     }
   }
-
 }
 
 /// FNV-1a 32-bit hash of [key], masked to a positive 31-bit int so it always

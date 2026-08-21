@@ -141,7 +141,6 @@ class HttpCertificateOcrService implements CertificateOcrService {
     final json = jsonDecode(_decodeBody(response)) as Map<String, dynamic>;
     return OcrExtractionResult.fromJson(json);
   }
-
 }
 
 /// JSON is UTF-8 by definition (RFC 8259). `response.body` instead picks its

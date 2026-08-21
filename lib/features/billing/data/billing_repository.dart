@@ -155,6 +155,12 @@ class RevenueCatBillingRepository implements BillingRepository {
   @override
   Future<void> refreshCustomerInfo() async {
     if (!BillingConfig.isConfigured) return;
+    // Invalidated first. getCustomerInfo() answers from the SDK's cache,
+    // which was filled at logIn -- before the server granted anything -- so
+    // asking without this returns the very state we are trying to replace
+    // and nothing appears to have changed (PM report, 2026-08-21: the free
+    // allowance was still being spent after a code was applied).
+    await Purchases.invalidateCustomerInfoCache();
     _onCustomerInfoUpdate(await Purchases.getCustomerInfo());
   }
 

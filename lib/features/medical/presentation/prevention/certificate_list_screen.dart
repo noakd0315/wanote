@@ -76,8 +76,7 @@ class _CertificateListScreenState extends State<CertificateListScreen> {
   String get uid => widget.uid;
   String get petId => widget.petId;
   PreventionRecordRepository get repository => widget.repository;
-  PreventionProgramRepository get programRepository =>
-      widget.programRepository;
+  PreventionProgramRepository get programRepository => widget.programRepository;
   CertificateCacheService get cacheService => widget.cacheService;
 
   @override
@@ -113,8 +112,9 @@ class _CertificateListScreenState extends State<CertificateListScreen> {
               .where((r) => r.certificateFile != null)
               .toList();
           final records = _showAll
-              ? (withCertificates
-                  ..sort((a, b) => b.administeredAt.compareTo(a.administeredAt)))
+              ? (withCertificates..sort(
+                  (a, b) => b.administeredAt.compareTo(a.administeredAt),
+                ))
               : latestCertificatePerProgram(withCertificates);
           final hiddenCount = withCertificates.length - records.length;
           if (records.isEmpty) {
@@ -185,25 +185,25 @@ class _CertificateListScreenState extends State<CertificateListScreen> {
                     ),
                   Expanded(
                     child: GridView.builder(
-                padding: const EdgeInsets.all(12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  // Taller than wide enough for the image plus two lines of
-                  // caption (program name + date) without squeezing the
-                  // thumbnail.
-                  childAspectRatio: 0.68,
-                ),
-                itemCount: records.length,
-                itemBuilder: (context, index) {
-                  final record = records[index];
-                  return _CertificateTile(
-                    record: record,
-                    programName: programNames[record.programId],
-                    cacheService: cacheService,
-                  );
-                },
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        // Taller than wide enough for the image plus two lines of
+                        // caption (program name + date) without squeezing the
+                        // thumbnail.
+                        childAspectRatio: 0.68,
+                      ),
+                      itemCount: records.length,
+                      itemBuilder: (context, index) {
+                        final record = records[index];
+                        return _CertificateTile(
+                          record: record,
+                          programName: programNames[record.programId],
+                          cacheService: cacheService,
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -455,9 +455,8 @@ class _CertificateImage extends StatelessWidget {
             width: double.infinity,
             errorBuilder: (context, error, stackTrace) =>
                 const Center(child: Icon(Icons.broken_image)),
-            loadingBuilder: (context, child, progress) => progress == null
-                ? child
-                : WanoteLoadingIndicator.centered(),
+            loadingBuilder: (context, child, progress) =>
+                progress == null ? child : WanoteLoadingIndicator.centered(),
           );
         }
         return const Center(child: Icon(Icons.broken_image));

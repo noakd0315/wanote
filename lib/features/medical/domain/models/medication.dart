@@ -70,7 +70,24 @@ class Medication extends Equatable {
   /// Every time of day this medicine is due. Empty when reminders are off.
   final List<ReminderTime> reminderTimes;
 
-  bool get isOngoing => endDate == null;
+  /// Whether the course is still running on [now].
+  ///
+  /// An end date in the future means the course is still on: the owner knew
+  /// when it would finish and said so in advance. Treating any end date as
+  /// "finished" marked a medicine as over the moment its last day was typed
+  /// in (PM report, 2026-08-21).
+  bool isOngoingAt(DateTime now) {
+    final end = endDate;
+    if (end == null) return true;
+    final today = DateTime(now.year, now.month, now.day);
+    return !DateTime(end.year, end.month, end.day).isBefore(today);
+  }
+
+  /// Whether the course has no end date at all.
+  ///
+  /// This is the form's "継続中（終了日未定）" switch, not "is it running
+  /// today" -- see [isOngoingAt] for that.
+  bool get hasNoEndDate => endDate == null;
 
   Medication copyWith({
     String? name,

@@ -359,7 +359,6 @@ class _PreventionRecordFormScreenState
     // Awaited, not skipped: the ad was started above and has to be given
     // the chance to finish before the form is usable again.
     await adFuture;
-
   }
 
   String _title(AppLocalizations l10n) {
@@ -378,8 +377,9 @@ class _PreventionRecordFormScreenState
     if (!_formKey.currentState!.validate()) return;
     // Read before the first await, like everything else taken from context.
     final savedMessage = AppLocalizations.of(context)!.commonSavedMessage;
-    final saveFailedMessage =
-        AppLocalizations.of(context)!.saveFailedRetryMessage;
+    final saveFailedMessage = AppLocalizations.of(
+      context,
+    )!.saveFailedRetryMessage;
     setState(() => _saving = true);
     try {
       final hospitalName = _hospitalController.text.trim().isEmpty
@@ -579,10 +579,7 @@ class _PreventionRecordFormScreenState
             color: Theme.of(context).colorScheme.tertiary,
           ),
           const SizedBox(width: 2),
-          Text(
-            l10n.ocrNeedsReviewLabel,
-            style: _reviewHelperStyle(context),
-          ),
+          Text(l10n.ocrNeedsReviewLabel, style: _reviewHelperStyle(context)),
         ],
       ),
     );
@@ -591,9 +588,10 @@ class _PreventionRecordFormScreenState
   String? _reviewHelperText(AppLocalizations l10n, _OcrField field) =>
       _needsReview.contains(field) ? l10n.ocrNeedsReviewHelper : null;
 
-  TextStyle? _reviewHelperStyle(BuildContext context) => Theme.of(
-    context,
-  ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.tertiary);
+  TextStyle? _reviewHelperStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodySmall
+      ?.copyWith(color: Theme.of(context).colorScheme.tertiary);
 
   @override
   Widget build(BuildContext context) {
@@ -637,9 +635,7 @@ class _PreventionRecordFormScreenState
                 title: Text(l10n.administeredAtLabel),
                 subtitle: Row(
                   children: [
-                    Text(
-                      _administeredAt.toLocal().toString().split(' ').first,
-                    ),
+                    Text(_administeredAt.toLocal().toString().split(' ').first),
                     _reviewChip(l10n, _OcrField.administeredAt),
                   ],
                 ),
@@ -689,8 +685,7 @@ class _PreventionRecordFormScreenState
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 value: _reminderEnabled,
-                onChanged: (value) =>
-                    setState(() => _reminderEnabled = value),
+                onChanged: (value) => setState(() => _reminderEnabled = value),
                 title: Text(l10n.medicationReminderSwitchLabel),
               ),
               if (_reminderEnabled) ...[

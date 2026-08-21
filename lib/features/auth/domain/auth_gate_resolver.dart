@@ -39,12 +39,17 @@ class AuthGateResolver {
     if (!hasActiveSession) {
       return AuthGateAction.requireSignIn;
     }
+    // Only when the session has actually expired. Biometrics are the
+    // *replacement* for signing in again, not an extra step on top of it --
+    // asking whenever they are enabled meant a scan started on the way to
+    // Home immediately after a password had just been typed (PM report,
+    // 2026-08-21).
+    if (!sessionExpired) {
+      return AuthGateAction.enterApp;
+    }
     if (biometricEnabled && biometricAvailable) {
       return AuthGateAction.requireBiometric;
     }
-    if (sessionExpired) {
-      return AuthGateAction.requireSignIn;
-    }
-    return AuthGateAction.enterApp;
+    return AuthGateAction.requireSignIn;
   }
 }

@@ -330,23 +330,49 @@ class _PackageTile extends StatelessWidget {
     };
   }
 
+  /// The plan's description, in the app's language.
+  ///
+  /// Not the store's. Both stores answer in whatever the *account's* region
+  /// and language resolve to, not the app's: an English-language app on a
+  /// Japanese Play account showed Japanese, and a sandbox account set to the
+  /// United States showed English everywhere (PM, 2026-08-21). The price is
+  /// still the store's -- that one has to be, it is what will be charged.
+  String _description(AppLocalizations l10n) {
+    final productId = ProductIds.baseId(package.storeProduct.identifier);
+    return switch (productId) {
+      ProductIds.premiumMonthly => l10n.premiumMonthlyDescription,
+      ProductIds.premiumYearly => l10n.premiumYearlyDescription,
+      ProductIds.aiTickets5 => l10n.aiTickets5Description,
+      ProductIds.aiTickets15 => l10n.aiTickets15Description,
+      _ => package.storeProduct.description,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      child: ListTile(
-        title: Text(_label(l10n)),
-        subtitle: Text(package.storeProduct.description),
-        trailing: isBusy
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : ElevatedButton(
-                onPressed: onPurchase,
-                child: Text(package.storeProduct.priceString),
-              ),
+      // The whole row buys, not just the button. The button sits at the
+      // right edge and the eye goes to the plan name, so the name is what
+      // got tapped -- and nothing happened (PM, 2026-08-21).
+      child: InkWell(
+        onTap: isBusy ? null : onPurchase,
+        child: ListTile(
+          title: Text(_label(l10n)),
+          subtitle: Text(_description(l10n)),
+          trailing: isBusy
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              // Filled, not elevated: this is the primary action of the
+              // screen and it was reading as secondary.
+              : FilledButton(
+                  onPressed: onPurchase,
+                  child: Text(package.storeProduct.priceString),
+                ),
+        ),
       ),
     );
   }

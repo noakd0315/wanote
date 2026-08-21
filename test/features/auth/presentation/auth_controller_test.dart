@@ -137,7 +137,7 @@ void main() {
     );
 
     test(
-      'existing session, biometric on and available -> requireBiometric',
+      'live session, biometric on and available -> enterApp',
       () async {
         when(() => authRepository.currentUser).thenReturn(_identity);
         when(
@@ -155,7 +155,9 @@ void main() {
         final controller = buildController();
         await controller.initialize();
 
-        expect(controller.gateAction, AuthGateAction.requireBiometric);
+        // Not requireBiometric: the session is still live, so there is
+        // nothing to re-authenticate. See AuthGateResolver.
+        expect(controller.gateAction, AuthGateAction.enterApp);
       },
     );
   });

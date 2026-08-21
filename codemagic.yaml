@@ -34,14 +34,17 @@ workflows:
     max_build_duration: 30
     environment:
       flutter: *flutter_version
+    # No `push`. Every push started a build and every build is paid for
+    # (PM, 2026-08-21). analyze and the full test suite are run locally
+    # before each commit, so this workflow only ever confirmed what was
+    # already known -- and this repo is worked on by pushing straight to
+    # main, so "every push" meant "every commit".
+    #
+    # Still available by hand from Codemagic, and still runs on a pull
+    # request if the workflow ever changes.
     triggering:
       events:
-        - push
         - pull_request
-      # Outdated runs are cancelled instead of queued. A run of pushes --
-      # which is how this repo is actually worked on -- otherwise starts one
-      # build per push and pays for all of them, when only the last one's
-      # result is ever looked at.
       cancel_previous_builds: true
     # Sibling of `triggering`, not a child of it -- nesting it there is
     # rejected with "extra fields not permitted".
@@ -126,12 +129,24 @@ workflows:
 
       # The step that would have caught the broken AndroidManifest.xml.
       # analyze, the tests and the web build never parse that file; only an
-      # Android build does, and none had run for days.
+      # Android build does.
       #
       # Debug, not release: this is a compile check, and the release signing
       # key is not present in CI (nor should it be).
+      #
+      # Only when something Android-specific moved. This is by far the
+      # longest step in the workflow, and build minutes are paid for
+      # (PM, 2026-08-21). A change under lib/ cannot break the manifest, and
+      # the release APK/AAB is built locally on every delivery anyway -- so
+      # the one thing this catches is already covered for everything except
+      # a change to the Android project itself.
       - name: Build Android
         script: flutter build apk --debug
+        when:
+          changeset:
+            includes:
+              - 'android/'
+              - 'pubspec.yaml'
 
   ios:
     name: iOS build to TestFlight

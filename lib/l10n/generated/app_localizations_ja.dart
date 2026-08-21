@@ -165,6 +165,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get billingUnavailableMessage => 'プランのご購入は現在準備中です。もうしばらくお待ちください。';
 
   @override
+  String get premiumMonthlyDescription => '広告非表示・AI相談が使い放題';
+
+  @override
+  String get premiumYearlyDescription => '広告非表示・AI相談が使い放題。年払い';
+
+  @override
+  String get aiTickets5Description => 'AI相談を5回追加。有効期限なし';
+
+  @override
+  String get aiTickets15Description => 'AI相談を15回追加。有効期限なし';
+
+  @override
   String get premiumMonthlyLabel => 'プレミアム（月額）';
 
   @override

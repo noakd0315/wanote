@@ -124,20 +124,22 @@ class _VisitFormScreenState extends State<VisitFormScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final chosen = await showHistoryCopyPicker<Visit>(
       context: context,
-      options: widget.repository.watchVisits(widget.uid, widget.petId).map(
-        (visits) => visits
-            .map(
-              (visit) => HistoryCopyOption(
-                value: visit,
-                title: visit.hospitalName ?? l10n.visitFallbackTitle,
-                subtitle: [
-                  visit.visitedAt.toLocal().toString().split(' ').first,
-                  if (visit.diagnosis != null) visit.diagnosis!,
-                ].join(' - '),
-              ),
-            )
-            .toList(),
-      ),
+      options: widget.repository
+          .watchVisits(widget.uid, widget.petId)
+          .map(
+            (visits) => visits
+                .map(
+                  (visit) => HistoryCopyOption(
+                    value: visit,
+                    title: visit.hospitalName ?? l10n.visitFallbackTitle,
+                    subtitle: [
+                      visit.visitedAt.toLocal().toString().split(' ').first,
+                      if (visit.diagnosis != null) visit.diagnosis!,
+                    ].join(' - '),
+                  ),
+                )
+                .toList(),
+          ),
     );
     if (chosen == null || !mounted) return;
     setState(() {

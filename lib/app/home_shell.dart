@@ -84,6 +84,20 @@ class _HomeShellState extends State<HomeShell>
   final ValueNotifier<int> _dailyRecordTabRequest = ValueNotifier<int>(0);
   final ValueNotifier<int> _medicalTabRequest = ValueNotifier<int>(0);
 
+  /// Bumped every time the AI section is opened, so the consultation screen
+  /// can drop the answer left over from last time.
+  ///
+  /// The sections live in an IndexedStack and are never disposed, so
+  /// "opening" the tab does not rebuild anything on its own -- returning to
+  /// AI相談 showed the previous conversation still sitting there (PM report,
+  /// 2026-08-21). Same shape as the tab requests above, and for the same
+  /// reason: a notifier is how a message reaches a screen that is already
+  /// alive.
+  final ValueNotifier<int> _aiSectionOpened = ValueNotifier<int>(0);
+
+  /// Where AiSection sits in the section list built by _buildSections.
+  static const int _aiSectionIndex = 3;
+
   /// Jumps to [sectionIndex] with its inner tab set, exactly as if the user
   /// had used the bottom nav bar and then the tab strip.
   ///
@@ -189,8 +203,15 @@ class _HomeShellState extends State<HomeShell>
     unawaited(_prepareAds());
     // Built in didChangeDependencies instead: the notification wording has
     // to come from AppLocalizations, which is not available in initState.
-    unawaited(_initializeBilling());
-    unawaited(_redeemPendingReferralCodeIfAny());
+    // Sequenced, not fired side by side. Redeeming asks the SDK to re-read
+    // the entitlement, and the handler that turns that into an unlimited
+    // flag is subscribed inside _initializeBilling -- run concurrently, the
+    // redemption could finish first and the event land with nobody
+    // listening. Worse, on iOS a Purchases call before configure() is a
+    // process kill rather than an exception.
+    unawaited(
+      _initializeBilling().then((_) => _redeemPendingReferralCodeIfAny()),
+    );
 
     // read, not watch: this is a one-time hook-up, not a rebuild dependency.
     _authController = context.read<AuthController>()
@@ -361,6 +382,7 @@ class _HomeShellState extends State<HomeShell>
     _billingRepository.dispose();
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();
+    _aiSectionOpened.dispose();
     super.dispose();
   }
 
@@ -483,6 +505,7 @@ class _HomeShellState extends State<HomeShell>
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
         onRequestUpgrade: () => _openPaywall(context),
+        opened: _aiSectionOpened,
       ),
       SettingsSection(
         activePet: widget.activePet,
@@ -578,6 +601,7 @@ class _HomeShellState extends State<HomeShell>
           // tapping e.g. 医療 while a shortcut screen is still pushed on top
           // would leave that stale screen visible instead of the new tab.
           _shellNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          if (index == _aiSectionIndex) _aiSectionOpened.value++;
           setState(() => _selectedIndex = index);
         },
         destinations: [
