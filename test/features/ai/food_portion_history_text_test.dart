@@ -23,6 +23,10 @@ class MockConsultationRepository extends Mock
 /// simplification in a diff.
 class _StubUsageRepository implements AiUsageRepository {
   @override
+  Stream<AiUsageStatus> watchStatus(String uid) =>
+      Stream<AiUsageStatus>.fromFuture(getStatus(uid));
+
+  @override
   Future<AiUsageStatus> getStatus(String uid) async => const AiUsageStatus(
     freeConsultationsRemainingThisMonth: 5,
     ticketsRemaining: 0,
@@ -59,8 +63,7 @@ void main() {
         languageCode: any(named: 'languageCode'),
       ),
     ).thenAnswer((invocation) async {
-      sentPrompt =
-          invocation.namedArguments[#questionText] as String;
+      sentPrompt = invocation.namedArguments[#questionText] as String;
       return '1日2回に分けてください。';
     });
 

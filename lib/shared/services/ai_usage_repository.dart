@@ -60,6 +60,16 @@ class AiUsageStatus {
 abstract class AiUsageRepository {
   Future<AiUsageStatus> getStatus(String uid);
 
+  /// The same status, but live.
+  ///
+  /// Every count here is written from somewhere else: a consultation spends
+  /// one, a ticket purchase credits five, an entitlement change flips the
+  /// unlimited flag. A screen holding a snapshot has no way to hear about
+  /// any of that, and the owner sees a number that is simply wrong -- a
+  /// ticket they had just paid for was missing from the badge, because the
+  /// badge had read the count before the purchase (PM, 2026-08-21).
+  Stream<AiUsageStatus> watchStatus(String uid);
+
   /// Called by features/ai right before invoking the consultation backend.
   /// Decrements free quota first, then tickets. Throws a [StateError] if
   /// [AiUsageStatus.canStartConsultation] was false.
@@ -98,9 +108,14 @@ class FirestoreAiUsageRepository implements AiUsageRepository {
   }
 
   @override
-  Future<AiUsageStatus> getStatus(String uid) async {
-    final snapshot = await _doc(uid).get();
-    final data = snapshot.data();
+  Future<AiUsageStatus> getStatus(String uid) async =>
+      _statusFrom((await _doc(uid).get()).data());
+
+  @override
+  Stream<AiUsageStatus> watchStatus(String uid) =>
+      _doc(uid).snapshots().map((snapshot) => _statusFrom(snapshot.data()));
+
+  AiUsageStatus _statusFrom(Map<String, dynamic>? data) {
     if (data == null) {
       return AiUsageStatus(
         freeConsultationsRemainingThisMonth:

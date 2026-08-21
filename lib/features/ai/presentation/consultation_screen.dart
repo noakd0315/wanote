@@ -88,9 +88,6 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
   /// and the failure was not theirs (PM report).
   bool _adAlreadyShown = false;
 
-  /// Bumped whenever a call is spent, so the remaining-count badge re-reads.
-  int _usageRefreshToken = 0;
-
   _ResultKind _resultKind = _ResultKind.none;
   String? _resultText;
 
@@ -219,7 +216,6 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
-      if (mounted) setState(() => _usageRefreshToken++);
       await widget.consultationRepository.save(
         uid: widget.uid,
         petId: widget.petId,
@@ -345,7 +341,6 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
           AiUsageBadge(
             uid: widget.uid,
             usageRepository: widget.usageRepository,
-            refreshToken: _usageRefreshToken,
           ),
           const SizedBox(height: 16),
           _buildResult(l10n),

@@ -75,13 +75,16 @@ void main() {
       expect(preloadCount, 1);
     });
 
-    test('preloads for subscribers too; the policy decides, not this', () async {
-      final pending = run(initializeSdk: () async {});
-      report(PremiumStatus.active);
-      await pending;
+    test(
+      'preloads for subscribers too; the policy decides, not this',
+      () async {
+        final pending = run(initializeSdk: () async {});
+        report(PremiumStatus.active);
+        await pending;
 
-      expect(preloadCount, 1);
-    });
+        expect(preloadCount, 1);
+      },
+    );
 
     test('gives up quietly when no status ever arrives', () async {
       await run(
@@ -101,23 +104,69 @@ void main() {
       expect(preloadCount, 0);
     });
 
-    test('reports no unhandled error once the status is already known',
-        () async {
-      // The status is known before the wait, so the timeout future is left
-      // over. Unretired, it would fire into the zone as an unhandled error
-      // long after prepareAds returned.
-      final errors = <Object>[];
-      await runZonedGuarded(() async {
-        current = PremiumStatus.inactive;
-        await run(
-          initializeSdk: () async {},
-          timeout: const Duration(milliseconds: 10),
-        );
-        await Future<void>.delayed(const Duration(milliseconds: 60));
-      }, (error, _) => errors.add(error));
+    test('fetches again when the plan lapses mid-session', () async {
+      // The report that started this: a free month that was still running
+      // when the app opened, so nothing was fetched, and had run out by the
+      // time the entitlement was re-read. No ad appeared for the rest of
+      // that session while the free allowance was being spent (PM,
+      // 2026-08-21).
+      current = PremiumStatus.active;
+      await run(initializeSdk: () async {});
+      expect(preloadCount, 1);
+
+      report(PremiumStatus.inactive);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(preloadCount, 2);
+    });
+
+    test('does not fetch while the account is still premium', () async {
+      current = PremiumStatus.inactive;
+      await run(initializeSdk: () async {});
+      expect(preloadCount, 1);
+
+      // Someone subscribing mid-session. An ad must not be waiting for them.
+      report(PremiumStatus.active);
+      await Future<void>.delayed(Duration.zero);
 
       expect(preloadCount, 1);
-      expect(errors, isEmpty);
     });
+
+    test('the subscription stops fetching once cancelled', () async {
+      current = PremiumStatus.inactive;
+      final refills = await prepareAds(
+        initializeSdk: () async {},
+        premiumStatusChanges: statusController.stream,
+        currentPremiumStatus: () => current,
+        preload: () async => preloadCount++,
+      );
+      await refills.cancel();
+
+      report(PremiumStatus.inactive);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(preloadCount, 1);
+    });
+
+    test(
+      'reports no unhandled error once the status is already known',
+      () async {
+        // The status is known before the wait, so the timeout future is left
+        // over. Unretired, it would fire into the zone as an unhandled error
+        // long after prepareAds returned.
+        final errors = <Object>[];
+        await runZonedGuarded(() async {
+          current = PremiumStatus.inactive;
+          await run(
+            initializeSdk: () async {},
+            timeout: const Duration(milliseconds: 10),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 60));
+        }, (error, _) => errors.add(error));
+
+        expect(preloadCount, 1);
+        expect(errors, isEmpty);
+      },
+    );
   });
 }

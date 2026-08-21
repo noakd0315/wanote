@@ -126,9 +126,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   /// consultation_screen.dart for why a retry must not cost a second one.
   bool _adAlreadyShown = false;
 
-  /// Bumped whenever a call is spent, so the remaining-count badge re-reads.
-  int _usageRefreshToken = 0;
-
   @override
   void initState() {
     super.initState();
@@ -310,7 +307,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       await adFuture;
 
       await widget.usageRepository.recordConsultationUsed(widget.uid);
-      if (mounted) setState(() => _usageRefreshToken++);
       // Prefixed so the two kinds are told apart in the list: this one was
       // assembled by a calculator, not typed by the owner.
       await widget.consultationRepository.save(
@@ -528,7 +524,6 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
             AiUsageBadge(
               uid: widget.uid,
               usageRepository: widget.usageRepository,
-              refreshToken: _usageRefreshToken,
             ),
           ],
         );

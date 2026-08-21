@@ -15,44 +15,37 @@ import '../../../../shared/services/ai_usage_repository.dart';
 /// Which pot the next call comes out of is [AiUsageStatus.nextSource]'s
 /// business, and free is always spent before tickets -- so the free count
 /// is the live one until it hits zero, at which point tickets become it.
+///
+/// Watches rather than reads. The parent used to hand down a token it
+/// bumped after spending a call, which covered the one change it made
+/// itself and no other: a ticket bought on the paywall landed in Firestore
+/// and never reached the badge, so a purchase looked like it had gone
+/// missing (PM, 2026-08-21).
 class AiUsageBadge extends StatefulWidget {
   const AiUsageBadge({
     super.key,
     required this.uid,
     required this.usageRepository,
-    this.refreshToken = 0,
   });
 
   final String uid;
   final AiUsageRepository usageRepository;
-
-  /// Bumped by the parent after a call is spent, to re-read the count.
-  ///
-  /// A token rather than a stream because the repository has no change
-  /// notification, and rather than a GlobalKey because the parent already
-  /// knows exactly when the number moved -- it is the thing that moved it.
-  final int refreshToken;
 
   @override
   State<AiUsageBadge> createState() => _AiUsageBadgeState();
 }
 
 class _AiUsageBadgeState extends State<AiUsageBadge> {
-  late Future<AiUsageStatus> _status;
-
-  @override
-  void initState() {
-    super.initState();
-    _status = widget.usageRepository.getStatus(widget.uid);
-  }
+  late Stream<AiUsageStatus> _status = widget.usageRepository.watchStatus(
+    widget.uid,
+  );
 
   @override
   void didUpdateWidget(AiUsageBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.refreshToken != widget.refreshToken ||
-        oldWidget.uid != widget.uid) {
+    if (oldWidget.uid != widget.uid) {
       setState(() {
-        _status = widget.usageRepository.getStatus(widget.uid);
+        _status = widget.usageRepository.watchStatus(widget.uid);
       });
     }
   }
@@ -60,8 +53,8 @@ class _AiUsageBadgeState extends State<AiUsageBadge> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return FutureBuilder<AiUsageStatus>(
-      future: _status,
+    return StreamBuilder<AiUsageStatus>(
+      stream: _status,
       builder: (context, snapshot) {
         final status = snapshot.data;
         // Nothing while it loads, and nothing if it fails. This is a

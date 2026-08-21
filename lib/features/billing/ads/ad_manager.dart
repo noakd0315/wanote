@@ -163,6 +163,14 @@ class AdManager {
         'skipped: none loaded '
         '(loading=$_isLoadingInterstitial)',
       );
+      // Start one now. Without this the shelf only ever refilled after an
+      // ad had been shown, so a session that missed its one preload -- the
+      // status was still unknown, or premium when it ran -- had no ad for
+      // any trigger, for as long as the app stayed open (PM, 2026-08-21:
+      // 期限切れなのに広告が出ない). Not awaited: this call promises never
+      // to keep its caller waiting on a network fetch. It is the *next*
+      // trigger, and the retry in AdGate, that this is for.
+      unawaited(preloadInterstitial());
       return false;
     }
 

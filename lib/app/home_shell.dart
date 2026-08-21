@@ -299,7 +299,10 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
 
   /// Ads are best-effort from the first line: a failure here must never be
   /// visible to someone using the app.
-  Future<void> _prepareAds() => prepareAds(
+  /// Keeps fetching an ad as the entitlement changes. See [prepareAds].
+  StreamSubscription<PremiumStatus>? _adRefillSubscription;
+
+  Future<void> _prepareAds() async => _adRefillSubscription = await prepareAds(
     initializeSdk: AdManager.initialize,
     premiumStatusChanges: _billingRepository.premiumStatusChanges(),
     currentPremiumStatus: () => _billingRepository.currentPremiumStatus,
@@ -340,11 +343,49 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         ),
       );
       await _billingRepository.configure();
-      await _billingRepository.logIn(widget.uid);
+      await _resolveEntitlementWithRetries();
     } catch (_) {
       // Best-effort only.
     }
   }
+
+  /// Identifies the customer and reads what they are entitled to, retrying
+  /// a failure rather than giving up on the session.
+  ///
+  /// logIn() is a network call, and it is the only thing that ever moves
+  /// premium status off `unknown` at startup. One failed attempt used to
+  /// end it: the exception was caught, the app carried on looking perfectly
+  /// normal, and for the rest of that session ads never appeared (unknown
+  /// withholds them), the free allowance was spent by a premium account,
+  /// and the paywall showed no plan at all. Nothing anywhere said why (PM,
+  /// 2026-08-21).
+  ///
+  /// A handful of attempts over about half a minute, then stop. Beyond that
+  /// the phone is offline, and a resume will re-read it -- see
+  /// [_refreshEntitlementAfter].
+  Future<void> _resolveEntitlementWithRetries() async {
+    var delay = const Duration(seconds: 2);
+    for (var attempt = 1; ; attempt++) {
+      try {
+        await _billingRepository.logIn(widget.uid);
+        return;
+      } catch (error, stackTrace) {
+        if (attempt >= _entitlementResolveAttempts || !mounted) {
+          developer.log(
+            'gave up reading the entitlement after $attempt attempts',
+            name: 'HomeShell',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          return;
+        }
+        await Future<void>.delayed(delay);
+        delay *= 2;
+      }
+    }
+  }
+
+  static const int _entitlementResolveAttempts = 4;
 
   /// If the user typed a referral code on [SignUpScreen], it's sitting in
   /// SharedPreferences (auth doesn't depend on features/billing, so it
@@ -389,6 +430,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     _authController?.removeListener(_onPetsChanged);
     unawaited(_reminderSyncService?.stop() ?? Future<void>.value());
     unawaited(_purchaseEventSubscription?.cancel() ?? Future<void>.value());
+    unawaited(_adRefillSubscription?.cancel() ?? Future<void>.value());
     _billingRepository.dispose();
     _dailyRecordTabRequest.dispose();
     _medicalTabRequest.dispose();
@@ -417,7 +459,7 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       return;
     }
     if (state != AppLifecycleState.resumed) return;
-    if (!mounted || _selectedIndex == 0) return;
+    if (!mounted) return;
     // Only when the app was actually away, not when it stepped out and came
     // straight back.
     //
@@ -436,6 +478,8 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     // for whoever picks the phone up next (PM, 2026-08-21). Locking rather
     // than signing out: the owner gets back in with a fingerprint.
     unawaited(_authController?.lockIfAwayTooLong(awayFor) ?? Future.value());
+    _refreshEntitlementAfter(awayFor);
+    if (_selectedIndex == 0) return;
     if (awayFor < _awayLongEnoughToReset) return;
     // Not while the owner is in the middle of something.
     //
@@ -448,6 +492,49 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
     if (_shellNavigatorKey.currentState?.canPop() ?? false) return;
     setState(() => _selectedIndex = 0);
   }
+
+  /// Re-asks RevenueCat what the account is entitled to, on the way back in.
+  ///
+  /// A subscription or a free month ends on a date, not on an event the app
+  /// is present for. Nothing arrives to say so: the SDK answers from a
+  /// cache filled when the session started, so an entitlement that ran out
+  /// overnight is still reported as active the next morning -- ads stay off
+  /// and the paywall still says premium (PM, 2026-08-21).
+  ///
+  /// Also the rescue for a session whose very first read failed. Until this
+  /// existed, a logIn() that threw left the status at `unknown` for as long
+  /// as the app stayed open, and unknown means no ads at all -- silently,
+  /// because the failure is caught and the app otherwise works.
+  ///
+  /// Not on every resume. The camera, the photo picker and an interstitial
+  /// each background the app, and re-reading over the network every time
+  /// one of them returns is a lot of asking for a date that moves once a
+  /// month.
+  void _refreshEntitlementAfter(Duration awayFor) {
+    final stranded =
+        _billingRepository.currentPremiumStatus.state ==
+        EntitlementState.unknown;
+    if (!stranded && awayFor < _awayLongEnoughToRecheckEntitlement) return;
+    unawaited(
+      _billingRepository.refreshCustomerInfo().catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        developer.log(
+          'could not re-read the entitlement on resume',
+          name: 'HomeShell',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
+  }
+
+  /// Long enough that the app was genuinely put away rather than stepping
+  /// aside for a picture.
+  static const Duration _awayLongEnoughToRecheckEntitlement = Duration(
+    minutes: 1,
+  );
 
   void _openConsultation(
     BuildContext context, {

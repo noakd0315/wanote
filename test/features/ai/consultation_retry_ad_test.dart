@@ -34,6 +34,10 @@ class _StubUsageRepository implements AiUsageRepository {
   int recordedUses = 0;
 
   @override
+  Stream<AiUsageStatus> watchStatus(String uid) =>
+      Stream<AiUsageStatus>.fromFuture(getStatus(uid));
+
+  @override
   Future<AiUsageStatus> getStatus(String uid) async => const AiUsageStatus(
     freeConsultationsRemainingThisMonth: 5,
     ticketsRemaining: 0,
@@ -148,7 +152,9 @@ void main() {
       ),
     ).thenAnswer((_) async {
       attempt++;
-      if (attempt == 1) throw AiBackendException(statusCode: 500, message: 'boom');
+      if (attempt == 1) {
+        throw AiBackendException(statusCode: 500, message: 'boom');
+      }
       return '様子を見てください。';
     });
 
