@@ -125,6 +125,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Subscriptions & AI consultation tickets';
 
   @override
+  String get lockMenuTitle => 'Lock';
+
+  @override
+  String get lockMenuSubtitle =>
+      'Unlock with Face ID / Touch ID / fingerprint. No password needed';
+
+  @override
   String get signOutMenuTitle => 'Sign out';
 
   @override

@@ -264,6 +264,7 @@ class AuthController extends ChangeNotifier {
       biometricEnabled: user.biometricEnabled,
       biometricAvailable: _biometricAvailable,
       sessionExpired: await _isSessionExpired(identity.uid),
+      locked: await _isLocked(identity.uid),
     );
     _pendingBiometricFallback = null;
     _subscribeToPets(identity.uid);
@@ -560,7 +561,41 @@ class AuthController extends ChangeNotifier {
   Future<void> signInWithApple() =>
       _runAuthAction(_authRepository.signInWithApple);
 
+  /// Whether this account can be locked instead of signed out.
+  ///
+  /// Only with biometrics set up and usable: a lock nobody can open is worse
+  /// than no lock (PM request, 2026-08-21).
+  bool get canLock => (_currentUser?.biometricEnabled ?? false) &&
+      _biometricAvailable;
+
+  /// Hides the app behind the biometric prompt without ending the session.
+  ///
+  /// Unlike [signOut] this keeps the Firebase session, so unlocking needs no
+  /// password. That is the point -- and also the reason [signOut] stays: a
+  /// locked device is still signed in, so handing the phone to someone else,
+  /// or switching to another account, still needs a real sign-out.
+  Future<void> lock() async {
+    final uid = _currentUser?.uid;
+    if (uid == null || !canLock) return;
+    final prefs = await _prefsFuture;
+    await prefs.setBool('${AuthPrefsKeys.lockedPrefix}$uid', true);
+    _gateAction = AuthGateAction.requireBiometric;
+    notifyListeners();
+  }
+
+  Future<void> _clearLock(String uid) async {
+    final prefs = await _prefsFuture;
+    await prefs.remove('${AuthPrefsKeys.lockedPrefix}$uid');
+  }
+
+  Future<bool> _isLocked(String uid) async {
+    final prefs = await _prefsFuture;
+    return prefs.getBool('${AuthPrefsKeys.lockedPrefix}$uid') ?? false;
+  }
+
   Future<void> signOut() async {
+    final uid = _currentUser?.uid;
+    if (uid != null) await _clearLock(uid);
     await _authRepository.signOut();
     // The authStateChanges listener fires with null and clears state via
     // _onAuthChanged; no need to duplicate that logic here.
@@ -638,7 +673,10 @@ class AuthController extends ChangeNotifier {
       // passing it restarts the clock (PM: biometric may pass instead of a
       // full sign-out).
       final uid = _currentUser?.uid;
-      if (uid != null) await _recordAuthentication(uid);
+      if (uid != null) {
+        await _recordAuthentication(uid);
+        await _clearLock(uid);
+      }
       _gateAction = AuthGateAction.enterApp;
       notifyListeners();
       return;
@@ -657,7 +695,13 @@ class AuthController extends ChangeNotifier {
     await _authRepository.reauthenticateWithPassword(password);
     _pendingBiometricFallback = null;
     final uid = _currentUser?.uid;
-    if (uid != null) await _recordAuthentication(uid);
+    if (uid != null) {
+      await _recordAuthentication(uid);
+      // The password is a valid way out of a lock too. Biometrics can stop
+      // working -- a finger re-registered, a face that will not read -- and
+      // a lock with only one key would strand the owner.
+      await _clearLock(uid);
+    }
     _gateAction = AuthGateAction.enterApp;
     notifyListeners();
   }

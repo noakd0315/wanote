@@ -26,6 +26,13 @@ class AuthPrefsKeys {
   /// redeem it (see lib/app/home_shell.dart).
   static const pendingReferralCode = 'auth.pending_referral_code';
 
+  /// Whether this device is locked rather than signed out.
+  ///
+  /// Per-uid: locking one account must not lock another that also uses this
+  /// device. Kept locally rather than in Firestore because it describes this
+  /// phone, not the account -- locking here should not lock the tablet.
+  static const lockedPrefix = 'auth.locked.';
+
   /// Last-used email, remembered so returning users don't have to retype it.
   /// Email only -- see SignUpScreen for why the password is never persisted.
   static const rememberedEmail = 'auth.remembered_email';
@@ -39,6 +46,7 @@ class AuthPrefsKeys {
     lastActivePetId,
     '$localSessionIdPrefix$uid',
     '$lastAuthenticatedAtPrefix$uid',
+    '$lockedPrefix$uid',
     pendingReferralCode,
     rememberedEmail,
   ];

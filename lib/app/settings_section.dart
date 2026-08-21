@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -127,6 +128,20 @@ class SettingsSection extends StatelessWidget {
           onTap: () => showLanguagePicker(context),
         ),
         const Divider(),
+        // Above sign-out, and only when there is something to unlock with.
+        //
+        // Locking keeps the session, so getting back in needs no password --
+        // which is what "生体認証でログインしたい" actually asks for. Sign-out
+        // stays below it on purpose: a locked device is still signed in, so
+        // handing the phone over, or using another account, still needs the
+        // real thing (PM, 2026-08-21).
+        if (controller.canLock)
+          ListTile(
+            leading: const Icon(Icons.lock_outline),
+            title: Text(l10n.lockMenuTitle),
+            subtitle: Text(l10n.lockMenuSubtitle),
+            onTap: () => unawaited(controller.lock()),
+          ),
         ListTile(
           leading: const Icon(Icons.logout),
           title: Text(l10n.signOutMenuTitle),

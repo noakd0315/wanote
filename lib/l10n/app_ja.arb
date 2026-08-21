@@ -35,6 +35,8 @@
   "switchPetMenuTitle": "ペットを切り替える・追加する",
   "upgradePlanMenuTitle": "プランをアップグレード",
   "upgradePlanMenuSubtitle": "サブスクリプション・AI相談チケットの購入",
+  "lockMenuTitle": "ロックする",
+  "lockMenuSubtitle": "生体認証で解除できます。パスワードは不要です",
   "signOutMenuTitle": "サインアウト",
   "languageMenuTitle": "言語",
   "languageMenuSubtitleSystem": "端末の設定に従う",

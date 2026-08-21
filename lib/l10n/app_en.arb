@@ -140,6 +140,12 @@
   "@upgradePlanMenuSubtitle": {
     "description": "Subtitle under the upgrade-plan settings menu item."
   },
+  "lockMenuTitle": "Lock",
+  "@lockMenuTitle": {
+    "description": "Settings row that hides the app behind the biometric prompt without signing out. Only shown when biometrics are set up -- a lock with no key would strand the owner."
+  },
+  "lockMenuSubtitle": "Unlock with Face ID / Touch ID / fingerprint. No password needed",
+  "@lockMenuSubtitle": { "description": "Explains that locking keeps the session, unlike signing out." },
   "signOutMenuTitle": "Sign out",
   "@signOutMenuTitle": {
     "description": "Settings menu item that signs the user out."

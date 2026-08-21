@@ -117,6 +117,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get upgradePlanMenuSubtitle => 'サブスクリプション・AI相談チケットの購入';
 
   @override
+  String get lockMenuTitle => 'ロックする';
+
+  @override
+  String get lockMenuSubtitle => '生体認証で解除できます。パスワードは不要です';
+
+  @override
   String get signOutMenuTitle => 'サインアウト';
 
   @override

@@ -54,6 +54,35 @@ void main() {
       },
     );
 
+    // Locking is a deliberate "hide this until I prove it's me", so it wins
+    // over a session that is still perfectly valid (PM, 2026-08-21).
+    test('locked with biometrics available -> requireBiometric', () {
+      expect(
+        resolver.resolve(
+          hasActiveSession: true,
+          biometricEnabled: true,
+          biometricAvailable: true,
+          locked: true,
+        ),
+        AuthGateAction.requireBiometric,
+      );
+    });
+
+    test('locked but the device has no biometrics -> enterApp', () {
+      // A lock with no key would strand the owner. Only accounts with
+      // biometrics set up are ever offered the lock in the first place, so
+      // this is the case where they were removed afterwards.
+      expect(
+        resolver.resolve(
+          hasActiveSession: true,
+          biometricEnabled: true,
+          biometricAvailable: false,
+          locked: true,
+        ),
+        AuthGateAction.enterApp,
+      );
+    });
+
     test('expired session with no biometric to fall back on -> sign in', () {
       expect(
         resolver.resolve(

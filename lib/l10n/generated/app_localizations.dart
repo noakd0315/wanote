@@ -308,6 +308,18 @@ abstract class AppLocalizations {
   /// **'Subscriptions & AI consultation tickets'**
   String get upgradePlanMenuSubtitle;
 
+  /// Settings row that hides the app behind the biometric prompt without signing out. Only shown when biometrics are set up -- a lock with no key would strand the owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get lockMenuTitle;
+
+  /// Explains that locking keeps the session, unlike signing out.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Face ID / Touch ID / fingerprint. No password needed'**
+  String get lockMenuSubtitle;
+
   /// Settings menu item that signs the user out.
   ///
   /// In en, this message translates to:

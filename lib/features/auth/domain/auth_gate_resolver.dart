@@ -35,9 +35,17 @@ class AuthGateResolver {
     required bool biometricEnabled,
     required bool biometricAvailable,
     bool sessionExpired = false,
+    bool locked = false,
   }) {
     if (!hasActiveSession) {
       return AuthGateAction.requireSignIn;
+    }
+    // Locked is a deliberate "hide this until I prove it's me again", so it
+    // outranks the age of the session. Only offered to accounts that have
+    // biometrics set up -- for anyone else there would be nothing to unlock
+    // with, and the lock would be a door with no key (PM, 2026-08-21).
+    if (locked && biometricEnabled && biometricAvailable) {
+      return AuthGateAction.requireBiometric;
     }
     // Only when the session has actually expired. Biometrics are the
     // *replacement* for signing in again, not an extra step on top of it --
