@@ -116,15 +116,6 @@ class AiBackendClient {
         'toiletCountsByDay': stats.toiletCountsByDay
             .map((c) => {'date': _dateOnly(c.date), 'count': c.count})
             .toList(),
-        'visits': stats.visits
-            .map(
-              (v) => {
-                'date': _dateOnly(v.date),
-                if (v.hospitalName != null) 'hospitalName': v.hospitalName,
-                if (v.diagnosis != null) 'diagnosis': v.diagnosis,
-              },
-            )
-            .toList(),
         'healthTagCounts': stats.healthTagCounts
             .map((t) => {'tag': t.tag, 'count': t.count})
             .toList(),

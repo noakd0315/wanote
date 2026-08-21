@@ -63,13 +63,11 @@ void main() {
   ) async {
     await tester.pumpWidget(_host(repository));
 
-    // The free month is running and nothing has been bought: the badge has
-    // no number worth showing.
     repository.emit(
       const AiUsageStatus(
         freeConsultationsRemainingThisMonth: 5,
         ticketsRemaining: 0,
-        hasUnlimitedSubscription: true,
+        hasUnlimitedSubscription: false,
       ),
     );
     await tester.pumpAndSettle();
@@ -81,12 +79,32 @@ void main() {
       const AiUsageStatus(
         freeConsultationsRemainingThisMonth: 5,
         ticketsRemaining: 5,
-        hasUnlimitedSubscription: true,
+        hasUnlimitedSubscription: false,
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.textContaining('チケット 5枚'), findsOneWidget);
+  });
+
+  testWidgets('says nothing at all while the allowance is unlimited', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(repository));
+
+    // Premium, or a free month from a campaign or referral code. Neither
+    // count is being spent, so neither is worth a line (PM, 2026-08-22).
+    repository.emit(
+      const AiUsageStatus(
+        freeConsultationsRemainingThisMonth: 5,
+        ticketsRemaining: 5,
+        hasUnlimitedSubscription: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('チケット'), findsNothing);
+    expect(find.textContaining('残り'), findsNothing);
   });
 
   testWidgets('the count follows a call spent from another screen', (

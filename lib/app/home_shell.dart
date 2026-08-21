@@ -16,7 +16,6 @@ import '../features/billing/ads/ad_manager.dart';
 import '../features/billing/ads/ad_preparer.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/data/campaign_code_repository.dart';
-import '../features/medical/data/visit_repository.dart';
 import '../features/billing/domain/ad_policy.dart';
 import '../features/billing/domain/billing_models.dart';
 import '../features/billing/domain/purchase_event_handler.dart';
@@ -624,9 +623,6 @@ class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         reportGenerator: _reportGenerator,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
-        // Read only so the report has the month's events in it, not just its
-        // numbers (PM, 2026-08-21).
-        visitRepository: FirestoreVisitRepository(),
         healthRecordRepository: _healthRecordRepository,
         onRequestUpgrade: () => _openPaywall(context),
         opened: _aiSectionOpened,

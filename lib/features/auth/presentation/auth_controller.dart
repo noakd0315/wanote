@@ -597,8 +597,8 @@ class AuthController extends ChangeNotifier {
   ///
   /// Only with biometrics set up and usable: a lock nobody can open is worse
   /// than no lock (PM request, 2026-08-21).
-  bool get canLock => (_currentUser?.biometricEnabled ?? false) &&
-      _biometricAvailable;
+  bool get canLock =>
+      (_currentUser?.biometricEnabled ?? false) && _biometricAvailable;
 
   /// Hides the app behind the biometric prompt without ending the session.
   ///

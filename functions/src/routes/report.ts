@@ -26,8 +26,8 @@ export function buildSystemPrompt(language: OutputLanguage): string {
   return `You write a monthly summary of a dog's health records. Follow these rules strictly.
 
 - Base the summary only on the figures and records supplied. Do not speculate about diagnoses or name conditions.
-- Where vet visits or health notes are supplied, tie them to the figures: say what happened that month and whether the numbers moved around it. Repeat a diagnosis only as the owner recorded it, never as your own finding.
-- Do not remark on the absence of anything. A month with no vet visits is an ordinary month, not a fact worth reporting.
+- Where health notes are supplied, tie them to the figures: say what came up that month and whether the numbers moved around it. Repeat what the owner logged as they logged it, never as your own finding.
+- Do not remark on the absence of anything. A month with nothing logged is an ordinary month, not a fact worth reporting.
 - Include the actual numbers, e.g. "weight went up/down by N kg this month" or "toilet visits were N more/fewer than last month".
 - If anything stands out -- a sharp change in weight, a large change in toilet frequency -- mention it as a reason to consider a vet visit.
 - Close with a short line noting that this is guidance, not a medical diagnosis.
@@ -37,14 +37,6 @@ ${outputLanguageInstruction(language)}`;
 export interface WeightSampleInput {
   date: string;
   weightKg: number;
-}
-
-/** One vet visit inside the period. Names and free text are the owner's
- * own words -- passed through as written rather than interpreted here. */
-export interface VisitInput {
-  date: string;
-  hospitalName?: string;
-  diagnosis?: string;
 }
 
 /** How many times each health-record tag was used in the period.
@@ -67,7 +59,6 @@ export interface ReportRequestBody {
   periodEnd: string;
   weightSamples: WeightSampleInput[];
   toiletCountsByDay: ToiletDayCountInput[];
-  visits: VisitInput[];
   healthTagCounts: HealthTagCountInput[];
   /** Language the summary should be written in. Defaults to Japanese. */
   language: OutputLanguage;
@@ -95,7 +86,6 @@ export function parseReportRequestBody(json: unknown): ReportRequestBody {
     toiletCountsByDay: parseToiletCounts(body.toiletCountsByDay),
     // Optional on the wire: an older client that does not send them still
     // gets a report, just the one it used to get.
-    visits: parseVisits(body.visits),
     healthTagCounts: parseHealthTagCounts(body.healthTagCounts),
     language: parseOutputLanguage(body.language),
   };
@@ -124,21 +114,6 @@ function parseToiletCounts(raw: unknown): ToiletDayCountInput[] {
       throw new Error('Invalid toiletCountsByDay entry shape.');
     }
     return { date: e.date, count: e.count };
-  });
-}
-
-function parseVisits(raw: unknown): VisitInput[] {
-  if (raw === undefined || raw === null) return [];
-  if (!Array.isArray(raw)) throw new Error('visits must be an array.');
-  return raw.map((entry) => {
-    if (typeof entry !== 'object' || entry === null) throw new Error('Invalid visits entry.');
-    const e = entry as Record<string, unknown>;
-    if (typeof e.date !== 'string') throw new Error('Invalid visits entry shape.');
-    return {
-      date: e.date,
-      hospitalName: typeof e.hospitalName === 'string' ? e.hospitalName : undefined,
-      diagnosis: typeof e.diagnosis === 'string' ? e.diagnosis : undefined,
-    };
   });
 }
 
@@ -194,21 +169,12 @@ export function buildReportUserPrompt(body: ReportRequestBody): string {
       : 'Weight: no weight records in this period.';
   const toiletLine = `Toilet records: ${stats.toiletTotalCount} in total (${stats.toiletAveragePerDay} per day on average)`;
 
-  // Visits and tags are what turn a page of numbers into a month with events
-  // in it (PM, 2026-08-21: レポートの情報が薄い). Omitted entirely when empty
-  // -- a "no visits" line invites the model to remark on the absence.
-  const visitLines =
-    body.visits.length > 0
-      ? [
-          'Vet visits:',
-          ...body.visits.map((v) => {
-            const parts = [v.date];
-            if (v.hospitalName) parts.push(v.hospitalName);
-            if (v.diagnosis) parts.push(v.diagnosis);
-            return `- ${parts.join(' / ')}`;
-          }),
-        ]
-      : [];
+  // Tags are what turn a page of numbers into a month with something in it
+  // (PM, 2026-08-21: レポートの情報が薄い). Omitted entirely when empty -- a
+  // "nothing logged" line invites the model to remark on the absence.
+  //
+  // Vet visits were carried here too, and were dropped at the PM's request
+  // (2026-08-22).
   const tagLines =
     body.healthTagCounts.length > 0
       ? [
@@ -222,7 +188,6 @@ export function buildReportUserPrompt(body: ReportRequestBody): string {
     `Period: ${body.periodStart} to ${body.periodEnd}`,
     weightLine,
     toiletLine,
-    ...visitLines,
     ...tagLines,
     '',
     'Write the monthly health summary for the owner from the figures above.',

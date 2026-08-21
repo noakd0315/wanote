@@ -27,7 +27,6 @@ describe('parseReportRequestBody', () => {
       language: 'ja',
       // Optional on the wire so an older client keeps working; absent means
       // "nothing to report", not "malformed".
-      visits: [],
       healthTagCounts: [],
     });
   });
@@ -48,28 +47,23 @@ describe('parseReportRequestBody', () => {
     expect(body.toiletCountsByDay).toEqual([]);
   });
 
-  it('carries vet visits and health-tag counts through', () => {
+  it('carries health-tag counts through', () => {
     const body = parseReportRequestBody({
       ...validBody,
-      visits: [{ date: '2026-07-04', hospitalName: 'わんわん動物病院', diagnosis: '狂犬病予防接種' }],
       healthTagCounts: [{ tag: 'appetite_loss', count: 3 }],
     });
-    expect(body.visits).toEqual([
-      { date: '2026-07-04', hospitalName: 'わんわん動物病院', diagnosis: '狂犬病予防接種' },
-    ]);
     expect(body.healthTagCounts).toEqual([{ tag: 'appetite_loss', count: 3 }]);
   });
 
-  it('accepts a visit with only a date', () => {
-    // The hospital name and the diagnosis are optional on the record itself,
-    // so a visit that has neither must still be reportable.
+  it('ignores vet visits, which are no longer carried', () => {
+    // Dropped at the PM's request (2026-08-22). A client built before that
+    // still sends them, and must still get a report.
     const body = parseReportRequestBody({
       ...validBody,
-      visits: [{ date: '2026-07-04' }],
+      visits: [{ date: '2026-07-04', hospitalName: 'わんわん動物病院' }],
     });
-    expect(body.visits).toEqual([
-      { date: '2026-07-04', hospitalName: undefined, diagnosis: undefined },
-    ]);
+    expect(body).not.toHaveProperty('visits');
+    expect(body.petId).toBe('pet-1');
   });
 
   it('throws when petId is missing', () => {

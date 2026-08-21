@@ -148,14 +148,30 @@ class _BiometricGateState extends State<_BiometricGate> {
   /// correct before submitting, instead of only ever seeing dots.
   bool _obscurePassword = true;
 
+  /// Holds the first prompt back. See [_settleBeforeFirstPrompt].
+  Timer? _firstPrompt;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _promptNow());
+    _firstPrompt = Timer(_settleBeforeFirstPrompt, () {
+      if (mounted) _promptNow();
+    });
   }
+
+  /// How long this screen is left alone before the face scan starts.
+  ///
+  /// It used to fire on the first frame, which put the system prompt on
+  /// screen while the route was still animating in -- the owner had not yet
+  /// seen where they were when the phone was already looking at them (PM,
+  /// 2026-08-22: 反応が早すぎる). Long enough for the transition to finish
+  /// and for the screen to be read; short enough that nobody reaches for
+  /// the button first.
+  static const Duration _settleBeforeFirstPrompt = Duration(milliseconds: 700);
 
   @override
   void dispose() {
+    _firstPrompt?.cancel();
     _passwordController.dispose();
     super.dispose();
   }

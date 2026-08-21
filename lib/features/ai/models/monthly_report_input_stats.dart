@@ -49,7 +49,6 @@ class MonthlyReportInputStats extends Equatable {
     required this.periodEnd,
     required this.weightSamples,
     required this.toiletCountsByDay,
-    this.visits = const [],
     this.healthTagCounts = const [],
   });
 
@@ -57,13 +56,6 @@ class MonthlyReportInputStats extends Equatable {
   final DateTime periodEnd;
   final List<WeightSample> weightSamples;
   final List<ToiletDayCount> toiletCountsByDay;
-
-  /// Vet visits inside the period, oldest first.
-  ///
-  /// Numbers alone made the report read as a page of statistics with nothing
-  /// happening in it (PM, 2026-08-21: 情報として薄い). A visit is the event
-  /// the numbers move around.
-  final List<ReportVisit> visits;
 
   /// How many times each health-record tag was used in the period.
   ///
@@ -77,21 +69,8 @@ class MonthlyReportInputStats extends Equatable {
     periodEnd,
     weightSamples,
     toiletCountsByDay,
-    visits,
     healthTagCounts,
   ];
-}
-
-/// One vet visit, reduced to what a summary can use.
-class ReportVisit extends Equatable {
-  const ReportVisit({required this.date, this.hospitalName, this.diagnosis});
-
-  final DateTime date;
-  final String? hospitalName;
-  final String? diagnosis;
-
-  @override
-  List<Object?> get props => [date, hospitalName, diagnosis];
 }
 
 /// How often one health-record tag was used.

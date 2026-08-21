@@ -193,7 +193,10 @@ class HomeScreen extends StatelessWidget {
                                   // "黒のグラデーションがかかっていますが、
                                   // 削除したい").
                                   shadows: const [
-                                    Shadow(color: Colors.black54, blurRadius: 8),
+                                    Shadow(
+                                      color: Colors.black54,
+                                      blurRadius: 8,
+                                    ),
                                   ],
                                 ),
                           ),

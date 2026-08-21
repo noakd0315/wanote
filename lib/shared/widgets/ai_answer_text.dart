@@ -38,11 +38,7 @@ List<InlineSpan> buildAiAnswerSpans(
 /// inside it -- but it should not show `#` either.
 String aiAnswerPlainText(String text) {
   const plain = TextStyle();
-  final spans = buildAiAnswerSpans(
-    text,
-    baseStyle: plain,
-    headingStyle: plain,
-  );
+  final spans = buildAiAnswerSpans(text, baseStyle: plain, headingStyle: plain);
   final buffer = StringBuffer();
   for (final span in spans) {
     if (span is TextSpan) buffer.write(span.text ?? '');
@@ -117,7 +113,10 @@ List<InlineSpan> _inlineSpans(String text, TextStyle style) {
       );
     } else {
       spans.add(
-        TextSpan(text: code, style: style.copyWith(fontFamily: 'monospace')),
+        TextSpan(
+          text: code,
+          style: style.copyWith(fontFamily: 'monospace'),
+        ),
       );
     }
     index = match.end;

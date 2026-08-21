@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../features/medical/data/visit_repository.dart';
 import '../features/daily_record/data/health_record_repository.dart';
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/data/consultation_repository.dart';
@@ -38,7 +37,6 @@ class AiSection extends StatefulWidget {
     required this.reportGenerator,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
-    required this.visitRepository,
     required this.healthRecordRepository,
     required this.onRequestUpgrade,
     this.opened,
@@ -55,8 +53,7 @@ class AiSection extends StatefulWidget {
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
 
-  /// Forwarded to the report tab, which reads them for context only.
-  final VisitRepository visitRepository;
+  /// Forwarded to the report tab, which reads it for context only.
   final HealthRecordRepository healthRecordRepository;
   final VoidCallback onRequestUpgrade;
 
@@ -142,7 +139,6 @@ class _AiSectionState extends State<AiSection>
                   weightRecordRepository: widget.weightRecordRepository,
                   toiletRecordRepository: widget.toiletRecordRepository,
                   onRequestUpgrade: widget.onRequestUpgrade,
-                  visitRepository: widget.visitRepository,
                   healthRecordRepository: widget.healthRecordRepository,
                 ),
               ),
@@ -179,7 +175,6 @@ class _MonthlyReportTab extends StatefulWidget {
     required this.reportGenerator,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
-    required this.visitRepository,
     required this.healthRecordRepository,
     required this.onRequestUpgrade,
     this.opened,
@@ -198,8 +193,7 @@ class _MonthlyReportTab extends StatefulWidget {
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
 
-  /// Read only for the report's context -- see _visitsIn.
-  final VisitRepository visitRepository;
+  /// Read only for the report's context -- see _healthTagCountsIn.
   final HealthRecordRepository healthRecordRepository;
   final VoidCallback onRequestUpgrade;
 
@@ -264,38 +258,8 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
       periodEnd: periodEnd,
       weightSamples: weightSamples,
       toiletCountsByDay: toiletCountsByDay,
-      visits: await _visitsIn(periodStart, periodEnd),
       healthTagCounts: await _healthTagCountsIn(periodStart, periodEnd),
     );
-  }
-
-  /// Vet visits inside the period, oldest first.
-  ///
-  /// Read here rather than inside features/ai: the visit belongs to
-  /// features/medical, and the AI feature depends only on the plain stats
-  /// shape (wanote/.claude/CLAUDE.md). Failing to read them costs the report
-  /// some context, not the report itself.
-  Future<List<ReportVisit>> _visitsIn(DateTime start, DateTime end) async {
-    try {
-      final visits = await widget.visitRepository
-          .watchVisits(widget.uid, widget.petId)
-          .first;
-      return visits
-          .where(
-            (v) => !v.visitedAt.isBefore(start) && !v.visitedAt.isAfter(end),
-          )
-          .map(
-            (v) => ReportVisit(
-              date: v.visitedAt,
-              hospitalName: v.hospitalName,
-              diagnosis: v.diagnosis,
-            ),
-          )
-          .toList()
-        ..sort((a, b) => a.date.compareTo(b.date));
-    } catch (_) {
-      return const [];
-    }
   }
 
   /// How many times each health-record tag was used in the period.

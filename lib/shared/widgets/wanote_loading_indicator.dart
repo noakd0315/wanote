@@ -49,8 +49,9 @@ class WanoteLoadingIndicator extends StatefulWidget {
   static const Duration _default = Duration(milliseconds: 300);
 
   /// The common case: centered in whatever space is available.
-  static Widget centered({double? size, Duration delay = _default}) =>
-      Center(child: WanoteLoadingIndicator(size: size, delay: delay));
+  static Widget centered({double? size, Duration delay = _default}) => Center(
+    child: WanoteLoadingIndicator(size: size, delay: delay),
+  );
 
   @override
   State<WanoteLoadingIndicator> createState() => _WanoteLoadingIndicatorState();
