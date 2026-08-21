@@ -431,6 +431,10 @@ class _HomeShellState extends State<HomeShell>
     final awayFor = DateTime.now().difference(
       _backgroundedAt ?? DateTime.now(),
     );
+    // Left alone long enough that the records should not still be on screen
+    // for whoever picks the phone up next (PM, 2026-08-21). Locking rather
+    // than signing out: the owner gets back in with a fingerprint.
+    unawaited(_authController?.lockIfAwayTooLong(awayFor) ?? Future.value());
     if (awayFor < _awayLongEnoughToReset) return;
     // Not while the owner is in the middle of something.
     //

@@ -137,7 +137,7 @@ void main() {
     );
 
     test(
-      'live session, biometric on and available -> enterApp',
+      'cold start with biometrics on and available -> requireBiometric',
       () async {
         when(() => authRepository.currentUser).thenReturn(_identity);
         when(
@@ -155,9 +155,11 @@ void main() {
         final controller = buildController();
         await controller.initialize();
 
-        // Not requireBiometric: the session is still live, so there is
-        // nothing to re-authenticate. See AuthGateResolver.
-        expect(controller.gateAction, AuthGateAction.enterApp);
+        // initialize() is a fresh process: the app was closed and opened
+        // again, which is exactly when an app with biometrics set up is
+        // expected to ask for them (PM, 2026-08-21). The session being
+        // still live does not change that.
+        expect(controller.gateAction, AuthGateAction.requireBiometric);
       },
     );
   });

@@ -202,11 +202,38 @@ class AuthController extends ChangeNotifier {
   /// Must be called once (e.g. from a top-level FutureBuilder in main.dart)
   /// before the controller is used. Subscribes to the Firebase Auth session
   /// stream and determines the initial gate action.
+  /// True from launch until the first gate decision has been made.
+  ///
+  /// A fresh process means the app was closed and reopened, and an app with
+  /// biometrics set up is expected to ask for them then -- that is what
+  /// every other app of this kind does, and behaving differently reads as a
+  /// fault rather than as a feature (PM, 2026-08-21).
+  bool _isColdStart = true;
+
   Future<void> initialize() async {
     _biometricAvailable = await _biometricService.isAvailable();
     _authSub = _authRepository.authStateChanges().listen(_onAuthChanged);
     await _onAuthChanged(_authRepository.currentUser);
+    _isColdStart = false;
   }
+
+  /// Locks the app after it has been away long enough.
+  ///
+  /// Called by the app shell on resume. A quick minimise -- taking a photo,
+  /// an interstitial, checking a message -- is not "leaving": locking there
+  /// would make the app unusable. Being away for real is.
+  Future<void> lockIfAwayTooLong(Duration awayFor) async {
+    if (awayFor < idleLockAfter) return;
+    await lock();
+  }
+
+  /// How long the app may sit in the background before it locks.
+  ///
+  /// 15 minutes: long enough that a photo, a phone call or a look at
+  /// something else does not lock you out, short enough that a phone left on
+  /// a table does not stay open on someone's medical records (PM decision,
+  /// 2026-08-21).
+  static const Duration idleLockAfter = Duration(minutes: 15);
 
   /// [claimSession] is set only by [_runAuthAction] -- i.e. when this device
   /// is *explicitly* signing in right now, as opposed to the auth stream
@@ -264,7 +291,12 @@ class AuthController extends ChangeNotifier {
       biometricEnabled: user.biometricEnabled,
       biometricAvailable: _biometricAvailable,
       sessionExpired: await _isSessionExpired(identity.uid),
-      locked: await _isLocked(identity.uid),
+      // A cold start counts as locked for anyone who has biometrics set
+      // up, whether or not the lock flag was written: closing the app and
+      // opening it again is exactly when this is expected to be asked.
+      locked:
+          await _isLocked(identity.uid) ||
+          (_isColdStart && user.biometricEnabled && _biometricAvailable),
     );
     _pendingBiometricFallback = null;
     _subscribeToPets(identity.uid);
@@ -577,6 +609,7 @@ class AuthController extends ChangeNotifier {
   Future<void> lock() async {
     final uid = _currentUser?.uid;
     if (uid == null || !canLock) return;
+    if (_gateAction == AuthGateAction.requireBiometric) return;
     final prefs = await _prefsFuture;
     await prefs.setBool('${AuthPrefsKeys.lockedPrefix}$uid', true);
     _gateAction = AuthGateAction.requireBiometric;
