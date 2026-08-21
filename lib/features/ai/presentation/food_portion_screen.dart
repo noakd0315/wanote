@@ -336,162 +336,175 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final result = _result;
     final isAdult = _lifeStage == DogLifeStage.adult;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.foodPortionAppBarTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      // Over the whole screen while the AI is answering, not tucked into the
+      // result box at the bottom (PM request, 2026-08-21). The request takes
+      // several seconds and the indicator sat below the fold, so the screen
+      // looked as though the button had done nothing. Covering also stops a
+      // second press and stops the inputs being edited underneath an answer
+      // that is already being generated from them.
+      body: Stack(
         children: [
-          TextField(
-            controller: _weightController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: l10n.foodPortionWeightLabel),
+          _buildBody(context, l10n, isAdult),
+          if (_adviceState == _AdviceState.loading) const _FullScreenWait(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AppLocalizations l10n, bool isAdult) {
+    final result = _result;
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        TextField(
+          controller: _weightController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(labelText: l10n.foodPortionWeightLabel),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<DogLifeStage>(
+          initialValue: _lifeStage,
+          decoration: InputDecoration(
+            labelText: l10n.foodPortionLifeStageLabel,
+          ),
+          items: [
+            for (final stage in DogLifeStage.values)
+              DropdownMenuItem(
+                value: stage,
+                child: Text(_lifeStageLabel(l10n, stage)),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null) setState(() => _lifeStage = value);
+          },
+        ),
+        if (isAdult) ...[
+          const SizedBox(height: 12),
+          Text(
+            l10n.foodPortionNeuteredStatusLabel(
+              widget.neutered
+                  ? l10n.neuteredStatusDone
+                  : l10n.neuteredStatusNotDone,
+            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<DogLifeStage>(
-            initialValue: _lifeStage,
+          DropdownButtonFormField<BodyCondition>(
+            initialValue: _bodyCondition,
             decoration: InputDecoration(
-              labelText: l10n.foodPortionLifeStageLabel,
+              labelText: l10n.foodPortionBodyConditionLabel,
+              helperText: l10n.foodPortionBodyConditionHelperText,
+              helperMaxLines: 2,
             ),
             items: [
-              for (final stage in DogLifeStage.values)
+              for (final condition in BodyCondition.values)
                 DropdownMenuItem(
-                  value: stage,
-                  child: Text(_lifeStageLabel(l10n, stage)),
+                  value: condition,
+                  child: Text(_bodyConditionLabel(l10n, condition)),
                 ),
             ],
             onChanged: (value) {
-              if (value != null) setState(() => _lifeStage = value);
+              if (value != null) setState(() => _bodyCondition = value);
             },
           ),
-          if (isAdult) ...[
-            const SizedBox(height: 12),
-            Text(
-              l10n.foodPortionNeuteredStatusLabel(
-                widget.neutered
-                    ? l10n.neuteredStatusDone
-                    : l10n.neuteredStatusNotDone,
-              ),
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<BodyCondition>(
-              initialValue: _bodyCondition,
-              decoration: InputDecoration(
-                labelText: l10n.foodPortionBodyConditionLabel,
-                helperText: l10n.foodPortionBodyConditionHelperText,
-                helperMaxLines: 2,
-              ),
-              items: [
-                for (final condition in BodyCondition.values)
-                  DropdownMenuItem(
-                    value: condition,
-                    child: Text(_bodyConditionLabel(l10n, condition)),
-                  ),
-              ],
-              onChanged: (value) {
-                if (value != null) setState(() => _bodyCondition = value);
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<ActivityLevel>(
-              initialValue: _activityLevel,
-              decoration: InputDecoration(
-                labelText: l10n.foodPortionActivityLevelLabel,
-              ),
-              items: [
-                for (final level in ActivityLevel.values)
-                  DropdownMenuItem(
-                    value: level,
-                    child: Text(_activityLevelLabel(l10n, level)),
-                  ),
-              ],
-              onChanged: (value) {
-                if (value != null) setState(() => _activityLevel = value);
-              },
-            ),
-          ] else ...[
-            const SizedBox(height: 12),
-            Text(
-              l10n.foodPortionPuppyNoteText,
-              // Red like the other cautions (PM request) -- grey made these
-              // read as decoration rather than something to act on.
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontSize: 12,
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
+          DropdownButtonFormField<ActivityLevel>(
+            initialValue: _activityLevel,
+            decoration: InputDecoration(
+              labelText: l10n.foodPortionActivityLevelLabel,
+            ),
+            items: [
+              for (final level in ActivityLevel.values)
+                DropdownMenuItem(
+                  value: level,
+                  child: Text(_activityLevelLabel(l10n, level)),
+                ),
+            ],
+            onChanged: (value) {
+              if (value != null) setState(() => _activityLevel = value);
+            },
+          ),
+        ] else ...[
+          const SizedBox(height: 12),
+          Text(
+            l10n.foodPortionPuppyNoteText,
+            // Red like the other cautions (PM request) -- grey made these
+            // read as decoration rather than something to act on.
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontSize: 12,
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        TextField(
+          controller: _foodDensityController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: l10n.foodPortionCalorieDensityLabel,
+            helperText: l10n.foodPortionCalorieDensityHelperText,
+          ),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _calculate,
+          child: Text(l10n.foodPortionCalculateButton),
+        ),
+        if (result != null) ...[
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 8),
+          // Below the result, because it is not part of the sum.
+          //
+          // Sitting above the calculate button it read as another figure
+          // the calculation needed, and people filled it in expecting it
+          // to change the answer -- it does not. It only gives the AI
+          // something to compare its suggestion against, which is a
+          // question that does not arise until there is a suggestion (PM
+          // request, 2026-08-17).
           TextField(
-            controller: _foodDensityController,
+            controller: _currentAmountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: l10n.foodPortionCalorieDensityLabel,
-              helperText: l10n.foodPortionCalorieDensityHelperText,
+              labelText: l10n.foodPortionCurrentAmountLabel,
+              helperText: l10n.foodPortionCurrentAmountHelperText,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _ResultRow(
+            label: l10n.foodPortionRerLabel,
+            value: l10n.foodPortionKcalPerDayValue(
+              result.restingEnergyKcal.round(),
+            ),
+          ),
+          _ResultRow(
+            label: l10n.foodPortionMerLabel,
+            value: l10n.foodPortionKcalPerDayValue(
+              result.maintenanceEnergyKcal.round(),
+            ),
+          ),
+          _ResultRow(
+            label: l10n.foodPortionDailyFoodLabel,
+            value: l10n.foodPortionGramsPerDayValue(
+              result.dailyFoodGrams.round(),
+            ),
+            emphasize: true,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.foodPortionResultDisclaimerText,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+              fontSize: 12,
             ),
           ),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: _calculate,
-            child: Text(l10n.foodPortionCalculateButton),
-          ),
-          if (result != null) ...[
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 8),
-            // Below the result, because it is not part of the sum.
-            //
-            // Sitting above the calculate button it read as another figure
-            // the calculation needed, and people filled it in expecting it
-            // to change the answer -- it does not. It only gives the AI
-            // something to compare its suggestion against, which is a
-            // question that does not arise until there is a suggestion (PM
-            // request, 2026-08-17).
-            TextField(
-              controller: _currentAmountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: l10n.foodPortionCurrentAmountLabel,
-                helperText: l10n.foodPortionCurrentAmountHelperText,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _ResultRow(
-              label: l10n.foodPortionRerLabel,
-              value: l10n.foodPortionKcalPerDayValue(
-                result.restingEnergyKcal.round(),
-              ),
-            ),
-            _ResultRow(
-              label: l10n.foodPortionMerLabel,
-              value: l10n.foodPortionKcalPerDayValue(
-                result.maintenanceEnergyKcal.round(),
-              ),
-            ),
-            _ResultRow(
-              label: l10n.foodPortionDailyFoodLabel,
-              value: l10n.foodPortionGramsPerDayValue(
-                result.dailyFoodGrams.round(),
-              ),
-              emphasize: true,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.foodPortionResultDisclaimerText,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildAdviceSection(l10n),
-          ],
+          _buildAdviceSection(l10n),
         ],
-      ),
+      ],
     );
   }
 
@@ -520,7 +533,8 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
           ],
         );
       case _AdviceState.loading:
-        return WanoteLoadingIndicator.centered();
+        // Nothing here: the wait is shown over the whole screen instead.
+        return const SizedBox.shrink();
       case _AdviceState.needsUpgrade:
         return UpgradePromptCard(
           message: l10n.foodPortionAdviceUsageLimitMessage,
@@ -585,6 +599,28 @@ class _ResultRow extends StatelessWidget {
                 : const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A wait that covers the screen.
+///
+/// Deliberately opaque enough to read as "busy" rather than as a dimmed
+/// version of the form: the inputs behind it are what the answer is being
+/// generated from, and editing them mid-request would leave the reply
+/// describing numbers that are no longer on screen.
+class _FullScreenWait extends StatelessWidget {
+  const _FullScreenWait();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: AbsorbPointer(
+        child: ColoredBox(
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
+          child: WanoteLoadingIndicator.centered(),
+        ),
       ),
     );
   }
