@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../features/medical/data/visit_repository.dart';
+import '../features/daily_record/data/health_record_repository.dart';
 import '../features/ai/data/ai_backend_client.dart';
 import '../features/ai/data/consultation_repository.dart';
 import '../features/ai/data/report_repository.dart';
@@ -36,6 +38,8 @@ class AiSection extends StatefulWidget {
     required this.reportGenerator,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
+    required this.visitRepository,
+    required this.healthRecordRepository,
     required this.onRequestUpgrade,
     this.opened,
   });
@@ -50,6 +54,10 @@ class AiSection extends StatefulWidget {
   final MonthlyReportGenerator reportGenerator;
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
+
+  /// Forwarded to the report tab, which reads them for context only.
+  final VisitRepository visitRepository;
+  final HealthRecordRepository healthRecordRepository;
   final VoidCallback onRequestUpgrade;
 
   /// Ticks each time this section is opened. Forwarded to the consultation
@@ -134,6 +142,8 @@ class _AiSectionState extends State<AiSection>
                   weightRecordRepository: widget.weightRecordRepository,
                   toiletRecordRepository: widget.toiletRecordRepository,
                   onRequestUpgrade: widget.onRequestUpgrade,
+                  visitRepository: widget.visitRepository,
+                  healthRecordRepository: widget.healthRecordRepository,
                 ),
               ),
             ],
@@ -169,6 +179,8 @@ class _MonthlyReportTab extends StatefulWidget {
     required this.reportGenerator,
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
+    required this.visitRepository,
+    required this.healthRecordRepository,
     required this.onRequestUpgrade,
     this.opened,
   });
@@ -185,6 +197,10 @@ class _MonthlyReportTab extends StatefulWidget {
   final MonthlyReportGenerator reportGenerator;
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
+
+  /// Read only for the report's context -- see _visitsIn.
+  final VisitRepository visitRepository;
+  final HealthRecordRepository healthRecordRepository;
   final VoidCallback onRequestUpgrade;
 
   @override
@@ -248,7 +264,72 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
       periodEnd: periodEnd,
       weightSamples: weightSamples,
       toiletCountsByDay: toiletCountsByDay,
+      visits: await _visitsIn(periodStart, periodEnd),
+      healthTagCounts: await _healthTagCountsIn(periodStart, periodEnd),
     );
+  }
+
+  /// Vet visits inside the period, oldest first.
+  ///
+  /// Read here rather than inside features/ai: the visit belongs to
+  /// features/medical, and the AI feature depends only on the plain stats
+  /// shape (wanote/.claude/CLAUDE.md). Failing to read them costs the report
+  /// some context, not the report itself.
+  Future<List<ReportVisit>> _visitsIn(DateTime start, DateTime end) async {
+    try {
+      final visits = await widget.visitRepository
+          .watchVisits(widget.uid, widget.petId)
+          .first;
+      return visits
+          .where(
+            (v) => !v.visitedAt.isBefore(start) && !v.visitedAt.isAfter(end),
+          )
+          .map(
+            (v) => ReportVisit(
+              date: v.visitedAt,
+              hospitalName: v.hospitalName,
+              diagnosis: v.diagnosis,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// How many times each health-record tag was used in the period.
+  ///
+  /// Counted, not listed. What matters to a summary is that sickness came up
+  /// four times, not the four individual entries -- and the entries carry
+  /// free-text comments and photos that have no place in a prompt.
+  Future<List<HealthTagCount>> _healthTagCountsIn(
+    DateTime start,
+    DateTime end,
+  ) async {
+    try {
+      final records = await widget.healthRecordRepository
+          .watchTimeline(widget.uid, widget.petId)
+          .first;
+      final counts = <String, int>{};
+      for (final record in records) {
+        if (record.recordedAt.isBefore(start) ||
+            record.recordedAt.isAfter(end)) {
+          continue;
+        }
+        for (final tag in record.tags) {
+          counts[tag.wireName] = (counts[tag.wireName] ?? 0) + 1;
+        }
+      }
+      final entries = counts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      return [
+        for (final entry in entries)
+          HealthTagCount(tag: entry.key, count: entry.value),
+      ];
+    } catch (_) {
+      return const [];
+    }
   }
 
   @override

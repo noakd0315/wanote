@@ -16,6 +16,7 @@ import '../features/billing/ads/ad_manager.dart';
 import '../features/billing/ads/ad_preparer.dart';
 import '../features/billing/data/billing_repository.dart';
 import '../features/billing/data/campaign_code_repository.dart';
+import '../features/medical/data/visit_repository.dart';
 import '../features/billing/domain/ad_policy.dart';
 import '../features/billing/domain/billing_models.dart';
 import '../features/billing/domain/purchase_event_handler.dart';
@@ -64,8 +65,7 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell>
-    with WidgetsBindingObserver {
+class _HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   /// Owns navigation *within* the shell (e.g. Home's 体重/トイレ/証明書/AI相談
@@ -250,7 +250,8 @@ class _HomeShellState extends State<HomeShell>
         '{dosage}',
       ),
       preventionTitle: l10n.reminderPreventionTitle('{productName}'),
-      preventionVaccineBody: l10n.reminderPreventionVaccineBody(0)
+      preventionVaccineBody: l10n
+          .reminderPreventionVaccineBody(0)
           .replaceFirst('0', '{days}'),
       preventionMedicationBody: l10n.reminderPreventionMedicationBody,
       preventionDueTodayBody: l10n.reminderPreventionDueTodayBody,
@@ -536,6 +537,10 @@ class _HomeShellState extends State<HomeShell>
         reportGenerator: _reportGenerator,
         weightRecordRepository: _weightRecordRepository,
         toiletRecordRepository: _toiletRecordRepository,
+        // Read only so the report has the month's events in it, not just its
+        // numbers (PM, 2026-08-21).
+        visitRepository: FirestoreVisitRepository(),
+        healthRecordRepository: _healthRecordRepository,
         onRequestUpgrade: () => _openPaywall(context),
         opened: _aiSectionOpened,
       ),

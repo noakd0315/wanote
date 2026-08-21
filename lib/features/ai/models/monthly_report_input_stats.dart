@@ -49,6 +49,8 @@ class MonthlyReportInputStats extends Equatable {
     required this.periodEnd,
     required this.weightSamples,
     required this.toiletCountsByDay,
+    this.visits = const [],
+    this.healthTagCounts = const [],
   });
 
   final DateTime periodStart;
@@ -56,11 +58,52 @@ class MonthlyReportInputStats extends Equatable {
   final List<WeightSample> weightSamples;
   final List<ToiletDayCount> toiletCountsByDay;
 
+  /// Vet visits inside the period, oldest first.
+  ///
+  /// Numbers alone made the report read as a page of statistics with nothing
+  /// happening in it (PM, 2026-08-21: 情報として薄い). A visit is the event
+  /// the numbers move around.
+  final List<ReportVisit> visits;
+
+  /// How many times each health-record tag was used in the period.
+  ///
+  /// Counts, not the records themselves: the summary is about what kept
+  /// recurring, and every individual entry would crowd out the figures.
+  final List<HealthTagCount> healthTagCounts;
+
   @override
   List<Object?> get props => [
     periodStart,
     periodEnd,
     weightSamples,
     toiletCountsByDay,
+    visits,
+    healthTagCounts,
   ];
+}
+
+/// One vet visit, reduced to what a summary can use.
+class ReportVisit extends Equatable {
+  const ReportVisit({required this.date, this.hospitalName, this.diagnosis});
+
+  final DateTime date;
+  final String? hospitalName;
+  final String? diagnosis;
+
+  @override
+  List<Object?> get props => [date, hospitalName, diagnosis];
+}
+
+/// How often one health-record tag was used.
+class HealthTagCount extends Equatable {
+  const HealthTagCount({required this.tag, required this.count});
+
+  /// The tag's wire name, not its label. The prompt is English and the
+  /// answer's language is pinned separately -- sending the display text
+  /// would put the reader's language inside the prompt.
+  final String tag;
+  final int count;
+
+  @override
+  List<Object?> get props => [tag, count];
 }

@@ -22,7 +22,14 @@ const validBody = {
 describe('parseReportRequestBody', () => {
   it('parses a fully valid body', () => {
     // language defaults to Japanese when the client doesn't send one.
-    expect(parseReportRequestBody(validBody)).toEqual({ ...validBody, language: 'ja' });
+    expect(parseReportRequestBody(validBody)).toEqual({
+      ...validBody,
+      language: 'ja',
+      // Optional on the wire so an older client keeps working; absent means
+      // "nothing to report", not "malformed".
+      visits: [],
+      healthTagCounts: [],
+    });
   });
 
   it('honours an explicit English language, and falls back to ja otherwise', () => {
@@ -39,6 +46,30 @@ describe('parseReportRequestBody', () => {
     });
     expect(body.weightSamples).toEqual([]);
     expect(body.toiletCountsByDay).toEqual([]);
+  });
+
+  it('carries vet visits and health-tag counts through', () => {
+    const body = parseReportRequestBody({
+      ...validBody,
+      visits: [{ date: '2026-07-04', hospitalName: 'わんわん動物病院', diagnosis: '狂犬病予防接種' }],
+      healthTagCounts: [{ tag: 'appetite_loss', count: 3 }],
+    });
+    expect(body.visits).toEqual([
+      { date: '2026-07-04', hospitalName: 'わんわん動物病院', diagnosis: '狂犬病予防接種' },
+    ]);
+    expect(body.healthTagCounts).toEqual([{ tag: 'appetite_loss', count: 3 }]);
+  });
+
+  it('accepts a visit with only a date', () => {
+    // The hospital name and the diagnosis are optional on the record itself,
+    // so a visit that has neither must still be reportable.
+    const body = parseReportRequestBody({
+      ...validBody,
+      visits: [{ date: '2026-07-04' }],
+    });
+    expect(body.visits).toEqual([
+      { date: '2026-07-04', hospitalName: undefined, diagnosis: undefined },
+    ]);
   });
 
   it('throws when petId is missing', () => {
