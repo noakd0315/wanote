@@ -1,5 +1,9 @@
 # 9/1 配信に向けた段取り（Instagram 告知 + Google フォーム）
 
+> 📦 **完了済みの記録です。**（2026-08-22 に `docs/archive/` へ移動）
+> テスター募集の初版。**../TESTER_RECRUITMENT.md に作り直された**ので、そちらが正
+> 現役の文書は [../INDEX.md](../INDEX.md)。
+
 作成: 2026-08-18
 関連: `TESTER_RECRUITMENT.md`（集める情報の根拠）、`CLOSED_TEST_GUIDE.md`
 

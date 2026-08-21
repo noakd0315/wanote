@@ -240,7 +240,7 @@
 
 **先に Firebase コンソールへテストデータを登録してください。**
 貼り付け用のデータと確認項目は
-[ANNOUNCEMENT_TEST_DATA.md](ANNOUNCEMENT_TEST_DATA.md) にあります。
+[archive/ANNOUNCEMENT_TEST_DATA.md](archive/ANNOUNCEMENT_TEST_DATA.md) にあります。
 
 - [ ] ホームのバナーと、設定→お知らせの一覧に出る
 - [ ] 🔴 **英語表示に切り替えると英語のお知らせになる**

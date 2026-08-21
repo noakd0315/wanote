@@ -1,5 +1,9 @@
 # 設定手順：Anthropic → Firebase の鍵 → Cloudflare
 
+> 📦 **完了済みの記録です。**（2026-08-22 に `docs/archive/` へ移動）
+> Anthropic / Firebase 鍵 / Cloudflare の設定手順。**完了**（同上）
+> 現役の文書は [../INDEX.md](../INDEX.md)。
+
 作成: 2026-08-14
 
 **合計 50〜60分。** 3つに分かれているので、**細切れの時間でも進められます。**

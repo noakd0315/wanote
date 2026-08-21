@@ -1,110 +1,106 @@
 # wanote ドキュメント一覧
 
-最終更新: 2026-08-16
+最終更新: 2026-08-22
 
-**迷ったらここから。** 目的別に並べてあります。
+**迷ったらここから。** 文書は3つに分けてあります。
 
----
-
-## 🔵 いま読むもの
-
-| ファイル | 何が書いてあるか |
-|---|---|
-| **[NEXT_SESSION.md](NEXT_SESSION.md)** | **再開時はまずこれ**。終わったこと・次にやること |
-| **[STATUS.md](STATUS.md)** | **完了／未了の一覧。まずこれ** |
-| **[SESSION_HANDOVER.md](SESSION_HANDOVER.md)** | 作業の引き継ぎ。日付順の全経緯 |
-| **[PLAN_implementation_first.md](PLAN_implementation_first.md)** | **着手順はこれが正**。申請より実装を優先する方針（PM指示） |
-| **[ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md)** | **次にやること**。実機テストの手順と確認項目 |
-| **[VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md)** | **いま確認するもの**。第3回・8/20までの通し確認（削除まで含む） |
-| **[RELEASE_SETUP_STEPS.md](RELEASE_SETUP_STEPS.md)** | **PMの作業手順**。署名鍵→課金→広告。順番に意味があります |
-| **[ANNOUNCEMENT_TEST_DATA.md](ANNOUNCEMENT_TEST_DATA.md)** | お知らせの貼り付け用テストデータ（コンソール作業） |
-| **[BACKLOG.md](BACKLOG.md)** | **後回しにしているものの一覧**。判断済み・着手待ち・意図的な見送りを理由つきで |
-
----
-
-## PM が作業するとき
-
-| ファイル | 用途 | 状況 |
+| | どういうものか | 場所 |
 |---|---|---|
-| [CLOUD_SETUP_CHECKLIST.md](CLOUD_SETUP_CHECKLIST.md) | クラウド各社の登録一覧 | AdMob のみ残 |
-| [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) | Firebase の詳細手順 | ✅ 完了 |
-| [SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md](SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md) | Anthropic → Cloudflare の詳細手順 | ✅ 完了 |
-| [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md) | iOSビルド用CIの設定 | ✅ `verify` 稼働中／iOS は Apple 承認待ち |
-| [CLOSED_TEST_GUIDE.md](CLOSED_TEST_GUIDE.md) | 申請とクローズドテストの流れ（Android / iOS） | 未着手 |
+| 🔵 **これから対応するもの** | 未着手・進行中の作業。**ここだけ見れば残りが分かる** | このフォルダ |
+| 📗 **手順書・参照資料** | 作業のたびに開くもの。終わりのある作業ではない | このフォルダ |
+| 📦 **完了済みの記録** | 済んだ作業の経緯。読まなくても進められる | [`archive/`](archive/) |
 
 ---
 
-## ストア提出物
+# 🔵 これから対応するもの
 
-| ファイル | 用途 | 状況 |
+**まずこの3つ。他は必要になったときで足ります。**
+
+| 文書 | 中身 | 見るとき |
 |---|---|---|
-| [PRIVACY_POLICY_DRAFT.md](PRIVACY_POLICY_DRAFT.md) | ポリシー本文と申し送り | 事業者名記入済み |
-| `wanote/site/privacy-ja.html` | **公開用ページ（日本語）** | ✅ 作成済み・未公開 |
-| `wanote/site/privacy-en.html` | **公開用ページ（英語）** | ✅ 作成済み・未公開 |
-| [STORE_LISTING_DRAFT.md](STORE_LISTING_DRAFT.md) | ストア掲載文（日英） | ✅ 草案 |
-| [DATA_SAFETY_DECLARATION.md](DATA_SAFETY_DECLARATION.md) | データセーフティ / App のプライバシー申告 | ✅ 回答集 |
+| [SESSION_HANDOVER.md](SESSION_HANDOVER.md) | **再開したら最初に読む。** 今どこにいるか、次に何をするか | 毎回 |
+| [REMAINING_WORK.md](REMAINING_WORK.md) | 公開までに必要な残作業の一覧 | 週の頭、申請前 |
+| [BACKLOG.md](BACKLOG.md) | 後回しにした判断と、公開前に確認が要る事項 | 「あれどうなった？」のとき |
 
-> 🔴 **ポリシーは未公開です。** Play も App Store も**公開URLが必須**なので、
-> Cloudflare Pages への配置が申請の前提になります。
+その他:
 
----
-
-## 設計・計画
-
-| ファイル | 内容 | 状況 |
+| 文書 | 中身 | 状態 |
 |---|---|---|
-| [dog_health_app_spec.md](dog_health_app_spec.md) | **元の仕様書** | — |
-| [PLAN_ads.md](PLAN_ads.md) | 広告の表示タイミング | ✅ 実装済み |
-| [PLAN_referral_reward.md](PLAN_referral_reward.md) | 紹介特典・保留付与 | ✅ 実装済み |
-| [PLAN_push_reminders.md](PLAN_push_reminders.md) | リマインダーのプッシュ化 | ⏸ **PM判断で保留** |
-| [CLOUD_PHASE_TASKS.md](CLOUD_PHASE_TASKS.md) | クラウド/実機でしかできない作業の一覧 | 進行中 |
+| [TESTER_RECRUITMENT.md](TESTER_RECRUITMENT.md) | テスター募集（Instagram + Google フォーム） | クローズドテストを業者に依頼する方針のため、**使うかは未定** |
+| [DATA_SAFETY_DECLARATION.md](DATA_SAFETY_DECLARATION.md) | データセーフティ申告（Play）/ App のプライバシー | **申告はこれから。** 申告内容は確定済み |
+| [PLAN_push_reminders.md](PLAN_push_reminders.md) | リマインダーをプッシュ通知にする検討 | **未着手。** 現在はローカル通知で動作中 |
+| [VERIFICATION_CHECKLIST.md](VERIFICATION_CHECKLIST.md) | 実機での通し確認リスト（第3回） | 公開前の総ざらいに再利用できる |
 
 ---
 
-## 現在の状態（2026-08-14 時点）
+# 📗 手順書・参照資料
 
-### 動くもの
+## ストア・課金の設定
 
-| | |
+| 文書 | 中身 |
 |---|---|
-| Firebase（認証・DB・画像） | ✅ 本番プロジェクト `wanote-7dca0` |
-| セキュリティルール | ✅ **本番で実データ確認済み** |
-| バックエンド（Cloudflare Worker） | ✅ デプロイ済み |
-| AI（相談・レポート・OCR） | ✅ **実キーで応答確認済み** |
-| リマインダー | ✅ 実装済み（**実機未検証**） |
-| 広告 | ✅ 実装済み（テストID・**実機未検証**） |
-| お知らせ | ✅ 実装済み（**実機未検証**） |
-| アカウント削除 | ✅ 実装済み（**実機未検証**） |
-| Android リリースビルド | ✅ APK生成確認済み |
+| [REVENUECAT_SETUP.md](REVENUECAT_SETUP.md) | RevenueCat の設定手順。**両ストアの商品登録から通しで書いてある**。困ったときの見分け方も末尾に |
+| [RELEASE_SETUP_STEPS.md](RELEASE_SETUP_STEPS.md) | 出荷準備（署名 → 課金 → 広告）の手順 |
+| [PRICING.md](PRICING.md) | **課金価格はこれが正。** 手順書の記入例と混同しないこと |
+| [CLOSED_TEST_GUIDE.md](CLOSED_TEST_GUIDE.md) | クローズドテストの進め方（Play / TestFlight） |
+| [ADS_AND_BILLING_IN_TEST.md](ADS_AND_BILLING_IN_TEST.md) | 広告と課金を、テスト段階でどこまで有効にするか |
 
-### 未了
+## ビルド・動作確認
 
-| | ブロッカー |
+| 文書 | 中身 |
 |---|---|
-| **Android 実機テスト** | **なし。いつでも可能** |
-| 本番の広告ID | AdMob 未登録 |
-| 課金 | RevenueCat（ストア申請待ち） |
-| iOS ビルド | 🔴 **Apple Developer Program のみ**（他は完了） |
-| Google / Apple サインイン | 未設定 |
-| ポリシーの公開 | Cloudflare Pages への配置 |
+| [ANDROID_DEVICE_TEST_GUIDE.md](ANDROID_DEVICE_TEST_GUIDE.md) | Android 実機へ入れて確認する手順 |
+| [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md) | iOS ビルドと TestFlight 配信（Mac 不要）。**iOS は手動起動のみ** |
+| [local_dev.md](local_dev.md) | ローカル開発環境の起動方法 |
 
-### テスト
+## 掲載・法務
 
-| | |
+| 文書 | 中身 |
 |---|---|
-| Flutter | 321件 |
-| Worker | 119件 |
-| セキュリティルール | 77件 |
-| `flutter analyze` | 0件 |
+| [STORE_LISTING_DRAFT.md](STORE_LISTING_DRAFT.md) | ストア掲載文の草案（そのまま使える形） |
+| [PRIVACY_POLICY_DRAFT.md](PRIVACY_POLICY_DRAFT.md) | プライバシーポリシー草案。公開版は `site/privacy-ja.html` |
+
+## 仕様
+
+| 文書 | 中身 |
+|---|---|
+| [dog_health_app_spec.md](dog_health_app_spec.md) | 機能仕様書（v0.2）。番号（6.4、8.2 など）はコード中のコメントから参照されている |
 
 ---
 
-## 🔴 忘れると詰むもの
+# 📦 完了済みの記録 → [`archive/`](archive/)
 
-| | なぜ |
+読まなくても作業は進みます。**「これは終わったのか？」を確かめたいときだけ**開いてください。
+各ファイルの冒頭に、何が終わったのかを1行で書いてあります。
+
+| 文書 | 済んだこと |
 |---|---|
-| **`api.wanote.jp` の設定** | バックエンドURLは**ビルド時に埋め込まれ、出荷後は変更できない** |
-| **アップロード鍵のバックアップ** | 失うと**二度とアプリを更新できない** |
-| **Play の 12人×14日** | **短縮不可**。9月上旬には開始したい |
-| **Sign in with Apple** | 無いと **iOS はリジェクトされる** |
-| **ポリシーと実装の一致** | 公開直前に両方向で突き合わせる（`PRIVACY_POLICY_DRAFT.md` A2） |
+| [archive/STATUS.md](archive/STATUS.md) | 2026-08-14 時点の作業状況スナップショット |
+| [archive/NEXT_SESSION.md](archive/NEXT_SESSION.md) | 2026-08-16 時点の次回作業メモ |
+| [archive/PLAN_ads.md](archive/PLAN_ads.md) | 広告の実装（本文の「未着手」は当時のまま） |
+| [archive/PLAN_referral_reward.md](archive/PLAN_referral_reward.md) | 紹介者特典・保留付与・セッション期限の実装 |
+| [archive/PLAN_fixes_round2.md](archive/PLAN_fixes_round2.md) | 実機テスト第1回の指摘対応 |
+| [archive/PLAN_implementation_first.md](archive/PLAN_implementation_first.md) | 「実装を先に」への方針転換（実装は完了） |
+| [archive/PRIVACY_POLICY_AUDIT_20260818.md](archive/PRIVACY_POLICY_AUDIT_20260818.md) | ポリシーと実装の照合（指摘は反映済み） |
+| [archive/VERIFICATION_CHECKLIST_R4.md](archive/VERIFICATION_CHECKLIST_R4.md) | 第4回の差分確認 |
+| [archive/VERIFICATION_CHECKLIST_R5.md](archive/VERIFICATION_CHECKLIST_R5.md) | 第5回の差分確認 |
+| [archive/ANNOUNCEMENT_TEST_DATA.md](archive/ANNOUNCEMENT_TEST_DATA.md) | お知らせ機能の実機確認 |
+| [archive/CLOUD_ACCOUNT_SETUP.md](archive/CLOUD_ACCOUNT_SETUP.md) | クラウド各社のアカウント発行 |
+| [archive/CLOUD_SETUP_CHECKLIST.md](archive/CLOUD_SETUP_CHECKLIST.md) | 実環境の整備 |
+| [archive/CLOUD_PHASE_TASKS.md](archive/CLOUD_PHASE_TASKS.md) | クラウド設定フェーズでしかできない作業 |
+| [archive/FIREBASE_SETUP_GUIDE.md](archive/FIREBASE_SETUP_GUIDE.md) | Firebase の構築（再構築時のみ参照） |
+| [archive/SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md](archive/SETUP_STEPS_ANTHROPIC_CLOUDFLARE.md) | Anthropic / Cloudflare の設定（同上） |
+| [archive/RECRUITMENT_9_1_PLAN.md](archive/RECRUITMENT_9_1_PLAN.md) | テスター募集の初版（TESTER_RECRUITMENT.md に作り直し） |
+
+---
+
+# この整理について（2026-08-22）
+
+**`C:\Dev\docs` は廃止しました。** 同じ名前の文書が2箇所にあり、どちらが正か
+分からない状態でした。中身を比べたところ、**SESSION_HANDOVER.md 以外はすべて
+このフォルダ側が新しい**（または同一）だったので、新しかった
+SESSION_HANDOVER.md だけをここへ移し、旧フォルダは
+`C:\Dev\docs_superseded_20260822` へ退避しました（消していません）。
+
+**以降、文書はこのフォルダ（`wanote/docs/`）だけです。** Git で管理されるので、
+いつ何が変わったかも追えます。
