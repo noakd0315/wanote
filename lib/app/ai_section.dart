@@ -124,6 +124,7 @@ class _AiSectionState extends State<AiSection>
               ),
               KeepAliveTab(
                 child: _MonthlyReportTab(
+                  opened: widget.opened,
                   uid: widget.uid,
                   petId: widget.petId,
                   petName: widget.petName,
@@ -169,6 +170,7 @@ class _MonthlyReportTab extends StatefulWidget {
     required this.weightRecordRepository,
     required this.toiletRecordRepository,
     required this.onRequestUpgrade,
+    this.opened,
   });
 
   final String uid;
@@ -176,6 +178,10 @@ class _MonthlyReportTab extends StatefulWidget {
   final String petName;
   final AiUsageRepository usageRepository;
   final ReportRepository reportRepository;
+
+  /// Ticks when the AI section is opened. Forwarded to ReportScreen so the
+  /// generate button comes back.
+  final ValueNotifier<int>? opened;
   final MonthlyReportGenerator reportGenerator;
   final WeightRecordRepository weightRecordRepository;
   final ToiletRecordRepository toiletRecordRepository;
@@ -265,6 +271,7 @@ class _MonthlyReportTabState extends State<_MonthlyReportTab> {
           reportGenerator: widget.reportGenerator,
           reportRepository: widget.reportRepository,
           onRequestUpgrade: widget.onRequestUpgrade,
+          opened: widget.opened,
         );
       },
     );

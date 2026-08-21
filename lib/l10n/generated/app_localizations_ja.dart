@@ -295,6 +295,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get biometricGateAppBarTitle => 'wanoteのロックを解除';
 
   @override
+  String get biometricGateUseAnotherAccountButton => '別のアカウントでサインイン';
+
+  @override
   String get biometricGateUnlockButton => 'ロック解除';
 
   @override

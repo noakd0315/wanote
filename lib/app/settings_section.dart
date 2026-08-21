@@ -67,7 +67,8 @@ class SettingsSection extends StatelessWidget {
                 ? l10n.biometricSettingSubtitleOn
                 : l10n.biometricSettingSubtitleOff,
           ),
-          value: (user?.biometricEnabled ?? false) &&
+          value:
+              (user?.biometricEnabled ?? false) &&
               controller.biometricAvailable,
           // Disabled rather than hidden when the device has no biometrics:
           // hiding it would read as "this app cannot do that", when the
@@ -80,9 +81,7 @@ class SettingsSection extends StatelessWidget {
                   try {
                     await controller.setBiometricEnabled(enabled);
                   } catch (_) {
-                    messenger.showSnackBar(
-                      SnackBar(content: Text(failed)),
-                    );
+                    messenger.showSnackBar(SnackBar(content: Text(failed)));
                   }
                 },
         ),
@@ -128,25 +127,27 @@ class SettingsSection extends StatelessWidget {
           onTap: () => showLanguagePicker(context),
         ),
         const Divider(),
-        // Above sign-out, and only when there is something to unlock with.
+        // With biometrics set up, this row locks instead of signing out
+        // (PM, 2026-08-21). Leaving a password screen in front of someone
+        // who has already registered a fingerprint is nonsense -- so the
+        // one exit becomes the one they can actually reopen.
         //
-        // Locking keeps the session, so getting back in needs no password --
-        // which is what "生体認証でログインしたい" actually asks for. Sign-out
-        // stays below it on purpose: a locked device is still signed in, so
-        // handing the phone over, or using another account, still needs the
-        // real thing (PM, 2026-08-21).
+        // Real sign-out has not gone away: it is on the lock screen, as
+        // "別のアカウントでサインイン". That is where it is needed -- handing
+        // the phone over, or switching accounts.
         if (controller.canLock)
           ListTile(
             leading: const Icon(Icons.lock_outline),
             title: Text(l10n.lockMenuTitle),
             subtitle: Text(l10n.lockMenuSubtitle),
             onTap: () => unawaited(controller.lock()),
+          )
+        else
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: Text(l10n.signOutMenuTitle),
+            onTap: () => controller.signOut(),
           ),
-        ListTile(
-          leading: const Icon(Icons.logout),
-          title: Text(l10n.signOutMenuTitle),
-          onTap: () => controller.signOut(),
-        ),
 
         // Deliberately far from sign-out.
         //

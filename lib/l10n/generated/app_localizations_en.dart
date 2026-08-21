@@ -312,6 +312,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get biometricGateAppBarTitle => 'Unlock wanote';
 
   @override
+  String get biometricGateUseAnotherAccountButton => 'Sign in as someone else';
+
+  @override
   String get biometricGateUnlockButton => 'Unlock';
 
   @override

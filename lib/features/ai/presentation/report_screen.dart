@@ -34,6 +34,7 @@ class ReportScreen extends StatefulWidget {
     required this.reportRepository,
     required this.onRequestUpgrade,
     this.petName,
+    this.opened,
   });
 
   final String uid;
@@ -47,6 +48,14 @@ class ReportScreen extends StatefulWidget {
   final VoidCallback onRequestUpgrade;
   final String? petName;
 
+  /// Ticks when the AI section is opened.
+  ///
+  /// The summary stayed on screen for good once generated, so returning to
+  /// the tab showed an old report with no way to ask for a new one (PM,
+  /// 2026-08-21). Past reports are in the history below, so nothing is lost
+  /// by clearing the inline copy.
+  final ValueNotifier<int>? opened;
+
   @override
   State<ReportScreen> createState() => _ReportScreenState();
 }
@@ -54,6 +63,28 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   _SummaryState _state = _SummaryState.idle;
   String? _summaryText;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.opened?.addListener(_clearOnReopen);
+  }
+
+  @override
+  void dispose() {
+    widget.opened?.removeListener(_clearOnReopen);
+    super.dispose();
+  }
+
+  void _clearOnReopen() {
+    if (!mounted) return;
+    if (_state == _SummaryState.loading) return;
+    if (_state == _SummaryState.idle) return;
+    setState(() {
+      _state = _SummaryState.idle;
+      _summaryText = null;
+    });
+  }
 
   Future<void> _generateSummary() async {
     // Captured before the first await: reading it from the

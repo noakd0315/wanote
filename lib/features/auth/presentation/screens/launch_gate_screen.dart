@@ -247,6 +247,23 @@ class _BiometricGateState extends State<_BiometricGate> {
                           ),
                         ),
                       ],
+                      if (!_isBusy) ...[
+                        const SizedBox(height: 24),
+                        // The way out of a lock that is not "prove you are
+                        // the same person". Signing out for real is what
+                        // makes replacing sign-out with lock safe: a locked
+                        // phone is still signed in, and without this it
+                        // could never be handed to someone else or used
+                        // with another account (PM, 2026-08-21).
+                        TextButton(
+                          onPressed: () => unawaited(
+                            context.read<AuthController>().signOut(),
+                          ),
+                          child: Text(
+                            l10n.biometricGateUseAnotherAccountButton,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

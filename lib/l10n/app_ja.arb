@@ -92,6 +92,7 @@
   "imageSourceCameraOption": "カメラで撮影",
   "imageSourceGalleryOption": "フォトライブラリから選択",
   "biometricGateAppBarTitle": "wanoteのロックを解除",
+  "biometricGateUseAnotherAccountButton": "別のアカウントでサインイン",
   "biometricGateUnlockButton": "ロック解除",
   "biometricGateMismatchMessage": "生体認証が一致しませんでした。",
   "biometricGateRetryButton": "もう一度試す",

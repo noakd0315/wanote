@@ -650,6 +650,12 @@ abstract class AppLocalizations {
   /// **'Unlock wanote'**
   String get biometricGateAppBarTitle;
 
+  /// Escape hatch on the lock screen. Signs the locked account out for real, so another account can be used -- without it a locked phone could never be handed over or switched.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as someone else'**
+  String get biometricGateUseAnotherAccountButton;
+
   /// Button that re-triggers the biometric prompt on the biometric gate screen.
   ///
   /// In en, this message translates to:

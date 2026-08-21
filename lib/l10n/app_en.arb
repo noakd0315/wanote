@@ -364,6 +364,10 @@
   "@biometricGateAppBarTitle": {
     "description": "AppBar title on the biometric re-auth gate shown to returning users with biometric login enabled."
   },
+  "biometricGateUseAnotherAccountButton": "Sign in as someone else",
+  "@biometricGateUseAnotherAccountButton": {
+    "description": "Escape hatch on the lock screen. Signs the locked account out for real, so another account can be used -- without it a locked phone could never be handed over or switched."
+  },
   "biometricGateUnlockButton": "Unlock",
   "@biometricGateUnlockButton": {
     "description": "Button that re-triggers the biometric prompt on the biometric gate screen."
