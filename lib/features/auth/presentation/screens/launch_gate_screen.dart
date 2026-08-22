@@ -99,6 +99,12 @@ class _LaunchGateScreenState extends State<LaunchGateScreen>
             (_) => controller.markOnboardingComplete(),
           );
         }
+        if (controller.isDeletingAccount) {
+          // Not the first-pet form. The account is being emptied, and the
+          // empty pet list that arrives on the way is not an owner who has
+          // yet to register a dog (PM, 2026-08-23).
+          return const _ResolvingScreen();
+        }
         if (controller.pets.isEmpty) {
           return const PetProfileFormScreen();
         }

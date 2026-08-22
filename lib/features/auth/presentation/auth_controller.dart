@@ -651,6 +651,18 @@ class AuthController extends ChangeNotifier {
   /// fails) so the screen can tell the user which part went wrong. Nothing
   /// here is left in a half-state by a failure: every step is idempotent and
   /// the identity is deleted last, so the recovery is simply to try again.
+  /// True from the moment the owner confirms deleting the account until
+  /// the identity is actually gone.
+  ///
+  /// The gate needs it. Deleting the account empties Firestore while the
+  /// pet stream is still listening, so an empty list arrives before Firebase
+  /// Auth has finished -- and an empty list is how the gate decides to ask
+  /// for a first pet. The owner asked to be deleted and was shown a
+  /// registration form on the way out (PM, 2026-08-23: 削除するのに登録画面が
+  /// 表示されるのはナンセンス).
+  bool get isDeletingAccount => _isDeletingAccount;
+  bool _isDeletingAccount = false;
+
   Future<void> deleteAccount({String? password}) async {
     final user = _currentUser;
     if (user == null) {
@@ -676,8 +688,24 @@ class AuthController extends ChangeNotifier {
         await _authRepository.signInWithApple();
     }
 
-    await service.deleteAccount(user.uid);
-    await _clearLocalAccountState(user.uid);
+    _isDeletingAccount = true;
+    notifyListeners();
+    // Stopped before the data goes, not after. The listener would otherwise
+    // report the emptied account back to us as though the owner had simply
+    // removed their last pet.
+    await _petsSub?.cancel();
+    _petsSub = null;
+    try {
+      await service.deleteAccount(user.uid);
+      await _clearLocalAccountState(user.uid);
+    } catch (_) {
+      // Deletion failed and the account is still there. Put the flag back,
+      // or the gate would sit on the wait forever.
+      _isDeletingAccount = false;
+      _subscribeToPets(user.uid);
+      notifyListeners();
+      rethrow;
+    }
     // The authStateChanges listener fires with null once the identity is
     // gone, which clears the in-memory state through _onAuthChanged.
   }
