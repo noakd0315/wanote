@@ -184,7 +184,36 @@ class RevenueCatBillingRepository implements BillingRepository {
   @override
   Future<Offerings> getOfferings() async {
     _requireConfigured();
-    return Purchases.getOfferings();
+    final offerings = await Purchases.getOfferings();
+    unawaited(_logPricingContext(offerings));
+    return offerings;
+  }
+
+  /// Writes down which storefront answered, and in what currency.
+  ///
+  /// The paywall prints `StoreProduct.priceString` exactly as the store
+  /// hands it over -- nothing here formats a price or picks a currency. So
+  /// when the wrong currency appears (PM, 2026-08-22: Android は常に円、iOS
+  /// は Sandbox が日本なのに USD), the answer is upstream, in which store
+  /// account is signed in and which regions the product is sold in. These
+  /// two fields say which, and are not otherwise visible from the app.
+  Future<void> _logPricingContext(Offerings offerings) async {
+    try {
+      final storefront = await Purchases.storefront;
+      final products = offerings.current?.availablePackages
+          .map((p) => p.storeProduct)
+          .map((p) => '${p.identifier}=${p.priceString}[${p.currencyCode}]')
+          .join(', ');
+      developer.log(
+        'storefront=${storefront?.countryCode ?? 'unknown'} $products',
+        name: 'BillingRepository',
+      );
+    } catch (e) {
+      developer.log(
+        'could not read the storefront: $e',
+        name: 'BillingRepository',
+      );
+    }
   }
 
   @override
