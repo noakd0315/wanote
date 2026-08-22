@@ -211,7 +211,7 @@ RevenueCat の「Apple Small Business Program」の開始日欄は**売上レポ
   利用者が少ないうちに着手するのが安全です
 - **Firebase の Web アプリ登録の削除**（`BACKLOG.md`）
   内部テストと審査が終わってから。急ぐ必要はありません
-- **AdMob の本番広告ユニットID**
+- **AdMob の本番広告ユニットID** → 🟡 **ID は 2026-08-23 に取得済み。差し替えは公開直前**（`SESSION_HANDOVER.md` に一覧）
   現在は Google のテストIDです。**このまま公開すると収益が発生しません**
 - **PDF出力の再実装**（`BACKLOG.md`）
   PM判断で削除済み。再開する場合は CJK フォントの同梱が必要
