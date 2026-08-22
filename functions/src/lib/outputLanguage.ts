@@ -35,12 +35,18 @@ export function outputLanguageInstruction(language: OutputLanguage): string {
     return [
       '- Write your answer in English. Write it as English from the start,',
       '  not as a translation of something drafted in another language.',
+      '- Answer in English even when the question is written in another',
+      '  language, and even when it is gibberish or makes no sense. The',
+      '  language is set by the owner, not by the question.',
       '- Aim for roughly 150-250 words.',
     ].join('\n');
   }
   return [
     '- Write your answer in Japanese (日本語). Write it as Japanese from the',
     '  start, not as a translation of something drafted in English.',
+    '- 質問が他の言語で書かれていても、意味をなさない文字列であっても、',
+    '  日本語で答えること。言語は飼い主の設定で決まるのであって、質問の',
+    '  見た目で決まるのではない。',
     '- Aim for roughly 200-400 characters.',
   ].join('\n');
 }

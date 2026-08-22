@@ -368,6 +368,12 @@ abstract class AppLocalizations {
   /// **'Restore purchases'**
   String get restorePurchasesButton;
 
+  /// Explains what the restore action does, shown above the button.
+  ///
+  /// In en, this message translates to:
+  /// **'Reapplies a plan this store account already pays for. Tickets are not restored.'**
+  String get restorePurchasesDescription;
+
   /// Snackbar shown after a purchase succeeds.
   ///
   /// In en, this message translates to:

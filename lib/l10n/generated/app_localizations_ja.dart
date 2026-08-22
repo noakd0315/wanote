@@ -149,6 +149,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get restorePurchasesButton => '購入を復元';
 
   @override
+  String get restorePurchasesDescription =>
+      'すでにこのストアアカウントでご契約中のプランを、いまのアカウントに反映します。チケットは復元の対象外です。';
+
+  @override
   String get purchaseCompleteMessage => '購入が完了しました。';
 
   @override

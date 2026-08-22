@@ -233,11 +233,9 @@ class RevenueCatBillingRepository implements BillingRepository {
     // (customerInfo + the store transaction) instead of the CustomerInfo
     // directly.
     final result = await Purchases.purchase(PurchaseParams.package(package));
-    // Reported from the transaction we were just handed, as well as from
-    // the customer info below. The two normally say the same thing, and the
-    // credit is keyed on the transaction id either way -- but the store has
-    // just taken money, and this is not the moment to depend on the
-    // customer info having caught up.
+    // The one purchase we know belongs to whoever is signed in right now,
+    // because we are the ones who just made it. The transaction it carries
+    // still keys the credit, so a repeat telling adds nothing.
     _reportIfConsumable(result.storeTransaction);
     _onCustomerInfoUpdate(result.customerInfo);
   }
@@ -323,21 +321,19 @@ class RevenueCatBillingRepository implements BillingRepository {
   }
 
   void _onCustomerInfoUpdate(CustomerInfo customerInfo) {
-    // Every ticket purchase RevenueCat holds, every time we hear from it.
+    // Deliberately does NOT walk customerInfo.nonSubscriptionTransactions.
     //
-    // Consumables are not entitlements, so nothing about them ever changes
-    // state -- there is no diff to watch. Crediting therefore used to rest
-    // on catching the one moment a purchase was made, and a moment that is
-    // missed is missed for good: the owner has paid, the tickets are not
-    // there, and restorePurchases() does not bring consumables back. Four
-    // purchases credited one (PM, 2026-08-21).
+    // That list belongs to the *store* account, not to the person signed
+    // into wanote. On a device where two people take turns, or where one
+    // owner keeps a second account, everything ever bought on that phone
+    // appears in it -- and crediting from here handed a brand-new account
+    // twenty tickets somebody else had paid for (PM, 2026-08-23: 付与判定が
+    // 端末単位になっているのではないか -- it was).
     //
-    // Repeating the whole list costs nothing, because the credit is keyed
-    // on the transaction. It also means a credit lost to a closed app or a
-    // failed write lands at the next sign-in instead of never.
-    for (final transaction in customerInfo.nonSubscriptionTransactions) {
-      _reportIfConsumable(transaction);
-    }
+    // The client cannot tell whose purchase it is looking at. Only the
+    // server can: RevenueCat's webhook names the app user id that made the
+    // purchase. Recovering a credit that never landed belongs there, and is
+    // recorded in docs/BACKLOG.md.
 
     final entitlement = customerInfo.entitlements.all[EntitlementIds.premium];
     final isActive = entitlement?.isActive ?? false;

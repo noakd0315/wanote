@@ -12,6 +12,7 @@ import 'widgets/disclaimer_banner.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
 import '../../../shared/widgets/stream_error_view.dart';
+import '../../../shared/widgets/full_screen_wait.dart';
 import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 enum _SummaryState { idle, loading, ready, needsUpgrade, error }
@@ -127,51 +128,61 @@ class _ReportScreenState extends State<ReportScreen> {
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(l10n.reportAppBarTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Stack(
         children: [
-          Text(
-            l10n.reportPeriodLabel(
-              _fullDateLabel(widget.stats.periodStart),
-              _fullDateLabel(widget.stats.periodEnd),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.reportWeightTrendTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(height: 180, child: _buildWeightChart(l10n)),
-          const SizedBox(height: 24),
-          Text(
-            l10n.reportToiletTrendTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(height: 180, child: _buildToiletChart(l10n)),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 8),
-          Text(
-            l10n.reportAiSummaryTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const DisclaimerBanner(),
-          const SizedBox(height: 12),
-          _buildSummarySection(l10n),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 8),
-          Text(
-            l10n.reportHistoryTitle,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          _buildHistory(l10n),
+          _buildBody(l10n),
+          // The same wait the food-portion screen shows (PM, 2026-08-23).
+          if (_state == _SummaryState.loading) const FullScreenWait(),
         ],
       ),
+    );
+  }
+
+  Widget _buildBody(AppLocalizations l10n) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          l10n.reportPeriodLabel(
+            _fullDateLabel(widget.stats.periodStart),
+            _fullDateLabel(widget.stats.periodEnd),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l10n.reportWeightTrendTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(height: 180, child: _buildWeightChart(l10n)),
+        const SizedBox(height: 24),
+        Text(
+          l10n.reportToiletTrendTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(height: 180, child: _buildToiletChart(l10n)),
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 8),
+        Text(
+          l10n.reportAiSummaryTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        const DisclaimerBanner(),
+        const SizedBox(height: 12),
+        _buildSummarySection(l10n),
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 8),
+        Text(
+          l10n.reportHistoryTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        _buildHistory(l10n),
+      ],
     );
   }
 
@@ -326,7 +337,8 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         );
       case _SummaryState.loading:
-        return WanoteLoadingIndicator.centered();
+        // Nothing here: the wait covers the whole screen instead.
+        return const SizedBox.shrink();
       case _SummaryState.needsUpgrade:
         return UpgradePromptCard(
           message: l10n.reportSummaryUsageLimitMessage,

@@ -169,18 +169,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
       // its Navigator) shows through, per the PM's request to scatter the
       // pattern across every non-input-form screen.
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: Text(l10n.paywallAppBarTitle),
-        actions: [
-          TextButton(
-            onPressed: _restore,
-            child: Text(
-              l10n.restorePurchasesButton,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+      // Restore lives at the bottom of the list, not up here. As an AppBar
+      // action it was drawn in white on the M3 default surface -- invisible
+      // (PM, 2026-08-23: 復元ボタンが見えない) -- and it gave no room to say
+      // what restoring does, which was the other half of the report.
+      appBar: AppBar(title: Text(l10n.paywallAppBarTitle)),
       body: Column(
         children: [
           _PremiumStatusBanner(billingRepository: widget.billingRepository),
@@ -240,6 +233,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const SizedBox(height: 8),
                     ],
+                    const SizedBox(height: 16),
+                    _RestoreSection(onRestore: _restore),
                   ],
                 );
               },
@@ -562,6 +557,43 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// The "restore purchases" action, and a line saying what it does.
+///
+/// Required by both stores for subscriptions, so it cannot simply be
+/// dropped -- but it was worth explaining. A plan is owned by the store
+/// account, not by the wanote account, so restoring reapplies whatever that
+/// store account already pays for. Tickets are consumable and are not part
+/// of it; asking and getting nothing back read as a failure (PM, 2026-08-23:
+/// どこまで復元されるのかわからない).
+class _RestoreSection extends StatelessWidget {
+  const _RestoreSection({required this.onRestore});
+
+  final VoidCallback onRestore;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        const Divider(),
+        const SizedBox(height: 8),
+        Text(
+          l10n.restorePurchasesDescription,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        TextButton(
+          onPressed: onRestore,
+          child: Text(l10n.restorePurchasesButton),
+        ),
+      ],
     );
   }
 }

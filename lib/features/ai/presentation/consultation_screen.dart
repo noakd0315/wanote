@@ -16,6 +16,7 @@ import 'widgets/ai_usage_badge.dart';
 import 'widgets/emergency_notice.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/widgets/stream_error_view.dart';
+import '../../../shared/widgets/full_screen_wait.dart';
 import '../../../shared/widgets/wanote_loading_indicator.dart';
 
 enum _ResultKind { none, emergency, response, needsUpgrade, error }
@@ -254,107 +255,120 @@ class _ConsultationScreenState extends State<ConsultationScreen> {
       // request to scatter the pattern across each screen.
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(l10n.consultationScreenAppBarTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Stack(
         children: [
-          const DisclaimerBanner(),
-          const SizedBox(height: 16),
-          if (prefill.isNotEmpty) ...[
-            Text(
-              l10n.consultationReferenceRecordsLabel,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: prefill
-                  .map(
-                    (record) => FilterChip(
-                      label: Text(record.label),
-                      selected: _selectedReferences.contains(record),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedReferences.add(record);
-                          } else {
-                            _selectedReferences.remove(record);
-                          }
-                        });
-                      },
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-          ],
-          TextField(
-            controller: _controller,
-            maxLines: 5,
-            // Rebuilds so the clear button appears with the first character
-            // typed rather than after the next unrelated rebuild.
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: l10n.consultationInputHintText,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton(
-                  onPressed: _submitting || _alreadyAnswered ? null : _submit,
-                  child: _submitting
-                      ? const SizedBox(
-                          height: 16,
-                          width: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      // Says why it is disabled. A greyed-out button with
-                      // its original label reads as a fault.
-                      : Text(
-                          _alreadyAnswered
-                              ? l10n.consultationAlreadyAnsweredButton
-                              : l10n.consultationSubmitButton,
-                        ),
-                ),
-              ),
-              // The question and its answer used to stay on screen with no
-              // way to dismiss them, so returning to this tab opened onto
-              // the last conversation (PM report). Hidden while there is
-              // nothing to clear, so it never sits there doing nothing.
-              if (!_submitting &&
-                  (_controller.text.isNotEmpty ||
-                      _resultKind != _ResultKind.none)) ...[
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: _clear,
-                  child: Text(l10n.consultationClearButton),
-                ),
-              ],
-            ],
-          ),
-          // Under the button that spends it (PM, 2026-08-18). At the top of
-          // the screen it was a fact about the account; here it is the
-          // price of the thing being pressed.
-          AiUsageBadge(
-            uid: widget.uid,
-            usageRepository: widget.usageRepository,
-          ),
-          const SizedBox(height: 16),
-          _buildResult(l10n),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 8),
+          _buildBody(context, l10n, prefill),
+          // The same wait the food-portion screen shows. Three AI screens
+          // asked the owner to wait and each showed it differently
+          // (PM, 2026-08-23).
+          if (_submitting) const FullScreenWait(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<ConsultationReferenceRecord> prefill,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const DisclaimerBanner(),
+        const SizedBox(height: 16),
+        if (prefill.isNotEmpty) ...[
           Text(
-            l10n.consultationHistoryTitle,
+            l10n.consultationReferenceRecordsLabel,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          _buildHistory(),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: prefill
+                .map(
+                  (record) => FilterChip(
+                    label: Text(record.label),
+                    selected: _selectedReferences.contains(record),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedReferences.add(record);
+                        } else {
+                          _selectedReferences.remove(record);
+                        }
+                      });
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 16),
         ],
-      ),
+        TextField(
+          controller: _controller,
+          maxLines: 5,
+          // Rebuilds so the clear button appears with the first character
+          // typed rather than after the next unrelated rebuild.
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: l10n.consultationInputHintText,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton(
+                onPressed: _submitting || _alreadyAnswered ? null : _submit,
+                child: _submitting
+                    ? const SizedBox(
+                        height: 16,
+                        width: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    // Says why it is disabled. A greyed-out button with
+                    // its original label reads as a fault.
+                    : Text(
+                        _alreadyAnswered
+                            ? l10n.consultationAlreadyAnsweredButton
+                            : l10n.consultationSubmitButton,
+                      ),
+              ),
+            ),
+            // The question and its answer used to stay on screen with no
+            // way to dismiss them, so returning to this tab opened onto
+            // the last conversation (PM report). Hidden while there is
+            // nothing to clear, so it never sits there doing nothing.
+            if (!_submitting &&
+                (_controller.text.isNotEmpty ||
+                    _resultKind != _ResultKind.none)) ...[
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: _clear,
+                child: Text(l10n.consultationClearButton),
+              ),
+            ],
+          ],
+        ),
+        // Under the button that spends it (PM, 2026-08-18). At the top of
+        // the screen it was a fact about the account; here it is the
+        // price of the thing being pressed.
+        AiUsageBadge(uid: widget.uid, usageRepository: widget.usageRepository),
+        const SizedBox(height: 16),
+        _buildResult(l10n),
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 8),
+        Text(
+          l10n.consultationHistoryTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        _buildHistory(),
+      ],
     );
   }
 

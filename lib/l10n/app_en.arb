@@ -176,6 +176,10 @@
     "description": "Same banner when the entitlement has no end date."
   },
   "restorePurchasesButton": "Restore purchases",
+  "restorePurchasesDescription": "Reapplies a plan this store account already pays for. Tickets are not restored.",
+  "@restorePurchasesDescription": {
+    "description": "Explains what the restore action does, shown above the button."
+  },
   "@restorePurchasesButton": {
     "description": "AppBar action button that restores previous purchases."
   },

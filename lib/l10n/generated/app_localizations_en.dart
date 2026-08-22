@@ -158,6 +158,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restorePurchasesButton => 'Restore purchases';
 
   @override
+  String get restorePurchasesDescription =>
+      'Reapplies a plan this store account already pays for. Tickets are not restored.';
+
+  @override
   String get purchaseCompleteMessage => 'Purchase complete.';
 
   @override

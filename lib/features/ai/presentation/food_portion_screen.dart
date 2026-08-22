@@ -12,7 +12,7 @@ import 'widgets/ai_usage_badge.dart';
 import 'widgets/upgrade_prompt_card.dart';
 import '../../../shared/utils/formatting.dart';
 import '../data/consultation_repository.dart';
-import '../../../shared/widgets/wanote_loading_indicator.dart';
+import '../../../shared/widgets/full_screen_wait.dart';
 
 /// Display labels for [DogLifeStage], kept here (not on the enum itself)
 /// since the enum lives in the framework-free domain layer and can't call
@@ -344,7 +344,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
       body: Stack(
         children: [
           _buildBody(context, l10n, isAdult),
-          if (_adviceState == _AdviceState.loading) const _FullScreenWait(),
+          if (_adviceState == _AdviceState.loading) const FullScreenWait(),
         ],
       ),
     );
@@ -514,7 +514,11 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
         // were being charged for (PM report, 2026-08-18). This is the only
         // button on the screen that spends one.
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Centred, as it was before. The button is the one thing on this
+          // stretch of screen the owner is meant to reach for, and left
+          // against the margin it read as another row of the result table
+          // (PM, 2026-08-23).
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             OutlinedButton.icon(
               onPressed: _requestAdvice,
@@ -537,7 +541,7 @@ class _FoodPortionScreenState extends State<FoodPortionScreen> {
         );
       case _AdviceState.error:
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -594,28 +598,6 @@ class _ResultRow extends StatelessWidget {
                 : const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A wait that covers the screen.
-///
-/// Deliberately opaque enough to read as "busy" rather than as a dimmed
-/// version of the form: the inputs behind it are what the answer is being
-/// generated from, and editing them mid-request would leave the reply
-/// describing numbers that are no longer on screen.
-class _FullScreenWait extends StatelessWidget {
-  const _FullScreenWait();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: AbsorbPointer(
-        child: ColoredBox(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
-          child: WanoteLoadingIndicator.centered(),
-        ),
       ),
     );
   }
