@@ -240,7 +240,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                       const SizedBox(height: 8),
                     ],
-                    _StoreDiagnostics(packages: packages),
                   ],
                 );
               },
@@ -563,64 +562,6 @@ class _CampaignCodeSectionState extends State<_CampaignCodeSection> {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// 🔧 TEMPORARY. Prints what the store actually returned, so it can be read
-/// on an iPhone without Xcode (PM, 2026-08-23).
-///
-/// The paywall shows `priceString` and nothing else, so a wrong-looking
-/// price could mean either of two very different things: the store answered
-/// from the wrong storefront, or it answered correctly and the string was
-/// formatted with the wrong currency symbol. `price` and `currencyCode`
-/// separate the two -- the number and the currency are carried apart from
-/// the formatted string, and neither is visible anywhere in the app.
-///
-/// Remove once the question is settled. Not localised, on purpose: this is
-/// not for owners to read.
-class _StoreDiagnostics extends StatelessWidget {
-  const _StoreDiagnostics({required this.packages});
-
-  final List<Package> packages;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Storefront?>(
-      future: Purchases.storefront,
-      builder: (context, snapshot) {
-        final lines = <String>[
-          'storefront: ${snapshot.data?.countryCode ?? '(reading...)'}',
-          for (final package in packages) ...[
-            package.storeProduct.identifier,
-            '  priceString : ${package.storeProduct.priceString}',
-            '  price       : ${package.storeProduct.price}',
-            '  currencyCode: ${package.storeProduct.currencyCode}',
-          ],
-        ];
-        return Container(
-          margin: const EdgeInsets.only(top: 24),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '🔧 store diagnostics (temporary)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              SelectableText(
-                lines.join('\n'),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
